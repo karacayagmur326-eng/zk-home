@@ -1,0 +1,1 @@
+ALTER TABLE store_media ADD COLUMN IF NOT EXISTS data_bytes BYTEA;

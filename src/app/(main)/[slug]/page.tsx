@@ -1,0 +1,193 @@
+import { query } from "@lib/admin/db"
+import { Metadata } from "next"
+import { notFound, permanentRedirect } from "next/navigation"
+import PageHero from "../../../components/common/PageHero"
+import DeliveryClientContent from "../teslimat-ve-iade/DeliveryClientContent"
+import WholesaleClientContent from "../toptan-ve-kurumsal-satis/WholesaleClientContent"
+import ContactPage from "../iletisim/page"
+import AboutPage from "../hakkimizda/page"
+import BrandsPage from "../markalar/page"
+
+export const dynamic = "force-dynamic"
+
+interface PageProps {
+  params: Promise<{ slug: string }>
+}
+
+import { getThemeSettings } from "@lib/content/theme-settings"
+import { renderSeoTemplate } from "@lib/seo/templates"
+import { getBaseURL } from "@lib/util/env"
+import { sanitizePublicHtml } from "@lib/security/html"
+import { isPublicContentPath } from "@lib/seo/indexing"
+import { getPublicPageAliases } from "@lib/seo/page-aliases"
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params
+  if (slug.startsWith("_") || slug === "api" || slug === "admin" || slug.includes(".")) {
+    return { title: "Sayfa" }
+  }
+  const [rows, settings] = await Promise.all([
+    query<{ content: any }>(
+      "SELECT content FROM content_pages WHERE (handle = $1 OR content->>'custom_slug' = $1) AND COALESCE(content->>'status', 'published') = 'published' LIMIT 1",
+      [slug]
+    ),
+    getThemeSettings().catch(() => null),
+  ])
+  const page = rows[0]?.content
+  if (!page) {
+    const alias = (await getPublicPageAliases()).find((item) => item.path === `/${slug}`)
+    return alias
+      ? { title: alias.title, alternates: { canonical: `${getBaseURL()}${alias.path}` } }
+      : { title: "Sayfa Bulunamadı", robots: { index: false, follow: true } }
+  }
+
+  const pageTitle = page.title || slug
+  const siteName = settings?.logo_text || "ZK Home"
+  const separator = settings?.seo_title_separator || "|"
+
+  const tokens = {
+    sayfa_adi: pageTitle,
+    page_title: pageTitle,
+    site_adi: siteName,
+    ayirici: separator,
+    ozet: page.description || "",
+  }
+
+  const titleTemplate =
+    settings?.seo_page_title_template || "%sayfa_adi% %ayirici% %site_adi%"
+
+  const title = page.seo_title || renderSeoTemplate(titleTemplate, tokens)
+  const description = page.seo_description || page.description || ""
+
+  return {
+    title: { absolute: title },
+    description,
+    alternates: {
+      canonical: `${getBaseURL()}/${page.custom_slug && isPublicContentPath(`/${page.custom_slug}`) ? page.custom_slug : slug}`,
+    },
+  }
+}
+
+export default async function DynamicSlugPage({ params }: PageProps) {
+  const { slug } = await params
+
+  // Exclude system static paths and Next.js internal routes
+  if (
+    slug.startsWith("_") ||
+    slug === "api" ||
+    slug === "admin" ||
+    slug === "brand" ||
+    slug === "uploads" ||
+    slug.includes(".")
+  ) {
+    notFound()
+  }
+
+  // 1. Fetch store settings for custom slugs
+  const [contactRows, brandsRows, deliveryRows, wholesaleRows] = await Promise.all([
+    query<{ value: any }>("SELECT value FROM store_settings WHERE key = 'contact_info' LIMIT 1"),
+    query<{ value: any }>("SELECT value FROM store_settings WHERE key = 'brands_info' LIMIT 1"),
+    query<{ value: any }>("SELECT value FROM store_settings WHERE key = 'delivery_returns_info' LIMIT 1"),
+    query<{ value: any }>("SELECT value FROM store_settings WHERE key = 'wholesale_info' LIMIT 1"),
+  ])
+
+  const contactInfo = contactRows[0]?.value || {}
+  const brandsInfo = brandsRows[0]?.value || {}
+  const deliveryInfo = deliveryRows[0]?.value || {}
+  const wholesaleInfo = wholesaleRows[0]?.value || {}
+
+  // 2. Fetch page from content_pages DB
+  let pageRows = await query<{ handle: string; content: any }>(
+    "SELECT handle, content FROM content_pages WHERE (handle = $1 OR content->>'custom_slug' = $1) AND COALESCE(content->>'status', 'published') = 'published' LIMIT 1",
+    [slug]
+  )
+
+  let page = pageRows[0]?.content
+  let handle = pageRows[0]?.handle || slug
+  if (page?.custom_slug && page.custom_slug !== slug && isPublicContentPath(`/${page.custom_slug}`)) {
+    permanentRedirect(`/${page.custom_slug}`)
+  }
+
+  // Match special pages by handle or custom_slug
+  if (handle === "iletisim" || slug === "iletisim" || contactInfo.custom_slug === slug) {
+    return <ContactPage searchParams={Promise.resolve({ render: "custom-slug" })} />
+  }
+
+  if (handle === "hakkimizda" || slug === "hakkimizda") {
+    return <AboutPage searchParams={Promise.resolve({ render: "custom-slug" })} />
+  }
+
+  if (handle === "markalar" || handle === "markalarimiz" || slug === "markalar" || brandsInfo.custom_slug === slug) {
+    return <BrandsPage searchParams={Promise.resolve({ render: "custom-slug" })} />
+  }
+
+  // 3. Render Delivery & Returns Page
+  if (handle === "teslimat-ve-iade" || deliveryInfo.custom_slug === slug) {
+    const displayTitle = page?.title || deliveryInfo.title || "Teslimat, İptal ve İade Koşulları"
+    const heroDesc = deliveryInfo.description || page?.description || ""
+
+    return (
+      <div className="bg-white min-h-screen pb-20">
+        <PageHero
+          breadcrumb={[{ title: displayTitle }]}
+          title={heroDesc && /<[a-z][\s\S]*>/i.test(heroDesc) ? undefined : displayTitle}
+          paragraphs={[heroDesc]}
+          htmlContent={heroDesc && /<[a-z][\s\S]*>/i.test(heroDesc) ? heroDesc : undefined}
+          ctaText={deliveryInfo.hero_cta_text}
+          ctaHref={deliveryInfo.hero_cta_href}
+          heroImage={!deliveryInfo.hero_image || deliveryInfo.hero_image === "/brand/placeholder.svg" ? "/brand/placeholder.svg" : deliveryInfo.hero_image}
+          heroImageAlt={displayTitle}
+        />
+        <div className="content-container py-10">
+          <DeliveryClientContent info={deliveryInfo} />
+        </div>
+      </div>
+    )
+  }
+
+  // 4. Render Wholesale & Corporate Sales Page
+  if (handle === "toptan-ve-kurumsal-satis" || handle === "toptan-satis" || wholesaleInfo.custom_slug === slug) {
+    const displayTitle = page?.title || wholesaleInfo.title || "Toptan ve Kurumsal Satış"
+    const heroDesc = wholesaleInfo.description || page?.description || ""
+
+    return (
+      <div className="bg-white min-h-screen pb-20">
+        <PageHero
+          breadcrumb={[{ title: displayTitle }]}
+          title={heroDesc && /<[a-z][\s\S]*>/i.test(heroDesc) ? undefined : displayTitle}
+          paragraphs={[heroDesc]}
+          htmlContent={heroDesc && /<[a-z][\s\S]*>/i.test(heroDesc) ? heroDesc : undefined}
+          ctaText={wholesaleInfo.hero_cta1_text}
+          ctaHref={wholesaleInfo.hero_cta1_href}
+          secondaryCtaText={wholesaleInfo.hero_cta2_text}
+          secondaryCtaHref="/iletisim"
+          heroImage={!wholesaleInfo.hero_image || wholesaleInfo.hero_image === "/brand/placeholder.svg" ? "/brand/placeholder.svg" : wholesaleInfo.hero_image}
+          heroImageAlt={displayTitle}
+        />
+        <div className="content-container py-10">
+          <WholesaleClientContent info={wholesaleInfo} />
+        </div>
+      </div>
+    )
+  }
+
+  if (!page) {
+    notFound()
+  }
+
+  // 5. Generic / Legal Page Fallback
+  const heroDesc = sanitizePublicHtml(page.description || "")
+  return (
+    <div className="bg-white min-h-screen pb-20">
+      <PageHero
+        breadcrumb={[{ title: page.title }]}
+        title={heroDesc && /<[a-z][\s\S]*>/i.test(heroDesc) ? undefined : page.title}
+        paragraphs={[heroDesc]}
+        htmlContent={heroDesc && /<[a-z][\s\S]*>/i.test(heroDesc) ? heroDesc : undefined}
+      />
+      <div className="content-container py-10">
+        <div className="prose max-w-none text-slate-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: heroDesc }} />
+      </div>
+    </div>
+  )
+}

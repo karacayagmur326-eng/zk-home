@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 104" role="img" aria-labelledby="title desc">
+  <title id="title">ZK Home</title>
+  <desc id="desc">Koyu zemin için ZK Home logosu</desc>
+  <g fill="#D89C9C">
+    <rect x="8" y="18" width="10" height="68" rx="2"/>
+    <rect x="25" y="18" width="10" height="68" rx="2" opacity=".88"/>
+    <rect x="42" y="18" width="10" height="68" rx="2" opacity=".74"/>
+    <rect x="59" y="18" width="10" height="68" rx="2" opacity=".6"/>
+  </g>
+  <text x="92" y="69" font-family="Georgia, 'Times New Roman', serif" font-size="54" font-weight="500" letter-spacing="3" fill="#FFF9F8">ZK HOME</text>
+</svg>

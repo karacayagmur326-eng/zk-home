@@ -1,0 +1,1425 @@
+"use client"
+
+import React, { useEffect, useState } from "react"
+import Link from "next/link"
+import {
+  MessageSquare,
+  Settings,
+  Mail,
+  CheckCircle,
+  AlertCircle,
+  Search,
+  Trash2,
+  Eye,
+  EyeOff,
+  RotateCcw,
+  Server,
+  X,
+  Archive,
+  BookOpen,
+  ChevronRight,
+  Inbox,
+  ChevronDown,
+  ShieldCheck,
+  Lock,
+  Sliders,
+  CheckCircle2,
+  Phone,
+  MapPin,
+  Send,
+  Building2,
+  ExternalLink,
+} from "lucide-react"
+
+
+interface ContactMessage {
+  id: string
+  name: string
+  email: string
+  phone?: string
+  subject?: string
+  order_no?: string
+  message: string
+  status: "new" | "read" | "replied" | "archived"
+  admin_reply?: string
+  replied_at?: string
+  created_at: string
+}
+
+function Toggle({
+  checked,
+  onChange,
+}: {
+  checked: boolean
+  onChange: (v: boolean) => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={() => onChange(!checked)}
+      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
+        checked ? "bg-[#C98484]" : "bg-slate-200"
+      }`}
+    >
+      <span
+        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+          checked ? "translate-x-5" : "translate-x-0"
+        }`}
+      />
+    </button>
+  )
+}
+
+export default function AdminContactPage() {
+  const [activeTab, setActiveTab] = useState<"messages" | "info_settings" | "smtp_settings">("messages")
+  const [messages, setMessages] = useState<ContactMessage[]>([])
+  const [statusFilter, setStatusFilter] = useState("")
+  const [dateFilter, setDateFilter] = useState("")
+  const [search, setSearch] = useState("")
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [successMsg, setSuccessMsg] = useState("")
+  const [errorMsg, setErrorMsg] = useState("")
+  const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null)
+  const [replyText, setReplyText] = useState("")
+  const [sendingReply, setSendingReply] = useState(false)
+  const [testingSmtp, setTestingSmtp] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [lastTestResult, setLastTestResult] = useState<{
+    status: "success" | "error" | null
+    time: string | null
+    response: string | null
+  }>({
+    status: "success",
+    time: "24 Mayıs 2025 • 15:42",
+    response: "250 OK: Message accepted for delivery",
+  })
+
+  const [contactInfo, setContactInfo] = useState({
+    eyebrow: "7/24 DESTEK EKİBİ",
+    title: "İletişim",
+    description: "Ürün seçimi, sipariş ve satış sonrası destek için ekibimizle iletişime geçin.",
+    phone: "",
+    phone_raw: "",
+    phone_hours: "Hafta içi 09:00 - 18:00",
+    email: "",
+    email_response_time: "Ortalama yanıt süresi: 2 saat",
+    address: "",
+    street_address: "",
+    district: "Merkez",
+    city: "İSTANBUL",
+    country: "Türkiye",
+    full_address: "",
+    whatsapp_phone: "",
+    whatsapp_text: "WhatsApp Canlı Destek Hattı",
+    whatsapp_enabled: true,
+    additional_notification_emails: "",
+    company_name: "E-Ticaret ve Mağazacılık A.Ş.",
+    brand_name: "Mağazamız",
+    website: "",
+    tax_office: "İstanbul V.D.",
+    tax_no: "",
+    mersis_no: "",
+    kep_address: "",
+    trade_reg_no: "",
+    work_hours: "Hafta içi 09:00 - 18:00",
+    form_title: "Mesaj Gönderin",
+    form_description: "Formu doldurun; mesajınız destek ekibimize kaydedilsin.",
+    kvkk_url: "/kvkk",
+  })
+
+
+  const [smtpSettings, setSmtpSettings] = useState({
+    host: "smtp.gmail.com",
+    port: "587",
+    user: "",
+    pass: "••••••••••••",
+    from_email: "",
+    recipient_email: "",
+    enable_notifications: true,
+    secure: false,
+  })
+
+  const showToast = (type: "success" | "error", msg: string) => {
+    if (type === "success") {
+      setSuccessMsg(msg)
+      setErrorMsg("")
+      setTimeout(() => setSuccessMsg(""), 3500)
+    } else {
+      setErrorMsg(msg)
+      setSuccessMsg("")
+      setTimeout(() => setErrorMsg(""), 3500)
+    }
+  }
+
+  const fetchMessages = async (status = "") => {
+    setLoading(true)
+    try {
+      const url = status ? `/api/admin/contact-messages?status=${status}` : `/api/admin/contact-messages`
+      const res = await fetch(url)
+      const data = await res.json()
+      if (res.ok) setMessages(data.messages || [])
+    } catch {
+      showToast("error", "Mesajlar yüklenirken bir hata oluştu.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchSettings = async () => {
+    try {
+      const res = await fetch("/api/admin/contact-settings")
+      const data = await res.json()
+      if (res.ok) {
+        if (data.contact_info) setContactInfo((current) => ({ ...current, ...data.contact_info }))
+        if (data.smtp_settings) setSmtpSettings(data.smtp_settings)
+      }
+    } catch {}
+  }
+
+  useEffect(() => {
+    fetchMessages()
+    fetchSettings()
+  }, [])
+
+  const handleUpdateStatus = async (id: string, newStatus: string) => {
+    try {
+      const res = await fetch("/api/admin/contact-messages", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status: newStatus }),
+      })
+      if (res.ok) {
+        showToast("success", "Mesaj durumu güncellendi.")
+        if (selectedMessage?.id === id) setSelectedMessage({ ...selectedMessage, status: newStatus as any })
+        fetchMessages(statusFilter)
+        window.dispatchEvent(new Event("admin-notifications:refresh"))
+      }
+    } catch {
+      showToast("error", "Durum güncellenemedi.")
+    }
+  }
+
+  const handleReply = async () => {
+    if (!selectedMessage || replyText.trim().length < 3) {
+      showToast("error", "Lütfen müşteriye gönderilecek yanıtı yazın.")
+      return
+    }
+    setSendingReply(true)
+    try {
+      const res = await fetch("/api/admin/contact-messages", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: selectedMessage.id, reply: replyText }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || "Yanıt gönderilemedi.")
+      setSelectedMessage(data.message)
+      setReplyText(data.message?.admin_reply || replyText)
+      showToast(
+        "success",
+        data.notifications?.sent
+          ? "Yanıt müşteriye gönderildi ve admin adresine bilgi kopyası iletildi."
+          : "Yanıt kaydedildi; e-postalar gönderim kuyruğuna alındı."
+      )
+      fetchMessages(statusFilter)
+    } catch (error: any) {
+      showToast("error", error?.message || "Yanıt gönderilemedi.")
+    } finally {
+      setSendingReply(false)
+    }
+  }
+
+  const handleDeleteMessage = async (id: string) => {
+    if (!confirm("Bu mesajı silmek istediğinize emin misiniz?")) return
+    try {
+      const res = await fetch(`/api/admin/contact-messages?id=${id}`, { method: "DELETE" })
+      if (res.ok) {
+        showToast("success", "Mesaj silindi.")
+        if (selectedMessage?.id === id) setSelectedMessage(null)
+        fetchMessages(statusFilter)
+      }
+    } catch {
+      showToast("error", "Mesaj silinemedi.")
+    }
+  }
+
+  const handleSaveSettings = async () => {
+    setSaving(true)
+    try {
+      const res = await fetch("/api/admin/contact-settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contact_info: contactInfo, smtp_settings: smtpSettings }),
+      })
+      if (res.ok) showToast("success", "İletişim ve SMTP ayarları başarıyla kaydedildi.")
+      else showToast("error", "Ayarlar kaydedilemedi.")
+    } catch {
+      showToast("error", "Kaydetme sırasında bir hata oluştu.")
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleTestSmtp = async () => {
+    setTestingSmtp(true)
+    try {
+      const res = await fetch("/api/admin/contact-settings/test-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(smtpSettings),
+      })
+      const data = await res.json()
+      const nowStr = new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" }) + " • " + new Date().toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })
+      if (res.ok) {
+        showToast("success", data.message || "SMTP bağlantısı başarılı!")
+        setLastTestResult({
+          status: "success",
+          time: nowStr,
+          response: "250 OK: Message accepted for delivery",
+        })
+      } else {
+        showToast("error", data.error || "SMTP bağlantısı başarısız.")
+        setLastTestResult({
+          status: "error",
+          time: nowStr,
+          response: data.error || "550 Authentication failed",
+        })
+      }
+    } catch {
+      showToast("error", "Test sırasında bağlantı hatası oluştu.")
+    } finally {
+      setTestingSmtp(false)
+    }
+  }
+
+  const filterByDate = (msgs: ContactMessage[]) => {
+    if (!dateFilter) return msgs
+    const now = new Date()
+    return msgs.filter((m) => {
+      const d = new Date(m.created_at)
+      if (dateFilter === "today") return d.toDateString() === now.toDateString()
+      if (dateFilter === "week") return now.getTime() - d.getTime() < 7 * 86400000
+      if (dateFilter === "month") return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
+      return true
+    })
+  }
+
+  const filteredMessages = filterByDate(
+    messages.filter((m) => {
+      if (!search) return true
+      const s = search.toLowerCase()
+      return (
+        m.name?.toLowerCase().includes(s) ||
+        m.email?.toLowerCase().includes(s) ||
+        m.subject?.toLowerCase().includes(s) ||
+        m.message?.toLowerCase().includes(s) ||
+        m.phone?.toLowerCase().includes(s)
+      )
+    })
+  )
+
+  const counts = {
+    all: messages.length,
+    new: messages.filter((m) => m.status === "new").length,
+    replied: messages.filter((m) => m.status === "replied").length,
+    archived: messages.filter((m) => m.status === "archived").length,
+  }
+
+  const statusBadge = (status: string) => {
+    if (status === "new") return <span className="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-blue-50 text-blue-600 border border-blue-100">Yeni</span>
+    if (status === "read") return <span className="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-slate-100 text-slate-600 border border-slate-200">İncelendi</span>
+    if (status === "replied") return <span className="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-emerald-50 text-emerald-600 border border-emerald-100">Yanıtlandı</span>
+    if (status === "archived") return <span className="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-purple-50 text-purple-600 border border-purple-100">Arşiv</span>
+    return null
+  }
+
+  return (
+    <div className="space-y-6 font-sans">
+      {/* Toast Notifications */}
+      {successMsg && (
+        <div className="admin-toast admin-toast--success !top-auto !bottom-6" role="status" aria-live="polite">
+          <CheckCircle className="w-4 h-4" />
+          <span className="font-semibold text-xs">{successMsg}</span>
+          <button className="admin-icon-button !h-7 !min-h-7 !w-7 ml-auto" aria-label="Bildirimi kapat" onClick={() => setSuccessMsg("")}><X className="w-3.5 h-3.5" /></button>
+        </div>
+      )}
+      {errorMsg && (
+        <div className="admin-toast admin-toast--error !top-auto !bottom-6" role="alert">
+          <AlertCircle className="w-4 h-4" />
+          <span className="font-semibold text-xs">{errorMsg}</span>
+          <button className="admin-icon-button !h-7 !min-h-7 !w-7 ml-auto" aria-label="Bildirimi kapat" onClick={() => setErrorMsg("")}><X className="w-3.5 h-3.5" /></button>
+        </div>
+      )}
+
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <button
+          type="button"
+          onClick={handleSaveSettings}
+          disabled={saving}
+          className="flex items-center gap-2 px-5 py-2.5 bg-[#C98484] text-white rounded-xl text-xs font-bold hover:bg-[#A95E5E] transition-all shadow-sm cursor-pointer disabled:opacity-60 shrink-0"
+        >
+          <Settings className="w-4 h-4" />
+          {saving ? "Kaydediliyor..." : "Ayarları Kaydet"}
+        </button>
+        <Link
+          href="/iletisim"
+          target="_blank"
+          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-extrabold text-slate-700 shadow-sm transition hover:border-rose-200 hover:text-[#C98484]"
+        >
+          <ExternalLink className="h-4 w-4" /> Formu Görüntüle
+        </Link>
+      </div>
+
+      {/* Tab Buttons Row */}
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => setActiveTab("messages")}
+          className={`flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+            activeTab === "messages"
+              ? "bg-white border-[#C98484] text-[#C98484] shadow-2xs ring-1 ring-[#C98484]/20"
+              : "bg-white border-slate-200/80 text-slate-600 hover:bg-slate-50"
+          }`}
+        >
+          <Mail className={`w-4 h-4 ${activeTab === "messages" ? "text-[#C98484]" : "text-slate-400"}`} />
+          Gelen Mesajlar ({counts.all})
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("info_settings")}
+          className={`flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+            activeTab === "info_settings"
+              ? "bg-white border-[#C98484] text-[#C98484] shadow-2xs ring-1 ring-[#C98484]/20"
+              : "bg-white border-slate-200/80 text-slate-600 hover:bg-slate-50"
+          }`}
+        >
+          <Settings className={`w-4 h-4 ${activeTab === "info_settings" ? "text-[#C98484]" : "text-slate-400"}`} />
+          İletişim & Sayfa Ayarları
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("smtp_settings")}
+          className={`flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+            activeTab === "smtp_settings"
+              ? "bg-white border-[#C98484] text-[#C98484] shadow-2xs ring-1 ring-[#C98484]/20"
+              : "bg-white border-slate-200/80 text-slate-600 hover:bg-slate-50"
+          }`}
+        >
+          <Mail className={`w-4 h-4 ${activeTab === "smtp_settings" ? "text-[#C98484]" : "text-slate-400"}`} />
+          SMTP / E-posta Gönderme İzinleri
+        </button>
+      </div>
+
+      {/* ── TAB 1: MESSAGES ─────────────────────────────────────────── */}
+      {activeTab === "messages" && (
+        <div className="space-y-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-[#FFF8F5] border border-rose-100/80 rounded-2xl p-4 flex items-center gap-3.5 shadow-2xs">
+              <div className="w-10 h-10 rounded-xl bg-rose-100/60 border border-rose-200/60 flex items-center justify-center shrink-0">
+                <Mail className="w-5 h-5 text-[#C98484]" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-2xl font-black text-slate-900 leading-none">{counts.all}</span>
+                <span className="text-[11px] font-bold text-slate-400 mt-1">Toplam Mesaj</span>
+              </div>
+            </div>
+
+            <div className="bg-[#F0F7FF] border border-blue-100/80 rounded-2xl p-4 flex items-center gap-3.5 shadow-2xs">
+              <div className="w-10 h-10 rounded-xl bg-blue-100/60 border border-blue-200/60 flex items-center justify-center shrink-0">
+                <div className="w-3.5 h-3.5 rounded-full bg-blue-500 ring-4 ring-blue-200/70" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-2xl font-black text-slate-900 leading-none">{counts.new}</span>
+                <span className="text-[11px] font-bold text-slate-400 mt-1">Yeni</span>
+              </div>
+            </div>
+
+            <div className="bg-[#F0FDF4] border border-emerald-100/80 rounded-2xl p-4 flex items-center gap-3.5 shadow-2xs">
+              <div className="w-10 h-10 rounded-xl bg-emerald-100/60 border border-emerald-200/60 flex items-center justify-center shrink-0">
+                <CheckCircle className="w-5 h-5 text-emerald-600" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-2xl font-black text-slate-900 leading-none">{counts.replied}</span>
+                <span className="text-[11px] font-bold text-slate-400 mt-1">Yanıtlandı</span>
+              </div>
+            </div>
+
+            <div className="bg-[#F8F5FF] border border-purple-100/80 rounded-2xl p-4 flex items-center gap-3.5 shadow-2xs">
+              <div className="w-10 h-10 rounded-xl bg-purple-100/60 border border-purple-200/60 flex items-center justify-center shrink-0">
+                <Archive className="w-5 h-5 text-purple-600" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-2xl font-black text-slate-900 leading-none">{counts.archived}</span>
+                <span className="text-[11px] font-bold text-slate-400 mt-1">Arşiv</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-5 items-start">
+            <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-2xs space-y-5">
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="relative flex-1 min-w-[180px]">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                  <input
+                    type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Mesajlarda ara..."
+                    className="w-full pl-8 pr-3 py-2 rounded-xl border border-slate-200/80 text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[#C98484] transition"
+                  />
+                </div>
+
+                <div className="relative w-36">
+                  <span className="absolute -top-2 left-2.5 bg-white px-1 text-[9px] font-bold text-slate-400">
+                    Durum
+                  </span>
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => {
+                      setStatusFilter(e.target.value)
+                      fetchMessages(e.target.value)
+                    }}
+                    className="w-full appearance-none border border-slate-200/80 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:border-[#C98484] cursor-pointer pr-7"
+                  >
+                    <option value="">Tümü</option>
+                    <option value="new">Yeni</option>
+                    <option value="read">İncelendi</option>
+                    <option value="replied">Yanıtlandı</option>
+                    <option value="archived">Arşiv</option>
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                </div>
+
+                <div className="relative w-36">
+                  <span className="absolute -top-2 left-2.5 bg-white px-1 text-[9px] font-bold text-slate-400">
+                    Tarih Aralığı
+                  </span>
+                  <select
+                    value={dateFilter}
+                    onChange={(e) => setDateFilter(e.target.value)}
+                    className="w-full appearance-none border border-slate-200/80 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:border-[#C98484] cursor-pointer pr-7"
+                  >
+                    <option value="">Tümü</option>
+                    <option value="today">Bugün</option>
+                    <option value="week">Bu Hafta</option>
+                    <option value="month">Bu Ay</option>
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearch("")
+                    setStatusFilter("")
+                    setDateFilter("")
+                    fetchMessages("")
+                  }}
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs font-bold transition cursor-pointer"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  Sıfırla
+                </button>
+              </div>
+
+              <div className="border border-slate-100 rounded-xl overflow-hidden">
+                <table className="w-full text-xs">
+                  <thead className="bg-slate-50/70 border-b border-slate-100 text-slate-700 font-extrabold">
+                    <tr>
+                      <th className="py-3 px-3 text-left w-8">
+                        <input type="checkbox" className="accent-[#C98484] rounded" />
+                      </th>
+                      <th className="py-3 px-3 text-left">Gönderen</th>
+                      <th className="py-3 px-3 text-left">Konu</th>
+                      <th className="py-3 px-3 text-left">Sayfa</th>
+                      <th className="py-3 px-3 text-left">Durum</th>
+                      <th className="py-3 px-3 text-left">
+                        <span className="flex items-center gap-1">Tarih <ChevronDown className="w-3 h-3 text-slate-400" /></span>
+                      </th>
+                      <th className="py-3 px-3 text-right">İşlemler</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {loading ? (
+                      <tr>
+                        <td colSpan={7} className="py-20 text-center">
+                          <div className="flex flex-col items-center gap-2 text-slate-400">
+                            <div className="w-6 h-6 border-2 border-[#C98484] border-t-transparent rounded-full animate-spin" />
+                            <span className="text-xs font-medium">Mesajlar yükleniyor...</span>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : filteredMessages.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="py-16 text-center">
+                          <div className="flex flex-col items-center gap-3 max-w-sm mx-auto">
+                            <div className="w-20 h-20 rounded-full bg-[#FFF5EE] flex items-center justify-center relative">
+                              <div className="w-11 h-11 rounded-xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-center">
+                                <Inbox className="w-6 h-6 text-slate-700" />
+                              </div>
+                              <span className="absolute top-2 right-3 text-rose-300 text-xs">✨</span>
+                              <span className="absolute bottom-2 left-3 text-rose-200 text-xs">+</span>
+                            </div>
+
+                            <div>
+                              <h3 className="text-sm font-extrabold text-slate-900">Kayıtlı mesaj bulunamadı</h3>
+                              <p className="text-[11px] text-slate-400 font-medium mt-1 leading-relaxed">
+                                Henüz hiçbir mesaj alınmamış görünür.<br />Yeni mesajlar burada listelenecektir.
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredMessages.map((m) => (
+                        <tr
+                          key={m.id}
+                          className={`hover:bg-slate-50/60 transition-colors group ${m.status === "new" ? "bg-rose-50/20" : ""}`}
+                        >
+                          <td className="py-3 px-3">
+                            <input type="checkbox" className="accent-[#C98484] rounded" />
+                          </td>
+                          <td className="py-3 px-3">
+                            <div>
+                              <p className="font-extrabold text-slate-900">{m.name}</p>
+                              <p className="text-[11px] text-slate-400 font-medium">{m.email}</p>
+                            </div>
+                          </td>
+                          <td className="py-3 px-3 max-w-[180px]">
+                            <p className="font-bold text-slate-800 truncate">{m.subject || "Genel İletişim"}</p>
+                            <p className="text-[11px] text-slate-400 truncate mt-0.5">{m.message}</p>
+                          </td>
+                          <td className="py-3 px-3">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600">
+                              {m.order_no ? `#${m.order_no}` : "İletişim"}
+                            </span>
+                          </td>
+                          <td className="py-3 px-3">{statusBadge(m.status)}</td>
+                          <td className="py-3 px-3 text-slate-400 font-medium whitespace-nowrap">
+                            {new Date(m.created_at).toLocaleDateString("tr-TR")}{" "}
+                            <span className="text-[10px]">
+                              {new Date(m.created_at).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })}
+                            </span>
+                          </td>
+                          <td className="py-3 px-3 text-right">
+                            <div className="inline-flex items-center gap-1">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSelectedMessage(m)
+                                  setReplyText(m.admin_reply || "")
+                                  if (m.status === "new") handleUpdateStatus(m.id, "read")
+                                }}
+                                className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2 py-1.5 text-[10px] font-bold text-slate-600 hover:bg-slate-50 cursor-pointer"
+                                title="Görüntüle"
+                              >
+                                <Eye className="w-3.5 h-3.5" />
+                                Görüntüle
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSelectedMessage(m)
+                                  setReplyText(m.admin_reply || "")
+                                  if (m.status === "new") handleUpdateStatus(m.id, "read")
+                                }}
+                                className="inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50 px-2 py-1.5 text-[10px] font-bold text-[#C98484] hover:bg-rose-100 cursor-pointer"
+                                title="Müşteriye yanıtla"
+                              >
+                                <Send className="w-3.5 h-3.5" />
+                                Yanıtla
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleUpdateStatus(m.id, "archived")}
+                                className="p-1.5 rounded-lg hover:bg-purple-50 text-purple-500 cursor-pointer"
+                                title="Arşivle"
+                              >
+                                <Archive className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteMessage(m.id)}
+                                className="p-1.5 rounded-lg hover:bg-rose-50 text-rose-500 cursor-pointer"
+                                title="Sil"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-2xs space-y-2">
+                <h3 className="text-xs font-black text-slate-900">Mesaj akışı hakkında</h3>
+                <p className="text-[11px] text-slate-400 leading-relaxed font-medium">
+                  Gelen mesajlar, web sitenizdeki iletişim formları üzerinden gönderilen tüm talepleri içerir. Mesajları yanıtlayabilir, arşivleyebilir veya durumlarını güncelleyebilirsiniz.
+                </p>
+              </div>
+
+              <div className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-2xs space-y-3">
+                <h3 className="text-xs font-black text-slate-900">Hızlı İpuçları</h3>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-2.5">
+                    <div className="w-6 h-6 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0 mt-0.5 text-slate-500 text-[10px]">
+                      ⏱
+                    </div>
+                    <p className="text-[11px] text-slate-400 leading-relaxed font-medium">
+                      Yeni mesajlar otomatik olarak <strong className="text-slate-700">"Yeni"</strong> statüsünde gelir.
+                    </p>
+                  </div>
+
+                  <div className="flex items-start gap-2.5">
+                    <div className="w-6 h-6 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0 mt-0.5 text-slate-500 text-[10px]">
+                      ✉
+                    </div>
+                    <p className="text-[11px] text-slate-400 leading-relaxed font-medium">
+                      Yanıtladığınız mesajlar <strong className="text-slate-700">"Yanıtlandı"</strong> olarak işaretlenir.
+                    </p>
+                  </div>
+
+                  <div className="flex items-start gap-2.5">
+                    <div className="w-6 h-6 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0 mt-0.5 text-slate-500 text-[10px]">
+                      📥
+                    </div>
+                    <p className="text-[11px] text-slate-400 leading-relaxed font-medium">
+                      Önemli mesajları arşivleyerek gelen kutunuzu düzenli tutabilirsiniz.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border border-rose-200 text-xs font-extrabold text-[#C98484] hover:bg-rose-50/50 transition cursor-pointer"
+                  >
+                    <span className="flex items-center gap-2">
+                      <BookOpen className="w-3.5 h-3.5 text-[#C98484]" />
+                      Kullanım Kılavuzunu İncele
+                    </span>
+                    <ChevronRight className="w-3.5 h-3.5 text-[#C98484]" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── TAB 2: INFO SETTINGS (CLEAN INPUTS WITHOUT INNER ICONS) ── */}
+      {activeTab === "info_settings" && (
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-5 items-start">
+          {/* Left Form Card */}
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-2xs space-y-6">
+            <div>
+              <h2 className="text-base font-black text-slate-900">İletişim Sayfası İçeriği</h2>
+              <p className="text-xs text-slate-400 font-medium mt-0.5">
+                İletişim sayfanızda görüntülenecek metinleri ve bilgileri düzenleyin.
+              </p>
+            </div>
+
+            <div className="space-y-4 text-xs font-semibold">
+              {/* Row 1 */}
+              <div className="grid grid-cols-1 gap-4">
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-extrabold text-slate-700">Ana Başlık</label>
+                  <input
+                    type="text"
+                    value={contactInfo.title}
+                    onChange={(e) => setContactInfo({ ...contactInfo, title: e.target.value })}
+                    placeholder="İletişim"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#C98484] transition"
+                  />
+                </div>
+              </div>
+
+              {/* Row 2: Description */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-extrabold text-slate-700">Sayfa Alt Açıklama Metni</label>
+                <textarea
+                  value={contactInfo.description}
+                  onChange={(e) => setContactInfo({ ...contactInfo, description: e.target.value })}
+                  rows={2}
+                  placeholder="Ürün seçimi, sipariş ve satış sonrası destek için ekibimizle iletişime geçin."
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-900 focus:outline-none focus:border-[#C98484] transition"
+                />
+              </div>
+
+              {/* Row 3 */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-extrabold text-slate-700">Müşteri Hizmetleri Telefon Numarası</label>
+                  <input
+                    type="text"
+                    value={contactInfo.phone}
+                    onChange={(e) => setContactInfo({ ...contactInfo, phone: e.target.value })}
+                    placeholder="0850 303 00 47"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#C98484] transition"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-extrabold text-slate-700">Çalışma Saatleri Bilgisi</label>
+                  <input
+                    type="text"
+                    value={contactInfo.phone_hours}
+                    onChange={(e) => setContactInfo({ ...contactInfo, phone_hours: e.target.value })}
+                    placeholder="Hafta içi 09:00 - 18:00"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#C98484] transition"
+                  />
+                </div>
+              </div>
+
+              {/* Row 4 */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-extrabold text-slate-700">E-Posta Destek Adresi</label>
+                  <input
+                    type="email"
+                    value={contactInfo.email}
+                    onChange={(e) => setContactInfo({ ...contactInfo, email: e.target.value })}
+                    placeholder=""
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#C98484] transition"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-extrabold text-slate-700">Ortalama Yanıt Süresi Metni</label>
+                  <input
+                    type="text"
+                    value={contactInfo.email_response_time}
+                    onChange={(e) => setContactInfo({ ...contactInfo, email_response_time: e.target.value })}
+                    placeholder="Ortalama yanıt süresi: 2 saat"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#C98484] transition"
+                  />
+                </div>
+              </div>
+
+              {/* Row 5 */}
+              <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-4 space-y-2">
+                <label className="block text-xs font-extrabold text-slate-800">Ek Admin Bildirim E-Postaları</label>
+                <input
+                  type="text"
+                  value={contactInfo.additional_notification_emails || ""}
+                  onChange={(e) => setContactInfo({ ...contactInfo, additional_notification_emails: e.target.value })}
+                  placeholder="ortak@firma.com, calisan@firma.com"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-blue-200 bg-white text-xs font-bold text-slate-900 focus:outline-none focus:border-[#C98484] transition"
+                />
+                <p className="text-[10px] leading-4 text-slate-500">Birden fazla adresi virgülle ayırın. Form, sipariş, kargo, teslimat ve fatura bildirimlerinin admin kopyaları bu adreslere de gider.</p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-extrabold text-slate-700">Genel Merkez & Mağaza Adresi</label>
+                  <input
+                    type="text"
+                    value={contactInfo.address}
+                    onChange={(e) => setContactInfo({ ...contactInfo, address: e.target.value, full_address: e.target.value })}
+                    placeholder="[Şirket adresi yönetim panelinden eklenecektir]"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#C98484] transition"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between gap-3">
+                    <label className="block text-xs font-extrabold text-slate-700">WhatsApp Telefon Numarası (Ülke koduyla)</label>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold text-slate-500">{contactInfo.whatsapp_enabled ? "Aktif" : "Pasif"}</span>
+                      <Toggle
+                        checked={Boolean(contactInfo.whatsapp_enabled)}
+                        onChange={(value) => setContactInfo({ ...contactInfo, whatsapp_enabled: value })}
+                      />
+                    </div>
+                  </div>
+                  <input
+                    type="text"
+                    value={contactInfo.whatsapp_phone}
+                    onChange={(e) => setContactInfo({ ...contactInfo, whatsapp_phone: e.target.value })}
+                    placeholder="9"
+                    disabled={!contactInfo.whatsapp_enabled}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#C98484] transition"
+                  />
+                  <p className="text-[10px] font-medium text-slate-500">Örnek: 9. Başında 0 ile yazarsanız sistem otomatik olarak Türkiye ülke koduna çevirir.</p>
+                </div>
+              </div>
+
+              {/* Row 6 */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-extrabold text-slate-700">Form Kartı Başlığı</label>
+                  <input
+                    type="text"
+                    value={contactInfo.form_title}
+                    onChange={(e) => setContactInfo({ ...contactInfo, form_title: e.target.value })}
+                    placeholder="Mesaj Gönderin"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#C98484] transition"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-extrabold text-slate-700">Form Kartı Açıklaması</label>
+                  <input
+                    type="text"
+                    value={contactInfo.form_description}
+                    onChange={(e) => setContactInfo({ ...contactInfo, form_description: e.target.value })}
+                    placeholder="Formu doldurun; mesajınız destek ekibimize kaydedilsin."
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#C98484] transition"
+                  />
+                </div>
+              </div>
+
+              {/* Firma Bilgileri (Yasal / SEO) */}
+              <div className="pt-4 border-t border-slate-100">
+                <h4 className="text-xs font-black text-slate-700 mb-3 flex items-center gap-2">
+                  <Building2 className="h-3.5 w-3.5 text-[#C98484]" />
+                  Firma Yasal Bilgileri (SEO & Sözleşmeler)
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-extrabold text-slate-700">Şirket Tam Unvanı</label>
+                    <input
+                      type="text"
+                      value={contactInfo.company_name || ""}
+                      onChange={(e) => setContactInfo({ ...contactInfo, company_name: e.target.value })}
+                      placeholder="Örn: Şirket Ünvanı San. Tic. Ltd. Şti."
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#C98484] transition"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-extrabold text-slate-700">Marka Adı (Kısa)</label>
+                    <input
+                      type="text"
+                      value={contactInfo.brand_name || ""}
+                      onChange={(e) => setContactInfo({ ...contactInfo, brand_name: e.target.value })}
+                      placeholder="Örn: Mağaza Adınız"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#C98484] transition"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-extrabold text-slate-700">Vergi Dairesi</label>
+                    <input
+                      type="text"
+                      value={contactInfo.tax_office || ""}
+                      onChange={(e) => setContactInfo({ ...contactInfo, tax_office: e.target.value })}
+                      placeholder="Esenler V.D."
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#C98484] transition"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-extrabold text-slate-700">Vergi Numarası</label>
+                    <input
+                      type="text"
+                      value={contactInfo.tax_no || ""}
+                      onChange={(e) => setContactInfo({ ...contactInfo, tax_no: e.target.value })}
+                      placeholder="7570982314"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#C98484] transition"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-extrabold text-slate-700">MERSİS Numarası</label>
+                    <input
+                      type="text"
+                      value={contactInfo.mersis_no || ""}
+                      onChange={(e) => setContactInfo({ ...contactInfo, mersis_no: e.target.value })}
+                      placeholder="0757098231400001"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#C98484] transition"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-extrabold text-slate-700">KEP Adresi</label>
+                    <input
+                      type="text"
+                      value={contactInfo.kep_address || ""}
+                      onChange={(e) => setContactInfo({ ...contactInfo, kep_address: e.target.value })}
+                      placeholder=""
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#C98484] transition"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Row 7 */}
+              <div className="flex flex-col sm:flex-row items-end justify-between gap-4">
+                <div className="flex-1 space-y-1.5 w-full">
+                  <label className="block text-xs font-extrabold text-slate-700">KVKK Aydınlatma Metni Bağlantısı (URL)</label>
+                  <input
+                    type="text"
+                    value={contactInfo.kvkk_url}
+                    onChange={(e) => setContactInfo({ ...contactInfo, kvkk_url: e.target.value })}
+                    placeholder="/kvkk"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#C98484] transition"
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleSaveSettings}
+                  disabled={saving}
+                  className="px-6 py-2.5 bg-[#C98484] text-white rounded-xl text-xs font-extrabold hover:bg-[#A95E5E] transition shadow-md shadow-rose-500/20 cursor-pointer disabled:opacity-60 shrink-0"
+                >
+                  {saving ? "Kaydediliyor..." : "Değişiklikleri Kaydet"}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Live Preview Card */}
+          <div className="space-y-3">
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-2xs space-y-4">
+              <div>
+                <h3 className="text-sm font-black text-slate-900">Canlı Önizleme</h3>
+                <p className="text-[11px] text-slate-400 font-medium mt-0.5">
+                  İletişim sayfanızın ziyaretçilere nasıl görüneceğini buradan inceleyebilirsiniz.
+                </p>
+              </div>
+
+              {/* Storefront Contact Page Live Preview Canvas */}
+              <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs space-y-5 relative overflow-hidden">
+                {/* Decorative background vectors */}
+                <div className="absolute top-4 right-4 w-28 h-28 bg-[#FFF5EE] rounded-full flex items-center justify-center opacity-70 pointer-events-none">
+                  <div className="w-16 h-12 rounded-xl bg-white border border-slate-200/60 shadow-2xs flex items-center justify-center">
+                    <span className="text-xs text-rose-400 font-extrabold">•••</span>
+                  </div>
+                </div>
+
+                {/* Badge */}
+                <span className="inline-block px-3 py-1 bg-rose-50 text-[#C98484] text-[10px] font-black rounded-full border border-rose-100">
+                  {contactInfo.eyebrow || "7/24 DESTEK EKİBİ"}
+                </span>
+
+                {/* Title & Desc */}
+                <div>
+                  <h2 className="text-2xl font-black text-slate-900 leading-tight">
+                    {contactInfo.title || "İletişim"}
+                  </h2>
+                  <p className="text-[11px] text-slate-500 font-medium leading-relaxed mt-1 max-w-[240px]">
+                    {contactInfo.description}
+                  </p>
+                </div>
+
+                {/* Contact Items */}
+                <div className="space-y-3 pt-1 text-xs">
+                  {/* Phone */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-rose-50 border border-rose-100 flex items-center justify-center shrink-0">
+                      <Phone className="w-3.5 h-3.5 text-[#C98484]" />
+                    </div>
+                    <div>
+                      <p className="font-extrabold text-slate-900 text-xs">{contactInfo.phone}</p>
+                      <p className="text-[10px] text-slate-400 font-medium">{contactInfo.phone_hours}</p>
+                    </div>
+                  </div>
+
+                  {/* Email */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-rose-50 border border-rose-100 flex items-center justify-center shrink-0">
+                      <Mail className="w-3.5 h-3.5 text-[#C98484]" />
+                    </div>
+                    <div>
+                      <p className="font-extrabold text-slate-900 text-xs">{contactInfo.email}</p>
+                      <p className="text-[10px] text-slate-400 font-medium">{contactInfo.email_response_time}</p>
+                    </div>
+                  </div>
+
+                  {/* Address */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-rose-50 border border-rose-100 flex items-center justify-center shrink-0">
+                      <MapPin className="w-3.5 h-3.5 text-[#C98484]" />
+                    </div>
+                    <div>
+                      <p className="font-extrabold text-slate-900 text-xs">{contactInfo.address}</p>
+                      <p className="text-[10px] text-slate-400 font-medium">Genel Merkez & Mağaza Adresi</p>
+                    </div>
+                  </div>
+
+                  {/* WhatsApp */}
+                  {contactInfo.whatsapp_enabled && (
+                  <div className="flex items-center justify-between pt-1 border-t border-slate-100">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0">
+                        <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />
+                      </div>
+                      <div>
+                        <p className="font-extrabold text-slate-900 text-[11px]">+{contactInfo.whatsapp_phone}</p>
+                        <p className="text-[9px] text-slate-400 font-medium">WhatsApp ile hızlı destek alın</p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="px-3 py-1.5 bg-[#25D366] text-white rounded-xl text-[10px] font-extrabold flex items-center gap-1 shrink-0"
+                    >
+                      <span>💬</span> WhatsApp ile İletişime Geç
+                    </button>
+                  </div>
+                  )}
+                </div>
+
+                {/* Form Card Live Preview */}
+                <div className="bg-[#FFF9F6] border border-rose-100/80 rounded-xl p-3.5 space-y-2 mt-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-lg bg-rose-100 flex items-center justify-center shrink-0">
+                      <Send className="w-3 h-3 text-[#C98484]" />
+                    </div>
+                    <div>
+                      <p className="font-extrabold text-slate-900 text-xs">{contactInfo.form_title}</p>
+                      <p className="text-[9px] text-slate-400 font-medium">{contactInfo.form_description}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    <div className="bg-white border border-slate-200/80 rounded-lg p-2 text-[9px] text-slate-400">
+                      Adınız Soyadınız
+                    </div>
+                    <div className="bg-white border border-slate-200/80 rounded-lg p-2 text-[9px] text-slate-400">
+                      E-posta Adresiniz
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── TAB 3: SMTP (CLEAN INPUTS WITHOUT INNER ICONS) ─────── */}
+      {activeTab === "smtp_settings" && (
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_290px] gap-5 items-start">
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-2xs space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 pb-5">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center shrink-0">
+                  <Sliders className="w-5 h-5 text-[#C98484]" />
+                </div>
+                <div>
+                  <h2 className="text-base font-black text-slate-900">SMTP Sunucu ve E-Posta Bildirim İzinleri</h2>
+                  <p className="text-xs text-slate-400 font-medium mt-0.5">
+                    Müşteriler iletişim formunu doldurduğunda admin'e anlık e-posta bildirimi gönderilmesi için SMTP yapılandırması.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 shrink-0 self-start sm:self-auto bg-slate-50/50 px-3 py-1.5 rounded-xl border border-slate-100">
+                <Toggle
+                  checked={smtpSettings.enable_notifications}
+                  onChange={(v) => setSmtpSettings({ ...smtpSettings, enable_notifications: v })}
+                />
+                <span className="text-xs font-extrabold text-slate-800">E-Posta Bildirimleri Aktif</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-extrabold text-slate-700">SMTP Sunucu Adresi (Host)</label>
+                <input
+                  type="text"
+                  value={smtpSettings.host}
+                  onChange={(e) => setSmtpSettings({ ...smtpSettings, host: e.target.value })}
+                  placeholder="smtp.gmail.com"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-900 focus:outline-none focus:border-[#C98484] transition"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-xs font-extrabold text-slate-700">Port Numarası</label>
+                <input
+                  type="text"
+                  value={smtpSettings.port}
+                  onChange={(e) => setSmtpSettings({ ...smtpSettings, port: e.target.value })}
+                  placeholder="587"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-900 focus:outline-none focus:border-[#C98484] transition"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-xs font-extrabold text-slate-700">SMTP Kullanıcı Adı (Email)</label>
+                <input
+                  type="text"
+                  value={smtpSettings.user}
+                  onChange={(e) => setSmtpSettings({ ...smtpSettings, user: e.target.value })}
+                  placeholder=""
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-900 focus:outline-none focus:border-[#C98484] transition"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-xs font-extrabold text-slate-700">SMTP Şifresi</label>
+                <div className="relative flex items-center">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={smtpSettings.pass}
+                    onChange={(e) => setSmtpSettings({ ...smtpSettings, pass: e.target.value })}
+                    placeholder="••••••••••••"
+                    className="w-full pl-3.5 pr-10 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-900 focus:outline-none focus:border-[#C98484] transition"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-xs font-extrabold text-slate-700">Gönderen E-Posta Adresi (From)</label>
+                <input
+                  type="email"
+                  value={smtpSettings.from_email}
+                  onChange={(e) => setSmtpSettings({ ...smtpSettings, from_email: e.target.value })}
+                  placeholder=""
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-900 focus:outline-none focus:border-[#C98484] transition"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-xs font-extrabold text-slate-700">Admin Bildirim E-Postası</label>
+                <input
+                  type="email"
+                  value={contactInfo.email}
+                  readOnly
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-700"
+                />
+                <p className="text-[10px] leading-4 text-slate-400">
+                  Bu adres İletişim &amp; Sayfa Ayarları bölümündeki ana e-posta alanından yönetilir ve tüm siteye uygulanır.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={handleTestSmtp}
+                disabled={testingSmtp || !smtpSettings.host}
+                className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200/90 text-slate-700 hover:bg-slate-50 rounded-xl text-xs font-extrabold transition cursor-pointer disabled:opacity-50 shadow-2xs"
+              >
+                <RotateCcw className={`w-3.5 h-3.5 ${testingSmtp ? "animate-spin" : ""}`} />
+                {testingSmtp ? "Test Ediliyor..." : "SMTP Bağlantısını Test Et"}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSaveSettings}
+                disabled={saving}
+                className="flex items-center gap-2 px-6 py-2.5 bg-[#C98484] text-white rounded-xl text-xs font-extrabold hover:bg-[#A95E5E] transition shadow-md shadow-rose-500/20 cursor-pointer disabled:opacity-60"
+              >
+                <Settings className="w-4 h-4" />
+                {saving ? "Kaydediliyor..." : "Ayarları Kaydet"}
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-2xs flex items-start gap-3.5">
+              <div className="w-9 h-9 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 mt-0.5">
+                <ShieldCheck className="w-4 h-4 text-blue-600" />
+              </div>
+              <div>
+                <h3 className="text-xs font-black text-slate-900">Güvenlik Notu</h3>
+                <p className="text-[11px] text-slate-400 font-medium leading-relaxed mt-1">
+                  SMTP şifrenizi düzenli olarak güncellemeniz hesabınızın güvenliği için önemlidir.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-2xs flex items-start gap-3.5">
+              <div className="w-9 h-9 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0 mt-0.5">
+                <Lock className="w-4 h-4 text-emerald-600" />
+              </div>
+              <div>
+                <h3 className="text-xs font-black text-slate-900">Şifreleme</h3>
+                <p className="text-[11px] text-slate-400 font-medium leading-relaxed mt-1">
+                  Güvenli bağlantı için STARTTLS önerilir. SSL bağlantılar için 465 portu kullanılabilir.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-2xs space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-purple-50 border border-purple-100 flex items-center justify-center shrink-0">
+                  <Sliders className="w-4 h-4 text-purple-600" />
+                </div>
+                <h3 className="text-xs font-black text-slate-900">Önerilen Portlar</h3>
+              </div>
+
+              <div className="space-y-2 text-xs font-medium pl-1">
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 font-black text-[11px]">587</span>
+                  <span className="text-slate-500 font-semibold">• STARTTLS (Önerilen)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 font-black text-[11px]">465</span>
+                  <span className="text-slate-500 font-semibold">• SSL/TLS</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 font-black text-[11px]">25</span>
+                  <span className="text-slate-400">• Eski sistemler için</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-2xs space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`w-9 h-9 rounded-full ${lastTestResult.status === "success" ? "bg-emerald-50 border border-emerald-100" : "bg-rose-50 border border-rose-100"} flex items-center justify-center shrink-0`}>
+                    <CheckCircle2 className={`w-4 h-4 ${lastTestResult.status === "success" ? "text-emerald-600" : "text-rose-600"}`} />
+                  </div>
+                  <h3 className="text-xs font-black text-slate-900">Son Test Durumu</h3>
+                </div>
+                <span className={`px-2 py-0.5 rounded-md text-[10px] font-black ${lastTestResult.status === "success" ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"}`}>
+                  {lastTestResult.status === "success" ? "Başarılı" : "Başarısız"}
+                </span>
+              </div>
+
+              <div className="space-y-1.5 text-xs pt-1 border-t border-slate-100/80">
+                <div className="flex justify-between items-center text-[11px]">
+                  <span className="text-slate-400 font-semibold">Test zamanı</span>
+                  <span className="text-slate-700 font-bold">{lastTestResult.time || "—"}</span>
+                </div>
+                <div className="space-y-0.5 text-[11px]">
+                  <span className="text-slate-400 font-semibold block">Yanıt</span>
+                  <p className="text-slate-600 font-mono text-[10px] bg-slate-50 p-2 rounded-lg border border-slate-100 break-all">
+                    {lastTestResult.response || "—"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Message Detail Modal */}
+      {selectedMessage && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[92vh] overflow-y-auto p-6 space-y-5 shadow-2xl animate-in zoom-in duration-150">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div>
+                <h3 className="text-base font-black text-slate-900">İletişim Mesaj Detayı</h3>
+                <p className="text-xs text-slate-400 font-medium mt-0.5">
+                  {new Date(selectedMessage.created_at).toLocaleString("tr-TR")}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSelectedMessage(null)}
+                className="p-2 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-700 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-4 text-xs">
+              <div className="grid grid-cols-2 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                {[
+                  { label: "Ad Soyad", value: selectedMessage.name },
+                  { label: "E-Posta", value: selectedMessage.email, isEmail: true },
+                  { label: "Telefon", value: selectedMessage.phone || "—" },
+                  { label: "Sipariş No", value: selectedMessage.order_no ? `#${selectedMessage.order_no}` : "—", isOrder: !!selectedMessage.order_no },
+                ].map((f) => (
+                  <div key={f.label}>
+                    <span className="text-slate-400 font-bold block mb-0.5 uppercase tracking-wide text-[10px]">{f.label}</span>
+                    {f.isEmail ? (
+                      <a href={`mailto:${f.value}`} className="text-blue-600 font-bold hover:underline">{f.value}</a>
+                    ) : (
+                      <span className={`font-black ${f.isOrder ? "text-[#C98484]" : "text-slate-800"}`}>{f.value}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div>
+                <span className="text-slate-400 font-bold block mb-1.5 uppercase tracking-wide text-[10px]">İletişim Konusu</span>
+                <span className="inline-block px-3 py-1 bg-slate-100 text-slate-800 font-extrabold rounded-lg">
+                  {selectedMessage.subject || "Genel İletişim"}
+                </span>
+              </div>
+
+              <div>
+                <span className="text-slate-400 font-bold block mb-1.5 uppercase tracking-wide text-[10px]">Mesaj İçeriği</span>
+                <div className="p-4 bg-slate-50 rounded-2xl text-slate-700 leading-relaxed font-medium whitespace-pre-wrap border border-slate-200/60 max-h-52 overflow-y-auto text-xs">
+                  {selectedMessage.message}
+                </div>
+              </div>
+
+              <div>
+                <span className="text-slate-400 font-bold block mb-1.5 uppercase tracking-wide text-[10px]">Müşteriye Yanıt</span>
+                <textarea
+                  value={replyText}
+                  onChange={(event) => setReplyText(event.target.value)}
+                  rows={5}
+                  maxLength={10000}
+                  placeholder="Kurumsal ve açıklayıcı yanıtınızı yazın…"
+                  className="w-full resize-y rounded-2xl border border-slate-200 bg-white p-4 text-xs font-medium leading-relaxed text-slate-800 outline-none transition focus:border-[#C98484] focus:ring-2 focus:ring-rose-100"
+                />
+                <div className="mt-2 flex items-center justify-between gap-3">
+                  <p className="text-[10px] leading-4 text-slate-400">
+                    Gönderildiğinde müşteriye yanıt, merkezi admin adresine de bilgi kopyası gider.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleReply}
+                    disabled={sendingReply || replyText.trim().length < 3}
+                    className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-[#C98484] px-4 py-2.5 text-xs font-extrabold text-white shadow-sm transition hover:bg-[#A95E5E] disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <Send className="h-3.5 w-3.5" />
+                    {sendingReply ? "Gönderiliyor…" : "Yanıtı Gönder"}
+                  </button>
+                </div>
+                {selectedMessage.admin_reply && (
+                  <p className="mt-2 rounded-xl bg-emerald-50 px-3 py-2 text-[10px] font-semibold text-emerald-700">
+                    Son yanıt {selectedMessage.replied_at ? new Date(selectedMessage.replied_at).toLocaleString("tr-TR") : "gönderildi"}.
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-slate-400">Durum:</span>
+                <select
+                  value={selectedMessage.status}
+                  onChange={(e) => handleUpdateStatus(selectedMessage.id, e.target.value)}
+                  className="bg-slate-100 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-extrabold text-slate-800 focus:outline-none focus:border-[#C98484] cursor-pointer"
+                >
+                  <option value="new">Yeni</option>
+                  <option value="read">İncelendi</option>
+                  <option value="replied">Yanıtlandı</option>
+                  <option value="archived">Arşivlendi</option>
+                </select>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleDeleteMessage(selectedMessage.id)}
+                  className="px-4 py-2 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-xl text-xs font-extrabold transition cursor-pointer"
+                >
+                  Sil
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedMessage(null)}
+                  className="px-5 py-2 bg-slate-900 text-white hover:bg-slate-800 rounded-xl text-xs font-extrabold transition cursor-pointer"
+                >
+                  Kapat
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

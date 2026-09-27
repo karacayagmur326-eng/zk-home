@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">ZK Home görsel alanı</title>
+  <desc id="desc">İçerik yönetim panelinden eklenecek nötr görsel alanı.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#f8fafc"/>
+      <stop offset="1" stop-color="#e2e8f0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <g fill="none" stroke="#cbd5e1" stroke-width="4" opacity=".75">
+    <path d="M120 720 430 410l190 190 250-290 610 610"/>
+    <circle cx="1160" cy="250" r="80"/>
+  </g>
+  <text x="800" y="470" text-anchor="middle" font-family="Arial, sans-serif" font-size="72" font-weight="700" fill="#0f172a">ZK HOME</text>
+  <text x="800" y="540" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" fill="#64748b">Görsel yönetim panelinden eklenecek</text>
+</svg>

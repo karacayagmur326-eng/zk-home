@@ -1,0 +1,27 @@
+# Dependencies and generated builds
+node_modules/
+.next/
+.next-*/
+.turbo/
+dist/
+build/
+*.tsbuildinfo
+
+# Local environment and platform state
+.env
+.env.*
+!.env.example
+.vercel/
+
+# Runtime uploads and local data
+public/uploads/
+/uploads/
+*.log
+*.dump
+*.sql.gz
+
+# Editor and operating-system files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

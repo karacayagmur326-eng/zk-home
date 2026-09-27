@@ -1,0 +1,643 @@
+@import "./tokens.css";
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+/* Theme-aware body backgrounds */
+body {
+  background-color: rgb(var(--color-background));
+  color: rgb(var(--color-foreground));
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+}
+
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+@layer utilities {
+  /* Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  input:focus ~ label,
+  input:not(:placeholder-shown) ~ label {
+    @apply -translate-y-2 text-xsmall-regular;
+  }
+
+  input:focus ~ label {
+    @apply left-0;
+  }
+
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  textarea:-webkit-autofill,
+  textarea:-webkit-autofill:hover,
+  textarea:-webkit-autofill:focus,
+  select:-webkit-autofill,
+  select:-webkit-autofill:hover,
+  select:-webkit-autofill:focus {
+    border: 1px solid rgb(var(--color-border));
+    -webkit-text-fill-color: rgb(var(--color-foreground));
+    -webkit-box-shadow: 0 0 0px 1000px rgb(var(--color-card)) inset;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  input[type="search"]::-webkit-search-decoration,
+  input[type="search"]::-webkit-search-cancel-button,
+  input[type="search"]::-webkit-search-results-button,
+  input[type="search"]::-webkit-search-results-decoration {
+    -webkit-appearance: none;
+  }
+}
+
+@layer components {
+  .content-container {
+    width: 100%;
+    max-width: var(--container-content);
+    margin-inline: auto;
+    padding-inline: var(--container-gutter);
+  }
+
+  .reading-container {
+    width: 100%;
+    max-width: var(--container-reading);
+    margin-inline: auto;
+    padding-inline: var(--container-gutter);
+  }
+
+  .section-spacing {
+    padding-block: var(--space-section);
+  }
+
+  /* Global typography overrides */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading tracking-tight;
+    line-height: var(--line-height-heading);
+  }
+
+  h1, .h1 { font-size: var(--font-size-heading-1); }
+  h2, .h2 { font-size: var(--font-size-heading-2); }
+  h3, .h3 { font-size: var(--font-size-heading-3); }
+  h4, .h4 { font-size: var(--font-size-heading-4); }
+
+  .font-display {
+    font-family: var(--font-family-body);
+  }
+
+  /* Touch targets for mobile */
+  button,
+  input:not([type="checkbox"]):not([type="radio"]),
+  select {
+    @apply min-h-[44px] sm:min-h-0; /* Apple's recommended minimum touch target */
+  }
+
+  @media (max-width: 639px) {
+    [data-ui-scope="storefront"] img,
+    [data-ui-scope="storefront"] video,
+    [data-ui-scope="storefront"] svg {
+      max-width: 100%;
+    }
+
+    [data-ui-scope="storefront"] {
+      overflow-wrap: anywhere;
+    }
+  }
+
+  .contrast-btn {
+    @apply px-4 py-3 sm:py-2 border border-foreground rounded-full hover:bg-foreground hover:text-background transition-colors duration-200 ease-in;
+  }
+
+  .text-xsmall-regular {
+    font-size: var(--font-size-xs);
+    line-height: 1rem;
+    font-weight: var(--font-weight-regular);
+  }
+
+  .text-small-regular {
+    font-size: var(--font-size-sm);
+    line-height: 1.25rem;
+    font-weight: var(--font-weight-regular);
+  }
+
+  .text-small-semi {
+    font-size: var(--font-size-sm);
+    line-height: 1.25rem;
+    font-weight: var(--font-weight-medium);
+  }
+
+  .text-base-regular {
+    font-size: var(--font-size-ui-base);
+    line-height: 1.5rem;
+    font-weight: var(--font-weight-regular);
+  }
+
+  .text-base-semi {
+    font-size: var(--font-size-ui-base);
+    line-height: 1.5rem;
+    font-weight: var(--font-weight-medium);
+  }
+
+  .text-large-regular {
+    font-size: var(--font-size-lg);
+    line-height: 1.75rem;
+    font-weight: var(--font-weight-regular);
+  }
+
+  .text-large-semi {
+    font-size: var(--font-size-lg);
+    line-height: 1.75rem;
+    font-weight: var(--font-weight-medium);
+  }
+
+  .text-xl-regular {
+    @apply text-xl sm:text-2xl leading-[1.4] font-normal;
+  }
+
+  .text-xl-semi {
+    @apply text-xl sm:text-2xl leading-[1.4] font-medium;
+  }
+
+  .text-2xl-regular {
+    @apply text-2xl sm:text-[30px] leading-[1.3] font-normal;
+  }
+
+  .text-2xl-semi {
+    @apply text-2xl sm:text-[30px] leading-[1.3] font-medium;
+  }
+
+  .text-3xl-regular {
+    @apply text-3xl sm:text-[32px] leading-[1.2] font-normal;
+  }
+
+  .text-3xl-semi {
+    @apply text-3xl sm:text-[32px] leading-[1.2] font-semibold;
+  }
+
+  /*
+   * Mağaza arayüzü biçim standardı.
+   * Tam yuvarlak yalnız rozet, avatar ve dairesel ikon düğmelerinde kalır.
+   */
+  [data-ui-scope="storefront"]
+    :where(.rounded, .rounded-sm, .rounded-md, .rounded-lg) {
+    border-radius: var(--radius-control) !important;
+  }
+
+  [data-ui-scope="storefront"] :where(.rounded-xl) {
+    border-radius: var(--radius-rounded) !important;
+  }
+
+  [data-ui-scope="storefront"] :where(.rounded-2xl, .rounded-3xl) {
+    border-radius: var(--radius-card) !important;
+  }
+
+  [data-ui-scope="storefront"] :where(.shadow-sm, .shadow-xs, .shadow-2xs, .shadow-soft) {
+    box-shadow: var(--shadow-card) !important;
+  }
+
+  [data-ui-scope="storefront"]
+    :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+    border-radius: var(--radius-control);
+  }
+
+  /*
+   * Legacy utility classes previously pushed many storefront labels and
+   * prices to 800/900. Keep strong hierarchy without the compressed,
+   * ink-heavy appearance.
+   */
+  [data-ui-scope="storefront"] :where(.font-black, .font-extrabold) {
+    font-weight: 700 !important;
+  }
+
+  .storefront-section-label {
+    font-size: 0.6875rem;
+    font-weight: 650;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .storefront-section-title {
+    font-family: var(--font-family-section, var(--font-family-heading));
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    line-height: 1.12;
+  }
+
+  .storefront-card-title {
+    font-family: var(--font-family-body);
+    font-weight: 600;
+    letter-spacing: -0.012em;
+    line-height: 1.4;
+  }
+
+  .storefront-price {
+    font-family: var(--font-family-body);
+    font-weight: 700;
+    letter-spacing: -0.018em;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Mobile Bottom Navigation Bar Safety Clearance (Matches exact menu height 68px + safe area) */
+@media (max-width: 767px) {
+  body,
+  [data-ui-scope="storefront"] {
+    padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+/*
+ * Ürün özeti ile Açıklama/Özellikler editör içerikleri aynı tipografi
+ * sistemini kullanır. Slider başlıklarının Barlow ayarları bundan etkilenmez.
+ */
+[data-ui-scope="storefront"] .product-rich-text,
+[data-ui-scope="storefront"] .product-rich-text :where(*) {
+  font-family: var(--font-family-body) !important;
+}
+
+[data-ui-scope="storefront"] .product-rich-text {
+  font-size: 0.875rem !important;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.65;
+}
+
+[data-ui-scope="storefront"] .product-rich-text :where(p, ul, ol, li, h1, h2, h3, h4, h5, h6) {
+  font-size: inherit !important;
+  line-height: inherit !important;
+}
+
+[data-ui-scope="storefront"] .product-rich-text :where(strong, b) {
+  font-weight: 700;
+}
+
+/*
+ * Soft turuncu şerit: Kendi paragrafında tek başına olan bold başlıkların altına
+ * ince, soluk bir dekoratif ayırıcı eklenir (Özellikler:, Kullanım Alanları: vb.)
+ */
+[data-ui-scope="storefront"] .product-rich-text p:has(> strong:only-child),
+[data-ui-scope="storefront"] .product-rich-text p:has(> b:only-child) {
+  display: inline-flex;
+  flex-direction: column;
+  width: 100%;
+  margin-top: 1.1em;
+  margin-bottom: 0.25em;
+  padding-bottom: 0.45em;
+  border-bottom: 1.5px solid;
+  border-image: linear-gradient(
+    to right,
+    rgba(200, 72, 0, 0.55) 0%,
+    rgba(200, 72, 0, 0.18) 55%,
+    transparent 100%
+  ) 1;
+}
+
+
+/* Custom Orange Check-Circle List Formatting & Hanging Alignment */
+[data-ui-scope="storefront"] .rich-list-item {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 0.5rem !important;
+  margin-top: 0.35rem !important;
+  margin-bottom: 0.35rem !important;
+}
+
+[data-ui-scope="storefront"] .rich-list-icon {
+  flex-shrink: 0 !important;
+  width: 1.1rem !important;
+  height: 1.1rem !important;
+  margin-top: 0.15rem !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23C84800' stroke='%23C84800' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10' fill='%23C84800'/%3E%3Cpath d='m9 12 2 2 4-4' stroke='%23ffffff' stroke-width='2.5' fill='none'/%3E%3C/svg%3E") !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+}
+
+[data-ui-scope="storefront"] .rich-list-content {
+  flex: 1 1 0% !important;
+  min-width: 0 !important;
+}
+
+/* Fallback for standard HTML <ul> and <li> elements (Product Rich Text only) */
+[data-ui-scope="storefront"] .product-rich-text ul {
+  list-style-type: disc !important;
+  padding-left: 1.25rem !important;
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+[data-ui-scope="storefront"] .product-rich-text ul > li {
+  margin-bottom: 0.375rem !important;
+  list-style-type: disc !important;
+  padding-left: 0.25rem !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   BLOG MAKALE TİPOGRAFİSİ & STANDART LİSTE / TABLO / SSS STİLLERİ
+───────────────────────────────────────────────────────────────────────────── */
+.blog-content {
+  font-family: var(--font-family-body, inherit);
+  color: #475569;
+}
+
+.blog-content h2 {
+  font-size: 1.15rem;
+  font-weight: 750;
+  color: #0f172a;
+  letter-spacing: -0.015em;
+  line-height: 1.35;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1.5px solid rgba(201, 132, 132, 0.3);
+}
+
+@media (min-width: 640px) {
+  .blog-content h2 {
+    font-size: 1.25rem;
+  }
+}
+
+.blog-content h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.blog-content p {
+  font-size: 0.875rem;
+  line-height: 1.7;
+  color: #475569;
+  margin-bottom: 1rem;
+}
+
+.blog-content p.lead {
+  font-size: 0.875rem;
+  line-height: 1.7;
+  font-weight: 500;
+  color: #1e293b;
+  background-color: #f8fafc;
+  border-left: 3.5px solid #C98484;
+  padding: 0.875rem 1.15rem;
+  border-radius: 0 0.75rem 0.75rem 0;
+  margin-bottom: 1.5rem;
+}
+
+/* Standart Temiz HTML Liste İşaretleri (Düz Bullet ve Numaralar) */
+.blog-content ul {
+  list-style-type: disc !important;
+  padding-left: 1.25rem !important;
+  margin-top: 0.5rem !important;
+  margin-bottom: 1.25rem !important;
+  display: block !important;
+}
+
+.blog-content ul > li {
+  list-style-type: disc !important;
+  display: list-item !important;
+  padding-left: 0.25rem !important;
+  margin-bottom: 0.4rem !important;
+  font-size: 0.875rem !important;
+  line-height: 1.65 !important;
+  color: #475569 !important;
+  position: static !important;
+}
+
+.blog-content ul > li::before {
+  display: none !important;
+  content: none !important;
+}
+
+.blog-content ol {
+  list-style-type: decimal !important;
+  padding-left: 1.25rem !important;
+  margin-top: 0.5rem !important;
+  margin-bottom: 1.25rem !important;
+  display: block !important;
+}
+
+.blog-content ol > li {
+  list-style-type: decimal !important;
+  display: list-item !important;
+  padding-left: 0.25rem !important;
+  margin-bottom: 0.4rem !important;
+  font-size: 0.875rem !important;
+  line-height: 1.65 !important;
+  color: #475569 !important;
+  position: static !important;
+}
+
+.blog-content ol > li::before {
+  display: none !important;
+  content: none !important;
+}
+
+/* Dikkat Çekici & Şık Tablo Tasarımı */
+.blog-content table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 0.875rem;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  margin-top: 1.25rem;
+  margin-bottom: 1.75rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+}
+
+.blog-content thead {
+  background: #0f172a;
+  color: #ffffff;
+}
+
+.blog-content thead th {
+  padding: 0.75rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: left;
+  border-bottom: 2px solid #1e293b;
+}
+
+.blog-content thead th:last-child {
+  background: #C98484 !important;
+  color: #ffffff !important;
+  text-align: center;
+}
+
+.blog-content tbody tr {
+  background-color: #ffffff;
+  transition: background-color 0.15s ease;
+}
+
+.blog-content tbody tr:nth-child(even) {
+  background-color: #f8fafc;
+}
+
+.blog-content tbody tr:hover {
+  background-color: #fcf7f6;
+}
+
+.blog-content tbody td {
+  padding: 0.75rem 1rem;
+  font-size: 0.8125rem;
+  color: #475569;
+  border-bottom: 1px solid #f1f5f9;
+  line-height: 1.5;
+}
+
+.blog-content tbody td:last-child {
+  background: rgba(201, 132, 132, 0.04);
+  font-weight: 700;
+  color: #C98484;
+  border-left: 1px solid #fed7aa;
+  border-right: 1px solid #fed7aa;
+  text-align: center;
+}
+
+.blog-content tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* SSS Soru Kartı Tasarımı (SSS sayfasındaki FaqContent ile birebir aynı) */
+.blog-content details.faq-accordion {
+  overflow: hidden;
+  border-radius: 0.875rem;
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  margin-bottom: 0.75rem;
+  transition: border-color 0.2s ease;
+}
+
+.blog-content details.faq-accordion:hover {
+  border-color: #fed7aa;
+}
+
+.blog-content details.faq-accordion summary {
+  display: flex !important;
+  cursor: pointer;
+  list-style: none !important;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.875rem 1.15rem;
+  font-size: 0.875rem;
+  font-weight: 750;
+  color: #0f172a;
+  user-select: none;
+}
+
+.blog-content details.faq-accordion summary::-webkit-details-marker {
+  display: none !important;
+}
+
+.blog-content details.faq-accordion summary::after {
+  content: "";
+  display: inline-block;
+  width: 0.875rem;
+  height: 0.875rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F25C05' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.blog-content details.faq-accordion[open] summary::after {
+  transform: rotate(180deg);
+}
+
+.blog-content details.faq-accordion .faq-body {
+  border-top: 1px solid #f1f5f9;
+  background-color: rgba(248, 250, 252, 0.75);
+  padding: 0.875rem 1.15rem;
+  font-size: 0.8125rem;
+  line-height: 1.65;
+  color: #475569;
+}
+
+.blog-content details.faq-accordion .faq-body p {
+  font-size: 0.8125rem;
+  line-height: 1.65;
+  color: #475569;
+  margin-bottom: 0.5rem;
+}
+
+.blog-content details.faq-accordion .faq-footer {
+  margin-top: 0.75rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid rgba(226, 232, 240, 0.7);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.blog-content details.faq-accordion .faq-footer-guarantee {
+  font-size: 0.6875rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.blog-content details.faq-accordion .faq-footer-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 0.625rem;
+  background-color: #fcf7f6;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 750;
+  color: #C98484;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.blog-content details.faq-accordion .faq-footer-link:hover {
+  background-color: #C98484;
+  color: #ffffff;
+}
+
+/* Shared order journey: subtle motion with an accessible reduced-motion fallback. */
+.order-journey { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: start; padding: 0.15rem 0; }
+.order-journey__rail { position: absolute; top: 1rem; left: 12.5%; right: 12.5%; height: 0.3rem; overflow: visible; border-radius: 999px; background: #e2e8f0; }
+.order-journey__progress { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #10b981, #059669); box-shadow: 0 0 12px rgb(16 185 129 / 24%); transition: width 700ms cubic-bezier(.22, 1, .36, 1); }
+.order-journey__traveller { position: absolute; top: -0.7rem; left: 62%; z-index: 2; display: grid; width: 1.75rem; height: 1.75rem; place-items: center; border: 3px solid white; border-radius: 0.65rem; color: white; background: #c98484; box-shadow: 0 5px 14px rgb(242 92 5 / 30%); animation: order-truck-float 1.8s ease-in-out infinite; }
+.order-journey__traveller svg, .order-journey__node svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-width: 2.25; stroke-linecap: round; stroke-linejoin: round; }
+.order-journey__step { position: relative; z-index: 3; display: flex; min-width: 0; flex-direction: column; align-items: center; gap: 0.3rem; text-align: center; }
+.order-journey__node { display: grid; width: 2rem; height: 2rem; place-items: center; border: 1px solid #e2e8f0; border-radius: 0.7rem; color: #94a3b8; background: #f1f5f9; box-shadow: 0 0 0 4px white; transition: transform 250ms ease, background-color 250ms ease, color 250ms ease; }
+.order-journey__node.is-reached { border-color: #059669; color: white; background: #059669; }
+.order-journey__node.is-active { border-color: #c98484; background: #c98484; box-shadow: 0 0 0 4px white, 0 6px 18px rgb(242 92 5 / 24%); animation: order-step-float 1.8s ease-in-out infinite; }
+.order-journey__step strong { font-size: 0.7rem; line-height: 1.2; font-weight: 750; color: #94a3b8; }
+.order-journey__step strong.is-reached { color: #0f172a; }
+.order-journey__step small { font-size: 0.625rem; font-weight: 650; color: #94a3b8; }
+.order-journey--compact .order-journey__rail { top: 0.875rem; }
+.order-journey--compact .order-journey__node { width: 1.75rem; height: 1.75rem; border-radius: 0.6rem; }
+.order-journey--compact .order-journey__traveller { top: -0.65rem; }
+.order-journey--compact .order-journey__step strong { font-size: 0.625rem; }
+@keyframes order-step-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@keyframes order-truck-float { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-3px) rotate(1deg); } }
+@media (prefers-reduced-motion: reduce) { .order-journey__progress { transition: none; } .order-journey__node.is-active, .order-journey__traveller { animation: none; } }
+
+
