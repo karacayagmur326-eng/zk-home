@@ -179,32 +179,12 @@ export default async function RootLayout({
 
   const organizationJsonLd = {
     "@context": "https://schema.org",
-    "@type": "HardwareStore",
+    "@type": "Organization",
     name: contact.company_name,
     alternateName: contact.brand_name,
     url: getCanonicalURL(),
     logo: `${getBaseURL()}/brand/zkhome-logo.svg`,
     image: `${getBaseURL()}/brand/zkhome-logo.svg`,
-    telephone: contact.phone,
-    email: contact.email,
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: contact.street_address,
-      addressLocality: contact.district,
-      addressRegion: contact.city,
-      postalCode: contact.postal_code || "34235",
-      addressCountry: "TR",
-    },
-    openingHoursSpecification: {
-      "@type": "OpeningHoursSpecification",
-      dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-      opens: "09:00",
-      closes: "18:00",
-    },
-    priceRange: "₺₺",
-    sameAs: [
-      "https://www.zk-home.com",
-    ],
   }
 
   return (

@@ -4,7 +4,6 @@ import { defaultFaqPageContent } from "@lib/content/knowledge-pages"
 import { getCanonicalURL } from "@lib/util/env"
 import PageHero from "../../../components/common/PageHero"
 import FaqContent from "./FaqContent"
-import { getContactInfo } from "@lib/content/contact-info"
 import { serializeJsonLd } from "@lib/security/html"
 
 export const metadata: Metadata = {
@@ -24,16 +23,13 @@ const removedQuestions = new Set([
 ])
 
 export default async function FaqPage() {
-  const [dbContent, contact] = await Promise.all([
-    query<{ content: Record<string, any> }>(
+  const dbContent = await query<{ content: Record<string, any> }>(
       "SELECT content FROM content_pages WHERE handle = 'sss' LIMIT 1"
-    ).then((rows) => rows[0]?.content || {}).catch((): Record<string, any> => ({})),
-    getContactInfo(),
-  ])
+    ).then((rows) => rows[0]?.content || {}).catch((): Record<string, any> => ({}))
 
   const replaceContactTokens = (value: string) => value
-    .replace(/info@zkhome\.com\.tr/gi, contact.email)
-    .replace(/0 \(543\) 797 6968/g, contact.phone)
+    .replace(/info@zkhome\.com\.tr/gi, "iletişim formu")
+    .replace(/0 \(543\) 797 6968/g, "iletişim formu")
 
   const content = {
     ...defaultFaqPageContent,
@@ -43,9 +39,6 @@ export default async function FaqPage() {
       ...item,
       answer: replaceContactTokens(String(item.answer || "")),
     })),
-    support_phone: dbContent.support_phone || contact.phone,
-    support_email: dbContent.support_email || contact.email,
-    support_address: dbContent.support_address || contact.full_address,
   }
 
   const faqItems = (content.faq_items || []).filter(

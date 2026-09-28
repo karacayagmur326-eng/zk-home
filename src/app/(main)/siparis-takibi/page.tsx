@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { ArrowRight, Box, Check, Clock3, Headphones, Mail, PackageCheck, Truck } from "lucide-react"
+import { ArrowRight, Box, Check, Clock3, Mail, PackageCheck, Truck } from "lucide-react"
 import PageHero from "../../../components/common/PageHero"
 import { query } from "@lib/admin/db"
 import OrderTrackingSearch from "./OrderTrackingSearch"
@@ -74,7 +74,7 @@ export default async function OrderTrackingPage() {
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs sm:p-7">
             <h2 className="text-base font-extrabold text-slate-900">{content.support_title || "Hızlı Destek"}</h2>
             <p className="mt-2 text-xs leading-5 text-slate-500">{content.support_description || "Siparişinizle ilgili farklı bir sorunuz mu var? Ekibimiz size yardımcı olmaktan memnuniyet duyar."}</p>
-            <div className="mt-5 grid gap-3 sm:grid-cols-2"><a href={`tel:${String(content.support_phone || "").replace(/\D/g, "")}`} className="flex items-center gap-3 rounded-xl bg-rose-50 p-4"><Headphones className="h-6 w-6 text-[#C98484]" /><span className="text-xs"><b className="block text-slate-900">{content.support_phone || ""}</b><span className="text-slate-500">Hafta içi 09:00–18:00</span></span></a><a href={`mailto:${content.support_email || ""}`} className="flex items-center gap-3 rounded-xl bg-slate-50 p-4"><Mail className="h-6 w-6 text-[#C98484]" /><span className="text-xs"><b className="block text-slate-900">{content.support_email || ""}</b><span className="text-slate-500">7/24 mesaj bırakın</span></span></a></div>
+            <Link href="/iletisim" className="mt-5 inline-flex items-center gap-3 rounded-xl bg-rose-50 p-4 text-sm font-bold text-slate-900 hover:bg-rose-100"><Mail className="h-6 w-6 text-[#C98484]" />İletişim formuna git <ArrowRight className="h-4 w-4" /></Link>
           </div>
         </section>
       </div>

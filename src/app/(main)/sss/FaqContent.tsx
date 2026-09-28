@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react"
 import Link from "next/link"
-import { ArrowRight, ChevronDown, Headphones, Mail, Package, Phone, Search, MapPin, ExternalLink } from "lucide-react"
+import { ArrowRight, ChevronDown, Headphones, Mail, Package, Search } from "lucide-react"
 import { AppIcon } from "@lib/icons"
 import { SellerQuestionButton } from "@components/common/SellerQuestion"
 import type { FaqCategory, FaqEntry } from "@lib/content/knowledge-pages"
@@ -48,13 +48,6 @@ export default function FaqContent({ content }: { content: Record<string, any> }
   const paginatedItems = useMemo(() => {
     return filteredItems.slice(0, visibleCount)
   }, [filteredItems, visibleCount])
-
-  const rawPhone = String(content.support_phone || "")
-  const telHref = `tel:${rawPhone.replace(/\D/g, "")}`
-  const supportEmail = String(content.support_email || "")
-  const mailtoHref = `mailto:${supportEmail}`
-  const mapAddress = String(content.support_address || "")
-  const mapUrl = `https://maps.google.com/?q=${encodeURIComponent(mapAddress)}`
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
@@ -253,46 +246,10 @@ export default function FaqContent({ content }: { content: Record<string, any> }
             {content.support_description || "Cevabını bulamadığınız sorular için bize ulaşabilirsiniz."}
           </p>
 
-          <div className="mt-4 space-y-3 sm:space-y-4">
-            {/* Interactive Phone Link */}
-            <a
-              href={telHref}
-              className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/50 p-3 transition hover:border-rose-200 hover:bg-rose-50/50"
-            >
-              <Phone className="h-5 w-5 text-[#C98484] shrink-0" />
-              <span className="text-xs">
-                <b className="block text-slate-900 text-sm">{rawPhone}</b>
-                <span className="text-slate-500">Mobil arama başlatmak için tıklayın</span>
-              </span>
-            </a>
-
-            {/* Interactive Email Link */}
-            <a
-              href={mailtoHref}
-              className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/50 p-3 transition hover:border-rose-200 hover:bg-rose-50/50"
-            >
-              <Mail className="h-5 w-5 text-[#C98484] shrink-0" />
-              <span className="text-xs">
-                <b className="block text-slate-900 text-sm">{supportEmail}</b>
-                <span className="text-slate-500">E-posta göndermek için tıklayın</span>
-              </span>
-            </a>
-
-            {/* Interactive Google Maps Address Link */}
-            <a
-              href={mapUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-start gap-3 rounded-xl border border-slate-100 bg-slate-50/50 p-3 transition hover:border-rose-200 hover:bg-rose-50/50"
-            >
-              <MapPin className="h-5 w-5 text-[#C98484] shrink-0 mt-0.5" />
-              <span className="text-xs">
-                <b className="block text-slate-900 font-bold mb-0.5 flex items-center gap-1">
-                  Mağaza & Genel Merkez <ExternalLink className="h-3 w-3 text-slate-400" />
-                </b>
-                <span className="text-slate-600 leading-4 block">{mapAddress}</span>
-              </span>
-            </a>
+          <div className="mt-4">
+            <Link href="/iletisim" className="flex items-center justify-center gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm font-bold text-[#C98484] transition hover:bg-rose-100">
+              <Mail className="h-5 w-5" /> İletişim formuna git
+            </Link>
           </div>
         </section>
 
