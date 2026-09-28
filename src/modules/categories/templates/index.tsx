@@ -459,7 +459,6 @@ export default async function CategoryTemplate({
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
                   {children.map((child) => {
                     const childMetadata = metadataOf(child)
-                    const grandchildren = Array.isArray(child.category_children) ? child.category_children : []
                     const cardImageUrl = imageValue(
                       childMetadata,
                       "card_image_url",
@@ -545,31 +544,6 @@ export default async function CategoryTemplate({
                             </span>
                           </div>
                         </LocalizedClientLink>
-                        {grandchildren.length > 0 && (
-                          <ul className="mx-3 mb-2 space-y-0.5 border-t border-[#eee5e1] pt-2" aria-label={`${child.name} alt kategorileri`}>
-                            {grandchildren.slice(0, 2).map((grandchild) => (
-                              <li key={grandchild.id}>
-                                <LocalizedClientLink
-                                  href={categoryPath(grandchild)}
-                                  className="flex items-center justify-between gap-2 rounded-md px-1.5 py-1.5 text-xs font-medium text-[#655b58] transition-colors hover:bg-[#fbf4f1] hover:text-[#a45d5f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C98484]"
-                                >
-                                  <span>{grandchild.name}</span>
-                                  <ChevronRight aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-[#bd7779]" />
-                                </LocalizedClientLink>
-                              </li>
-                            ))}
-                            {grandchildren.length > 2 && (
-                              <li>
-                                <LocalizedClientLink
-                                  href={categoryPath(child)}
-                                  className="block rounded-md px-1.5 py-1 text-xs font-semibold text-[#bd6f72] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C98484]"
-                                >
-                                  +{grandchildren.length - 2} alt kategori
-                                </LocalizedClientLink>
-                              </li>
-                            )}
-                          </ul>
-                        )}
                       </div>
                     )
                   })}
