@@ -167,7 +167,6 @@ export const defaultMobileSettings: MobileSettings = {
     noticeDescription: "Güncel kargo ve teslimat bilgilerinize ulaşın.",
     menuItems: [
       item("account-orders", "Siparişlerim", "PackageCheck", "/hesabim/siparislerim"),
-      item("account-service", "Servis Taleplerim", "Wrench", "/garanti-ve-teknik-servis"),
       item("account-favorites", "Favorilerim", "Heart", "/hesabim/favorilerim"),
       item("account-history", "Son Gezilenler", "History", "/son-gezdiklerim"),
       item("account-collections", "Koleksiyonlarım", "FolderHeart", "/koleksiyonlarim"),
@@ -210,7 +209,13 @@ const merge = (stored: Partial<MobileSettings>): MobileSettings => ({
   favorites: { ...defaultMobileSettings.favorites, ...(stored.favorites || {}) },
   history: { ...defaultMobileSettings.history, ...(stored.history || {}) },
   collections: { ...defaultMobileSettings.collections, ...(stored.collections || {}) },
-  account: { ...defaultMobileSettings.account, ...(stored.account || {}) },
+  account: {
+    ...defaultMobileSettings.account,
+    ...(stored.account || {}),
+    menuItems: (stored.account?.menuItems || defaultMobileSettings.account.menuItems).filter(
+      (entry) => entry.id !== "account-service" && entry.href !== "/garanti-ve-teknik-servis",
+    ),
+  },
   cart: { ...defaultMobileSettings.cart, ...(stored.cart || {}) },
   slides: (Array.isArray(stored.slides) ? stored.slides : defaultMobileSettings.slides).map((slide) => ({
     ...slide,
