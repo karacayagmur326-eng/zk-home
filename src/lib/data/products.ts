@@ -38,6 +38,14 @@ export const listProducts = async ({
   nextPage: number | null
   queryParams?: ProductListQueryParams
 }> => {
+  if (process.env.NODE_ENV === "production" && !process.env.DATABASE_URL) {
+    return {
+      response: { products: [], count: 0 },
+      nextPage: null,
+      queryParams,
+    }
+  }
+
   const limit = Number(queryParams?.limit || 12)
   const page = Math.max(pageParam, 1)
   const offset =
@@ -91,6 +99,9 @@ export const listProducts = async ({
 }
 
 export async function retrieveProduct(idOrHandle: string) {
+  if (process.env.NODE_ENV === "production" && !process.env.DATABASE_URL) {
+    return null
+  }
   return (await getStoreProduct(idOrHandle)) as
     | HttpTypes.StoreProduct
     | null

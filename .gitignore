@@ -25,3 +25,22 @@ public/uploads/
 Thumbs.db
 .idea/
 .vscode/
+
+# Local-only project material: never publish to GitHub or Vercel
+/AGENTS.md
+/.githooks/
+/README.md
+/docs/
+/migrations/
+/scripts/
+/strat-zk-home.cmd
+/e-ticaret-kategori-seo-codex-v2.md
+/.env.example
+/.eslintrc.json
+/.prettierrc.json
+/next-sitemap.js
+/typography-check.png
+/public/category-images/*.png
+/public/hero/zkhome-panorama-v3.png
+/public/editorial/article-holiday-table.png
+/public/editorial/article-winter-home.png
