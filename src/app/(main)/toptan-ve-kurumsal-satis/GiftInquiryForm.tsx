@@ -17,6 +17,7 @@ export default function GiftInquiryForm() {
     const message = [
       `Kurum: ${data.get("company") || "Belirtilmedi"}`,
       `Etkinlik: ${data.get("occasion") || "Belirtilmedi"}`,
+      `İlgilenilen örnek: ${data.get("example") || "Belirtilmedi"}`,
       `Tahmini adet: ${data.get("quantity") || "Belirtilmedi"}`,
       `Bütçe aralığı: ${data.get("budget") || "Belirtilmedi"}`,
       `Tercihler: ${data.get("preferences") || "Belirtilmedi"}`,
@@ -50,6 +51,15 @@ export default function GiftInquiryForm() {
       <label className="text-sm font-medium text-slate-700">E-posta *<input name="email" required type="email" maxLength={254} className={`mt-2 ${field}`} /></label>
       <label className="text-sm font-medium text-slate-700">Telefon<input name="phone" type="tel" maxLength={40} className={`mt-2 ${field}`} /></label>
       <label className="text-sm font-medium text-slate-700">Özel gün / etkinlik<input name="occasion" placeholder="Örn. yılbaşı" maxLength={100} className={`mt-2 ${field}`} /></label>
+      <label className="text-sm font-medium text-slate-700">İlgilendiğiniz hediye örneği
+        <select name="example" defaultValue="" className={`mt-2 ${field}`}>
+          <option value="">Henüz karar vermedim</option>
+          <option value="Yeni yıl kutuları">Yeni yıl kutuları</option>
+          <option value="Kitap biçimli hediye kutuları">Kitap biçimli hediye kutuları</option>
+          <option value="Dekoratif sunum hediyeleri">Dekoratif sunum hediyeleri</option>
+          <option value="Kendi hediye fikrim">Kendi hediye fikrim</option>
+        </select>
+      </label>
       <label className="text-sm font-medium text-slate-700">Tahmini adet<input name="quantity" type="number" min="1" className={`mt-2 ${field}`} /></label>
       <label className="text-sm font-medium text-slate-700 sm:col-span-2">Tahmini bütçe aralığı<input name="budget" placeholder="Örn. kişi başı bütçe" maxLength={100} className={`mt-2 ${field}`} /></label>
       <label className="text-sm font-medium text-slate-700 sm:col-span-2">Hediye tercihleri ve notlar *<textarea name="preferences" required minLength={5} maxLength={4000} rows={5} placeholder="Ürün türü, renk, teslim zamanı veya başka tercihleriniz" className={`mt-2 ${field}`} /></label>
