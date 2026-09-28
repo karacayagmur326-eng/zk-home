@@ -1,15 +1,14 @@
 import { HttpTypes } from "@medusajs/types"
 import { listStoreCategories } from "@lib/commerce/repository"
+import { isDatabaseReachable } from "@lib/admin/db"
 import { getFallbackCategories } from "./category-fallback"
 
 const getPublicCategories = async () => {
   try {
     const categories = await listStoreCategories(true)
-    if (categories.length || process.env.DATABASE_URL) return categories
+    if (categories.length || await isDatabaseReachable()) return categories
   } catch (error) {
-    if (process.env.DATABASE_URL) {
-      console.error("Kategoriler yüklenemedi:", error)
-    }
+    console.error("Kategoriler yüklenemedi:", error)
   }
   return getFallbackCategories()
 }

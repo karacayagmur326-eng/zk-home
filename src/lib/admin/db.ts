@@ -39,6 +39,15 @@ export function getDb() {
   return global._pgPool
 }
 
+export async function isDatabaseReachable(): Promise<boolean> {
+  try {
+    await getDb().query("SELECT 1")
+    return true
+  } catch {
+    return false
+  }
+}
+
 export async function query<T = Record<string, unknown>>(
   sql: string,
   params: unknown[] = []

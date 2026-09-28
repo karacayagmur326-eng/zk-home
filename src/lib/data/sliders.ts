@@ -1,6 +1,6 @@
 "use server"
 
-import { query } from "@lib/admin/db"
+import { isDatabaseReachable, query } from "@lib/admin/db"
 import { normalizePublicImageUrl } from "@lib/security/public-assets"
 
 const fallbackSlider = {
@@ -30,7 +30,8 @@ export async function listActiveSliders(): Promise<any[]> {
      WHERE deleted_at IS NULL AND is_active=TRUE
      ORDER BY order_index ASC, created_at DESC`,
   ).catch(() => null)
-  if (!rows || (!rows.length && !process.env.DATABASE_URL)) {
+  if (!rows?.length) {
+    if (rows && await isDatabaseReachable()) return []
     return [fallbackSlider]
   }
   return rows.map(({ image_url_light: legacyLightImage, ...slider }) => ({
