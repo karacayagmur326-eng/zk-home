@@ -235,10 +235,10 @@ export default function MasterContactForm({
               className="w-full bg-slate-50/70 border border-slate-200 rounded-2xl px-4 py-3 text-xs text-slate-900 font-bold focus:outline-none focus:border-[#C98484] focus:bg-white transition"
             >
               <option value="Genel Bilgi & Danışma">Genel Bilgi & Danışma</option>
-              <option value="Toptan Satış & Kurumsal">Toptan Satış & Kurumsal</option>
+              <option value="Kurumsal Hediye Talebi">Kurumsal Hediye Talebi</option>
               <option value="Sipariş & Teslimat">Sipariş & Teslimat</option>
               <option value="İade & Değişim">İade & Değişim</option>
-              <option value="Teknik Destek & Garanti">Teknik Destek & Garanti</option>
+              <option value="Ürün ve Sipariş Desteği">Ürün ve Sipariş Desteği</option>
               <option value="Diğer">Diğer</option>
             </select>
           </div>
