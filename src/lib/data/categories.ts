@@ -1,8 +1,21 @@
 import { HttpTypes } from "@medusajs/types"
 import { listStoreCategories } from "@lib/commerce/repository"
+import { getFallbackCategories } from "./category-fallback"
+
+const getPublicCategories = async () => {
+  try {
+    const categories = await listStoreCategories(true)
+    if (categories.length || process.env.DATABASE_URL) return categories
+  } catch (error) {
+    if (process.env.DATABASE_URL) {
+      console.error("Kategoriler yüklenemedi:", error)
+    }
+  }
+  return getFallbackCategories()
+}
 
 export const listCategories = async (options?: Record<string, unknown>) => {
-  const categories = await listStoreCategories(true)
+  const categories = await getPublicCategories()
   const handle = options?.handle
   const filtered = handle
     ? categories.filter((category) => category.handle === handle)
@@ -36,7 +49,7 @@ export const filterActiveCategories = <
 
 export const getCategoryByHandle = async (categoryHandle: string[]) => {
   const handle = categoryHandle.join("/")
-  const categories = await listStoreCategories(true)
+  const categories = await getPublicCategories()
   const category = categories.find((item) => item.handle === handle)
   if (!category) return undefined
   let parentId = category.parent_category_id
