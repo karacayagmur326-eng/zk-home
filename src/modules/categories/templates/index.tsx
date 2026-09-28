@@ -223,13 +223,6 @@ export default async function CategoryTemplate({
     "hero_object_position",
     "center",
   )
-  const childCardColumns = numberValue(
-    metadata,
-    "child_card_columns",
-    3,
-    3,
-    4,
-  )
   const childCardImageWidth = numberValue(
     metadata,
     "child_card_image_width",
@@ -244,11 +237,7 @@ export default async function CategoryTemplate({
     40,
     140,
   )
-  const childCardImageFit = textValue(
-    metadata,
-    "child_card_image_fit",
-    "cover",
-  )
+  const childCardImageSize = Math.min(childCardImageWidth, childCardImageHeight, 104)
   const features = itemList(
     metadata,
     "hero_features",
@@ -482,7 +471,7 @@ export default async function CategoryTemplate({
                   </a>
                 </div>
 
-                <div className={`grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 ${childCardColumns === 4 ? "2xl:grid-cols-4" : ""}`}>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
                   {children.map((child) => {
                     const childMetadata = metadataOf(child)
                     const grandchildren = Array.isArray(child.category_children) ? child.category_children : []
@@ -520,7 +509,7 @@ export default async function CategoryTemplate({
                     return (
                       <div
                         key={child.id}
-                        className="group min-w-0 rounded-xl border border-[#eee9e5] bg-white shadow-[0_4px_16px_rgba(99,71,61,0.04)] transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-[#dfb9b5] hover:shadow-[0_10px_24px_rgba(99,71,61,0.10)]"
+                        className="group flex min-w-0 flex-col rounded-xl border border-[#eee9e5] bg-white shadow-[0_4px_16px_rgba(99,71,61,0.04)] transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-[#dfb9b5] hover:shadow-[0_10px_24px_rgba(99,71,61,0.10)]"
                       >
                         <LocalizedClientLink
                           href={categoryPath(child)}
@@ -528,7 +517,7 @@ export default async function CategoryTemplate({
                         >
                           <div
                             className="relative flex max-w-[44%] shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#f5efeb]"
-                            style={{ width: childCardImageWidth, height: childCardImageHeight }}
+                            style={{ width: childCardImageSize, height: childCardImageSize }}
                           >
                             {cardImageUrl ? (
                               cardImageUrl.startsWith("/") ? (
@@ -536,17 +525,17 @@ export default async function CategoryTemplate({
                                   src={cardImageUrl}
                                   alt=""
                                   fill
-                                  sizes="(max-width: 639px) 40vw, 145px"
+                                  sizes="104px"
                                   quality={75}
-                                  className={`${childCardImageFit === "contain" ? "object-contain" : "object-cover"} transition-transform duration-300 group-hover:scale-[1.04]`}
+                                  className="object-contain transition-transform duration-300 group-hover:scale-[1.04]"
                                 />
                               ) : (
                                 <SafeImage
                                   src={cardImageUrl}
                                   alt=""
-                                  width={childCardImageWidth}
-                                  height={childCardImageHeight}
-                                  className={`h-full w-full ${childCardImageFit === "contain" ? "object-contain" : "object-cover"} transition-transform duration-300 group-hover:scale-[1.04]`}
+                                  width={childCardImageSize}
+                                  height={childCardImageSize}
+                                  className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.04]"
                                 />
                               )
                             ) : (
@@ -574,7 +563,7 @@ export default async function CategoryTemplate({
                         </LocalizedClientLink>
                         {grandchildren.length > 0 && (
                           <ul className="mx-3 mb-2 space-y-0.5 border-t border-[#eee5e1] pt-2" aria-label={`${child.name} alt kategorileri`}>
-                            {grandchildren.map((grandchild) => (
+                            {grandchildren.slice(0, 2).map((grandchild) => (
                               <li key={grandchild.id}>
                                 <LocalizedClientLink
                                   href={categoryPath(grandchild)}
@@ -585,6 +574,16 @@ export default async function CategoryTemplate({
                                 </LocalizedClientLink>
                               </li>
                             ))}
+                            {grandchildren.length > 2 && (
+                              <li>
+                                <LocalizedClientLink
+                                  href={categoryPath(child)}
+                                  className="block rounded-md px-1.5 py-1 text-xs font-semibold text-[#bd6f72] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C98484]"
+                                >
+                                  +{grandchildren.length - 2} alt kategori
+                                </LocalizedClientLink>
+                              </li>
+                            )}
                           </ul>
                         )}
                       </div>

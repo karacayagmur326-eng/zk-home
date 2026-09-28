@@ -88,10 +88,10 @@ const defaultCategoryDesign = (): CategoryDesignForm => ({
   badgeIcon: "check",
   titleSize: 42,
   titleSizeMobile: 32,
-  childCardColumns: 3,
+  childCardColumns: 4,
   childCardImageWidth: 145,
   childCardImageHeight: 120,
-  childCardImageFit: "cover",
+  childCardImageFit: "contain",
   cardImageUrl: "",
   cardTitle: "",
   cardDescription: "",
@@ -478,10 +478,10 @@ export default function CategoriesPage() {
       badge_icon: design.badgeIcon || "check",
       title_size: design.titleSize,
       title_size_mobile: design.titleSizeMobile,
-      child_card_columns: design.childCardColumns,
+      child_card_columns: 4,
       child_card_image_width: design.childCardImageWidth,
       child_card_image_height: design.childCardImageHeight,
-      child_card_image_fit: design.childCardImageFit,
+      child_card_image_fit: "contain",
       card_image_url: design.cardImageUrl,
       card_title: (design.cardTitle || name).trim(),
       card_description: design.cardDescription.trim(),
@@ -1033,10 +1033,10 @@ export default function CategoriesPage() {
             badge_icon: d.design.badgeIcon || "check",
             title_size: d.design.titleSize,
             title_size_mobile: d.design.titleSizeMobile,
-            child_card_columns: d.design.childCardColumns,
+            child_card_columns: 4,
             child_card_image_width: d.design.childCardImageWidth,
             child_card_image_height: d.design.childCardImageHeight,
-            child_card_image_fit: d.design.childCardImageFit,
+            child_card_image_fit: "contain",
             card_image_url: d.design.cardImageUrl,
             card_title: (d.design.cardTitle || d.name).trim(),
             card_description: d.design.cardDescription.trim(),
@@ -2295,82 +2295,8 @@ export default function CategoriesPage() {
                             Alt Kategori Kartlarının Ortak Tasarımı
                           </h4>
                           <p className="text-[10px] text-slate-500">
-                            Bu ana kategorinin bütün alt kategori kartlarına uygulanır.
+                            Masaüstünde dört kart yan yana görünür. Görseller kare alana kırpılmadan sığdırılır.
                           </p>
-                        </div>
-                        <div className="grid grid-cols-2 gap-3">
-                          <label className="space-y-1">
-                            <span className="block text-[10px] font-bold text-slate-600">
-                              Sütun Sayısı
-                            </span>
-                            <select
-                              value={design.childCardColumns}
-                              onChange={(event) =>
-                                setDesign((current) => ({
-                                  ...current,
-                                  childCardColumns: Number(event.target.value),
-                                }))
-                              }
-                              className="w-full rounded-lg border border-slate-300 bg-white px-2 py-2 text-xs"
-                            >
-                              <option value={3}>3 sütun</option>
-                              <option value={4}>4 sütun</option>
-                            </select>
-                          </label>
-                          <label className="space-y-1">
-                            <span className="block text-[10px] font-bold text-slate-600">
-                              Görsel Yerleşimi
-                            </span>
-                            <select
-                              value={design.childCardImageFit}
-                              onChange={(event) =>
-                                setDesign((current) => ({
-                                  ...current,
-                                  childCardImageFit: event.target.value,
-                                }))
-                              }
-                              className="w-full rounded-lg border border-slate-300 bg-white px-2 py-2 text-xs"
-                            >
-                              <option value="contain">Tamamını göster</option>
-                              <option value="cover">Alanı doldur</option>
-                            </select>
-                          </label>
-                          <label className="space-y-1">
-                            <span className="block text-[10px] font-bold text-slate-600">
-                              Görsel Genişliği
-                            </span>
-                            <input
-                              type="number"
-                              min={80}
-                              max={240}
-                              value={design.childCardImageWidth}
-                              onChange={(event) =>
-                                setDesign((current) => ({
-                                  ...current,
-                                  childCardImageWidth: Number(event.target.value),
-                                }))
-                              }
-                              className="w-full rounded-lg border border-slate-300 px-2 py-2 text-xs"
-                            />
-                          </label>
-                          <label className="space-y-1">
-                            <span className="block text-[10px] font-bold text-slate-600">
-                              Görsel Yüksekliği
-                            </span>
-                            <input
-                              type="number"
-                              min={80}
-                              max={200}
-                              value={design.childCardImageHeight}
-                              onChange={(event) =>
-                                setDesign((current) => ({
-                                  ...current,
-                                  childCardImageHeight: Number(event.target.value),
-                                }))
-                              }
-                              className="w-full rounded-lg border border-slate-300 px-2 py-2 text-xs"
-                            />
-                          </label>
                         </div>
                       </div>
                     )}
