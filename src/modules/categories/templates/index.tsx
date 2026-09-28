@@ -223,21 +223,6 @@ export default async function CategoryTemplate({
     "hero_object_position",
     "center",
   )
-  const childCardImageWidth = numberValue(
-    metadata,
-    "child_card_image_width",
-    74,
-    40,
-    140,
-  )
-  const childCardImageHeight = numberValue(
-    metadata,
-    "child_card_image_height",
-    68,
-    40,
-    140,
-  )
-  const childCardImageSize = Math.min(childCardImageWidth, childCardImageHeight, 104)
   const features = itemList(
     metadata,
     "hero_features",
@@ -516,8 +501,7 @@ export default async function CategoryTemplate({
                           className="flex min-w-0 items-center gap-3 p-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C98484]"
                         >
                           <div
-                            className="relative flex max-w-[44%] shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#f5efeb]"
-                            style={{ width: childCardImageSize, height: childCardImageSize }}
+                            className="relative flex aspect-square w-[44%] max-w-[104px] shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#f5efeb]"
                           >
                             {cardImageUrl ? (
                               cardImageUrl.startsWith("/") ? (
@@ -533,8 +517,8 @@ export default async function CategoryTemplate({
                                 <SafeImage
                                   src={cardImageUrl}
                                   alt=""
-                                  width={childCardImageSize}
-                                  height={childCardImageSize}
+                                  width={104}
+                                  height={104}
                                   className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.04]"
                                 />
                               )
