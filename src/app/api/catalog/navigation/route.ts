@@ -24,7 +24,7 @@ export async function GET() {
     ? kurumsalMenu.items
     : [
         { label: "Hakkımızda", url: "/hakkimizda" },
-        { label: "Toptan ve Kurumsal Satış", url: "/toptan-ve-kurumsal-satis" },
+        { label: "Kurumsal Hediyeler", url: "/toptan-ve-kurumsal-satis" },
         { label: "Markalarımız", url: "/magaza" },
         { label: "Ürün Rehberi ve Makaleler", url: "/blog" },
       ]
@@ -35,14 +35,9 @@ export async function GET() {
         { label: "İletişim", url: "/iletisim" },
         { label: "Sık Sorulan Sorular", url: "/sss" },
         { label: "Teslimat, İptal ve İade", url: "/teslimat-ve-iade" },
-        { label: "Garanti ve Teknik Servis", url: "/garanti-ve-teknik-servis" },
         { label: "Sipariş Takibi", url: "/siparis-takibi" },
       ]
-  const musteriItems = rawMusteriItems.map((item: any) =>
-    item.id === "fm4" || item.label === "Garanti ve Teknik Servis"
-      ? { ...item, url: "/garanti-ve-teknik-servis" }
-      : item
-  )
+  const musteriItems = rawMusteriItems.filter((item: any) => item.url !== "/garanti-ve-teknik-servis" && item.label !== "Garanti ve Teknik Servis" && item.id !== "fm4")
 
   const yasalItems = yasalMenu?.items?.length
     ? yasalMenu.items
@@ -60,7 +55,7 @@ export async function GET() {
       collections,
       kurumsal: {
         title: (themeSettings?.footer_col2_title as string) || "KURUMSAL",
-        items: kurumsalItems,
+        items: kurumsalItems.map((item: any) => item.url === "/toptan-ve-kurumsal-satis" ? { ...item, label: "Kurumsal Hediyeler" } : item),
       },
       musteri: {
         title: (themeSettings?.footer_col3_title as string) || "MÜŞTERİ HİZMETLERİ",
@@ -71,7 +66,7 @@ export async function GET() {
         items: yasalItems,
       },
       sidebarMenu,
-      supportPhone: (themeSettings?.contact_phone as string) || "[Telefon yönetim panelinden eklenecektir]",
+      supportPhone: process.env.NEXT_PUBLIC_CONTACT_PHONE || "",
     },
     {
       headers: {

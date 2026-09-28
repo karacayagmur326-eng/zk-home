@@ -43,7 +43,7 @@ export default function MobileSiteChrome({ settings, logoUrl }: { settings: Mobi
     title: "KURUMSAL",
     items: [
       { label: "Hakkımızda", url: "/hakkimizda" },
-      { label: "Toptan ve Kurumsal Satış", url: "/toptan-ve-kurumsal-satis" },
+      { label: "Kurumsal Hediyeler", url: "/toptan-ve-kurumsal-satis" },
       { label: "Markalarımız", url: "/magaza" },
       { label: "Ürün Rehberi ve Makaleler", url: "/blog" },
     ],
@@ -54,7 +54,6 @@ export default function MobileSiteChrome({ settings, logoUrl }: { settings: Mobi
       { label: "İletişim", url: "/iletisim" },
       { label: "Sık Sorulan Sorular", url: "/sss" },
       { label: "Teslimat, İptal ve İade", url: "/teslimat-ve-iade" },
-      { label: "Garanti ve Teknik Servis", url: "/garanti-ve-teknik-servis" },
       { label: "Sipariş Takibi", url: "/siparis-takibi" },
     ],
   })
@@ -68,7 +67,7 @@ export default function MobileSiteChrome({ settings, logoUrl }: { settings: Mobi
       { label: "Çerez Politikası", url: "/cerez-politikasi" },
     ],
   })
-  const [supportPhone, setSupportPhone] = useState("0850 303 00 47")
+  const [supportPhone, setSupportPhone] = useState("")
 
   // Collapsible accordion states in drawer
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
@@ -450,7 +449,7 @@ export default function MobileSiteChrome({ settings, logoUrl }: { settings: Mobi
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider">Müşteri Destek</p>
-                  <p className="text-xs font-black text-slate-900">{supportPhone}</p>
+                  <p className="text-xs font-black text-slate-900">{supportPhone || "İletişim formu"}</p>
                 </div>
                 <SellerQuestionButton
                   onClick={() => setMenuOpen(false)}

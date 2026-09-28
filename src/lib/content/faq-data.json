@@ -6,12 +6,10 @@
         ["Yemek takımı alırken nelere dikkat edilmeli?", "Önce kaç kişilik bir takım gerektiğini ve günlük kullanım mı misafir sofrası mı kuracağınızı belirleyin. Ardından parça içeriğini, tabak ölçülerini, malzemeyi ve ürünün kendi bakım talimatını karşılaştırın."],
         ["6 kişilik yemek takımı kaç parçadan oluşur?", "6 kişilik takımların parça sayısı modele göre değişir. Örneğin 24 parçalık bir takımda kişi başı servis tabağı, çukur tabak, tatlı tabağı ve kase bulunabilir; satın almadan önce ürün içeriğini kontrol edin."],
         ["12 kişilik yemek takımı kimler için uygundur?", "Kalabalık aileler ve sık misafir ağırlayanlar için 12 kişilik takım pratik olabilir. Saklama alanınız sınırlıysa daha küçük bir günlük takım ve ihtiyacınıza göre tamamlayıcı parçalar da düşünebilirsiniz."],
-        ["Porselen ve stoneware yemek takımı arasındaki fark nedir?", "Porselen genellikle daha ince ve zarif bir görünüm sunar; stoneware ise doğal dokulu, daha tok bir sofra etkisi verir. Dayanıklılık ve kullanım özellikleri ürünün üretimine bağlı olduğundan açıklamayı inceleyin."],
         ["Günlük kullanım için hangi yemek takımı seçilmeli?", "Günlük kullanımda kolay temizlenen, rahat istiflenen ve mevcut sofranızla uyumlu parçalar işinizi kolaylaştırır. Bulaşık makinesi uygunluğu gibi bakım bilgilerini ürün bazında kontrol edin."],
         ["Çeyizlik yemek takımı kaç kişilik olmalı?", "Bu seçim evdeki kişi sayısına, misafir sıklığına ve dolap alanına bağlıdır. Sık davet veriyorsanız 12 kişilik; daha esnek bir başlangıç istiyorsanız 6 kişilik takım ve ek servis parçaları tercih edebilirsiniz."],
         ["Yemek takımı parçaları tek tek tamamlanabilir mi?", "Bazı koleksiyonlarda tabak, kase veya servis parçaları ayrı satılır; her seride stok ve uyumluluk aynı değildir. Takımın seri adı, renk tonu ve ölçüsünü eşleştirerek ürün sayfalarını kontrol edin."],
         ["Yemek takımı bulaşık makinesinde yıkanır mı?", "Her takım için tek bir kural yoktur. Altın veya metal detaylı, özel sırlı ya da elde boyanmış ürünlerde bakım farklılaşabilir; ürün sayfasındaki ve ambalajdaki talimatı esas alın."],
-        ["Mikrodalgaya uygun yemek takımı nasıl anlaşılır?", "Mikrodalga uygunluğu yalnızca malzeme adına bakılarak kesinleştirilemez. Ürünün açıklamasında veya alt işaretinde açık bir uygunluk bilgisi arayın; metal yaldızlı parçaları özellikle kontrol edin."],
         ["Yemek takımı rengini sofra dekorasyonuna göre nasıl seçerim?", "Beyaz ve nötr tonlar farklı masa örtüsü ve aksesuarlarla kolay eşleşir. Renkli bir takım seçiyorsanız mevcut bardak, çatal bıçak ve servis parçalarıyla birlikte görünümünü düşünün."]
       ]
     },
@@ -24,7 +22,6 @@
         ["Kahvaltı sofrasında hangi servis ürünleri kullanılır?", "Tabak ve kaselere ek olarak peynirlik, reçellik, servis tabağı ve tepsi düzen kurmayı kolaylaştırır. İhtiyaç duyduğunuz parçaları sofradaki kişi sayısına göre seçin."],
         ["Servis tabağı ile yemek tabağı arasındaki fark nedir?", "Yemek tabağı kişisel porsiyon için kullanılır; servis tabağı ortak yiyecekleri sofraya taşımak veya sunmak içindir. İkisini seçerken çap ve masa üzerindeki alanı karşılaştırın."],
         ["Sunum tepsisi seçerken hangi ölçüye bakılmalı?", "Tepsinin dış ölçüsü kadar kullanılabilir iç yüzeyi ve taşıyacağınız fincan ya da tabakların taban ölçüleri önemlidir. Saplı bir model alıyorsanız dolapta kaplayacağı alanı da kontrol edin."],
-        ["Ahşap servis ürünleri nasıl temizlenir?", "Ahşap ürünleri uzun süre suda bekletmeden, yumuşak bir bezle temizleyip tamamen kurutmak genellikle uygundur. Yağlama veya makine kullanımı için ürünün kendi bakım talimatına uyun."],
         ["Cam servis ürünleri sıcak yiyeceğe uygun mudur?", "Her cam ürün ısıya dayanıklı değildir. Sıcak servis veya fırın kullanımı düşünüyorsanız açıklamada açıkça belirtilen ısı uygunluğunu ve sıcaklık sınırını kontrol edin."],
         ["Kahvaltı takımına uygun tepsi nasıl seçilir?", "Takımın renk ve malzemesini tamamlayan bir tepsi görünümü bütünler. Bir arada taşınacak parça sayısını ölçerek tepsinin iç yüzeyinde yeterli boşluk kaldığından emin olun."],
         ["Servis ve sunum ürünleri hediye olarak alınır mı?", "Sunum tabağı, tepsi ve kaseler ev hediyesi için sık tercih edilen seçeneklerdir. Alıcının evindeki renkleri ve kullanım alışkanlığını biliyorsanız daha isabetli bir seçim yapabilirsiniz."]
@@ -67,7 +64,6 @@
         ["Çubuklu oda kokusu nasıl kullanılır?", "Çubukları ürünün talimatına göre şişeye yerleştirin ve düz, korunaklı bir yüzey seçin. Dökülme ihtimali nedeniyle hassas mobilya yüzeyleri ve çocukların erişebileceği alanlardan uzak tutun."],
         ["Çubuklu oda kokusu ne kadar dayanır?", "Kullanım süresi şişe hacmine, çubuk sayısına, hava akımına ve ortam sıcaklığına göre değişir. Kesin süre için ürünün açıklamasında verilen bilgiyi esas alın."],
         ["Kokulu mum alırken nelere bakılmalı?", "Koku notaları, kap ölçüsü, yanma süresi ve bakım bilgilerini karşılaştırın. Mumu düz ve ısıya dayanıklı bir yüzeyde, gözetim altında kullanın."],
-        ["Mum nasıl güvenli kullanılır?", "Yanan mumu gözetimsiz bırakmayın; yanıcı eşyalardan ve çocukların erişiminden uzak tutun. Fitil ve kullanım süresi konusunda ürün etiketindeki talimatlara uyun."],
         ["Küçük odalar için hangi oda kokusu uygundur?", "Küçük alanlarda daha hafif koku yoğunluğu veya daha az çubuk tercih edebilirsiniz; ürünün kullanım önerisi önceliklidir. İlk kullanımda kokuyu kısa süre gözlemleyerek ayarlayın."],
         ["Mum ile oda kokusu birlikte kullanılır mı?", "Birlikte kullanılabilir; ancak yoğun kokuların karışması rahatsız edici olabilir. Önce birini deneyip ortamda nasıl hissedildiğine göre diğerini ekleyin."],
         ["Mumluk seçerken hangi malzeme uygundur?", "Mumun ölçüsüne uygun ve ısıya dayanıklı olduğu belirtilen bir mumluk seçin. Dekoratif malzemenin doğrudan alevle temas etmemesine dikkat edin."],
@@ -110,7 +106,6 @@
       "questions": [
         ["Banyo havlusu seçerken nelere dikkat edilmeli?", "Havlunun ölçüsünü, kumaş içeriğini, dokusunu ve bakım talimatını karşılaştırın. Kalın havluların kuruma süresi ortam koşullarına göre değişebilir; kullanım alışkanlığınıza uygun modeli seçin."],
         ["Pamuklu havlu neden tercih edilir?", "Pamuklu havlular yumuşak dokuları ve su emme özellikleri nedeniyle yaygın tercih edilir. Gerçek his, dokuma ve ürün işlemesine göre değiştiğinden açıklamayı inceleyin."],
-        ["Havlu gramajı neyi gösterir?", "Gramaj genellikle kumaşın metrekare başına ağırlığını belirtir; tek başına kalite ölçüsü değildir. Dokuma, elyaf ve kullanım amacıyla birlikte değerlendirmek daha doğru olur."],
         ["El havlusu ile banyo havlusu arasındaki fark nedir?", "Temel fark ölçü ve kullanım alanıdır. El havlusu lavabo çevresinde, banyo havlusu duş sonrası vücudu kurulamak için kullanılır; ürün ebatlarını kontrol edin."],
         ["Havlular ilk kullanımda nasıl yıkanır?", "İlk yıkamada ürün etiketindeki sıcaklık ve deterjan önerisine uyun. Renkli havluları açık renklerden ayırmak ve tamamen kurutmak kullanım açısından yararlıdır."],
         ["Havlular neden sertleşir?", "Deterjan kalıntısı, yanlış dozaj veya uygun olmayan kurutma dokuyu etkileyebilir. Bakım etiketine uyarak durulama ve kurutma koşullarını gözden geçirin."],

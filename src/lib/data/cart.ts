@@ -287,7 +287,10 @@ async function shapeCart(id: string) {
     }
   })
   const subtotal = shapedItems.reduce((sum, item) => sum + item.total, 0)
-  const shippingTotal = Number(cart.shipping_method?.amount || 0)
+  const shippingSettings = await getCommerceSettings()
+  const shippingTotal = cart.shipping_method
+    ? calculateShippingAmount(subtotal, shippingSettings.shipping_methods)
+    : 0
   const paymentProviderId = cart.metadata?.payment_provider_id
   const paymentData = cart.metadata?.payment_data || {}
 
@@ -339,7 +342,7 @@ async function shapeCart(id: string) {
     }
   }
 
-  const commerceSettings = await getCommerceSettings()
+  const commerceSettings = shippingSettings
   const codFee =
     paymentProviderId === "cash_on_delivery" &&
     commerceSettings.payment_methods.cashOnDelivery &&
@@ -386,7 +389,7 @@ async function shapeCart(id: string) {
     total: finalTotal,
     original_total: subtotal + shippingTotal + codFee,
     promotions,
-    shipping_methods: cart.shipping_method ? [cart.shipping_method] : [],
+    shipping_methods: cart.shipping_method ? [{ ...cart.shipping_method, id: "shipping_standard", name: "Standart Kargo", amount: shippingTotal }] : [],
     payment_collection: {
       id: `paycol_${cart.id}`,
       status: "not_paid",
@@ -1249,22 +1252,22 @@ async function shippingOptions(cartId?: string) {
     )
     subtotal = Number(rows[0]?.subtotal || 0)
   }
-  return settings.shipping_methods
-    .filter((method) => method.active && method.name.trim())
-    .map((method) => ({
-      id: `shipping_${method.id}`,
-      name: method.name,
-      amount:
-        method.freeThreshold !== null && subtotal >= Number(method.freeThreshold)
-          ? 0
-          : Math.max(0, Number(method.price) || 0),
-      price_type: "flat",
-      metadata: {
-        coverage: method.coverage,
-        estimated_days: method.estimatedDays,
-      },
-      service_zone: { fulfillment_set: { type: "shipping" } },
-    }))
+  return [{
+    id: "shipping_standard",
+    name: "Standart Kargo",
+    amount: calculateShippingAmount(subtotal, settings.shipping_methods),
+    price_type: "flat",
+    metadata: { coverage: "Tüm Türkiye" },
+    service_zone: { fulfillment_set: { type: "shipping" } },
+  }]
+}
+
+function calculateShippingAmount(subtotal: number, methods: Array<{ active: boolean; name: string; price: number }>) {
+  if (subtotal >= 1_000_000) return 0
+  if (subtotal >= 500_000) return 60_000
+  if (subtotal >= 200_000) return 30_000
+  const standard = methods.find((method) => method.active && !/mağazadan|teslim alma|pickup/i.test(method.name))
+  return Math.max(0, Number(standard?.price ?? 9900))
 }
 
 export async function listCartOptions(cartId?: string) {

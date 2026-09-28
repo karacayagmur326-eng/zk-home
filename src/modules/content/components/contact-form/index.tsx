@@ -143,7 +143,7 @@ export default function ContactForm({ kvkkUrl = "/kvkk" }: { kvkkUrl?: string })
             <option value="Sipariş / Kargo Durumu">Sipariş / Kargo Durumu</option>
             <option value="Ürün Danışma & Teknik Destek">Ürün Danışma & Teknik Destek</option>
             <option value="İade & Değişim Talebi">İade & Değişim Talebi</option>
-            <option value="Kurumsal Satış & Bayilik">Kurumsal Satış & Bayilik</option>
+            <option value="Kurumsal Hediye Talebi">Kurumsal Hediye Talebi</option>
             <option value="Öneri & Şikayet">Öneri & Şikayet</option>
           </select>
           <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">

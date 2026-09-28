@@ -93,7 +93,7 @@ export async function GET(req: NextRequest) {
         power: md.power || dynamicOptionsSpecs.find((s) => s.key.toLowerCase().includes("güç") || s.key.toLowerCase().includes("volt"))?.value || "—",
         stock_status: inStock ? "Stokta Var" : "Stokta Yok",
         shipping_time: md.shipping_time || "1-3 İş Günü",
-        warranty: md.warranty || "2 Yıl Resmi Distribütör",
+        warranty: md.warranty || "Ürün bazında belirtilir",
         installment: md.installment || "Var",
         rating: revInfo.avg > 0 ? revInfo.avg : "4.8",
         reviews_count: revInfo.count,

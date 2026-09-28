@@ -25,7 +25,6 @@ export const SITE_PAGES: LinkOption[] = [
   { label: "Gizlilik Politikası", url: "/gizlilik-politikasi" },
   { label: "Çerez Politikası", url: "/cerez-politikasi" },
   { label: "Teslimat ve İade", url: "/teslimat-ve-iade" },
-  { label: "Garanti ve Teknik Servis", url: "/garanti-ve-teknik-servis" },
   { label: "Kullanım Koşulları", url: "/kullanim-kosullari" },
   { label: "Sıkça Sorulan Sorular (SSS)", url: "/sss" },
   { label: "Blog", url: "/blog" },

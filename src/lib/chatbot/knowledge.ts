@@ -9,7 +9,6 @@ import {
   defaultFaqItems,
   defaultFaqPageContent,
 } from "@lib/content/knowledge-pages"
-import { defaultServicePageData } from "@lib/content/service-page"
 import { ChatbotSettings } from "./config"
 import { normalizeChatbotText } from "./settings"
 import { ChatbotSourceType, isLowInformationTerm, QueryUnderstanding, understandQuery } from "./understanding"
@@ -323,7 +322,6 @@ async function getPublicKnowledgeEntries() {
     entries.push(toEntry({ id: "fallback:blog", title: "Blog ve ürün rehberleri", content: defaultBlogPageContent, url: "/blog" }, 2))
   }
   if (!pages.some((row) => row.id === "garanti-ve-teknik-servis")) {
-    entries.push(toEntry({ id: "fallback:service", title: "Garanti ve teknik servis", content: defaultServicePageData, url: "/garanti-ve-teknik-servis" }, 5))
   }
 
   knowledgeSnapshot = {

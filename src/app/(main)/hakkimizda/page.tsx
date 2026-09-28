@@ -6,7 +6,7 @@ import Image from "@components/common/SmartImage"
 import PageHero from "../../../components/common/PageHero"
 import { Target, Eye, ArrowRight } from "lucide-react"
 import { getBaseURL } from "@lib/util/env"
-import { sanitizePublicHtml, serializeJsonLd } from "@lib/security/html"
+import { serializeJsonLd } from "@lib/security/html"
 
 export const metadata: Metadata = {
   title: "Hakkımızda",
@@ -20,39 +20,39 @@ export const dynamic = "force-dynamic"
 
 const defaultAboutData = {
   title: "Hakkımızda",
-  subtitle: "Profesyonel ekipmanlar, güvenilir çözümler.",
-  heroP1: "Geniş ürün yelpazesi, kaliteli ürünler ve müşteri odaklı hizmet anlayışımızla perakende ve toptan satış yapan güvenilir çözüm ortağınızız.",
-  heroP2: "Amacımız; doğru ürünü, doğru bilgiyle ve güvenilir hizmetle sizlere sunmaktır.",
-  heroCtaText: "Toptan ve Kurumsal Satış",
-  heroCtaHref: "/iletisim",
+  subtitle: "Evinize özenle seçilmiş parçalar.",
+  heroP1: "ZK Home'da yaşam alanlarınızı tamamlayan dekorasyon ve ev ürünlerini özenle bir araya getiriyoruz.",
+  heroP2: "Amacımız; doğru ürünü güvenilir hizmetle sizlere sunmaktır.",
+  heroCtaText: "Kurumsal Hediyeler",
+  heroCtaHref: "/toptan-ve-kurumsal-satis",
   heroImage: "/brand/placeholder.svg",
 
   whyTitle: "Neden Bizi Seçmelisiniz?",
   whyItems: [
     { title: "Geniş Ürün Seçeneği", desc: "Farklı kullanım alanlarına ve bütçelere uygun kaliteli ürünleri tek çatı altında sunuyoruz." },
-    { title: "Perakende ve Toptan Satış", desc: "Bireysel siparişlerden yüksek adetli kurumsal alımlara kadar farklı ihtiyaçlara uygun satış çözümleri geliştiriyoruz." },
-    { title: "Güvenilir Ürün Bilgilendirmesi", desc: "Ürünlerin teknik özelliklerini, kullanım alanlarını ve paket içeriklerini açık ve anlaşılır biçimde sunuyoruz." },
-    { title: "Satış Sonrası Destek", desc: "Sipariş, teslimat, garanti ve teknik servis süreçlerinde müşterilerimizin yanında olmayı önemsiyoruz." },
+    { title: "Özenli Seçki", desc: "Yaşam alanlarınıza uyum sağlayan ürünleri bir araya getiriyoruz." },
+    { title: "Kolay Sipariş", desc: "Ürünleri çevrimiçi inceleyip siparişinizi kolayca oluşturabilirsiniz." },
+    { title: "Sipariş Desteği", desc: "Teslimat ve iade süreçlerine ilişkin sorularınızda yanınızdayız." },
     { title: "Güvenli Alışveriş", desc: "Ödeme ve sipariş süreçlerinde güvenli altyapılar kullanarak müşteri bilgilerinin korunmasına önem veriyoruz." }
   ],
 
   missionTitle: "Misyonumuz",
   missionDesc: "Kaliteli ürünleri güvenilir, ulaşılabilir ve kullanıcı odaklı bir alışveriş deneyimiyle müşterilerimize sunmak.",
   visionTitle: "Vizyonumuz",
-  visionDesc: "Bireysel kullanıcılar, profesyoneller ve kurumsal işletmeler için sektörün en güvenilir e-ticaret ve tedarik çözüm ortağı olmak.",
+  visionDesc: "Her evin kendine özgü hikâyesine eşlik eden, güven veren ve ilham veren bir alışveriş deneyimi sunmak.",
 
   stats: [
-    { value: "10.000+", label: "Ürün Çeşidi" },
-    { value: "15.000+", label: "Mutlu Müşteri" },
-    { value: "2 Yıl", label: "Garanti Desteği" },
-    { value: "1-3 İş Günü", label: "Hızlı Teslimat" }
+    { value: "Özenli", label: "Ürün Seçkisi" },
+    { value: "Güvenli", label: "Ödeme" },
+    { value: "Kolay", label: "Sipariş" },
+    { value: "Destek", label: "İletişim" }
   ],
 
   aboutDetailImage: "/brand/placeholder.svg",
-  aboutDetailTitle: "Kurumsal Profilimiz",
-  aboutDetailP1: "Sektördeki deneyimimizi, güçlü tedarik ağımız ve müşteri odaklı hizmet anlayışımızla birleştiriyoruz.",
-  aboutDetailP2: "Kaliteli markaları, rekabetçi fiyatlarla ve güvenilir hizmetle buluşturarak işinizi kolaylaştırmak için çalışıyoruz.",
-  aboutDetailP3: "İşinize ve yaşamınıza değer katacak çözümlerle her zaman yanınızdayız.",
+  aboutDetailTitle: "ZK Home Hakkında",
+  aboutDetailP1: "Evde kendinizi iyi hissettiren ayrıntıların önemli olduğuna inanıyoruz.",
+  aboutDetailP2: "Dekorasyon ve yaşam ürünlerini farklı zevklere hitap eden bir seçkide buluşturuyoruz.",
+  aboutDetailP3: "Siparişinizle ilgili sorularınız için bize her zaman yazabilirsiniz.",
   aboutDetailCtaText: "İletişime Geçin",
   aboutDetailCtaHref: "/iletisim"
 }
@@ -93,15 +93,23 @@ export default async function AboutPage({ searchParams }: AboutPageProps) {
       contentData = {
         ...defaultAboutData,
         ...parsed,
-        whyItems: Array.isArray(parsed.whyItems) && parsed.whyItems.length > 0 ? parsed.whyItems : defaultAboutData.whyItems,
-        stats: Array.isArray(parsed.stats) && parsed.stats.length > 0 ? parsed.stats : defaultAboutData.stats,
+        subtitle: defaultAboutData.subtitle,
+        heroP1: defaultAboutData.heroP1,
+        heroP2: defaultAboutData.heroP2,
+        heroCtaText: defaultAboutData.heroCtaText,
+        heroCtaHref: defaultAboutData.heroCtaHref,
+        whyItems: defaultAboutData.whyItems,
+        visionDesc: defaultAboutData.visionDesc,
+        stats: defaultAboutData.stats,
+        aboutDetailTitle: defaultAboutData.aboutDetailTitle,
+        aboutDetailP1: defaultAboutData.aboutDetailP1,
+        aboutDetailP2: defaultAboutData.aboutDetailP2,
+        aboutDetailP3: defaultAboutData.aboutDetailP3,
       }
     }
   }
 
-  const heroParagraphs = (contentData as any).heroText
-    ? (contentData as any).heroText.split("\n").filter(Boolean)
-    : [contentData.heroP1, contentData.heroP2].filter(Boolean)
+  const heroParagraphs = [contentData.heroP1, contentData.heroP2]
 
   const baseUrl = getBaseURL()
   const aboutJsonLd = {
@@ -236,19 +244,9 @@ export default async function AboutPage({ searchParams }: AboutPageProps) {
               </div>
 
               <div className="space-y-4 text-slate-600 text-xs sm:text-sm leading-relaxed font-normal">
-                {/<[a-z][\s\S]*>/i.test((contentData as any).aboutDetailText || "") ? (
-                  <div
-                    className="[&>h1]:text-2xl [&>h1]:font-black [&>h2]:text-xl [&>h2]:font-bold [&>h3]:text-base [&>h3]:font-bold [&>p]:mb-3 [&>b]:font-black [&>strong]:font-black"
-                    dangerouslySetInnerHTML={{ __html: sanitizePublicHtml((contentData as any).aboutDetailText) }}
-                  />
-                ) : (
-                  ((contentData as any).aboutDetailText
-                    ? (contentData as any).aboutDetailText.split("\n").filter(Boolean)
-                    : [contentData.aboutDetailP1, contentData.aboutDetailP2, contentData.aboutDetailP3].filter(Boolean)
-                  ).map((p: string, idx: number) => (
-                    <p key={idx}>{p}</p>
-                  ))
-                )}
+                {[contentData.aboutDetailP1, contentData.aboutDetailP2, contentData.aboutDetailP3].map((p: string, idx: number) => (
+                  <p key={idx}>{p}</p>
+                ))}
               </div>
 
               {contentData.aboutDetailCtaText && (

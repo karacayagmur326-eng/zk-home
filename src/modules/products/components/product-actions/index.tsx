@@ -256,8 +256,8 @@ export default function ProductActions({
           <div className="flex items-start gap-3">
             <Shield className="h-4.5 w-4.5 text-slate-800 shrink-0 mt-0.5" />
             <div>
-              <h4 className="text-xs font-black text-slate-900">2 Yıl Resmi Garanti</h4>
-              <p className="text-[10px] text-slate-400 font-medium leading-tight">Tüm ürünlerimiz garantilidir</p>
+              <h4 className="text-xs font-black text-slate-900">Alışveriş Desteği</h4>
+              <p className="text-[10px] text-slate-400 font-medium leading-tight">Sipariş ve iade sorularınız için bize ulaşın</p>
             </div>
           </div>
         </div>

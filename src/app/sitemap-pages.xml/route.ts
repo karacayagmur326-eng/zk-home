@@ -27,7 +27,6 @@ export async function GET() {
     { path: "/hakkimizda", priority: "0.5", changefreq: "monthly" },
     { path: "/iletisim", priority: "0.5", changefreq: "monthly" },
     { path: "/sss", priority: "0.5", changefreq: "weekly" },
-    { path: "/garanti-ve-teknik-servis", priority: "0.5", changefreq: "monthly" },
     { path: "/teslimat-ve-iade", priority: "0.5", changefreq: "monthly" },
     { path: "/kvkk", priority: "0.3", changefreq: "monthly" },
     { path: "/gizlilik-politikasi", priority: "0.3", changefreq: "monthly" },

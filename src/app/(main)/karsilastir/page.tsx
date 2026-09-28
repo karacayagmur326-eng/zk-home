@@ -198,7 +198,7 @@ type CompareRowItem = {
         {
           key: "warranty",
           label: "Garanti",
-          getValue: (p: any) => p.warranty || "2 Yıl Resmi Distribütör",
+          getValue: (p: any) => p.warranty || "Ürün bazında belirtilir",
         },
         {
           key: "installment",

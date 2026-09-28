@@ -79,8 +79,8 @@ export default async function Footer() {
         icon: "truck",
       },
       {
-        title: "Ürüne Özel Garanti",
-        subtitle: "Garanti süresi ve kapsamı ürün sayfasında belirtilir.",
+        title: "Kolay İade İletişimi",
+        subtitle: "İade ve hasar bildirimlerinde ekibimizle iletişime geçebilirsiniz.",
         icon: "award",
       },
       {
@@ -95,6 +95,11 @@ export default async function Footer() {
       },
     ]
   }
+  footerFeatures = footerFeatures.map((feature) =>
+    /garanti|teknik servis/i.test(`${feature.title} ${feature.subtitle}`)
+      ? { title: "İade Desteği", subtitle: "İade ve hasar bildirimleriniz için bize ulaşın.", icon: "headphones" }
+      : feature
+  )
 
   // 1. Column Titles & Content
   const logoText = (themeSettings?.logo_text as string | undefined) || "ZK HOME"
@@ -123,9 +128,9 @@ export default async function Footer() {
   const footerDescription =
     (themeSettings?.footer_description as string | undefined) ||
     "ZK Home, yaşam alanlarına zarif dokunuşlar katan dekorasyon, sofra ve ev tekstili seçkilerini bir araya getirir."
-  const phone = storeReady ? (themeSettings?.contact_phone as string | undefined) || "" : ""
+  const phone = process.env.NEXT_PUBLIC_CONTACT_PHONE || ""
   const email = storeReady ? (themeSettings?.contact_email as string | undefined) || "" : ""
-  const address = storeReady ? (themeSettings?.contact_address as string | undefined) || "" : ""
+  const address = process.env.NEXT_PUBLIC_CONTACT_ADDRESS || ""
 
   const col2Title = turkishTitleCase((themeSettings?.footer_col2_title as string | undefined) || "Kurumsal")
   const col3Title = turkishTitleCase((themeSettings?.footer_col3_title as string | undefined) || "Müşteri Hizmetleri")
@@ -151,7 +156,7 @@ export default async function Footer() {
   // Fallback Menu Arrays
   const defaultKurumsalItems = [
     { label: "Hakkımızda", url: "/hakkimizda" },
-    { label: "Toptan ve Kurumsal Satış", url: "/toptan-ve-kurumsal-satis" },
+    { label: "Kurumsal Hediyeler", url: "/toptan-ve-kurumsal-satis" },
     { label: "Markalarımız", url: "/magaza" },
     { label: "Ürün Rehberi ve Makaleler", url: "/blog" },
   ]
@@ -159,7 +164,6 @@ export default async function Footer() {
     { label: "İletişim", url: "/iletisim" },
     { label: "Sık Sorulan Sorular", url: "/sss" },
     { label: "Teslimat, İptal ve İade", url: "/teslimat-ve-iade" },
-    { label: "Garanti ve Teknik Servis", url: "/garanti-ve-teknik-servis" },
     { label: "Sipariş Takibi", url: "/siparis-takibi" },
   ]
   const defaultYasalItems = [
@@ -170,17 +174,16 @@ export default async function Footer() {
     { label: "Çerez Politikası", url: "/cerez-politikasi" },
   ]
 
-  const kurumsalItems = kurumsalMenu?.items?.length
+  const rawKurumsalItems = kurumsalMenu?.items?.length
     ? kurumsalMenu.items
     : defaultKurumsalItems
+  const kurumsalItems = rawKurumsalItems.map((item: any) =>
+    item.url === "/toptan-ve-kurumsal-satis" ? { ...item, label: "Kurumsal Hediyeler" } : item
+  )
   const rawMusteriItems = musteriMenu?.items?.length
     ? musteriMenu.items
     : defaultMusteriItems
-  const musteriItems = rawMusteriItems.map((item: any) =>
-    item.id === "fm4" || item.label === "Garanti ve Teknik Servis"
-      ? { ...item, url: "/garanti-ve-teknik-servis" }
-      : item
-  )
+  const musteriItems = rawMusteriItems.filter((item: any) => item.url !== "/garanti-ve-teknik-servis" && item.label !== "Garanti ve Teknik Servis" && item.id !== "fm4")
   const yasalItems = yasalMenu?.items?.length
     ? yasalMenu.items
     : defaultYasalItems

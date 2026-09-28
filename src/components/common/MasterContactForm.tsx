@@ -41,10 +41,12 @@ export default function MasterContactForm({
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
+  const [emailDraft, setEmailDraft] = useState("")
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setErrorMessage("")
+    setEmailDraft("")
 
     if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
       setErrorMessage("Lütfen zorunlu olan Ad Soyad, E-Posta ve Mesaj alanlarını doldurun.")
@@ -94,7 +96,10 @@ export default function MasterContactForm({
         kvkk: false,
       })
     } catch (err: any) {
-      setErrorMessage(err.message || "Mesajınız iletilemedi. Lütfen tekrar deneyiniz.")
+      setErrorMessage("Form şu anda iletilemedi. Mesajınızı e-posta uygulamanızla gönderebilirsiniz.")
+      const recipient = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@zk-home.com"
+      const body = `Ad: ${formData.name}\nE-posta: ${formData.email}\nTelefon: ${formData.phone}\nSipariş: ${formData.order_no}\n\n${formData.message}`
+      setEmailDraft(`mailto:${recipient}?subject=${encodeURIComponent(formData.subject)}&body=${encodeURIComponent(body)}`)
     } finally {
       setLoading(false)
     }
@@ -138,6 +143,7 @@ export default function MasterContactForm({
           {errorMessage && (
             <div role="alert" aria-live="polite" className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs font-bold">
               {errorMessage}
+              {emailDraft && <a href={emailDraft} className="mt-2 block underline">E-posta uygulamasında aç</a>}
             </div>
           )}
 

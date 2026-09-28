@@ -5,7 +5,7 @@ const settingPages: Record<string, { path: string; title: string }> = {
   contact_info: { path: "/iletisim", title: "İletişim ve Müşteri Hizmetleri" },
   brands_info: { path: "/markalar", title: "Markalar" },
   delivery_returns_info: { path: "/teslimat-ve-iade", title: "Teslimat ve İade" },
-  wholesale_info: { path: "/toptan-ve-kurumsal-satis", title: "Toptan ve Kurumsal Satış" },
+  wholesale_info: { path: "/toptan-ve-kurumsal-satis", title: "Kurumsal Hediyeler" },
 }
 
 export async function getPublicPageAliases() {

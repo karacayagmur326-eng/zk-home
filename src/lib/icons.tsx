@@ -276,7 +276,7 @@ export const APP_ICON_OPTIONS: AppIconOption[] = [
   option("file-check", "Cayma Hakkı & Form", "teslimat"),
   option("map-pin", "Teslimat & İade Adresi", "teslimat"),
   option("clock", "1-3 İş Günü Teslimat", "teslimat"),
-  option("shield-check", "2 Yıl Resmi Garanti", "teslimat"),
+  option("shield-check", "Sipariş Desteği", "teslimat"),
   option("headphones", "7/24 Canlı Destek", "teslimat"),
 
   // 2. Mağaza & Alışveriş İkonları

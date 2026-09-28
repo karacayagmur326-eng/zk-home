@@ -15,6 +15,14 @@ export const metadata: Metadata = {
   },
 }
 
+const removedQuestions = new Set([
+  "Porselen ve stoneware yemek takımı arasındaki fark nedir?",
+  "Mikrodalgaya uygun yemek takımı nasıl anlaşılır?",
+  "Ahşap servis ürünleri nasıl temizlenir?",
+  "Mum nasıl güvenli kullanılır?",
+  "Havlu gramajı neyi gösterir?",
+])
+
 export default async function FaqPage() {
   const [dbContent, contact] = await Promise.all([
     query<{ content: Record<string, any> }>(
@@ -31,7 +39,7 @@ export default async function FaqPage() {
     ...defaultFaqPageContent,
     ...dbContent,
     faq_categories: Array.isArray(dbContent.faq_categories) ? dbContent.faq_categories : defaultFaqPageContent.faq_categories,
-    faq_items: (Array.isArray(dbContent.faq_items) ? dbContent.faq_items : defaultFaqPageContent.faq_items).map((item: any) => ({
+    faq_items: (Array.isArray(dbContent.faq_items) ? dbContent.faq_items : defaultFaqPageContent.faq_items).filter((item: any) => !removedQuestions.has(String(item.question || ""))).map((item: any) => ({
       ...item,
       answer: replaceContactTokens(String(item.answer || "")),
     })),

@@ -15,7 +15,7 @@ const defaultMenuSeeds: Record<string, { name: string; items: any[] }> = {
     name: "Footer 1 - Kurumsal",
     items: [
       { id: "fk1", label: "Hakkımızda", url: "/hakkimizda", type: "page" },
-      { id: "fk2", label: "Toptan ve Kurumsal Satış", url: "/toptan-ve-kurumsal-satis", type: "page" },
+      { id: "fk2", label: "Kurumsal Hediyeler", url: "/toptan-ve-kurumsal-satis", type: "page" },
       { id: "fk3", label: "Markalarımız", url: "/magaza", type: "custom" },
       { id: "fk4", label: "Ürün Rehberi ve Makaleler", url: "/blog", type: "custom" },
     ],

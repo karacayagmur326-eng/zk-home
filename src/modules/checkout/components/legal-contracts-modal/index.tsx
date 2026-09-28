@@ -277,7 +277,7 @@ export default function LegalContractsModal({
             </h3>
             <p><strong>3.1.</strong> Satıcı, sözleşme konusu ürünü eksiksiz, siparişte belirtilen niteliklere uygun ve varsa garanti belgeleri, kullanım kılavuzları ile teslim etmeyi taahhüt eder.</p>
             <p><strong>3.2.</strong> Ürün, Alıcı veya Alıcı tarafından belirlenen adresteki üçüncü kişiye, yasal 30 günlük süreyi aşmamak koşulu ile anlaşmalı kargo şirketi ile teslim edilir.</p>
-            <p><strong>3.3.</strong> Alıcı teslim anında ürünü muayene etmekle yükümlüdür; ezik, kırık veya ambalajı açık ürünleri teslim almayarak kargo görevlisine tutanak tutturmalıdır.</p>
+            <p><strong>3.3.</strong> Teslimat sırasında görünür bir hasar fark edilirse kargo görevlisiyle tutanak düzenlenmesi ve durumun Satıcı'ya bildirilmesi önerilir. Tutanak düzenlenmemiş olması tüketicinin yasal haklarını ortadan kaldırmaz.</p>
             <p><strong>3.4.</strong> Ödemenin gerçekleşmemesi veya banka tarafından iptal edilmesi halinde Satıcı’nın ürünü teslim yükümlülüğü sona erer.</p>
           </div>
 
@@ -287,7 +287,7 @@ export default function LegalContractsModal({
               4. CAYMA HAKKI VE İADE KOŞULLARI
             </h3>
             <p><strong>4.1.</strong> Alıcı, hiçbir hukuki ve cezai sorumluluk üstlenmeksizin ve hiçbir gerekçe göstermeksizin, malı teslim aldığı tarihten itibaren <strong>14 (on dört) gün</strong> içerisinde cayma hakkını kullanabilir.</p>
-            <p><strong>4.2.</strong> Cayma hakkının kullanılması için bu süre içinde Satıcı'ya {ZK_HOME_CORPORATE_INFO.email} e-posta veya {ZK_HOME_CORPORATE_INFO.phone} numaralı müşteri hizmetleri kanalıyla bildirimde bulunulması gereklidir.</p>
+            <p><strong>4.2.</strong> Cayma hakkının kullanılması için bu süre içinde Satıcı'ya {ZK_HOME_CORPORATE_INFO.email} adresinden veya iletişim formundan bildirimde bulunulması yeterlidir. Gerekçe veya fotoğraf paylaşılması zorunlu değildir.</p>
             <p><strong>4.3.</strong> İade edilen ürün kutusu, ambalajı ve aksesuarlarıyla birlikte eksiksiz olarak gönderilmelidir.</p>
           </div>
 

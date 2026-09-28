@@ -2,8 +2,6 @@ import { query } from "@lib/admin/db"
 import { Metadata } from "next"
 import { notFound, permanentRedirect } from "next/navigation"
 import PageHero from "../../../components/common/PageHero"
-import DeliveryClientContent from "../teslimat-ve-iade/DeliveryClientContent"
-import WholesaleClientContent from "../toptan-ve-kurumsal-satis/WholesaleClientContent"
 import ContactPage from "../iletisim/page"
 import AboutPage from "../hakkimizda/page"
 import BrandsPage from "../markalar/page"
@@ -154,52 +152,12 @@ export default async function DynamicSlugPage({ params, searchParams }: PageProp
 
   // 3. Render Delivery & Returns Page
   if (handle === "teslimat-ve-iade" || deliveryInfo.custom_slug === slug) {
-    const displayTitle = page?.title || deliveryInfo.title || "Teslimat, İptal ve İade Koşulları"
-    const heroDesc = deliveryInfo.description || page?.description || ""
-
-    return (
-      <div className="bg-white min-h-screen pb-20">
-        <PageHero
-          breadcrumb={[{ title: displayTitle }]}
-          title={heroDesc && /<[a-z][\s\S]*>/i.test(heroDesc) ? undefined : displayTitle}
-          paragraphs={[heroDesc]}
-          htmlContent={heroDesc && /<[a-z][\s\S]*>/i.test(heroDesc) ? heroDesc : undefined}
-          ctaText={deliveryInfo.hero_cta_text}
-          ctaHref={deliveryInfo.hero_cta_href}
-          heroImage={!deliveryInfo.hero_image || deliveryInfo.hero_image === "/brand/placeholder.svg" ? "/brand/placeholder.svg" : deliveryInfo.hero_image}
-          heroImageAlt={displayTitle}
-        />
-        <div className="content-container py-10">
-          <DeliveryClientContent info={deliveryInfo} />
-        </div>
-      </div>
-    )
+    permanentRedirect("/teslimat-ve-iade")
   }
 
   // 4. Render Wholesale & Corporate Sales Page
   if (handle === "toptan-ve-kurumsal-satis" || handle === "toptan-satis" || wholesaleInfo.custom_slug === slug) {
-    const displayTitle = page?.title || wholesaleInfo.title || "Toptan ve Kurumsal Satış"
-    const heroDesc = wholesaleInfo.description || page?.description || ""
-
-    return (
-      <div className="bg-white min-h-screen pb-20">
-        <PageHero
-          breadcrumb={[{ title: displayTitle }]}
-          title={heroDesc && /<[a-z][\s\S]*>/i.test(heroDesc) ? undefined : displayTitle}
-          paragraphs={[heroDesc]}
-          htmlContent={heroDesc && /<[a-z][\s\S]*>/i.test(heroDesc) ? heroDesc : undefined}
-          ctaText={wholesaleInfo.hero_cta1_text}
-          ctaHref={wholesaleInfo.hero_cta1_href}
-          secondaryCtaText={wholesaleInfo.hero_cta2_text}
-          secondaryCtaHref="/iletisim"
-          heroImage={!wholesaleInfo.hero_image || wholesaleInfo.hero_image === "/brand/placeholder.svg" ? "/brand/placeholder.svg" : wholesaleInfo.hero_image}
-          heroImageAlt={displayTitle}
-        />
-        <div className="content-container py-10">
-          <WholesaleClientContent info={wholesaleInfo} />
-        </div>
-      </div>
-    )
+    permanentRedirect("/toptan-ve-kurumsal-satis")
   }
 
   if (!page) {

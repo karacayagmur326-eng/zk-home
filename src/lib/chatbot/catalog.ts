@@ -385,16 +385,15 @@ export async function analyzeCatalogQuestion(
   if (["GENERAL_PRODUCT_QUALITY", "PURCHASE_ADVICE", "PRODUCT_QUALITY", "PRODUCT_DURABILITY"].includes(understanding.intent)) {
     if (understanding.needsClarification) {
       return {
-        answer: "Hangi ürün grubunu soruyorsunuz: matkap, testere, tırpan veya başka bir ürün mü? Ürün türünü ve yapacağınız işi yazarsanız daha net yardımcı olabilirim.",
+        answer: "Hangi ürün grubunu soruyorsunuz? Ürün türünü ve kullanım amacınızı yazarsanız daha net yardımcı olabilirim.",
         source: "catalog_clarification" as const,
       }
     }
     const features = verifiedFeatures(rows).slice(0, 3)
-    const warranty = settings.questions.find((item) => item.active && normalizeChatbotText(`${item.question} ${item.keywords}`).includes("garanti"))
     const subject = understanding.productCategory ? `${understanding.productCategory} grubunda` : "ZK Home ürünlerinde"
     const evidence = [
       features.length ? `${features.join(", ")} gibi doğrulanabilir özelliklere sahip modeller bulunuyor` : "özellikler modele göre değişiyor",
-      warranty ? "sitede 2 yıl resmi garanti bilgisi yer alıyor" : "garanti koşulları ilgili ürün ve servis sayfasında belirtiliyor",
+      "varsa ürüne özel garanti bilgileri ürün açıklamasında belirtilir; yasal tüketici hakları saklıdır",
     ]
     const prefix = understanding.intent === "PURCHASE_ADVICE"
       ? "Alınabilir; ancak doğru seçim yapacağınız işe göre değişir."
@@ -409,7 +408,7 @@ export async function analyzeCatalogQuestion(
       link_url: understanding.productCategory ? undefined : "/magaza",
       link_text: understanding.productCategory ? undefined : "Ürünleri İncele",
       source: "catalog_grounded_guidance" as const,
-      evidence: [features.join(", "), warranty?.answer || ""].filter(Boolean),
+      evidence: [features.join(", "), "Garanti kapsamı ürün bazında belirtilir."].filter(Boolean),
     }
   }
 

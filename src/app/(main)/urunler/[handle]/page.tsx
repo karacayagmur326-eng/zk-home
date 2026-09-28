@@ -125,9 +125,10 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   }
 
   const titleTemplate = settings?.seo_product_title_template || "%urun_adi% %ayirici% %site_adi%"
-  const descTemplate =
-    settings?.seo_product_desc_template ||
-    "%urun_adi% en uygun fiyatı, %marka% kalitesi ve 2 yıl resmi garanti avantajıyla %site_adi% üzerinde. Hemen inceleyin!"
+  const configuredDescTemplate = settings?.seo_product_desc_template || ""
+  const descTemplate = /2\s*yıl.*garanti|tüm ürün.*garanti/i.test(configuredDescTemplate)
+    ? "%urun_adi% ürününü %site_adi% üzerinde inceleyin. Ürün özellikleri ve sipariş bilgilerine göz atın."
+    : configuredDescTemplate || "%urun_adi% ürününü %site_adi% üzerinde inceleyin. Ürün özellikleri ve sipariş bilgilerine göz atın."
 
   const title = renderSeoTemplate(titleTemplate, tokens)
   const description =
