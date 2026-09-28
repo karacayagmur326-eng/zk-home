@@ -16,6 +16,8 @@ import { query } from "@lib/admin/db"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import FooterMobileSections from "@modules/layout/components/footer-mobile-sections"
 import { isStoreReady } from "@lib/security/store-readiness"
+import { turkishTitleCase } from "@lib/util/turkish-title-case"
+import "./footer-light.css"
 
 const InstagramIcon = () => (
   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -72,22 +74,22 @@ export default async function Footer() {
   if (!storeReady || !footerFeatures || footerFeatures.length === 0) {
     footerFeatures = [
       {
-        title: "TESLİMAT BİLGİSİ",
+        title: "Teslimat Bilgisi",
         subtitle: "Tahmini süre ürün ve adrese göre sipariş özetinde gösterilir.",
         icon: "truck",
       },
       {
-        title: "ÜRÜNE ÖZEL GARANTİ",
+        title: "Ürüne Özel Garanti",
         subtitle: "Garanti süresi ve kapsamı ürün sayfasında belirtilir.",
         icon: "award",
       },
       {
-        title: "MÜŞTERİ DESTEĞİ",
+        title: "Müşteri Desteği",
         subtitle: "Güncel çalışma saatleri iletişim sayfasında yer alır.",
         icon: "headphones",
       },
       {
-        title: "GÜVENLİ ALIŞVERİŞ",
+        title: "Güvenli Alışveriş",
         subtitle: "Ödeme bilgileri yetkili ödeme kuruluşu tarafından işlenir.",
         icon: "shield",
       },
@@ -102,14 +104,11 @@ export default async function Footer() {
   const isValidFooterLogo = Boolean(footerLogoUrl && footerLogoUrl !== "/brand/zkhome-logo.svg")
   const isValidFooterDarkLogo = Boolean(footerLogoDarkUrl && footerLogoDarkUrl !== "/brand/zkhome-logo-dark.svg")
 
-  const darkLogo =
+  const lightLogo =
     (isValidFooterLogo ? footerLogoUrl : null) ||
-    (isValidFooterDarkLogo ? footerLogoDarkUrl : null) ||
     footerLogoUrl ||
-    footerLogoDarkUrl ||
-    (themeSettings?.header_logo_dark_url as string | undefined) ||
     (themeSettings?.header_logo_url as string | undefined) ||
-    "/brand/zkhome-logo-dark.svg"
+    "/brand/zkhome-logo.svg"
 
   const logoAlt =
     (themeSettings?.footer_logo_alt as string | undefined) ||
@@ -123,15 +122,15 @@ export default async function Footer() {
 
   const footerDescription =
     (themeSettings?.footer_description as string | undefined) ||
-    "ZK Home online mağazası. Ürünler ve içerikler hazırlanıyor."
+    "ZK Home, yaşam alanlarına zarif dokunuşlar katan dekorasyon, sofra ve ev tekstili seçkilerini bir araya getirir."
   const phone = storeReady ? (themeSettings?.contact_phone as string | undefined) || "" : ""
   const email = storeReady ? (themeSettings?.contact_email as string | undefined) || "" : ""
   const address = storeReady ? (themeSettings?.contact_address as string | undefined) || "" : ""
 
-  const col2Title = (themeSettings?.footer_col2_title as string | undefined) || "KURUMSAL"
-  const col3Title = (themeSettings?.footer_col3_title as string | undefined) || "MÜŞTERİ HİZMETLERİ"
-  const col4Title = (themeSettings?.footer_col4_title as string | undefined) || "YASAL BİLGİLENDİRME"
-  const col5Title = (themeSettings?.footer_col5_title as string | undefined) || "BİZİ TAKİP EDİN"
+  const col2Title = turkishTitleCase((themeSettings?.footer_col2_title as string | undefined) || "Kurumsal")
+  const col3Title = turkishTitleCase((themeSettings?.footer_col3_title as string | undefined) || "Müşteri Hizmetleri")
+  const col4Title = turkishTitleCase((themeSettings?.footer_col4_title as string | undefined) || "Yasal Bilgilendirme")
+  const col5Title = turkishTitleCase((themeSettings?.footer_col5_title as string | undefined) || "Bizi Takip Edin")
   const col5Desc =
     (themeSettings?.footer_col5_desc as string | undefined) ||
     "Yeniliklerden, kampanyalardan ve içeriklerden haberdar olun."
@@ -188,8 +187,7 @@ export default async function Footer() {
 
   return (
     <>
-      {/* Main Dark Footer (Hidden on Mobile, Visible on Desktop) */}
-      <footer className="hidden md:block w-full bg-[#0b0e11] text-white pt-12 sm:pt-16 pb-8 border-t border-white/10">
+      <footer className="zk-footer-light w-full border-t pt-12 pb-8 sm:pt-16">
 
         <div className="content-container">
           {/* Mobile Footer Top: Brand info + Accordion Menus (Kurumsal, Müşteri Hizmetleri, Yasal Bilgilendirme) + Social */}
@@ -197,9 +195,9 @@ export default async function Footer() {
             {/* Mobile Brand Info */}
             <div className="flex flex-col space-y-3">
               <LocalizedClientLink href="/" aria-label="Ana Sayfa" className="inline-block">
-                {darkLogo ? (
+                {lightLogo ? (
                   <img
-                    src={darkLogo}
+                    src={lightLogo}
                     alt={logoAlt}
                     width={180}
                     height={40}
@@ -212,7 +210,7 @@ export default async function Footer() {
                   </span>
                 )}
               </LocalizedClientLink>
-              <p className="text-xs text-white/65 leading-relaxed">
+              <p className="text-[13px] text-white/75 leading-relaxed">
                 {footerDescription}
               </p>
               <div className="flex flex-col space-y-2 pt-1 text-xs text-white/80 font-medium">
@@ -255,11 +253,11 @@ export default async function Footer() {
 
             {/* Mobile Social Links */}
             <div className="flex flex-col space-y-3 pt-2">
-              <h4 className="text-xs font-black uppercase text-white tracking-widest flex items-center gap-2">
+              <h4 className="text-sm font-semibold normal-case text-white tracking-normal flex items-center gap-2">
                 <Users className="w-4 h-4 text-[#C98484] shrink-0" />
                 <span>{col5Title}</span>
               </h4>
-              <p className="text-xs text-white/65 leading-relaxed">
+              <p className="text-[13px] text-white/75 leading-relaxed">
                 {col5Desc}
               </p>
               <div className="flex items-center gap-2.5 pt-1">
@@ -316,9 +314,9 @@ export default async function Footer() {
             {/* Column 1: Brand & Contact Info */}
             <div className="flex flex-col space-y-4 lg:col-span-1">
               <LocalizedClientLink href="/" aria-label="Ana Sayfa" className="inline-block">
-                {darkLogo ? (
+                {lightLogo ? (
                   <img
-                    src={darkLogo}
+                    src={lightLogo}
                     alt={logoAlt}
                     width={220}
                     height={50}
@@ -364,11 +362,11 @@ export default async function Footer() {
 
             {/* Column 2: KURUMSAL */}
             <div className="flex flex-col space-y-4">
-              <h3 className="text-xs font-black uppercase text-white tracking-widest flex items-center gap-2 border-b border-white/10 pb-2.5">
+              <h3 className="text-sm font-semibold normal-case text-white tracking-normal flex items-center gap-2 border-b border-white/10 pb-2.5">
                 <Building2 className="w-4 h-4 text-[#C98484] shrink-0" />
                 <span>{col2Title}</span>
               </h3>
-              <ul className="flex flex-col space-y-2 text-xs text-white/70 font-medium">
+              <ul className="flex flex-col space-y-2 text-[12.5px] text-white/75 font-medium">
                 {kurumsalItems.map((item: any, i: number) => (
                   <li key={i}>
                     <LocalizedClientLink
@@ -385,11 +383,11 @@ export default async function Footer() {
 
             {/* Column 3: MÜŞTERİ HİZMETLERİ */}
             <div className="flex flex-col space-y-4">
-              <h3 className="text-xs font-black uppercase text-white tracking-widest flex items-center gap-2 border-b border-white/10 pb-2.5">
+              <h3 className="text-sm font-semibold normal-case text-white tracking-normal flex items-center gap-2 border-b border-white/10 pb-2.5">
                 <Headphones className="w-4 h-4 text-[#C98484] shrink-0" />
                 <span>{col3Title}</span>
               </h3>
-              <ul className="flex flex-col space-y-2 text-xs text-white/70 font-medium">
+              <ul className="flex flex-col space-y-2 text-[12.5px] text-white/75 font-medium">
                 {musteriItems.map((item: any, i: number) => (
                   <li key={i}>
                     <LocalizedClientLink
@@ -406,11 +404,11 @@ export default async function Footer() {
 
             {/* Column 4: YASAL BİLGİLENDİRME */}
             <div className="flex flex-col space-y-4">
-              <h3 className="text-xs font-black uppercase text-white tracking-widest flex items-center gap-2 border-b border-white/10 pb-2.5">
+              <h3 className="text-sm font-semibold normal-case text-white tracking-normal flex items-center gap-2 border-b border-white/10 pb-2.5">
                 <FileText className="w-4 h-4 text-[#C98484] shrink-0" />
                 <span>{col4Title}</span>
               </h3>
-              <ul className="flex flex-col space-y-2 text-xs text-white/70 font-medium">
+              <ul className="flex flex-col space-y-2 text-[12.5px] text-white/75 font-medium">
                 {yasalItems.map((item: any, i: number) => (
                   <li key={i}>
                     <LocalizedClientLink
@@ -427,11 +425,11 @@ export default async function Footer() {
 
             {/* Column 5: BİZİ TAKİP EDİN & Social Links */}
             <div className="flex flex-col space-y-4">
-              <h3 className="text-xs font-black uppercase text-white tracking-widest flex items-center gap-2 border-b border-white/10 pb-2.5">
+              <h3 className="text-sm font-semibold normal-case text-white tracking-normal flex items-center gap-2 border-b border-white/10 pb-2.5">
                 <Users className="w-4 h-4 text-[#C98484] shrink-0" />
                 <span>{col5Title}</span>
               </h3>
-              <p className="text-xs text-white/65 leading-relaxed">
+              <p className="text-[13px] text-white/75 leading-relaxed">
                 {col5Desc}
               </p>
               <div className="flex items-center gap-2.5 pt-2">
@@ -496,10 +494,10 @@ export default async function Footer() {
                     <AppIcon name={item.icon} fallback="shield" className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-black uppercase text-white tracking-wider">
-                      {item.title}
+                    <h4 className="text-[13px] font-semibold normal-case text-white tracking-normal">
+                      {turkishTitleCase(item.title)}
                     </h4>
-                    <p className="text-[11px] text-white/60 mt-1 leading-snug">
+                    <p className="text-[12px] text-white/70 mt-1 leading-snug">
                       {item.subtitle}
                     </p>
                   </div>

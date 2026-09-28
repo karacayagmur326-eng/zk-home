@@ -25,6 +25,10 @@ export async function DELETE(_req: NextRequest, { params }: Context) {
   if (!session)
     return NextResponse.json({ error: "Yetkisiz işlem." }, { status: 401 })
   const id = (await params).id
-  const deleted = await deleteStoreCategory(id)
-  return NextResponse.json({ id, deleted })
+  try {
+    const deleted = await deleteStoreCategory(id)
+    return NextResponse.json({ id, deleted })
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Kategori silinemedi." }, { status: 409 })
+  }
 }

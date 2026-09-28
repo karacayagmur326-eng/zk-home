@@ -23,13 +23,16 @@ const DEFAULT_TABS: ConfigTab[] = [
 
 export function formatTabLabel(label: string): string {
   if (!label) return ""
-  const lower = label.toLowerCase().trim()
+  const lower = label.toLocaleLowerCase("tr-TR").trim()
   if (lower === "vitrin-cok-satan" || lower === "cok-satan" || lower === "cok-satanlar") return "Çok Satanlar"
   if (lower === "vitrin-yeni" || lower === "yeni") return "Yeni Ürünler"
   if (lower === "vitrin-kampanya" || lower === "kampanya" || lower === "kampanyali-urunler") return "Kampanyalı Ürünler"
   
   const clean = label.replace(/^vitrin-/i, "").replace(/-/g, " ").trim()
-  return clean.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")
+  return clean.split(" ").map((word) => {
+    const lowerWord = word.toLocaleLowerCase("tr-TR")
+    return lowerWord.charAt(0).toLocaleUpperCase("tr-TR") + lowerWord.slice(1)
+  }).join(" ")
 }
 
 function ShowcaseBlock({
@@ -61,7 +64,7 @@ function ShowcaseBlock({
         <div className="flex items-start gap-3">
           <span className="w-1.5 h-7 rounded-full bg-[#C98484] shrink-0 mt-1" />
           <div>
-            <h2 className="overflow-visible pb-0.5 pt-px text-xl font-black uppercase leading-[1.2] tracking-tight text-slate-900 sm:text-2xl">
+            <h2 className="overflow-visible pb-0.5 pt-px text-xl font-semibold normal-case leading-[1.2] tracking-tight text-slate-900 sm:text-2xl">
               {title}
             </h2>
             <p className="text-xs font-medium text-slate-600 mt-0.5">{subtitle}</p>
@@ -123,7 +126,7 @@ export default function FeaturedTabs({
   countryCode: string
   initialProducts: HttpTypes.StoreProduct[]
 }) {
-  const [sectionTitle, setSectionTitle] = useState("ÖNE ÇIKAN ÜRÜNLER")
+  const [sectionTitle, setSectionTitle] = useState("Öne Çıkan Ürünler")
   const [sectionSubtitle, setSectionSubtitle] = useState("Atölyeniz için en güçlü seçimler.")
   
   const [configTabs, setConfigTabs] = useState<ConfigTab[]>(DEFAULT_TABS)
@@ -253,20 +256,20 @@ export default function FeaturedTabs({
       {/* ── DESKTOP VIEW: 3 SEPARATE SHOWCASE BLOCKS (NO TABS) ── */}
       <div className="hidden md:flex flex-col gap-8">
         <ShowcaseBlock
-          title="ÇOK SATAN ÜRÜNLER"
-          subtitle="Atölyeniz için en çok tercih edilen popüler ürünler."
+          title="Çok Satan Ürünler"
+          subtitle="Yaşam alanlarınıza uyum sağlayan sevilen ürünleri keşfedin."
           products={cokSatanProducts}
           region={region}
         />
         <ShowcaseBlock
-          title="YENİ ÜRÜNLER"
-          subtitle="En son eklenen yeni nesil performanslı ürünleri keşfedin."
+          title="Yeni Ürünler"
+          subtitle="Evinize yeni bir dokunuş katacak ürünleri inceleyin."
           products={yeniUrunlerProducts}
           region={region}
         />
         <ShowcaseBlock
-          title="KAMPANYALI ÜRÜNLER"
-          subtitle="Kaçırılmayacak indirimli fırsat ve avantajlı kampanya ürünleri."
+          title="Kampanyalı Ürünler"
+          subtitle="Eviniz için seçili ürünlerdeki fırsatları keşfedin."
           products={kampanyaliProducts}
           region={region}
         />
@@ -282,7 +285,7 @@ export default function FeaturedTabs({
             <div>
               <h2
                 id="featured-products-title"
-                className="overflow-visible pb-0.5 pt-px text-xl font-black uppercase leading-[1.2] tracking-tight text-slate-900"
+                className="overflow-visible pb-0.5 pt-px text-xl font-semibold normal-case leading-[1.2] tracking-tight text-slate-900"
               >
                 {sectionTitle}
               </h2>

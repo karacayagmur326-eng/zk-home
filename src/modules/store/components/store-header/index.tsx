@@ -54,12 +54,7 @@ export default function StoreHeader({
       return <span>“{searchQuery}” arama sonuçları</span>
     }
     if (title) {
-      return (
-        <>
-          <span className="text-[#C98484] font-black">{title}</span>{" "}
-          <span className="text-gray-900">Ürünleri</span>
-        </>
-      )
+      return <span className="text-[#C98484] font-semibold">{title}</span>
     }
     return <span>Tüm Ürünler</span>
   }
@@ -68,20 +63,22 @@ export default function StoreHeader({
     <div className="relative z-30 flex flex-row items-center justify-between mb-2 sm:mb-7 my-1 sm:my-0 py-2.5 px-3.5 sm:p-4.5 sm:px-6 bg-white sm:bg-white border-y sm:border sm:border-slate-200/80 -mx-4 sm:mx-0 w-[calc(100%+2rem)] sm:w-full shadow-2xs sm:shadow-2xs sm:rounded-2xl gap-3">
       <div className="min-w-0 flex-1">
         {headingLevel === 1 ? (
-          <h1 data-testid="store-page-title" className="font-bold text-gray-900 text-sm sm:text-2xl mb-0.5 sm:mb-1 uppercase tracking-tight line-clamp-1">
+          <h1 data-testid="store-page-title" className="font-semibold text-gray-900 text-sm sm:text-2xl mb-0.5 sm:mb-1 normal-case tracking-tight line-clamp-1">
             {renderTitleContent()}
           </h1>
         ) : (
-          <h2 data-testid="store-page-title" className="font-bold text-gray-900 text-sm sm:text-2xl mb-0.5 sm:mb-1 uppercase tracking-tight line-clamp-1">
+          <h2 data-testid="store-page-title" className="font-semibold text-gray-900 text-sm sm:text-2xl mb-0.5 sm:mb-1 normal-case tracking-tight line-clamp-1">
             {renderTitleContent()}
           </h2>
         )}
-        <p className="text-[11px] sm:text-sm text-slate-500 font-bold">
-          {productCount || "0"} ürün bulundu
-        </p>
+        {Boolean(productCount) && (
+          <p className="text-[11px] sm:text-sm text-slate-500 font-medium">
+            {productCount} ürün bulundu
+          </p>
+        )}
       </div>
 
-      <div className="flex items-center gap-3 shrink-0">
+      {Boolean(productCount) && <div className="flex items-center gap-3 shrink-0">
         {/* Unified Sorting Select (Right side of Tüm Ürünler on mobile) */}
         <div className="flex items-center gap-2">
           <span className="hidden text-sm font-medium text-gray-500 md:inline">Sırala:</span>
@@ -158,7 +155,7 @@ export default function StoreHeader({
             </button>
           </div>
         </div>
-      </div>
+      </div>}
     </div>
   )
 }

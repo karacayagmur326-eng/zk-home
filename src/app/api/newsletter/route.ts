@@ -20,5 +20,8 @@ export async function POST(request: NextRequest) {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return NextResponse.json({ error: "Geçerli bir e-posta adresi girin." }, { status: 400 })
   await query(`CREATE TABLE IF NOT EXISTS newsletter_subscribers (email TEXT PRIMARY KEY, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW())`)
   await query("INSERT INTO newsletter_subscribers (email) VALUES ($1) ON CONFLICT (email) DO NOTHING", [email])
+  if (request.headers.get("accept")?.includes("application/json")) {
+    return NextResponse.json({ success: true })
+  }
   return NextResponse.redirect(new URL("/blog?abonelik=basarili", request.url), 303)
 }

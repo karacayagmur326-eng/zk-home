@@ -7,7 +7,8 @@ import { AppIcon } from "@lib/icons"
 import { SellerQuestionButton } from "@components/common/SellerQuestion"
 import type { FaqCategory, FaqEntry } from "@lib/content/knowledge-pages"
 
-const ITEMS_PER_PAGE = 25
+// Keep every answer in the rendered page so category and search content is crawlable.
+const ITEMS_PER_PAGE = 100
 
 export default function FaqContent({ content }: { content: Record<string, any> }) {
   const categories = (content.faq_categories || []) as FaqCategory[]
@@ -52,7 +53,7 @@ export default function FaqContent({ content }: { content: Record<string, any> }
   const telHref = `tel:${rawPhone.replace(/\D/g, "")}`
   const supportEmail = String(content.support_email || "")
   const mailtoHref = `mailto:${supportEmail}`
-  const mapAddress = ""
+  const mapAddress = String(content.support_address || "")
   const mapUrl = `https://maps.google.com/?q=${encodeURIComponent(mapAddress)}`
 
   return (
@@ -68,7 +69,7 @@ export default function FaqContent({ content }: { content: Record<string, any> }
               setSearchQuery(e.target.value)
               setVisibleCount(ITEMS_PER_PAGE)
             }}
-            placeholder="Sıkça sorulan sorular içerisinde arayın (Örn: matkap, kargo, tork, garanti...)"
+            placeholder="Sorularda ara (ör. yemek takımı, nevresim, kargo, iade...)"
             className="w-full rounded-2xl border border-slate-200 bg-white py-3 sm:py-3.5 pl-10 sm:pl-12 pr-16 text-xs sm:text-sm text-slate-900 shadow-xs transition placeholder:text-slate-400 focus:border-[#C98484] focus:outline-hidden focus:ring-2 focus:ring-rose-100"
           />
           {searchQuery && (
@@ -95,8 +96,8 @@ export default function FaqContent({ content }: { content: Record<string, any> }
               }}
               className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-3.5 pr-8 text-xs font-extrabold text-slate-800 shadow-xs appearance-none focus:border-[#C98484] focus:outline-none"
             >
-              <option value="">Tüm Kategori Soruları ({items.length})</option>
-              {categories
+              <option value="">Tüm sorular ({items.filter((item) => item.active !== false).length})</option>
+              {[...categories]
                 .sort((a, b) => a.sort_order - b.sort_order)
                 .map((cat) => {
                   const count = categoryCounts[cat.id] || 0
@@ -125,9 +126,9 @@ export default function FaqContent({ content }: { content: Record<string, any> }
                 : "border-slate-200 bg-white text-slate-700 hover:border-rose-200"
             }`}
           >
-            Tüm Sorular ({items.length})
+            Tüm sorular ({items.filter((item) => item.active !== false).length})
           </button>
-          {categories
+          {[...categories]
             .sort((a, b) => a.sort_order - b.sort_order)
             .map((category) => {
               const count = categoryCounts[category.id] || 0

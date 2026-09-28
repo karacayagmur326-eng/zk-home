@@ -12,6 +12,7 @@ export const dynamic = "force-dynamic"
 
 interface PageProps {
   params: Promise<{ slug: string }>
+  searchParams: Promise<Record<string, string | string[] | undefined>>
 }
 
 import { getThemeSettings } from "@lib/content/theme-settings"
@@ -20,11 +21,24 @@ import { getBaseURL } from "@lib/util/env"
 import { sanitizePublicHtml } from "@lib/security/html"
 import { isPublicContentPath } from "@lib/seo/indexing"
 import { getPublicPageAliases } from "@lib/seo/page-aliases"
+import { getCategoryByHandle } from "@lib/data/categories"
+import { categoryPath } from "@lib/seo/category"
+import CategoryTemplate from "@modules/categories/templates"
+import { generateMetadata as getCategoryMetadata } from "../kategoriler/[...category]/page"
+import { parseOptionValueIds } from "@lib/util/product-option-filters"
+import type { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
   const { slug } = await params
   if (slug.startsWith("_") || slug === "api" || slug === "admin" || slug.includes(".")) {
     return { title: "Sayfa" }
+  }
+  const category = await getCategoryByHandle([slug])
+  if (category && categoryPath(category) === `/${slug}`) {
+    return getCategoryMetadata({
+      params: Promise.resolve({ category: [slug] }),
+      searchParams,
+    })
   }
   const [rows, settings] = await Promise.all([
     query<{ content: any }>(
@@ -68,7 +82,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-export default async function DynamicSlugPage({ params }: PageProps) {
+export default async function DynamicSlugPage({ params, searchParams }: PageProps) {
   const { slug } = await params
 
   // Exclude system static paths and Next.js internal routes
@@ -81,6 +95,23 @@ export default async function DynamicSlugPage({ params }: PageProps) {
     slug.includes(".")
   ) {
     notFound()
+  }
+
+  const category = await getCategoryByHandle([slug])
+  if (category && categoryPath(category) === `/${slug}`) {
+    const filters = await searchParams
+    return <CategoryTemplate
+      category={category}
+      countryCode="tr"
+      sortBy={filters.sortBy as SortOptions | undefined}
+      page={typeof filters.page === "string" ? filters.page : undefined}
+      optionValueIds={parseOptionValueIds(filters)}
+      collectionId={filters.collection_id}
+      hideOutOfStock={typeof filters.hide_out_of_stock === "string" ? filters.hide_out_of_stock : undefined}
+      priceMin={typeof filters.price_min === "string" ? filters.price_min : undefined}
+      priceMax={typeof filters.price_max === "string" ? filters.price_max : undefined}
+      viewMode={typeof filters.viewMode === "string" ? filters.viewMode : undefined}
+    />
   }
 
   // 1. Fetch store settings for custom slugs

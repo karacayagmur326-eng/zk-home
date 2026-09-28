@@ -89,7 +89,7 @@ export default function PromoBanner({
           />
           <div>
             <p className="text-xs font-semibold opacity-80">ÜYEYE ÖZEL</p>
-            <p className="mt-1 text-lg font-black uppercase leading-tight">
+            <p className="mt-1 text-lg font-semibold normal-case leading-tight">
               Fırsatları kaçırma
             </p>
           </div>

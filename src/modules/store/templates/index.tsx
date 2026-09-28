@@ -26,7 +26,7 @@ const StoreTemplate = async ({
   page?: string
   countryCode: string
   optionValueIds?: OptionValueIds
-  collectionId?: string
+  collectionId?: string | string[]
   hideOutOfStock?: string
   priceMin?: string
   priceMax?: string

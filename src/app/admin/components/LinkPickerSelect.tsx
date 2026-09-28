@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react"
 import { RefreshCw } from "@lib/icons"
+import { categoryPath } from "@lib/seo/category"
 
 export interface LinkOption {
   label: string
@@ -68,7 +69,7 @@ export default function LinkPickerSelect({
         const catList: LinkOption[] = []
         const rawCats = catData.categories || navData.categories || []
         for (const cat of rawCats) {
-          const url = `/kategoriler/${cat.handle || cat.id}`
+          const url = cat.handle ? categoryPath(cat) : `/kategoriler/${cat.id}`
           const image =
             cat.metadata?.card_image_url ||
             cat.metadata?.image_url ||

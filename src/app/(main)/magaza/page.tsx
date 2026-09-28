@@ -19,7 +19,7 @@ export async function generateMetadata({ searchParams }: Params): Promise<Metada
 type StorePageSearchParams = Record<string, string | string[] | undefined> & {
   sortBy?: SortOptions
   page?: string
-  collection_id?: string
+  collection_id?: string | string[]
   hide_out_of_stock?: string
   optionValueIds?: string | string[]
   price_min?: string

@@ -1,4 +1,5 @@
 import { retrieveCustomer } from "@lib/data/customer"
+import { getThemeSettings } from "@lib/content/theme-settings"
 // TODO: Re-add Toaster component when needed
 import AccountLayout from "@modules/account/templates/account-layout"
 import { Metadata } from "next"
@@ -24,10 +25,13 @@ export default async function AccountPageLayout({
   dashboard?: React.ReactNode
   login?: React.ReactNode
 }) {
-  const customer = await retrieveCustomer().catch(() => null)
+  const [customer, themeSettings] = await Promise.all([
+    retrieveCustomer().catch(() => null),
+    getThemeSettings(),
+  ])
 
   return (
-    <AccountLayout customer={customer}>
+    <AccountLayout customer={customer} logoUrl={themeSettings?.footer_logo_url || "/brand/zkhome-logo.svg"}>
       {customer ? dashboard : login}
       {/* TODO: Re-add Toaster component when needed */}
     </AccountLayout>

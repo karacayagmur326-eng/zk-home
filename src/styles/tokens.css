@@ -1,16 +1,16 @@
 :root {
   color-scheme: light;
   --font-family-body:
-    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    var(--font-plus-jakarta-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-family-heading:
-    Georgia, "Times New Roman", serif;
+    var(--font-plus-jakarta-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-family-section:
-    Georgia, "Times New Roman", serif;
+    var(--font-plus-jakarta-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-family-display:
-    Georgia, "Times New Roman", serif;
+    var(--font-plus-jakarta-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --slider-font-title:
-    Georgia, "Times New Roman", serif;
-  --slider-font-desc: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    var(--font-plus-jakarta-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --slider-font-desc: var(--font-plus-jakarta-sans), -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
   --font-family-mono:
     "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;

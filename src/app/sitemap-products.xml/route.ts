@@ -3,6 +3,7 @@ import { ensureCommerceSchema } from "@lib/commerce/schema"
 import { getBaseURL } from "@lib/util/env"
 import { NextResponse } from "next/server"
 import { escapeXml, lastModifiedXml } from "@lib/seo/indexing"
+import { isStoreReady } from "@lib/security/store-readiness"
 
 export const dynamic = "force-dynamic"
 
@@ -15,7 +16,7 @@ export async function GET() {
      WHERE status = 'published' AND deleted_at IS NULL ORDER BY updated_at DESC`
   )
 
-  const xmlRows = products.map(
+  const xmlRows = (isStoreReady() ? products : []).map(
     (product) => `  <url>
     <loc>${escapeXml(`${baseUrl}/urunler/${product.handle}`)}</loc>
     ${lastModifiedXml(product.updated_at)}

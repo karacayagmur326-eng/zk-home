@@ -61,7 +61,7 @@ export const listProducts = async ({
     status: String(queryParams?.status || "published"),
     categoryId: categorySingle || (categoryVals?.length === 1 ? categoryVals[0] : categoryVals?.[0]),
     categoryIds: categoryMultiple,
-    collectionId: String(queryParams?.collection_id || "") || undefined,
+    collectionIds: values(queryParams?.collection_id),
     ids: values(queryParams?.id),
     handles: values(queryParams?.handle),
     tagIds: values(queryParams?.tag_id),

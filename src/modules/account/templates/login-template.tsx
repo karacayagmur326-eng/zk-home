@@ -1,6 +1,8 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
+import { X } from "lucide-react"
 import Register from "@modules/account/components/register"
 import Login from "@modules/account/components/login"
 import { SellerQuestionButton } from "@components/common/SellerQuestion"
@@ -91,7 +93,15 @@ const LoginTemplate = () => {
         </div>
 
         {/* Form Area - Full Width on Mobile, Right 8-Cols on Desktop */}
-        <div className="w-full lg:col-span-8 p-4 sm:p-10 lg:p-12 flex flex-col justify-center">
+        <div className="relative w-full lg:col-span-8 p-4 pt-14 sm:p-10 lg:p-12 flex flex-col justify-center">
+          <Link
+            href="/"
+            aria-label="Giriş ve üyelik ekranını kapat"
+            title="Kapat"
+            className="absolute right-4 top-3 grid h-9 w-9 place-items-center rounded-full border border-slate-200 bg-white text-slate-600 transition-colors hover:border-[#C98484] hover:text-[#a45d5f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C98484] sm:hidden"
+          >
+            <X className="h-5 w-5" aria-hidden="true" />
+          </Link>
           {/* Top Segmented Tab Switcher */}
           <div className="flex items-center justify-around border-b border-slate-100 mb-6">
             <button

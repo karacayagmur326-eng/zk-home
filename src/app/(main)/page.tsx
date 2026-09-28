@@ -1,4 +1,4 @@
-import { HeroSlider, CategoryStrip, FeaturedTabs } from "@modules/home/components/desktop-home-components"
+import { HeroSlider, CategoryStrip } from "@modules/home/components/desktop-home-components"
 import { getRegion } from "@lib/data/regions"
 import { listCategories } from "@lib/data/categories"
 import { listProducts } from "@lib/data/products"
@@ -14,11 +14,14 @@ import { Metadata } from "next"
 import { getBaseURL } from "@lib/util/env"
 import { getThemeSettings } from "@lib/content/theme-settings"
 import { serializeJsonLd } from "@lib/security/html"
+import { query } from "@lib/admin/db"
+import { defaultHomeEditorialContent, type HomeEditorialContent } from "@lib/content/home-editorial"
+import HomeEditorial, { type HomeArticle } from "@modules/home/components/home-editorial"
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getThemeSettings()
   const title = "ZK Home | Online Mağaza"
-  const description = "ZK Home online mağazası. Yeni ürünler ve içerikler hazırlanıyor."
+  const description = "ZK Home'da ev dekorasyonu, sofra ve ev tekstili için ilham veren kategorileri keşfedin. Yaşam alanınıza iyi gelen dokunuşları bulun."
   return {
     title: { absolute: title }, description,
     alternates: { canonical: getBaseURL() },
@@ -47,6 +50,12 @@ export default async function Home() {
   const regionPromise = getRegion(countryCode).catch(() => null)
   const mobileSettingsPromise = getMobileSettings()
   const categoriesPromise = listCategories().catch(() => [])
+  const editorialPromise = query<{ content: Partial<HomeEditorialContent> }>(
+    "SELECT content FROM homepage_editorial WHERE id = 'main' LIMIT 1"
+  ).then((rows) => ({ ...defaultHomeEditorialContent, ...(rows[0]?.content || {}) })).catch(() => defaultHomeEditorialContent)
+  const articlesPromise = query<HomeArticle>(
+    "SELECT id, title, slug, excerpt, image, published_at FROM blog_posts WHERE status = 'published' ORDER BY featured DESC, published_at DESC, created_at DESC LIMIT 3"
+  ).catch(() => [])
   // Phone home uses the slides from mobile settings, not the desktop slider.
   const slidersPromise = mobileSettingsPromise.then((settings) =>
     isPhoneRequest && settings.enabled
@@ -67,12 +76,14 @@ export default async function Home() {
       .catch(() => ({ region, products: [] }))
   })
 
-  const [mobileSettings, categories, sliders, productsData] =
+  const [mobileSettings, categories, sliders, productsData, editorialContent, articles] =
     await Promise.all([
       mobileSettingsPromise,
       categoriesPromise,
       slidersPromise,
       productsPromise,
+      editorialPromise,
+      articlesPromise,
     ])
 
   const region = productsData.region
@@ -87,10 +98,7 @@ export default async function Home() {
     return (
       <><HomeStructuredData /><MobileHomeExperience
         settings={mobileSettings}
-        products={initialProducts}
-        region={region}
-        categories={categories}
-      /></>
+      /><HomeEditorial content={editorialContent} products={initialProducts} region={region} articles={articles} /></>
     )
   }
 
@@ -101,9 +109,6 @@ export default async function Home() {
         <MobileHomeExperience
           prioritizeHero={false}
           settings={mobileSettings}
-          products={initialProducts}
-          region={region}
-          categories={categories}
         />
       )}
       <div className={mobileSettings.enabled ? "hidden md:block" : "block"}>
@@ -111,14 +116,8 @@ export default async function Home() {
       </div>
       <div className={`bg-[#f6f7f8] ${mobileSettings.enabled ? "hidden md:block" : "block"}`}>
         <CategoryStrip categories={categories} />
-        <div className="content-container pb-8">
-          <FeaturedTabs
-            region={region}
-            countryCode={countryCode}
-            initialProducts={initialProducts}
-          />
-        </div>
       </div>
+      <HomeEditorial content={editorialContent} products={initialProducts} region={region} articles={articles} />
     </>
   )
 }

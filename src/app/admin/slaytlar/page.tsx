@@ -6,6 +6,7 @@ import MediaSelectorModal from "../components/MediaSelectorModal"
 import IconPickerModal from "../components/IconPickerModal"
 import HeroSlider from "@modules/home/components/hero-slider"
 import { AppIcon, Wrench, Trash2, Pencil, Copy, Plus, Save, Image as ImageIcon } from "@lib/icons"
+import { categoryPath } from "@lib/seo/category"
 
 // SVG Icons matching backend sliders page
 function DynamicIcon({ name, className = "w-4 h-4 text-[#C98484]", style }: { name: string; className?: string; style?: React.CSSProperties }) {
@@ -235,6 +236,8 @@ function ColorPickerPopover({ color, onChange, pickerId, activePicker, setActive
 }
 
 const SLIDER_FONT_OPTIONS = [
+  { value: "Plus Jakarta Sans", label: "Plus Jakarta Sans (Önerilen)" },
+  { value: "Playfair Display", label: "Playfair Display" },
   { value: "Barlow Condensed", label: "Barlow Condensed" },
   { value: "Inter", label: "Inter" },
   { value: "Arial", label: "Arial" },
@@ -352,7 +355,7 @@ export default function SlidersPage() {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
   const [formData, setFormData] = useState<any>({
     title: "",
-    heading: "|#FFFFFF|70px|Barlow Condensed|600",
+    heading: "|#FFFFFF|70px|Plus Jakarta Sans|600",
     subheading: "|14px|Inter|400",
     description: "",
     badge_text: "|16px|Inter|600",
@@ -507,12 +510,12 @@ export default function SlidersPage() {
       order_index: slider.order_index || 1
     })
 
-    if (slider.button_link?.startsWith("/categories/") || slider.button_link?.startsWith("/kategoriler/")) setLinkType1("category")
+    if (slider.button_link?.startsWith("/categories/") || slider.button_link?.startsWith("/kategoriler/") || categories.some((category) => categoryPath(category) === slider.button_link)) setLinkType1("category")
     else if (slider.button_link?.startsWith("/urunler/")) setLinkType1("product")
     else if (pages.some(page => page.url === slider.button_link)) setLinkType1("page")
     else setLinkType1("custom")
 
-    if (slider.button2_link?.startsWith("/categories/") || slider.button2_link?.startsWith("/kategoriler/")) setLinkType2("category")
+    if (slider.button2_link?.startsWith("/categories/") || slider.button2_link?.startsWith("/kategoriler/") || categories.some((category) => categoryPath(category) === slider.button2_link)) setLinkType2("category")
     else if (slider.button2_link?.startsWith("/urunler/")) setLinkType2("product")
     else if (pages.some(page => page.url === slider.button2_link)) setLinkType2("page")
     else setLinkType2("custom")
@@ -525,7 +528,7 @@ export default function SlidersPage() {
     setEditingTopFeatureIdx(null)
     setFormData({
       title: "",
-      heading: "|#FFFFFF|70px|Barlow Condensed|600",
+      heading: "|#FFFFFF|70px|Plus Jakarta Sans|600",
       subheading: "|14px|Inter|400",
       description: "",
       badge_text: "|16px|Inter|600",
@@ -735,7 +738,7 @@ export default function SlidersPage() {
   const descriptionParts = String(formData.subheading || "").split("|")
   const badgeFontFamily = badgeParts[2] || "Inter"
   const badgeFontWeight = badgeParts[3] || "600"
-  const headingFontFamily = firstHeadingParts[3] || "Barlow Condensed"
+  const headingFontFamily = firstHeadingParts[3] || "Plus Jakarta Sans"
   const headingFontWeight = firstHeadingParts[4] || "600"
   const descriptionFontFamily = descriptionParts[2] || "Inter"
   const descriptionFontWeight = descriptionParts[3] || "400"
@@ -750,7 +753,7 @@ export default function SlidersPage() {
             line,
             partIndex,
             value,
-            ["", "#FFFFFF", "70px", "Barlow Condensed", "600"]
+            ["", "#FFFFFF", "70px", "Plus Jakarta Sans", "600"]
           )
         )
         .join("\n"),
@@ -1351,7 +1354,7 @@ export default function SlidersPage() {
                       >
                         <option value="">Kategori Seçin...</option>
                         {categories.map((c) => (
-                          <option key={c.id} value={`/kategoriler/${c.handle}`}>{c.name} ({c.handle})</option>
+                          <option key={c.id} value={categoryPath(c)}>{c.name} ({c.handle})</option>
                         ))}
                       </select>
                     ) : linkType1 === "product" ? (
@@ -1426,7 +1429,7 @@ export default function SlidersPage() {
                       >
                         <option value="">Kategori Seçin...</option>
                         {categories.map((c) => (
-                          <option key={c.id} value={`/kategoriler/${c.handle}`}>{c.name} ({c.handle})</option>
+                          <option key={c.id} value={categoryPath(c)}>{c.name} ({c.handle})</option>
                         ))}
                       </select>
                     ) : linkType2 === "product" ? (

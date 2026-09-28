@@ -12,7 +12,9 @@ interface CategoryItem {
   id: string
   name: string
   handle: string
+  url: string
   icon?: string
+  children?: CategoryItem[]
 }
 
 interface MenuItem {
@@ -25,7 +27,7 @@ interface MenuSection {
   items: MenuItem[]
 }
 
-export default function MobileSiteChrome({ settings }: { settings: MobileSettings }) {
+export default function MobileSiteChrome({ settings, logoUrl }: { settings: MobileSettings; logoUrl: string }) {
   const pathname = usePathname()
   const router = useRouter()
   const [searchOpen, setSearchOpen] = useState(false)
@@ -139,13 +141,19 @@ export default function MobileSiteChrome({ settings }: { settings: MobileSetting
       .then((data: any) => {
         if (cancelled) return
         const catList: CategoryItem[] = []
-        for (const cat of data?.categories || []) {
-          catList.push({
+        const mapCategory = (cat: any): CategoryItem => ({
             id: cat.id,
             name: cat.name || cat.title || cat.handle,
             handle: cat.handle || cat.id,
+            url: cat.metadata?.pretty_url === true ? `/${cat.handle}` : `/kategoriler/${cat.handle}`,
             icon: cat.metadata?.card_image_url || cat.metadata?.icon || cat.icon || "",
+            children: (cat.category_children || []).map(mapCategory),
           })
+        for (const cat of data?.categories || []) {
+          catList.push(mapCategory(cat))
+        }
+        if ((data?.collections || []).some((brand: any) => brand.metadata?.active !== false)) {
+          catList.push({ id: "brands", name: "Markalar", handle: "markalar", url: "/markalar", icon: "/category-icons/markalar.svg" })
         }
         setCategories(catList)
         if (data?.kurumsal) setKurumsal(data.kurumsal)
@@ -161,6 +169,30 @@ export default function MobileSiteChrome({ settings }: { settings: MobileSetting
   }, [menuOpen, categoriesLoaded])
 
   if (!settings.enabled) return null
+
+  const renderCategoryItems = (items: CategoryItem[], depth = 0): React.ReactNode =>
+    items.map((cat) => {
+      const hasChildren = Boolean(cat.children?.length)
+      const key = `category-${cat.id}`
+      const expanded = Boolean(openSections[key])
+      return <div key={cat.id} className={depth ? "ml-4 border-l border-slate-100 pl-2" : ""}>
+        <div className="flex items-center gap-1">
+          <Link href={cat.url} onClick={() => setMenuOpen(false)}
+            className="group flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-2 py-1.5 text-[11.5px] font-bold text-slate-800 hover:bg-rose-50 hover:text-[#C98484]">
+            {depth === 0 && <span className="grid h-6 w-6 shrink-0 place-items-center overflow-hidden rounded-full border border-slate-200 bg-slate-100/80">
+              <AppIcon name={cat.icon || "Tag"} className="h-3.5 w-3.5 object-contain" />
+            </span>}
+            <span className="truncate">{cat.name}</span>
+          </Link>
+          {hasChildren && <button type="button" aria-label={`${cat.name} alt kategorilerini ${expanded ? "kapat" : "aç"}`}
+            aria-expanded={expanded} onClick={() => toggleSection(key)}
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-slate-500 hover:bg-rose-50 hover:text-[#C98484]">
+            <ChevronRight className={`h-4 w-4 transition-transform ${expanded ? "rotate-90" : ""}`} />
+          </button>}
+        </div>
+        {hasChildren && expanded && renderCategoryItems(cat.children || [], depth + 1)}
+      </div>
+    })
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -218,7 +250,7 @@ export default function MobileSiteChrome({ settings }: { settings: MobileSetting
           {/* Logo (Consistent h-8 w-32 size across all mobile screens) */}
           <Link href="/" className="relative h-8 w-32 shrink-0 flex items-center justify-center">
             <Image
-              src={settings.logoUrl || "/brand/zkhome-logo.svg"}
+              src={logoUrl}
               alt="ZK Home"
               width={128}
               height={32}
@@ -297,7 +329,7 @@ export default function MobileSiteChrome({ settings }: { settings: MobileSetting
             <div className="flex h-[56px] items-center justify-between border-b border-slate-100 bg-slate-50 px-3.5">
               <Link href="/" onClick={() => setMenuOpen(false)} className="relative h-7 w-28 flex items-center justify-center">
                 <Image
-                  src={settings.logoUrl || "/brand/zkhome-logo.svg"}
+                  src={logoUrl}
                   alt="ZK Home"
                   width={112}
                   height={28}
@@ -361,28 +393,7 @@ export default function MobileSiteChrome({ settings }: { settings: MobileSetting
                 </div>
 
                 <div className="space-y-0.5">
-                  {categories.map((cat) => (
-                    <Link
-                      key={cat.id}
-                      href={`/kategoriler/${cat.handle}`}
-                      onClick={() => setMenuOpen(false)}
-                      className="flex items-center justify-between rounded-lg px-2 py-1.5 text-[11.5px] font-bold text-slate-800 hover:bg-rose-50 hover:text-[#C98484] transition-colors group"
-                    >
-                      <div className="flex items-center gap-2.5">
-                        {cat.icon ? (
-                          <div className="grid h-6 w-6 place-items-center rounded-full bg-slate-100/80 border border-slate-200/50 group-hover:bg-rose-100/50 group-hover:border-rose-200 transition-colors overflow-hidden shrink-0">
-                            <AppIcon name={cat.icon} className="h-3.5 w-3.5 object-contain text-slate-700 group-hover:text-[#C98484]" />
-                          </div>
-                        ) : (
-                          <div className="grid h-6 w-6 place-items-center rounded-full bg-slate-100/80 border border-slate-200/50 text-slate-500 group-hover:bg-rose-100/50 group-hover:border-rose-200 group-hover:text-[#C98484] transition-colors shrink-0">
-                            <AppIcon name="Tag" className="h-3 w-3" />
-                          </div>
-                        )}
-                        <span className="truncate">{cat.name}</span>
-                      </div>
-                      <AppIcon name="ChevronRight" className="h-3.5 w-3.5 text-slate-300 group-hover:text-[#C98484] transition-colors shrink-0" />
-                    </Link>
-                  ))}
+                  {renderCategoryItems(categories)}
                 </div>
               </div>
 

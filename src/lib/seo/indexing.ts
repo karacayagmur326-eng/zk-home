@@ -12,10 +12,10 @@ export function isPrivatePath(pathname: string): boolean {
 }
 
 export function isSearchOrFilterPage(pathname: string, params: URLSearchParams): boolean {
-  if (!/^\/(magaza|kategoriler|markalar|blog)(\/|$)/.test(pathname)) return false
+  if (isPrivatePath(pathname)) return false
   return ["q", "search", "sortBy", "collection_id", "hide_out_of_stock", "optionValueIds",
     "price_min", "price_max", "viewMode", "kategori"].some((key) => params.has(key)) ||
-    Array.from(params.keys()).some((key) => key.startsWith("option_"))
+    Array.from(params.keys()).some((key) => key.startsWith("option_") || key.startsWith("utm_"))
 }
 
 export function isPublicContentPath(path: string): boolean {

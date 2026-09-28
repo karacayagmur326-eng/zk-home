@@ -2,6 +2,7 @@ import { query } from "@lib/admin/db"
 import { getBaseURL } from "@lib/util/env"
 import { NextResponse } from "next/server"
 import { escapeXml, lastModifiedXml } from "@lib/seo/indexing"
+import { isStoreReady } from "@lib/security/store-readiness"
 
 export const dynamic = "force-dynamic"
 
@@ -42,7 +43,7 @@ export async function GET() {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
-${[mainBlogXml, ...postXmlRows].join("\n")}
+${(isStoreReady() ? [mainBlogXml, ...postXmlRows] : []).join("\n")}
 </urlset>`
 
   return new NextResponse(xml, {

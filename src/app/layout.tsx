@@ -1,6 +1,6 @@
 import { getBaseURL, getCanonicalURL } from "@lib/util/env"
 import { Metadata, Viewport } from "next"
-import { Barlow_Condensed, Inter } from "next/font/google"
+import { Barlow_Condensed, Inter, Playfair_Display, Plus_Jakarta_Sans } from "next/font/google"
 import Script from "next/script"
 import "styles/globals.css"
 import { ThemeProvider } from "@modules/layout/components/theme-provider"
@@ -15,6 +15,7 @@ import ChatbotWidget from "@components/common/ChatbotWidget"
 import { getChatbotSettings } from "@lib/chatbot/settings"
 import { serializeJsonLd } from "@lib/security/html"
 import { omitStandardGa4Snippet } from "@lib/util/analytics-snippet"
+import { isStoreReady } from "@lib/security/store-readiness"
 
 
 const inter = Inter({
@@ -31,6 +32,18 @@ const barlowCondensed = Barlow_Condensed({
   preload: false,
   variable: "--font-barlow-condensed",
   weight: ["300", "400", "500", "600", "700", "800", "900"],
+})
+
+const playfairDisplay = Playfair_Display({
+  subsets: ["latin", "latin-ext"],
+  display: "swap",
+  variable: "--font-playfair-display",
+})
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin", "latin-ext"],
+  display: "swap",
+  variable: "--font-plus-jakarta-sans",
 })
 
 export const viewport: Viewport = {
@@ -78,7 +91,7 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 
   const indexing =
-    settings?.seo_indexing_enabled !== false &&
+    isStoreReady() && settings?.seo_indexing_enabled === true &&
     process.env.VERCEL_ENV !== "preview"
 
   return {
@@ -128,13 +141,13 @@ export default async function RootLayout({
 }) {
   const settings = (await getThemeSettings()) || {
     logo_text: "ZK HOME",
-    font_family: "Inter",
+    font_family: "Plus Jakarta Sans",
     font_size_base: "16px",
     h1_size: "2.5rem",
     h2_size: "2rem",
     h3_size: "1.75rem",
     h4_size: "1.5rem",
-    slider_font_title: "Barlow Condensed",
+    slider_font_title: "Plus Jakarta Sans",
     slider_font_desc: "Inter",
     seo_meta_title:
       "ZK Home | Online Mağaza",
@@ -197,7 +210,7 @@ export default async function RootLayout({
   return (
     <html
       lang="tr"
-      className={`${inter.variable} ${barlowCondensed.variable}`}
+      className={`${inter.variable} ${barlowCondensed.variable} ${playfairDisplay.variable} ${plusJakartaSans.variable}`}
       suppressHydrationWarning
     >
       <head>
@@ -239,7 +252,7 @@ export default async function RootLayout({
         className="antialiased overflow-x-hidden max-w-full"
         style={{
           fontFamily:
-            "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+            "var(--font-plus-jakarta-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
         }}
       >
         {/* Raw admin snippets may contain complete script tags. Rendering their

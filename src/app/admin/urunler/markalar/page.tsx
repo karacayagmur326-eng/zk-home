@@ -25,6 +25,9 @@ interface Brand {
   updated_at?: string
   metadata?: {
     description?: string
+    seo_title?: string
+    seo_description?: string
+    is_indexable?: boolean
     logo_url?: string
     active?: boolean
     featured?: boolean
@@ -44,6 +47,9 @@ export default function BrandsPage() {
   const [name, setName] = useState("")
   const [handle, setHandle] = useState("")
   const [description, setDescription] = useState("")
+  const [seoTitle, setSeoTitle] = useState("")
+  const [seoDescription, setSeoDescription] = useState("")
+  const [isIndexable, setIsIndexable] = useState(false)
   const [logoUrl, setLogoUrl] = useState("")
   const [active, setActive] = useState(true)
   const [featured, setFeatured] = useState(true)
@@ -96,6 +102,9 @@ export default function BrandsPage() {
       metadata: {
         ...existingMetadata,
         description: description.trim(),
+        seo_title: seoTitle.trim(),
+        seo_description: seoDescription.trim(),
+        is_indexable: isIndexable,
         logo_url: logoUrl,
         active,
         featured,
@@ -117,6 +126,9 @@ export default function BrandsPage() {
     setName("")
     setHandle("")
     setDescription("")
+    setSeoTitle("")
+    setSeoDescription("")
+    setIsIndexable(false)
     setLogoUrl("")
     setActive(true)
     setFeatured(true)
@@ -139,6 +151,9 @@ export default function BrandsPage() {
     setName(b.title)
     setHandle(b.handle)
     setDescription(b.metadata?.description || "")
+    setSeoTitle(b.metadata?.seo_title || "")
+    setSeoDescription(b.metadata?.seo_description || "")
+    setIsIndexable(b.metadata?.is_indexable === true)
     setLogoUrl(b.metadata?.logo_url || "")
     setActive(b.metadata?.active !== false)
     setFeatured(b.metadata?.featured !== false)
@@ -151,6 +166,9 @@ export default function BrandsPage() {
     setName("")
     setHandle("")
     setDescription("")
+    setSeoTitle("")
+    setSeoDescription("")
+    setIsIndexable(false)
     setLogoUrl("")
     setActive(true)
     setFeatured(true)
@@ -283,6 +301,22 @@ export default function BrandsPage() {
                 rows={4}
                 className="w-full px-3.5 py-3 rounded-xl border border-slate-200 bg-slate-50/50 font-semibold text-slate-900 outline-none focus:border-[#C98484] focus:bg-white transition-all placeholder:text-slate-400 resize-y"
               />
+            </div>
+
+            <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
+              <h3 className="font-extrabold">Marka SEO</h3>
+              <label className="block">SEO Başlığı
+                <input value={seoTitle} onChange={(event) => setSeoTitle(event.target.value)}
+                  className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2" />
+              </label>
+              <label className="block">Meta Açıklaması
+                <textarea value={seoDescription} onChange={(event) => setSeoDescription(event.target.value)} rows={3}
+                  className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2" />
+              </label>
+              <label className="flex items-center gap-2">
+                <input type="checkbox" checked={isIndexable} onChange={(event) => setIsIndexable(event.target.checked)} />
+                İndekslemeye aday olsun
+              </label>
             </div>
 
             <ImagePickerField

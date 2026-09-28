@@ -15,6 +15,8 @@ import { isStoreReady, sanitizePublicSettings } from "@lib/security/store-readin
 import { User, Heart, ShoppingCart, AppIcon } from "@lib/icons"
 import { getThemeSettings } from "@lib/content/theme-settings"
 import { retrieveCustomer } from "@lib/data/customer"
+import { categoryPath } from "@lib/seo/category"
+import type { NavigationItem } from "@lib/types/navigation"
 
 export default async function Nav() {
   const [
@@ -46,10 +48,23 @@ export default async function Nav() {
     retrieveCustomer().catch(() => null),
   ])
   const publicThemeSettings = sanitizePublicSettings(themeSettings)
+  const brandLogoUrl = themeSettings?.footer_logo_url || "/brand/zkhome-logo.svg"
+  const isAdminCustomer = (customer as { role?: string } | null)?.role === "Admin"
+  const accountLabel = isAdminCustomer ? "Admin" : customer?.first_name || "Hesabım"
+  const accountTitle = isAdminCustomer
+    ? "Admin hesabı"
+    : customer?.first_name
+      ? `${customer.first_name} ${customer.last_name || ""}`.trim()
+      : customer?.email || "Hesabım"
 
-  const activeCategoryHandles = new Set(
-    activeCategories.map((category) => category.handle),
-  )
+  const activeCategoryHandles = new Set<string>()
+  const collectHandles = (categories: typeof activeCategories) => {
+    for (const category of categories) {
+      activeCategoryHandles.add(category.handle)
+      collectHandles(category.category_children as typeof activeCategories || [])
+    }
+  }
+  collectHandles(activeCategories)
 
   const categoryMap = new Map<string, StoreProductCategory>()
   const buildCategoryMap = (cats: StoreProductCategory[]) => {
@@ -120,9 +135,23 @@ export default async function Nav() {
         }
       })
 
-  const visibleHeaderMenu = headerMenu
+  const categoryMenuItem = (category: (typeof activeCategories)[number]): NavigationItem => {
+    const metadata = (category.metadata || {}) as Record<string, unknown>
+    return {
+      id: category.id,
+      label: category.name,
+      url: categoryPath(category),
+      type: "category",
+      imageUrl: typeof metadata.card_image_url === "string" ? metadata.card_image_url : undefined,
+      description: category.description || undefined,
+      children: (category.category_children || []).map((child) => categoryMenuItem(child as typeof category)),
+    }
+  }
+  const categoryMenu = activeCategories.map(categoryMenuItem)
+  categoryMenu.push({ id: "brands", label: "Markalar", url: "/markalar", type: "page", children: [] })
+  const visibleHeaderMenu = headerMenu?.items?.length
     ? { ...headerMenu, items: filterAndEnrichMenuCategories(headerMenu.items) }
-    : null
+    : { items: categoryMenu }
 
   let topBarColor = "#C98484"
   let topBarFeatures = [
@@ -213,65 +242,13 @@ export default async function Nav() {
               className="hover:opacity-80 transition-opacity flex items-center gap-3 shrink-0"
               data-testid="nav-store-link"
             >
-              {themeSettings?.header_logo_url ? (
-                <>
-                  {themeSettings.header_logo_dark_url &&
-                  !themeSettings.header_logo_dark_url.includes("1784456767796-") ? (
-                    <>
-                      <img
-                        src={themeSettings.header_logo_url}
-                        alt={
-                          themeSettings.header_logo_alt ||
-                          themeSettings.logo_text ||
-                          "Logo"
-                        }
-                        width={220}
-                        height={50}
-                        style={{
-                          height: `${themeSettings?.header_logo_height || 40}px`,
-                        }}
-                        className="w-auto object-contain transition-all dark:hidden"
-                      />
-                      <img
-                        src={themeSettings.header_logo_dark_url}
-                        alt={
-                          themeSettings.header_logo_alt ||
-                          themeSettings.logo_text ||
-                          "Logo"
-                        }
-                        width={220}
-                        height={50}
-                        style={{
-                          height: `${themeSettings?.header_logo_height || 40}px`,
-                        }}
-                        className="w-auto object-contain transition-all hidden dark:block"
-                      />
-                    </>
-                  ) : (
-                    <img
-                      src={themeSettings.header_logo_url}
-                      alt={
-                        themeSettings.header_logo_alt ||
-                        themeSettings.logo_text ||
-                        "Logo"
-                      }
-                      width={220}
-                      height={50}
-                      style={{
-                        height: `${themeSettings?.header_logo_height || 40}px`,
-                      }}
-                      className="w-auto object-contain transition-all"
-                    />
-                  )}
-                </>
-              ) : (
-                <span
-                  className="font-black text-lg tracking-widest leading-none text-foreground sm:text-xl xl:text-[26px] truncate"
-                  style={{ letterSpacing: "0.12em" }}
-                >
-                  {themeSettings?.logo_text || "ZK HOME"}
-                </span>
-              )}
+              <img
+                src={brandLogoUrl}
+                alt={themeSettings?.footer_logo_alt || themeSettings?.logo_text || "ZK Home"}
+                width={220}
+                height={50}
+                className="h-9 w-auto max-w-[190px] object-contain sm:h-10 xl:max-w-[220px]"
+              />
             </LocalizedClientLink>
           </div>
 
@@ -305,17 +282,17 @@ export default async function Nav() {
             <div className="hidden h-full items-center gap-0.5 sm:gap-1 lg:flex">
               {customer ? (
                 <LocalizedClientLink
-                  aria-label={`Hesabım (${customer.first_name || customer.email})`}
-                  title={`Hesabım: ${customer.first_name ? `${customer.first_name} ${customer.last_name || ""}` : customer.email}`}
+                  aria-label={`Hesabım (${accountTitle})`}
+                  title={`Hesabım: ${accountTitle}`}
                   className="flex items-center gap-1.5 pl-1 pr-2.5 h-8 xl:h-9 rounded-full bg-[#C98484] text-white shadow-sm hover:bg-[#A95E5E] transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
                   href="/hesabim"
                   data-testid="nav-account-link"
                 >
                   <div className="flex h-6 w-6 xl:h-7 xl:w-7 items-center justify-center rounded-full bg-white/20 text-white font-extrabold text-[11px]">
-                    {customer.first_name ? customer.first_name.charAt(0).toUpperCase() : <User className="w-3.5 h-3.5 text-white" />}
+                    {accountLabel ? accountLabel.charAt(0).toUpperCase() : <User className="w-3.5 h-3.5 text-white" />}
                   </div>
                   <span className="text-xs font-extrabold max-w-[90px] truncate hidden 2xl:inline">
-                    {customer.first_name || "Hesabım"}
+                    {accountLabel}
                   </span>
                 </LocalizedClientLink>
               ) : (

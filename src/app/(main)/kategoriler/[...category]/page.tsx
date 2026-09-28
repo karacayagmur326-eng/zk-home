@@ -1,8 +1,7 @@
 import { Metadata } from "next"
-import { notFound } from "next/navigation"
+import { notFound, permanentRedirect } from "next/navigation"
 
-import { getCategoryByHandle, listCategories } from "@lib/data/categories"
-import { HttpTypes } from "@medusajs/types"
+import { getCategoryByHandle } from "@lib/data/categories"
 import CategoryTemplate from "@modules/categories/templates"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import { parseOptionValueIds } from "@lib/util/product-option-filters"
@@ -13,7 +12,7 @@ type Props = {
     Record<string, string | string[] | undefined> & {
       sortBy?: SortOptions
       page?: string
-      collection_id?: string
+      collection_id?: string | string[]
       hide_out_of_stock?: string
       price_min?: string
       price_max?: string
@@ -28,6 +27,8 @@ import { getThemeSettings } from "@lib/content/theme-settings"
 import { renderSeoTemplate } from "@lib/seo/templates"
 import { getBaseURL } from "@lib/util/env"
 import { paginatedPath } from "@lib/seo/indexing"
+import { categoryIndexable, categoryPath, categorySeoText } from "@lib/seo/category"
+import { isStoreReady } from "@lib/security/store-readiness"
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params
@@ -59,15 +60,16 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       settings?.seo_category_desc_template ||
       "En kaliteli %kategori% çeşitleri uygun fiyatlar, taksit seçenekleri ve hızlı kargo avantajıyla %site_adi% üzerinde!"
 
-    const title = renderSeoTemplate(titleTemplate, tokens)
-    const description =
-      productCategory.description || renderSeoTemplate(descTemplate, tokens)
+    const customSeo = categorySeoText(productCategory)
+    const title = customSeo.title || renderSeoTemplate(titleTemplate, tokens)
+    const description = customSeo.description || productCategory.description || renderSeoTemplate(descTemplate, tokens)
 
     return {
       title: { absolute: title },
       description,
+      robots: { index: isStoreReady() && categoryIndexable(productCategory), follow: true },
       alternates: {
-        canonical: getBaseURL() + paginatedPath(`/kategoriler/${params.category.join("/")}`, page),
+        canonical: getBaseURL() + paginatedPath(categoryPath(productCategory), page),
       },
     }
   } catch {
@@ -93,6 +95,10 @@ export default async function CategoryPage(props: Props) {
 
   if (!productCategory) {
     notFound()
+  }
+
+  if (categoryPath(productCategory) !== `/kategoriler/${params.category.join("/")}`) {
+    permanentRedirect(categoryPath(productCategory))
   }
 
   return (

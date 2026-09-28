@@ -1,0 +1,154 @@
+{
+  "categories": [
+    {
+      "id": "yemek-takimlari", "title": "Yemek takımları", "icon": "/category-icons/yemek-takimlari.svg", "linkUrl": "/mutfak-sofra/yemek-takimlari", "linkText": "Yemek takımlarını incele",
+      "questions": [
+        ["Yemek takımı alırken nelere dikkat edilmeli?", "Önce kaç kişilik bir takım gerektiğini ve günlük kullanım mı misafir sofrası mı kuracağınızı belirleyin. Ardından parça içeriğini, tabak ölçülerini, malzemeyi ve ürünün kendi bakım talimatını karşılaştırın."],
+        ["6 kişilik yemek takımı kaç parçadan oluşur?", "6 kişilik takımların parça sayısı modele göre değişir. Örneğin 24 parçalık bir takımda kişi başı servis tabağı, çukur tabak, tatlı tabağı ve kase bulunabilir; satın almadan önce ürün içeriğini kontrol edin."],
+        ["12 kişilik yemek takımı kimler için uygundur?", "Kalabalık aileler ve sık misafir ağırlayanlar için 12 kişilik takım pratik olabilir. Saklama alanınız sınırlıysa daha küçük bir günlük takım ve ihtiyacınıza göre tamamlayıcı parçalar da düşünebilirsiniz."],
+        ["Porselen ve stoneware yemek takımı arasındaki fark nedir?", "Porselen genellikle daha ince ve zarif bir görünüm sunar; stoneware ise doğal dokulu, daha tok bir sofra etkisi verir. Dayanıklılık ve kullanım özellikleri ürünün üretimine bağlı olduğundan açıklamayı inceleyin."],
+        ["Günlük kullanım için hangi yemek takımı seçilmeli?", "Günlük kullanımda kolay temizlenen, rahat istiflenen ve mevcut sofranızla uyumlu parçalar işinizi kolaylaştırır. Bulaşık makinesi uygunluğu gibi bakım bilgilerini ürün bazında kontrol edin."],
+        ["Çeyizlik yemek takımı kaç kişilik olmalı?", "Bu seçim evdeki kişi sayısına, misafir sıklığına ve dolap alanına bağlıdır. Sık davet veriyorsanız 12 kişilik; daha esnek bir başlangıç istiyorsanız 6 kişilik takım ve ek servis parçaları tercih edebilirsiniz."],
+        ["Yemek takımı parçaları tek tek tamamlanabilir mi?", "Bazı koleksiyonlarda tabak, kase veya servis parçaları ayrı satılır; her seride stok ve uyumluluk aynı değildir. Takımın seri adı, renk tonu ve ölçüsünü eşleştirerek ürün sayfalarını kontrol edin."],
+        ["Yemek takımı bulaşık makinesinde yıkanır mı?", "Her takım için tek bir kural yoktur. Altın veya metal detaylı, özel sırlı ya da elde boyanmış ürünlerde bakım farklılaşabilir; ürün sayfasındaki ve ambalajdaki talimatı esas alın."],
+        ["Mikrodalgaya uygun yemek takımı nasıl anlaşılır?", "Mikrodalga uygunluğu yalnızca malzeme adına bakılarak kesinleştirilemez. Ürünün açıklamasında veya alt işaretinde açık bir uygunluk bilgisi arayın; metal yaldızlı parçaları özellikle kontrol edin."],
+        ["Yemek takımı rengini sofra dekorasyonuna göre nasıl seçerim?", "Beyaz ve nötr tonlar farklı masa örtüsü ve aksesuarlarla kolay eşleşir. Renkli bir takım seçiyorsanız mevcut bardak, çatal bıçak ve servis parçalarıyla birlikte görünümünü düşünün."]
+      ]
+    },
+    {
+      "id": "kahvalti-servis", "title": "Kahvaltı ve servis", "icon": "/category-icons/servis-sunum.svg", "linkUrl": "/mutfak-sofra/servis-sunum", "linkText": "Servis ürünlerini incele",
+      "questions": [
+        ["Kahvaltı takımı seçerken nelere bakılmalı?", "Takımın kaç kişilik olduğunu, tabak ve kaselerin gerçek ölçülerini, reçellik veya zeytinlik gibi ek parçaları kontrol edin. Günlük kullanım için temizleme ve dolapta saklama kolaylığı da önemlidir."],
+        ["6 kişilik kahvaltı takımı kaç parçadır?", "Parça sayısı sabit değildir; bazı takımlarda tabak ve kaseler, bazılarında sunumluklar da yer alır. İlan başlığındaki sayı yerine ürünün tek tek listelenen içeriğine bakın."],
+        ["Kahvaltı takımı ile yemek takımı arasındaki fark nedir?", "Kahvaltı takımı genellikle küçük tabak ve çoklu sunum kaplarıyla kahvaltı düzenine odaklanır. Yemek takımı ise ana yemek, çorba ve tatlı servisi için kişi bazlı parçalardan oluşur."],
+        ["Kahvaltı sofrasında hangi servis ürünleri kullanılır?", "Tabak ve kaselere ek olarak peynirlik, reçellik, servis tabağı ve tepsi düzen kurmayı kolaylaştırır. İhtiyaç duyduğunuz parçaları sofradaki kişi sayısına göre seçin."],
+        ["Servis tabağı ile yemek tabağı arasındaki fark nedir?", "Yemek tabağı kişisel porsiyon için kullanılır; servis tabağı ortak yiyecekleri sofraya taşımak veya sunmak içindir. İkisini seçerken çap ve masa üzerindeki alanı karşılaştırın."],
+        ["Sunum tepsisi seçerken hangi ölçüye bakılmalı?", "Tepsinin dış ölçüsü kadar kullanılabilir iç yüzeyi ve taşıyacağınız fincan ya da tabakların taban ölçüleri önemlidir. Saplı bir model alıyorsanız dolapta kaplayacağı alanı da kontrol edin."],
+        ["Ahşap servis ürünleri nasıl temizlenir?", "Ahşap ürünleri uzun süre suda bekletmeden, yumuşak bir bezle temizleyip tamamen kurutmak genellikle uygundur. Yağlama veya makine kullanımı için ürünün kendi bakım talimatına uyun."],
+        ["Cam servis ürünleri sıcak yiyeceğe uygun mudur?", "Her cam ürün ısıya dayanıklı değildir. Sıcak servis veya fırın kullanımı düşünüyorsanız açıklamada açıkça belirtilen ısı uygunluğunu ve sıcaklık sınırını kontrol edin."],
+        ["Kahvaltı takımına uygun tepsi nasıl seçilir?", "Takımın renk ve malzemesini tamamlayan bir tepsi görünümü bütünler. Bir arada taşınacak parça sayısını ölçerek tepsinin iç yüzeyinde yeterli boşluk kaldığından emin olun."],
+        ["Servis ve sunum ürünleri hediye olarak alınır mı?", "Sunum tabağı, tepsi ve kaseler ev hediyesi için sık tercih edilen seçeneklerdir. Alıcının evindeki renkleri ve kullanım alışkanlığını biliyorsanız daha isabetli bir seçim yapabilirsiniz."]
+      ]
+    },
+    {
+      "id": "fincan-bardak", "title": "Fincan ve bardaklar", "icon": "/category-icons/kahve-fincanlari.svg", "linkUrl": "/mutfak-sofra/kahve-fincanlari", "linkText": "Kahve fincanlarını incele",
+      "questions": [
+        ["Türk kahvesi fincanı kaç ml olmalı?", "Türk kahvesi fincanlarında kapasite modele göre değişir; yaklaşık 75–90 ml seçenekler yaygındır. Köpük ve sunum tercihinize göre ürünün belirtilen hacmini kontrol edin."],
+        ["Kahve fincanı ile kupa arasındaki fark nedir?", "Kahve fincanları genellikle daha küçük porsiyonlu içecekler için, kupalar daha büyük hacimli içecekler için tasarlanır. Seçimde fincanın gerçek ml değeri ve tutuş rahatlığı belirleyicidir."],
+        ["Porselen kahve fincanı nasıl seçilir?", "Fincanın hacmine, kulp rahatlığına, tabakla uyumuna ve bakım talimatına bakın. Türk kahvesi, espresso veya filtre kahve için beklenen porsiyon farklı olduğundan kullanım amacını önce belirleyin."],
+        ["Çay fincanı mı çay bardağı mı tercih edilmeli?", "İki seçenek de sunum tarzına göre uygundur. Geleneksel ince belli bardak görünümünü veya kulplu fincan konforunu tercih edebilirsiniz; kapasite ve ısıya uygunluk bilgilerini karşılaştırın."],
+        ["Kupa bardak kaç ml olmalı?", "Kupa hacmi içeceğin türüne ve tek seferde içmek istediğiniz miktara bağlıdır. Ürün sayfasındaki kapasiteyi mevcut kullandığınız bardakla karşılaştırmak en kolay seçim yoludur."],
+        ["Cam bardak alırken nelere dikkat edilmeli?", "Günlük kullanımda hacim, ağız kalınlığı, elde tutuş ve istiflenebilirlik önemlidir. Bulaşık makinesi ve sıcak içecek uygunluğunu ürün bazında kontrol edin."],
+        ["Su bardağı ile meşrubat bardağı arasındaki fark nedir?", "Ürün adları kullanım önerisini anlatır; kesin bir ölçü standardı değildir. İçeceği nasıl servis edeceğinize göre ml kapasitesi, yükseklik ve ağız çapını inceleyin."],
+        ["Kadeh seçerken hangi ölçüye bakılır?", "Kadehin hacmi, yüksekliği ve dolap rafınıza sığıp sığmayacağı pratik fark yaratır. İnce gövdeli modellerde yıkama ve saklama talimatına da göz atın."],
+        ["Fincan ve bardaklarda renkli desenler nasıl korunur?", "Desenin uzun ömürlü kalması için üreticinin yıkama önerisini izleyin. Özellikle metal detay ve baskılı yüzeylerde makine uygunluğunu varsaymayın."],
+        ["Kahve fincanı takımı kaç kişilik alınmalı?", "Evde düzenli kahve içen kişi sayısı ve misafir alışkanlığına göre 2, 4 veya 6 kişilik seçenekleri değerlendirin. Takımdaki fincan ve tabak adetlerini ürün içeriğinden doğrulayın."]
+      ]
+    },
+    {
+      "id": "ev-dekorasyonu", "title": "Ev dekorasyonu", "icon": "/category-icons/dekorasyon.svg", "linkUrl": "/dekorasyon", "linkText": "Dekorasyonu keşfet",
+      "questions": [
+        ["Ev dekorasyonuna nereden başlanmalı?", "Önce odanın kullanımını, ölçülerini ve mevcut renklerini belirleyin. Ardından vazo, kırlent veya duvar objesi gibi az sayıda tamamlayıcı parçayla bir odak noktası oluşturun."],
+        ["Küçük salon nasıl dekore edilir?", "Geçiş alanını açık bırakıp ölçek olarak odaya uygun aksesuarlar seçin. Açık tonlar, ayna ve düzenli yerleşim daha ferah bir görünüm yaratmaya yardımcı olabilir."],
+        ["Dekoratif vazo nasıl seçilir?", "Vazonun yüksekliğini koyacağınız yüzey ve kullanacağınız dal ya da çiçekle birlikte düşünün. Canlı çiçek kullanacaksanız vazonun suya uygun olup olmadığını kontrol edin."],
+        ["Vazo ile yapay çiçek nasıl kombinlenir?", "Çiçek saplarının boyunu vazonun yüksekliğiyle dengeleyin; çok geniş bir vazoda az sayıda dal boş görünebilir. Renkleri odadaki bir veya iki tonla ilişkilendirmek bütünlük sağlar."],
+        ["Duvar dekorasyonu için doğru boyut nasıl seçilir?", "Objenin kaplayacağı alanı duvarda işaretleyerek mobilyayla oranını kontrol edin. Asma tipi, ağırlık ve duvar malzemesine uygun bağlantı gereksinimlerini ürün bilgileriyle karşılaştırın."],
+        ["Konsol üstü dekorasyonu nasıl yapılır?", "Farklı yükseklikte vazo, mumluk veya küçük objeleri dengeli gruplandırın. Yüzeyi tamamen doldurmadan boşluk bırakmak parçaların daha rahat görünmesini sağlar."],
+        ["Modern ve sade dekorasyon için hangi renkler uygundur?", "Krem, bej, kırık beyaz ve sıcak gri gibi nötr tonlar sade bir temel kurar. Dokuyu seramik, cam veya tekstille çeşitlendirip tek bir vurgu rengi ekleyebilirsiniz."],
+        ["Dekoratif obje seçerken nelere dikkat edilmeli?", "Objenin ölçüsü, ağırlığı, malzemesi ve konacağı yüzeyle uyumu önemlidir. Çocuk veya evcil hayvan bulunan alanlarda yerleşim güvenliğini de hesaba katın."],
+        ["Mevsime göre ev dekorasyonu nasıl yenilenir?", "Büyük mobilyaları değiştirmeden kırlent kılıfı, masa tekstili ve küçük dekoratif objelerin renklerini yenileyebilirsiniz. Parçaları saklama kolaylığına göre seçin."],
+        ["Ev hediyesi olarak hangi dekoratif ürünler seçilebilir?", "Nötr renkli vazo, tepsi veya küçük dekoratif obje birçok stile uyarlanabilir. Hediye alacağınız kişinin evinde kullanacağı alanı ve ürün ölçüsünü düşünün."]
+      ]
+    },
+    {
+      "id": "mum-oda-kokusu", "title": "Mum ve oda kokusu", "icon": "/category-icons/mum-oda-kokusu.svg", "linkUrl": "/dekorasyon/mum-oda-kokusu", "linkText": "Mum ve oda kokularını incele",
+      "questions": [
+        ["Oda kokusu seçerken nelere dikkat edilmeli?", "Kokunun yoğunluğunu, kullanılacak odanın büyüklüğünü ve kişisel koku tercihlerinizi düşünün. Ürün açıklamasındaki kullanım ve güvenlik talimatlarını uygulayın."],
+        ["Çubuklu oda kokusu nasıl kullanılır?", "Çubukları ürünün talimatına göre şişeye yerleştirin ve düz, korunaklı bir yüzey seçin. Dökülme ihtimali nedeniyle hassas mobilya yüzeyleri ve çocukların erişebileceği alanlardan uzak tutun."],
+        ["Çubuklu oda kokusu ne kadar dayanır?", "Kullanım süresi şişe hacmine, çubuk sayısına, hava akımına ve ortam sıcaklığına göre değişir. Kesin süre için ürünün açıklamasında verilen bilgiyi esas alın."],
+        ["Kokulu mum alırken nelere bakılmalı?", "Koku notaları, kap ölçüsü, yanma süresi ve bakım bilgilerini karşılaştırın. Mumu düz ve ısıya dayanıklı bir yüzeyde, gözetim altında kullanın."],
+        ["Mum nasıl güvenli kullanılır?", "Yanan mumu gözetimsiz bırakmayın; yanıcı eşyalardan ve çocukların erişiminden uzak tutun. Fitil ve kullanım süresi konusunda ürün etiketindeki talimatlara uyun."],
+        ["Küçük odalar için hangi oda kokusu uygundur?", "Küçük alanlarda daha hafif koku yoğunluğu veya daha az çubuk tercih edebilirsiniz; ürünün kullanım önerisi önceliklidir. İlk kullanımda kokuyu kısa süre gözlemleyerek ayarlayın."],
+        ["Mum ile oda kokusu birlikte kullanılır mı?", "Birlikte kullanılabilir; ancak yoğun kokuların karışması rahatsız edici olabilir. Önce birini deneyip ortamda nasıl hissedildiğine göre diğerini ekleyin."],
+        ["Mumluk seçerken hangi malzeme uygundur?", "Mumun ölçüsüne uygun ve ısıya dayanıklı olduğu belirtilen bir mumluk seçin. Dekoratif malzemenin doğrudan alevle temas etmemesine dikkat edin."],
+        ["Oda kokusu hediye olarak seçilirken neye bakılır?", "Koku zevki kişisel olduğu için hafif ve dengeli notalar daha esnek bir tercih olabilir. Alıcının koku hassasiyeti olup olmadığını bilmek seçimde yardımcı olur."],
+        ["Kokulu mum nasıl saklanır?", "Ürün etiketinde farklı bir yönlendirme yoksa serin, kuru ve doğrudan güneş almayan bir yerde saklayın. Tozlanmayı azaltmak için kapağını kapalı tutabilirsiniz."]
+      ]
+    },
+    {
+      "id": "nevresim-yatak", "title": "Nevresim ve yatak tekstili", "icon": "/category-icons/nevresim-takimlari.svg", "linkUrl": "/tekstil/yatak-odasi/nevresim-takimlari", "linkText": "Nevresim takımlarını incele",
+      "questions": [
+        ["Nevresim takımı seçerken nelere dikkat edilmeli?", "Yorgan ve yastık ölçülerini kontrol ederek başlayın. Kumaş içeriğini, dokuma tipini, takımda yer alan parça sayısını ve yıkama talimatını karşılaştırın."],
+        ["Tek kişilik nevresim ölçüsü nasıl seçilir?", "Yatağın ölçüsünden çok kullanacağınız yorganın ölçüsü belirleyicidir. Ürün sayfasındaki nevresim ve yastık kılıfı ebatlarını mevcut ürünlerinizle karşılaştırın."],
+        ["Çift kişilik nevresim ölçüsü nasıl seçilir?", "Çift kişilik yorganlarda farklı ebatlar bulunur; nevresimi yorganın gerçek en ve boyuna göre seçin. Lastikli çarşaf da alacaksanız yatak yüksekliğini ayrıca ölçün."],
+        ["Pamuklu nevresim takımının avantajı nedir?", "Pamuk, yumuşak ve nefes alabilen yapısıyla yaygın bir tercihtir. Konfor algısı dokuma sıklığı ve kumaş işlemesine göre değişir; ürün içeriğini ve bakım bilgisini inceleyin."],
+        ["Saten nevresim ile pamuklu nevresim arasındaki fark nedir?", "Saten bir dokuma veya yüzey hissini anlatabilir; pamuk ise elyaf türüdür. Pamuk saten bir ürün de mümkün olduğundan karar verirken malzeme yüzdesini ve dokuma bilgisini birlikte okuyun."],
+        ["Nevresim takımı kaç derecede yıkanır?", "Tek bir sıcaklık bütün kumaşlara uymaz. Renk, baskı ve kumaş karışımı değişebildiği için ürün etiketindeki sıcaklık ve kurutma talimatını izleyin."],
+        ["Nevresim takımı ilk kullanım öncesi yıkanmalı mı?", "Tekstil ürününü ilk kullanımdan önce etiketine uygun biçimde yıkamak tercih edilebilir. Renkli parçaları ayırın ve belirtilen deterjan, sıcaklık ve kurutma önerilerine uyun."],
+        ["Pike ile yatak örtüsü arasındaki fark nedir?", "Pike daha çok hafif bir örtünme katmanı olarak kullanılır; yatak örtüsü yatağın görünümünü tamamlamaya odaklanır. Malzeme ve kalınlık modele göre değişebilir."],
+        ["Yatak örtüsü ölçüsü nasıl hesaplanır?", "Yatağın en, boy ve yüksekliğini ölçün; örtünün yanlardan ne kadar sarkmasını istediğinizi ekleyin. Başlık ve baza yapısı da gerekli ölçüyü etkileyebilir."],
+        ["Mevsime göre yatak tekstili nasıl seçilir?", "Sıcak aylarda daha hafif ve nefes alan kumaşlar, serin aylarda katmanlı kullanım rahat gelebilir. Kumaş içeriğini ve kişisel ısı tercihlerinizi esas alın."]
+      ]
+    },
+    {
+      "id": "sofra-tekstili", "title": "Sofra tekstili ve kırlent", "icon": "/category-icons/masa-ortuleri.svg", "linkUrl": "/tekstil/sofra-tekstili/masa-ortuleri", "linkText": "Masa örtülerini incele",
+      "questions": [
+        ["Masa örtüsü ölçüsü nasıl seçilir?", "Masanın enini ve boyunu ölçün; istediğiniz sarkma payını iki tarafa ekleyin. Gündelik kullanımda yaklaşık 20–30 cm sarkma bir başlangıç noktası olabilir; masa biçimini de hesaba katın."],
+        ["Yuvarlak masa için örtü çapı nasıl hesaplanır?", "Masa çapını ölçüp istediğiniz sarkma uzunluğunu iki kez ekleyin. Örneğin 100 cm masa ve her yanda 20 cm sarkma için yaklaşık 140 cm çap gerekir."],
+        ["Runner ile masa örtüsü birlikte kullanılır mı?", "Evet, runner masa örtüsünün üstünde katman oluşturabilir. Ölçü ve desenlerin yarışmaması için birini daha sade seçmek dengeli bir görünüm sağlar."],
+        ["Runner ölçüsü nasıl seçilir?", "Masa boyunu ölçüp runnerın uçlardan sarkmasını isteyip istemediğinize karar verin. Kısa runner masa üzerinde kalır; uzun modelde iki uca sarkma payı eklenir."],
+        ["Amerikan servis ne işe yarar?", "Amerikan servis, tabak ve çatal bıçak için kişisel bir alan oluşturur ve masa düzenini tamamlar. Yüzey koruması malzemesine göre değişir; sıcak kap uygunluğunu kontrol edin."],
+        ["Kırlent ölçüsü nasıl seçilir?", "Koltuk veya yatağın boyutuna göre kırlentin enini ve yüksekliğini karşılaştırın. Büyük koltukta farklı ölçüleri katmanlamak, küçük alanda ise daha az parça kullanmak dengeli durabilir."],
+        ["Kırlent kılıfı ile iç yastık aynı ölçüde mi olmalı?", "Genellikle uyumlu ölçü tercih edilir; dolgunluk beklentisi iç dolgunun yapısına göre değişir. Kılıfın ürün ölçüsünü ve fermuar açıklığını kontrol edin."],
+        ["Masa örtüsü lekesi nasıl çıkarılır?", "Leke türü ve kumaş içeriği yöntemi değiştirir. Önce bakım etiketini okuyun; görünmeyen küçük bir alanda denemeden güçlü kimyasal veya yüksek ısı uygulamayın."],
+        ["Sofra tekstilinde keten mi pamuk mu seçilmeli?", "Keten ve pamuk farklı doku ve kırışma görünümü sunar; karışım kumaşlar da bulunur. Seçimi istediğiniz sofra tarzı, yıkama kolaylığı ve ürünün içerik bilgisine göre yapın."],
+        ["Masa örtüsü ve peçete renkleri nasıl eşleştirilir?", "Aynı rengin farklı tonları sakin bir sofra kurar; kontrast tonlar daha belirgin vurgu verir. Tabakların rengi ve masanın yüzeyiyle birlikte değerlendirin."]
+      ]
+    },
+    {
+      "id": "banyo-havlu", "title": "Banyo ve havlu", "icon": "/category-icons/banyo.svg", "linkUrl": "/banyo", "linkText": "Banyo ürünlerini incele",
+      "questions": [
+        ["Banyo havlusu seçerken nelere dikkat edilmeli?", "Havlunun ölçüsünü, kumaş içeriğini, dokusunu ve bakım talimatını karşılaştırın. Kalın havluların kuruma süresi ortam koşullarına göre değişebilir; kullanım alışkanlığınıza uygun modeli seçin."],
+        ["Pamuklu havlu neden tercih edilir?", "Pamuklu havlular yumuşak dokuları ve su emme özellikleri nedeniyle yaygın tercih edilir. Gerçek his, dokuma ve ürün işlemesine göre değiştiğinden açıklamayı inceleyin."],
+        ["Havlu gramajı neyi gösterir?", "Gramaj genellikle kumaşın metrekare başına ağırlığını belirtir; tek başına kalite ölçüsü değildir. Dokuma, elyaf ve kullanım amacıyla birlikte değerlendirmek daha doğru olur."],
+        ["El havlusu ile banyo havlusu arasındaki fark nedir?", "Temel fark ölçü ve kullanım alanıdır. El havlusu lavabo çevresinde, banyo havlusu duş sonrası vücudu kurulamak için kullanılır; ürün ebatlarını kontrol edin."],
+        ["Havlular ilk kullanımda nasıl yıkanır?", "İlk yıkamada ürün etiketindeki sıcaklık ve deterjan önerisine uyun. Renkli havluları açık renklerden ayırmak ve tamamen kurutmak kullanım açısından yararlıdır."],
+        ["Havlular neden sertleşir?", "Deterjan kalıntısı, yanlış dozaj veya uygun olmayan kurutma dokuyu etkileyebilir. Bakım etiketine uyarak durulama ve kurutma koşullarını gözden geçirin."],
+        ["Banyo seti seçerken neler ölçülmeli?", "Sabunluk, diş fırçalık veya diğer parçaların yerleşeceği lavabo alanını ölçün. Malzemenin nemli ortamda kullanım ve temizleme bilgilerini de inceleyin."],
+        ["Banyo paspası ölçüsü nasıl seçilir?", "Duş ya da küvet çıkışındaki kullanılabilir zemini ölçün; kapının rahat açıldığını kontrol edin. Kaymaz taban ve yıkama bilgilerini ürün bazında değerlendirin."],
+        ["Küçük banyo nasıl daha düzenli görünür?", "Tezgâh üstünde sık kullanılan birkaç parça bırakıp diğerlerini gruplandırın. Aynı renk ailesindeki havlu ve banyo aksesuarları görsel kalabalığı azaltabilir."],
+        ["Havlu seti hediye olarak alınır mı?", "Havlu setleri işlevsel bir ev hediyesi olabilir. Renk, ölçü, takım içeriği ve bakım kolaylığına göre seçim yapmak faydalıdır."]
+      ]
+    },
+    {
+      "id": "yapay-cicek-yilbasi", "title": "Yapay çiçek ve yılbaşı", "icon": "/category-icons/yapay-cicek-bitki.svg", "linkUrl": "/yapay-cicek-bitki", "linkText": "Yapay çiçekleri incele",
+      "questions": [
+        ["Yapay çiçek seçerken nelere dikkat edilmeli?", "Çiçeğin yüksekliğini, dal sayısını ve kullanacağınız vazoyla oranını inceleyin. Yakından görülecek bir alanda yaprak ve çiçek dokusu da seçimde önemlidir."],
+        ["Yapay çiçekler nasıl temizlenir?", "Önce üründeki bakım bilgisini okuyun. Çoğu dekoratif parçada yumuşak, kuru bir bez veya nazik bir toz fırçası kullanılabilir; suya uygunluğu varsaymayın."],
+        ["Yapay çiçek ve canlı çiçek birlikte kullanılır mı?", "Görsel olarak birlikte kullanılabilir; ancak canlı çiçek için su kullanacaksanız yapay parçanın ıslanma uygunluğunu kontrol edin. Aynı renk ailesi daha bütünlüklü görünür."],
+        ["Yapay ağaç boyu nasıl seçilir?", "Tavan yüksekliğini ve ağacın yerleştirileceği köşenin enini ölçün. Saksı ve yaprakların kaplayacağı alanı da hesaba katın."],
+        ["Vazo için yapay çiçek boyu ne olmalı?", "Vazonun boynu ve gövdesiyle dengeli duran dal uzunluğu seçin. Gerekiyorsa sapı ürüne zarar vermeden düzenleyebileceğiniz bir model tercih edin."],
+        ["Yapay çiçekler güneşte solar mı?", "Malzeme ve boya türüne göre uzun süre doğrudan güneş ışığı renkleri etkileyebilir. Ürünün bakım uyarısına uyun ve hassas parçaları yoğun güneşten koruyun."],
+        ["Yılbaşı ağacı süsü nasıl seçilir?", "Ağacın yüksekliğine ve dal yoğunluğuna göre süs boyutlarını karıştırın. Önce bir renk paleti seçmek, ışık ve süslerin birlikte daha düzenli görünmesini sağlar."],
+        ["Yılbaşı dekorasyonunda hangi renkler uyumludur?", "Kırmızı ve yeşil klasik; beyaz, altın veya doğal tonlar daha sakin bir görünüm oluşturur. İki veya üç ana renk seçmek süsleri bir arada tutar."],
+        ["Yılbaşı süsleri nasıl saklanmalı?", "Kırılabilir parçaları ayrı bölmelere yerleştirip kuru bir yerde saklayın. Işıkları gevşek biçimde sararak kabloyu zorlamamaya dikkat edin."],
+        ["Yılbaşı dekorasyonunda küçük alanlar nasıl değerlendirilir?", "Büyük bir ağaç yerine masa üstü süsler, küçük çelenk veya birkaç dekoratif dal kullanabilirsiniz. Geçiş alanlarını kapatmayacak ölçüler seçin."]
+      ]
+    },
+    {
+      "id": "siparis-destek", "title": "Sipariş ve destek", "icon": "package", "linkUrl": "/iletisim", "linkText": "Destek için iletişime geç",
+      "questions": [
+        ["Siparişimi nasıl takip edebilirim?", "Hesabınızdaki siparişler bölümünü kontrol edin. Siparişinize ait takip bilgisi görünmüyorsa sipariş numaranızla iletişim sayfasından destek isteyin."],
+        ["Sipariş verdikten sonra adresimi değiştirebilir miyim?", "Adres değişikliği, siparişin hazırlık ve kargo durumuna bağlıdır. Mümkün olup olmadığını öğrenmek için sipariş numaranızla en kısa sürede destek ekibine ulaşın."],
+        ["Siparişimi iptal edebilir miyim?", "İptal olanağı siparişin işlem durumuna göre değişebilir. Hesabınızdaki sipariş durumunu kontrol edip sipariş numaranızla destek ekibine başvurun."],
+        ["Kargo ücreti ne kadar?", "Kargo bedeli veya ücretsiz kargo koşulu teslimat adresi ve sepet içeriğine göre değişebilir. Geçerli tutarı ödeme öncesi sepet ve teslimat adımında kontrol edin."],
+        ["Siparişim ne zaman kargoya verilir?", "Hazırlık süresi ürün ve sipariş durumuna göre değişir. Sipariş ekranındaki güncel bilgiye bakın; gecikme veya özel bir talep için sipariş numaranızla destek alın."],
+        ["Hasarlı veya eksik ürün gelirse ne yapmalıyım?", "Paketi ve ürünü fotoğraflayıp sipariş numaranızla birlikte iletişim sayfasından bildirin. Kutuyu ve varsa irsaliye gibi belgeleri inceleme tamamlanana kadar saklayın."],
+        ["İnternetten alınan ürünlerde cayma hakkı kaç gündür?", "Türkiye'de mesafeli satışlarda genel cayma süresi, malın teslim alınmasından itibaren 14 gündür; kanuni istisnalar bulunabilir. Başvurunuzu ve ilgili koşulları iade sayfasından inceleyin."],
+        ["Ürün iadesini nasıl başlatabilirim?", "Sipariş numaranız ve iade etmek istediğiniz ürün bilgileriyle destek ekibine başvurun. Güncel iade adımları, gönderim yöntemi ve olası istisnalar için sitedeki iade koşullarını inceleyin."],
+        ["İade ücretim ne zaman geri ödenir?", "Yasal süreç ve ödeme yöntemi dikkate alınarak iade gerçekleştirilir; bankanın hesaba yansıtma süresi farklı olabilir. Başvurunuzun durumu için sipariş numaranızla destek ekibine ulaşın."],
+        ["Ürün stokta yoksa yeniden gelir mi?", "Yeniden stok durumu tedarike bağlıdır ve her ürün için garanti edilemez. Ürün sayfasını daha sonra kontrol edebilir veya benzer seçenekler için mağazaya göz atabilirsiniz."]
+      ]
+    }
+  ]
+}

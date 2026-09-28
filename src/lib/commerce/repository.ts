@@ -19,6 +19,10 @@ export function slugify(value: string) {
     .replace(/^-+|-+$/g, "")
 }
 
+export function categoryHandle(value: string) {
+  return value.split("/").map(slugify).filter(Boolean).join("/")
+}
+
 function publicUrl(value: unknown) {
   if (!value) return null
   return String(value)
@@ -142,6 +146,7 @@ export type ProductFilters = {
   categoryId?: string
   categoryIds?: string[]
   collectionId?: string
+  collectionIds?: string[]
   typeId?: string
   ids?: string[]
   handles?: string[]
@@ -205,7 +210,9 @@ export async function listStoreProducts(filters: ProductFilters = {}) {
         )
     )`)
   }
-  if (filters.collectionId)
+  if (filters.collectionIds?.length)
+    where.push(`p.collection_id = ANY(${add(filters.collectionIds)}::text[])`)
+  else if (filters.collectionId)
     where.push(`p.collection_id = ${add(filters.collectionId)}`)
   if (filters.typeId) where.push(`p.type_id = ${add(filters.typeId)}`)
   if (filters.categoryIds?.length) {
@@ -554,7 +561,13 @@ export async function restoreStoreProduct(id: string) {
 
 export async function listStoreCategories(activeOnly = false) {
   await ensureCommerceSchema()
-  const sql = `SELECT c.*,
+  const sql = `WITH RECURSIVE descendants(root_id, id) AS (
+       SELECT id, id FROM store_category
+       UNION ALL
+       SELECT d.root_id, child.id FROM store_category child
+       JOIN descendants d ON child.parent_id = d.id
+     )
+     SELECT c.*,
       COALESCE((
         SELECT COUNT(DISTINCT pc.product_id)
         FROM store_product_category pc
@@ -565,13 +578,13 @@ export async function listStoreCategories(activeOnly = false) {
         SELECT COUNT(DISTINCT pc.product_id)
         FROM store_product_category pc
         JOIN store_product p ON p.id = pc.product_id
-        WHERE (pc.category_id = c.id OR pc.category_id IN (SELECT id FROM store_category WHERE parent_id = c.id))
+        WHERE pc.category_id IN (SELECT id FROM descendants WHERE root_id = c.id)
           AND (p.status != 'archived' OR p.status IS NULL)
       ), 0)::int AS product_count,
       EXISTS (
         SELECT 1 FROM store_product_category pc
         JOIN store_product p ON p.id = pc.product_id
-        WHERE (pc.category_id = c.id OR pc.category_id IN (SELECT id FROM store_category WHERE parent_id = c.id))
+        WHERE pc.category_id IN (SELECT id FROM descendants WHERE root_id = c.id)
           AND p.status = 'published'
       ) AS has_products
      FROM store_category c
@@ -601,9 +614,18 @@ export async function listStoreCategories(activeOnly = false) {
   const byId = new Map(shaped.map((category) => [category.id, category]))
   for (const category of shaped) {
     if (category.parent_category_id) {
-      byId
-        .get(category.parent_category_id)
-        ?.category_children.push(category)
+      const parent = byId.get(category.parent_category_id)
+      if (parent) {
+        parent.category_children.push(category)
+        ;(category as typeof category & { parent_category?: Record<string, unknown> }).parent_category = {
+          id: parent.id,
+          name: parent.name,
+          handle: parent.handle,
+          metadata: parent.metadata,
+          parent_category_id: parent.parent_category_id,
+          parent_category: (parent as typeof parent & { parent_category?: Record<string, unknown> }).parent_category,
+        }
+      }
     }
   }
   return shaped
@@ -614,7 +636,7 @@ export async function createStoreCategory(body: any) {
   const id = createId("pcat")
   const name = String(body.name || "").trim()
   if (!name) throw new Error("Kategori adı zorunludur.")
-  const handle = slugify(body.handle || name) || id
+  const handle = categoryHandle(body.handle || name) || id
   const metadata = {
     ...(body.metadata || {}),
     ...(body.icon !== undefined ? { icon: body.icon } : {}),
@@ -664,7 +686,7 @@ export async function updateStoreCategory(id: string, body: any) {
        name=COALESCE($2,name),
        handle=COALESCE($3,handle),
        description=$4,
-       parent_id=CASE WHEN $5::text IS NOT NULL THEN $5::text ELSE parent_id END,
+       parent_id=CASE WHEN $8::boolean THEN $5::text ELSE parent_id END,
        active=COALESCE($6,active),
        metadata=COALESCE(metadata,'{}'::jsonb) || $7::jsonb,
        updated_at=NOW()
@@ -673,7 +695,7 @@ export async function updateStoreCategory(id: string, body: any) {
     [
       id,
       body.name || null,
-      body.handle ? slugify(body.handle) : null,
+      body.handle ? categoryHandle(body.handle) : null,
       body.description !== undefined ? body.description : null,
       body.parent_category_id !== undefined ? (body.parent_category_id || null) : null,
       body.is_active !== undefined ? Boolean(body.is_active) : (body.active !== undefined ? Boolean(body.active) : null),
@@ -683,6 +705,7 @@ export async function updateStoreCategory(id: string, body: any) {
           ...(body.icon !== undefined ? { icon: body.icon } : {}),
         }
       ),
+      body.parent_category_id !== undefined,
     ]
   )
   clearMemoryCache()
@@ -711,6 +734,10 @@ export async function updateStoreCategory(id: string, body: any) {
 
 export async function deleteStoreCategory(id: string) {
   await ensureCommerceSchema()
+  const children = await query<{ id: string }>(
+    `SELECT id FROM store_category WHERE parent_id=$1 LIMIT 1`, [id]
+  )
+  if (children.length) throw new Error("Önce bu kategorinin alt kategorilerini silin veya başka bir üst kategoriye taşıyın.")
   const rows = await query<{ id: string }>(
     `DELETE FROM store_category WHERE id=$1 RETURNING id`,
     [id]

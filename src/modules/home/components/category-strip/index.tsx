@@ -27,7 +27,9 @@ export default function CategoryStrip({
   }
 
   // Filter categories by metadata.show_on_homepage checkbox (true olanlar) and sort by homepage_order (1, 2, 3... first, 0 afterwards by name/rank)
-  const selectedCategories = categories
+  const flattenCategories = (items: HttpTypes.StoreProductCategory[]): HttpTypes.StoreProductCategory[] =>
+    items.flatMap((item) => [item, ...flattenCategories(item.category_children || [])])
+  const selectedCategories = flattenCategories(categories)
     .filter(
       (c) =>
         Boolean(c.metadata?.show_on_homepage) ||

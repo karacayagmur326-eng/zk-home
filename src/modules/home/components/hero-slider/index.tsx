@@ -7,8 +7,15 @@ import useEmblaCarousel from "embla-carousel-react"
 import Autoplay from "embla-carousel-autoplay"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { AppIcon, ArrowLeft, ArrowRight, Pause, Play } from "@lib/icons"
+import { turkishTitleCase } from "@lib/util/turkish-title-case"
+
+const EDITORIAL_HERO_IMAGE = "/hero/zkhome-panorama-v4.png"
 
 const SLIDER_FONT_STACKS: Record<string, string> = {
+  "Plus Jakarta Sans":
+    "var(--font-plus-jakarta-sans), 'Plus Jakarta Sans', Arial, sans-serif",
+  "Playfair Display":
+    "var(--font-playfair-display), 'Playfair Display', Georgia, serif",
   "Barlow Condensed":
     "var(--font-barlow-condensed), 'Barlow Condensed', 'Arial Narrow', sans-serif",
   Inter: "var(--font-inter), Inter, Arial, sans-serif",
@@ -400,53 +407,9 @@ export default function HeroSlider({
       })
         .then((res) => res.json())
         .then((data) => {
-          if (data.sliders && data.sliders.length > 0) {
-            setSliders(data.sliders)
-          } else {
-            setSliders([
-              {
-                id: "default-1",
-                badge_text: "ZK HOME",
-                heading: "YENİ MAĞAZAMIZ **HAZIRLANIYOR**",
-                subheading:
-                  "Ürünler, kategoriler ve kampanyalar yönetim panelinden eklenecektir.",
-                image_url: "",
-                bg_color: "#F7EFED",
-                button_text: "Ürünleri İncele",
-                button_link: "/magaza",
-                button_color: "#C98484",
-                button2_text: "Tüm Kampanyalar",
-                button2_link: "/magaza",
-                button2_color: "#1A1A1A",
-                text_color: "#312727",
-                features: JSON.stringify([]),
-                right_features: JSON.stringify([]),
-              },
-            ])
-          }
+          setSliders(Array.isArray(data.sliders) ? data.sliders : [])
         })
-        .catch(() => {
-          setSliders([
-            {
-              id: "default-1",
-              badge_text: "ZK HOME",
-              heading: "YENİ MAĞAZAMIZ **HAZIRLANIYOR**",
-              subheading:
-                "Ürünler, kategoriler ve kampanyalar yönetim panelinden eklenecektir.",
-              image_url: "",
-              bg_color: "#F7EFED",
-              button_text: "Ürünleri İncele",
-              button_link: "/magaza",
-              button_color: "#C98484",
-              button2_text: "Tüm Kampanyalar",
-              button2_link: "/magaza",
-              button2_color: "#1A1A1A",
-              text_color: "#312727",
-              features: JSON.stringify([]),
-              right_features: JSON.stringify([]),
-            },
-          ])
-        })
+        .catch(() => setSliders([]))
     }
   }, [])
 
@@ -508,11 +471,13 @@ export default function HeroSlider({
     const lines = text.split("\n")
     return lines.map((lineWithColor, lineIdx) => {
       const lineParts = lineWithColor.split("|")
-      const lineText = lineParts[0] || ""
+      const lineText = turkishTitleCase(lineParts[0] || "")
       const rawLineColor = lineParts[1] || defaultTextColor || "#FFFFFF"
       const lineColor = rawLineColor
       const lineSize = lineParts[2] || ""
-      const lineFontFamily = lineParts[3] || "Barlow Condensed"
+      const lineFontFamily = ["Barlow Condensed", "Playfair Display"].includes(lineParts[3])
+        ? "Plus Jakarta Sans"
+        : lineParts[3] || "Plus Jakarta Sans"
       const lineFontWeight = lineParts[4] || "600"
       const parts = lineText.split("**")
       return (
@@ -521,10 +486,10 @@ export default function HeroSlider({
           className={lineIdx > 0 ? "mt-1 sm:mt-1.5" : ""}
           style={{
             color: lineColor,
-            fontFamily: resolveSliderFont(lineFontFamily, "Barlow Condensed"),
+            fontFamily: resolveSliderFont(lineFontFamily, "Plus Jakarta Sans"),
             fontWeight: resolveSliderWeight(lineFontWeight, 600),
             fontSize: `clamp(1.1rem, 3.1vw, ${lineSize || "3.8rem"})`,
-            lineHeight: 0.98,
+            lineHeight: 1.12,
           }}
         >
           {parts.map((part, i) =>
@@ -642,6 +607,7 @@ export default function HeroSlider({
             transform: translate3d(0, 0, 0) scale(1);
           }
         }
+
         
         .zkhome-hero-slide-item {
           container-type: inline-size;
@@ -654,10 +620,10 @@ export default function HeroSlider({
 
         /* 1:1 Proportional Scaling System */
         .zkhome-heading {
-          font-family: var(--slider-font-title, 'Barlow Condensed'), 'Impact', 'Arial Black', sans-serif !important;
-          font-weight: 400 !important;
-          letter-spacing: 0.005em !important;
-          line-height: 0.98 !important;
+          font-family: var(--slider-font-title, Arial, sans-serif);
+          font-weight: 600;
+          letter-spacing: -0.035em;
+          line-height: 1.12;
           font-stretch: normal !important;
         }
 
@@ -764,6 +730,12 @@ export default function HeroSlider({
             -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
           }
         }
+        @media (min-width: 1900px) {
+          .zkhome-panorama-img {
+            mask-image: linear-gradient(to right, transparent 0%, black 18%);
+            -webkit-mask-image: linear-gradient(to right, transparent 0%, black 18%);
+          }
+        }
 
         @media (prefers-reduced-motion: reduce) {
           .zkhome-slider-motion,
@@ -854,17 +826,20 @@ export default function HeroSlider({
                 }
               >
                 {slider.image_url && (
-                  <div className="absolute inset-0 z-[1] flex items-center justify-center content-container overflow-hidden pointer-events-none">
+                  <div className={slider.image_url === EDITORIAL_HERO_IMAGE ? "absolute inset-0 z-[1] overflow-hidden pointer-events-none bg-[linear-gradient(180deg,#d1c3b6,#c3b5a7)]" : "absolute inset-0 z-[1] flex items-center justify-center content-container overflow-hidden pointer-events-none"}>
+                    <div className={slider.image_url === EDITORIAL_HERO_IMAGE ? "absolute inset-y-0 right-0 w-full min-[1900px]:w-[1860px]" : "absolute inset-0"}>
                     <Image
                       src={slider.image_url}
                       alt=""
                       fill
-                      sizes="(max-width: 640px) 100vw, (max-width: 1200px) 90vw, 1200px"
+                      sizes={slider.image_url === EDITORIAL_HERO_IMAGE ? "100vw" : "(max-width: 640px) 100vw, (max-width: 1200px) 90vw, 1200px"}
                       quality={75}
+                      unoptimized={slider.image_url === EDITORIAL_HERO_IMAGE}
                       priority={index === 0}
                       fetchPriority={index === 0 ? "high" : "auto"}
-                      className="object-contain object-center transition-transform [transition-duration:12s] hover:scale-102 mobile-hero-img opacity-100"
+                      className={slider.image_url === EDITORIAL_HERO_IMAGE ? "object-cover object-top min-[1900px]:object-[center_20%] zkhome-panorama-img opacity-100" : "object-contain object-center transition-transform [transition-duration:12s] hover:scale-102 mobile-hero-img opacity-100"}
                     />
+                    </div>
                   </div>
                 )}
                 {/* Mobile Gradient Overlay for text readability */}
@@ -914,7 +889,7 @@ export default function HeroSlider({
                         ?.split("\n")
                         .some((line: string) => line.split("|")[0]?.trim()) && (
                         <HeadingTag
-                          className="zkhome-heading max-w-full font-medium uppercase select-none sm:drop-shadow-sm sm:hover:scale-[1.01] cursor-default"
+                          className="zkhome-heading max-w-full font-medium normal-case select-none sm:drop-shadow-sm sm:hover:scale-[1.01] cursor-default"
                           style={{
                             animation: isActive
                               ? "drillHeading 1.1s cubic-bezier(0.25, 1, 0.5, 1) 0.1s forwards"

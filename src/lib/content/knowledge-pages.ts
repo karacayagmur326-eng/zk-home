@@ -33,14 +33,14 @@ export const defaultArticleCategories: ArticleCategory[] = []
 export const defaultArticles: ArticleEntry[] = []
 
 export const defaultFaqPageContent = {
-  title: "Sık Sorulan Sorular",
-  description: "Bu alan yönetim panelinden oluşturulacaktır.",
-  hero_text: "Sık sorulan sorular yakında burada yer alacak.",
+  title: "Sıkça Sorulan Sorular",
+  description: "Yemek takımları, ev dekorasyonu, nevresim, banyo ürünleri ve sipariş süreçleri hakkında sık sorulan soruların yanıtları.",
+  hero_text: "Sofra, dekorasyon, ev tekstili ve alışveriş hakkında merak ettiklerinizi keşfedin.",
   hero_image: "",
   faq_categories: defaultFaqCategories,
   faq_items: defaultFaqItems,
   support_title: "Destek",
-  support_description: "İletişim bilgileri yönetim panelinden eklenecektir.",
+  support_description: "Yanıtını bulamadığınız konular için bizimle iletişime geçin.",
   support_phone: "",
   support_email: "",
   support_address: "",
@@ -48,7 +48,7 @@ export const defaultFaqPageContent = {
   tracking_title: "Sipariş Takibi",
   tracking_description: "Siparişlerinizi hesabınızdan takip edebilirsiniz.",
   bottom_title: "Yardıma mı ihtiyacınız var?",
-  bottom_description: "Destek kanalları yakında eklenecektir.",
+  bottom_description: "Ürün veya siparişinizle ilgili daha fazla bilgi için bize ulaşın.",
 }
 
 export const defaultBlogPageContent = {

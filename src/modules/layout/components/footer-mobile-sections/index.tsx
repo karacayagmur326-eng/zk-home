@@ -72,7 +72,7 @@ export default function FooterMobileSections({
             <button
               type="button"
               onClick={() => toggleSection(section.key)}
-              className="flex items-center justify-between px-3.5 py-2.5 text-left text-[11px] font-black uppercase text-white tracking-wider transition-colors hover:bg-white/[0.04] focus:outline-none"
+              className="flex items-center justify-between px-3.5 py-2.5 text-left text-[11px] font-semibold normal-case text-white tracking-wide transition-colors hover:bg-white/[0.04] focus:outline-none"
               aria-expanded={isOpen}
             >
               <div className="flex items-center gap-2">
@@ -111,4 +111,3 @@ export default function FooterMobileSections({
     </div>
   )
 }
-

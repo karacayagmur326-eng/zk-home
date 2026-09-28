@@ -24,6 +24,7 @@ import { getThemeSettings } from "@lib/content/theme-settings"
 import { renderSeoTemplate } from "@lib/seo/templates"
 import { getBaseURL } from "@lib/util/env"
 import { paginatedPath } from "@lib/seo/indexing"
+import { isStoreReady } from "@lib/security/store-readiness"
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params
@@ -36,6 +37,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   if (!collection) {
     notFound()
   }
+  if ((collection.metadata as Record<string, unknown> | undefined)?.active === false) notFound()
 
   const siteName = settings?.logo_text || "ZK Home"
   const separator = settings?.seo_title_separator || "|"
@@ -54,12 +56,16 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     settings?.seo_brand_desc_template ||
     "%marka% ürünlerini %site_adi% üzerinde inceleyin."
 
-  const title = renderSeoTemplate(titleTemplate, tokens)
-  const description = renderSeoTemplate(descTemplate, tokens)
+  const brandMetadata = (collection.metadata || {}) as Record<string, unknown>
+  const title = typeof brandMetadata.seo_title === "string" && brandMetadata.seo_title.trim()
+    ? brandMetadata.seo_title.trim() : renderSeoTemplate(titleTemplate, tokens)
+  const description = typeof brandMetadata.seo_description === "string" && brandMetadata.seo_description.trim()
+    ? brandMetadata.seo_description.trim() : renderSeoTemplate(descTemplate, tokens)
 
   return {
     title: { absolute: title },
     description,
+    robots: { index: isStoreReady() && brandMetadata.is_indexable === true && Boolean(collection.products?.length), follow: true },
     alternates: {
       canonical: getBaseURL() + paginatedPath(`/markalar/${params.handle}`, page),
     },
@@ -79,6 +85,7 @@ export default async function CollectionPage(props: Props) {
   if (!collection) {
     notFound()
   }
+  if ((collection.metadata as Record<string, unknown> | undefined)?.active === false) notFound()
 
   return (
     <CollectionTemplate

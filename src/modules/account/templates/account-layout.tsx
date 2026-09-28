@@ -6,11 +6,13 @@ import { SellerQuestionButton } from "@components/common/SellerQuestion"
 
 interface AccountLayoutProps {
   customer: HttpTypes.StoreCustomer | null
+  logoUrl: string
   children: React.ReactNode
 }
 
 const AccountLayout: React.FC<AccountLayoutProps> = ({
   customer,
+  logoUrl,
   children,
 }) => {
 
@@ -30,7 +32,7 @@ const AccountLayout: React.FC<AccountLayoutProps> = ({
       <div className="content-container mx-auto max-md:px-4">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[280px_1fr]">
           {/* Left Floating Sidebar */}
-          <div className="hidden md:block"><AccountNav customer={customer} /></div>
+          <div className="hidden md:block"><AccountNav customer={customer} logoUrl={logoUrl} /></div>
 
           {/* Main Account Area */}
           <div className="min-w-0 flex-1 space-y-6">

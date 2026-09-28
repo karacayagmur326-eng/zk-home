@@ -12,6 +12,7 @@ import { HttpTypes } from "@medusajs/types"
 import { getProductPrice } from "@lib/util/get-product-price"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import { categoryPath } from "@lib/seo/category"
 
 type ProductTemplateProps = {
   product: HttpTypes.StoreProduct
@@ -22,6 +23,7 @@ type ProductTemplateProps = {
     id: string
     name: string
     handle: string
+    metadata?: Record<string, unknown>
   }>
 }
 
@@ -58,7 +60,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
             <React.Fragment key={category.id}>
               <span>&gt;</span>
               <LocalizedClientLink
-                href={`/kategoriler/${category.handle}`}
+                href={categoryPath(category)}
                 className="transition-colors hover:text-[#C98484]"
               >
                 {category.name}

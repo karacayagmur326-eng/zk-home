@@ -13,6 +13,7 @@ import { getThemeSettings } from "@lib/content/theme-settings"
 import { renderSeoTemplate } from "@lib/seo/templates"
 import { sanitizePublicHtml, serializeJsonLd } from "@lib/security/html"
 import { findProductRedirectHandle } from "@lib/seo/product-redirect"
+import { categoryPath } from "@lib/seo/category"
 
 type Props = {
   params: Promise<{ handle: string }>
@@ -25,6 +26,7 @@ type BreadcrumbCategory = {
   id: string
   name: string
   handle: string
+  metadata?: Record<string, unknown>
   parent_category_id?: string | null
   category_children?: BreadcrumbCategory[]
 }
@@ -59,7 +61,7 @@ function buildCategoryBreadcrumbs(
       : undefined
   }
 
-  return hierarchy.map(({ id, name, handle }) => ({ id, name, handle }))
+  return hierarchy.map(({ id, name, handle, metadata }) => ({ id, name, handle, metadata }))
 }
 
 function getImagesForVariant(
@@ -413,7 +415,7 @@ export default async function ProductPage(props: Props) {
         "@type": "ListItem",
         position: index + 3,
         name: category.name,
-        item: `${getBaseURL()}/kategoriler/${category.handle}`,
+        item: `${getBaseURL()}${categoryPath(category)}`,
       })),
       {
         "@type": "ListItem",

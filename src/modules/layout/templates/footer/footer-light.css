@@ -1,0 +1,33 @@
+.zk-footer-light {
+  background: #fdfbf9;
+  color: #302b2a;
+  border-color: #ebe2dd;
+}
+
+.zk-footer-light :is(.text-white, [class*="text-white/"]) {
+  color: #716966;
+}
+
+.zk-footer-light :is(h3, h4, .font-black) {
+  color: #302b2a;
+}
+
+.zk-footer-light [class*="border-white/"] {
+  border-color: #e9dfda;
+}
+
+.zk-footer-light [class*="bg-white/"] {
+  background-color: #f5eeeb;
+}
+
+.zk-footer-light a:hover {
+  color: #ad686b;
+}
+
+.zk-footer-light a.rounded-full:hover {
+  color: #fff;
+}
+
+.zk-footer-light [class*="divide-white/"] > :not(:first-child) {
+  border-color: #e9dfda;
+}

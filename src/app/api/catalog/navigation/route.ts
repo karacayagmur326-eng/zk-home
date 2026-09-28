@@ -10,7 +10,7 @@ export async function GET() {
   ensureCommerceSchema().catch(() => null)
   const [categories, collections, kurumsalMenu, musteriMenu, yasalMenu, sidebarMenu, themeSettings] = await Promise.all([
     listCategories().catch(() => []),
-    query(`SELECT id,title,handle FROM store_collection ORDER BY title`).catch(() => []),
+    query(`SELECT id,title,handle,metadata FROM store_collection ORDER BY title`).catch(() => []),
     getMenu("footer-kurumsal").catch(() => null),
     getMenu("footer-musteri-hizmetleri").catch(() => null),
     getMenu("footer-yasal").catch(() => null),
@@ -80,4 +80,3 @@ export async function GET() {
     }
   )
 }
-

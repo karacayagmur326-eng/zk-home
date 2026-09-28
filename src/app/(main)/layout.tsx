@@ -55,7 +55,7 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
           <Nav />
         </div>
       )}
-      <MobileSiteChrome settings={mobileSettings} />
+      <MobileSiteChrome settings={mobileSettings} logoUrl={themeSettings?.footer_logo_url || "/brand/zkhome-logo.svg"} />
       {cart && (
         <FreeShippingPriceNudge
           variant="popup"

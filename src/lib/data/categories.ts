@@ -29,12 +29,21 @@ export const filterActiveCategories = <
     } as T
   }
   return categories
+    .filter((category) => !category.parent_category_id)
     .map(prune)
     .filter((category): category is T => Boolean(category))
 }
 
 export const getCategoryByHandle = async (categoryHandle: string[]) => {
   const handle = categoryHandle.join("/")
-  const categories = await listCategories({ handle })
-  return categories[0] || undefined
+  const categories = await listStoreCategories(true)
+  const category = categories.find((item) => item.handle === handle)
+  if (!category) return undefined
+  let parentId = category.parent_category_id
+  while (parentId) {
+    const parent = categories.find((item) => item.id === parentId)
+    if (!parent) return undefined
+    parentId = parent.parent_category_id
+  }
+  return category as unknown as HttpTypes.StoreProductCategory
 }

@@ -111,6 +111,11 @@ const mainNavItems = [
     ),
   },
   {
+    href: "/admin/anasayfa-vitrini",
+    label: "Ana Sayfa Vitrini",
+    icon: <AppIcon name="PanelsTopLeft" size={18} />,
+  },
+  {
     href: "/admin/menuler",
     label: "Menüler",
     icon: (
@@ -243,6 +248,7 @@ const navIconNames: Record<string, string> = {
   "/admin/iadeler": "RotateCcw",
   "/admin/kullanicilar": "UsersRound",
   "/admin/slaytlar": "GalleryHorizontalEnd",
+  "/admin/anasayfa-vitrini": "PanelsTopLeft",
   "/admin/mobil": "Smartphone",
   "/admin/menuler": "ListTree",
   "/admin/sayfalar": "Files",
@@ -317,6 +323,7 @@ export default function AdminLayout({
               "/admin/urunler",
               "/admin/kategoriler",
               "/admin/slaytlar",
+              "/admin/anasayfa-vitrini",
               "/admin/menuler",
               "/admin/sayfalar",
               "/admin/medya",
@@ -443,6 +450,7 @@ export default function AdminLayout({
     "/admin/iadeler": "Müşterilerden gelen iade taleplerini inceleyin ve yönetin.",
     "/admin/kullanicilar": "Kullanıcı ve yönetim ekibi hesaplarını yönetin.",
     "/admin/slaytlar": "Ana sayfa slider görsellerini ve duyuru bantlarını yönetin.",
+    "/admin/anasayfa-vitrini": "Koleksiyon, seçki, banner, oda ve bülten alanlarını yönetin.",
     "/admin/menuler": "Mağaza üst ve alt menü yapısını düzenleyin.",
     "/admin/sayfalar": "Kurumsal sayfaları (Gizlilik, KVKK, vb.) düzenleyin ve yönetin.",
     "/admin/medya": "Yüklenen tüm görsel ve medya dosyalarını yönetin.",
@@ -795,6 +803,7 @@ export default function AdminLayout({
               if (userRole === "Editör") {
                 return [
                   "/admin/slaytlar",
+                  "/admin/anasayfa-vitrini",
                   "/admin/menuler",
                   "/admin/sayfalar",
                   "/admin/medya",

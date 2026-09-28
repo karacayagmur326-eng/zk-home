@@ -91,6 +91,10 @@ textarea {
     line-height: var(--line-height-heading);
   }
 
+  [data-ui-scope="storefront"] :is(h1, h2, h3, h4, h5, h6) {
+    text-transform: none;
+  }
+
   h1, .h1 { font-size: var(--font-size-heading-1); }
   h2, .h2 { font-size: var(--font-size-heading-2); }
   h3, .h3 { font-size: var(--font-size-heading-3); }
@@ -639,5 +643,4 @@ textarea {
 @keyframes order-step-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
 @keyframes order-truck-float { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-3px) rotate(1deg); } }
 @media (prefers-reduced-motion: reduce) { .order-journey__progress { transition: none; } .order-journey__node.is-active, .order-journey__traveller { animation: none; } }
-
 

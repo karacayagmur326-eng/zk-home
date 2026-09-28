@@ -1,13 +1,14 @@
 import Nav from "@modules/layout/templates/nav"
 import MobileSiteChrome from "@modules/layout/components/mobile-site-chrome"
 import { getMobileSettings } from "@lib/content/mobile-settings"
+import { getThemeSettings } from "@lib/content/theme-settings"
 
 export default async function CheckoutLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const mobileSettings = await getMobileSettings()
+  const [mobileSettings, themeSettings] = await Promise.all([getMobileSettings(), getThemeSettings()])
 
   return (
     <div
@@ -17,7 +18,7 @@ export default async function CheckoutLayout({
       <div className="hidden md:block">
         <Nav />
       </div>
-      <MobileSiteChrome settings={mobileSettings} />
+      <MobileSiteChrome settings={mobileSettings} logoUrl={themeSettings?.footer_logo_url || "/brand/zkhome-logo.svg"} />
       <div className="relative" data-testid="checkout-container">
         {children}
       </div>

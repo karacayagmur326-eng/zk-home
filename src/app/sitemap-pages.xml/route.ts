@@ -5,6 +5,7 @@ import { NextResponse } from "next/server"
 import { escapeXml, isPublicContentPath, lastModifiedXml } from "@lib/seo/indexing"
 import legacyRedirects from "@lib/seo/legacy-redirects.json"
 import { getPublicPageAliases } from "@lib/seo/page-aliases"
+import { isStoreReady } from "@lib/security/store-readiness"
 
 export const dynamic = "force-dynamic"
 
@@ -86,7 +87,7 @@ export async function GET() {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${[...staticXmlRows, ...dynamicXmlRows].join("\n")}
+${(isStoreReady() ? [...staticXmlRows, ...dynamicXmlRows] : []).join("\n")}
 </urlset>`
 
   return new NextResponse(xml, {

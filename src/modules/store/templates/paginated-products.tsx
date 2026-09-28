@@ -7,6 +7,7 @@ import { SortOptions } from "@modules/store/components/refinement-list/sort-prod
 import { Pagination } from "@modules/store/components/pagination"
 import StoreHeader from "../components/store-header"
 import MobileInfiniteScroll from "../components/mobile-infinite-scroll"
+import { isStoreReady } from "@lib/security/store-readiness"
 
 const PRODUCT_LIMIT = 12
 
@@ -40,7 +41,7 @@ export default async function PaginatedProducts({
 }: {
   sortBy?: SortOptions
   page: number
-  collectionId?: string
+  collectionId?: string | string[]
   categoryId?: string
   title?: string
   productsIds?: string[]
@@ -60,7 +61,7 @@ export default async function PaginatedProducts({
   }
 
   if (collectionId) {
-    queryParams["collection_id"] = [collectionId]
+    queryParams["collection_id"] = Array.isArray(collectionId) ? collectionId : [collectionId]
   }
 
   if (categoryId) {
@@ -145,6 +146,20 @@ export default async function PaginatedProducts({
   }
 
   const totalPages = Math.ceil(count / PRODUCT_LIMIT)
+  const hasActiveFilters = Boolean(
+    isPriceFiltered || hideOutOfStock || searchQuery?.trim() ||
+    (optionValueIds && Object.keys(optionValueIds).length > 0) || collectionId,
+  )
+  const emptyTitle = !isStoreReady()
+    ? "Ürünler hazırlanıyor"
+    : hasActiveFilters
+      ? "Aradığınız ürün bulunamadı"
+      : "Bu kategoride henüz ürün yok"
+  const emptyDescription = !isStoreReady()
+    ? "ZK Home seçkisi hazırlanıyor. Yeni ürünler eklendiğinde burada görebilirsiniz."
+    : hasActiveFilters
+      ? "Seçtiğiniz ölçütlere uygun ürün yok. Filtreleri değiştirerek yeniden deneyin."
+      : "Yeni ürünler eklendiğinde burada görebilirsiniz."
 
   return (
     <>
@@ -213,9 +228,9 @@ export default async function PaginatedProducts({
         </>
       ) : (
         <EmptyState
-          title="Ürün bulunamadı"
-          description="Seçtiğiniz filtrelere uygun ürün yok. Filtreleri temizleyerek yeniden deneyebilirsiniz."
-          className="bg-card"
+          title={emptyTitle}
+          description={emptyDescription}
+          className="bg-card border-rose-100/80"
         />
       )}
       {totalPages > 1 && (

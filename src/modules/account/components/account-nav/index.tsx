@@ -16,8 +16,10 @@ import {
 
 const AccountNav = ({
   customer,
+  logoUrl,
 }: {
   customer: HttpTypes.StoreCustomer | null
+  logoUrl: string
 }) => {
   const pathname = usePathname()
   const { countryCode } = useParams() as { countryCode: string }
@@ -75,14 +77,11 @@ const AccountNav = ({
 
   return (
     <aside className="w-full rounded-3xl border border-slate-100 bg-white p-6 shadow-soft">
-      {/* Brand Logo Box */}
+      {/* Storefront brand mark */}
       <div className="mb-6 pb-6 border-b border-slate-100">
-        <div className="flex flex-col items-center">
-          <span className="text-2xl font-black tracking-widest text-slate-900 font-sans">
-            ZK HOME
-          </span>
-          <span className="mt-1 h-1 w-8 rounded-full bg-[#C98484]" />
-        </div>
+        <LocalizedClientLink href="/" aria-label="ZK Home ana sayfa" className="flex h-12 items-center justify-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C98484]">
+          <img src={logoUrl} alt="ZK Home" width={220} height={44} className="max-h-11 max-w-[205px] object-contain" />
+        </LocalizedClientLink>
       </div>
 
       {/* Navigation Menu Links */}

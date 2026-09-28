@@ -8,7 +8,7 @@ const Hero = () => {
         <span className="flex flex-col gap-4">
           <Heading
             level="h1"
-            className="text-4xl md:text-6xl leading-tight text-white font-black tracking-tighter uppercase"
+            className="text-4xl md:text-6xl leading-tight text-white font-semibold tracking-tight normal-case"
           >
             Profesyonel<br/>
             <span className="text-primary">Çözümler</span>

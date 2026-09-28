@@ -21,6 +21,7 @@ import OptionsPicker from "./options-picker"
 import SortProducts, { SortOptions } from "./sort-products"
 
 import MobileTopCategoriesStrip from "@modules/store/components/mobile-top-categories-strip"
+import { categoryPath } from "@lib/seo/category"
 
 type RefinementListProps = {
   sortBy: SortOptions
@@ -261,9 +262,10 @@ const RefinementList = ({
         const nextState = { ...prev }
         groups.forEach((category: any) => {
           const isCurrentActive =
-            pathname.includes(`/kategoriler/${category.handle}`) ||
+            pathname.includes(categoryPath(category)) ||
             category.category_children?.some((child: any) =>
-              pathname.includes(`/kategoriler/${child.handle}`)
+              pathname.includes(categoryPath(child)) ||
+              child.category_children?.some((grandchild: any) => pathname.includes(categoryPath(grandchild)))
             )
           if (isCurrentActive) {
             nextState[category.id] = true
@@ -366,16 +368,16 @@ const RefinementList = ({
       )
     })
 
-  const selectedCollectionId = searchParams.get("collection_id") || ""
+  const selectedCollectionIds = searchParams.getAll("collection_id")
   const hideOutOfStock = searchParams.get("hide_out_of_stock") === "true"
 
   const toggleCollection = (id: string) => {
     updateQueryParams((params) => {
-      if (selectedCollectionId === id) {
-        params.delete("collection_id")
-      } else {
-        params.set("collection_id", id)
-      }
+      const nextIds = new Set(params.getAll("collection_id"))
+      if (nextIds.has(id)) nextIds.delete(id)
+      else nextIds.add(id)
+      params.delete("collection_id")
+      nextIds.forEach((collectionId) => params.append("collection_id", collectionId))
     })
   }
 
@@ -487,9 +489,7 @@ const RefinementList = ({
                     const children = Array.isArray(cat.category_children)
                       ? cat.category_children
                       : []
-                    const isActive = pathname.includes(
-                      `/kategoriler/${cat.handle}`,
-                    )
+                    const isActive = pathname.includes(categoryPath(cat))
                     const isOpen = Boolean(openCategoryGroups[cat.id])
 
                     return (
@@ -503,7 +503,7 @@ const RefinementList = ({
                           <button
                             type="button"
                             onClick={() =>
-                              router.push(`/kategoriler/${cat.handle}`)
+                              router.push(categoryPath(cat))
                             }
                             className="min-w-0 flex-1 px-2 py-2 text-left font-bold text-[12.5px] xl:text-[13px] text-gray-900 hover:text-[#C98484] truncate"
                           >
@@ -536,26 +536,44 @@ const RefinementList = ({
                         {isOpen && children.length > 0 && (
                           <ul className="mb-1 ml-3 border-l border-rose-200 pl-2">
                             {children.map((child: any) => {
-                              const childActive = pathname.includes(
-                                `/kategoriler/${child.handle}`,
-                              )
+                              const childActive = pathname.includes(categoryPath(child))
+                              const grandchildren = Array.isArray(child.category_children) ? child.category_children : []
+                              const descendantActive = grandchildren.some((grandchild: any) => pathname.includes(categoryPath(grandchild)))
                               return (
                                 <li key={child.id}>
                                   <button
                                     type="button"
                                     onClick={() =>
                                       router.push(
-                                        `/kategoriler/${child.handle}`,
+                                        categoryPath(child),
                                       )
                                     }
                                     className={clx(
                                       "w-full rounded-md px-2 py-2 text-left text-[12.5px] transition-colors hover:bg-rose-50 hover:text-[#C98484]",
-                                      childActive &&
+                                      (childActive || descendantActive) &&
                                         "bg-rose-50 font-bold text-[#C98484]",
                                     )}
                                   >
                                     {child.name}
                                   </button>
+                                  {grandchildren.length > 0 && (
+                                    <ul className="mb-1 ml-2 border-l border-rose-200 pl-2">
+                                      {grandchildren.map((grandchild: any) => (
+                                        <li key={grandchild.id}>
+                                          <button
+                                            type="button"
+                                            onClick={() => router.push(categoryPath(grandchild))}
+                                            className={clx(
+                                              "w-full rounded-md px-2 py-1.5 text-left text-xs text-gray-600 transition-colors hover:bg-rose-50 hover:text-[#C98484]",
+                                              pathname.includes(categoryPath(grandchild)) && "font-semibold text-[#C98484]",
+                                            )}
+                                          >
+                                            {grandchild.name}
+                                          </button>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  )}
                                 </li>
                               )
                             })}
@@ -755,10 +773,10 @@ const RefinementList = ({
                       <Checkbox
                         key={col.id}
                         id={`brand-${col.id}`}
-                        checked={selectedCollectionId === col.id}
+                        checked={selectedCollectionIds.includes(col.id)}
                         onChange={() => toggleCollection(col.id)}
                         labelClassName={
-                          selectedCollectionId === col.id
+                          selectedCollectionIds.includes(col.id)
                             ? "text-gray-900 font-bold"
                             : "text-gray-600 font-normal"
                         }

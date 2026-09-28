@@ -22,6 +22,7 @@ import { Code, Sparkles } from "lucide-react"
 import clx from "clsx"
 
 const FONT_OPTIONS = [
+  { value: "Plus Jakarta Sans", label: "Plus Jakarta Sans (Önerilen)" },
   { value: "Inter", label: "Inter (Varsayılan)" },
   { value: "Barlow Condensed", label: "Barlow Condensed (Slider)" },
   { value: "Outfit", label: "Outfit" },
@@ -33,6 +34,7 @@ const FONT_OPTIONS = [
 ]
 
 const SITE_FONT_OPTIONS = [
+  { value: "Plus Jakarta Sans", label: "Plus Jakarta Sans (Önerilen)" },
   { value: "Poppins", label: "Poppins (Önerilen - Kalın & Şık)" },
   { value: "Inter", label: "Inter (Varsayılan)" },
   { value: "Roboto", label: "Roboto" },
@@ -84,13 +86,13 @@ export default function ThemeSettingsPage(props: any = {}) {
   // Form states
   const [logoText, setLogoText] = useState("")
   const [logoUrl, setLogoUrl] = useState("")
-  const [fontFamily, setFontFamily] = useState("Poppins")
+  const [fontFamily, setFontFamily] = useState("Plus Jakarta Sans")
   const [fontSizeBase, setFontSizeBase] = useState("16px")
   const [h1Size, setH1Size] = useState("2.5rem")
   const [h2Size, setH2Size] = useState("2rem")
   const [h3Size, setH3Size] = useState("1.75rem")
   const [h4Size, setH4Size] = useState("1.5rem")
-  const [sliderFontTitle, setSliderFontTitle] = useState("Barlow Condensed")
+  const [sliderFontTitle, setSliderFontTitle] = useState("Plus Jakarta Sans")
   const [sliderFontDesc, setSliderFontDesc] = useState("Inter")
 
   // Header Menu States
@@ -195,13 +197,13 @@ export default function ThemeSettingsPage(props: any = {}) {
           const s = data.settings
           setLogoText(s.logo_text || "Mağaza Adı")
           setLogoUrl(s.logo_url || "")
-          setFontFamily(s.font_family || "Poppins")
+          setFontFamily(s.font_family || "Plus Jakarta Sans")
           setFontSizeBase(s.font_size_base || "16px")
           setH1Size(s.h1_size || "2.5rem")
           setH2Size(s.h2_size || "2rem")
           setH3Size(s.h3_size || "1.75rem")
           setH4Size(s.h4_size || "1.5rem")
-          setSliderFontTitle(s.slider_font_title || "Barlow Condensed")
+          setSliderFontTitle(s.slider_font_title || "Plus Jakarta Sans")
           setSliderFontDesc(s.slider_font_desc || "Inter")
 
           setHeaderMenuAlign(s.header_menu_align || "center")

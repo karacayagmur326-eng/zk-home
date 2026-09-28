@@ -6,6 +6,7 @@ import { SafeImage } from "@lib/SafeImage"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { clx } from "@modules/common/components/ui"
 import { AppIcon, Box, Drill, Hammer, Ruler, Scissors, Settings, Toolbox, Wrench, Zap } from "@lib/icons"
+import { categoryPath } from "@lib/seo/category"
 
 function resolveCategoryIcon(name: string, iconName?: string) {
   if (iconName) return iconName
@@ -65,12 +66,12 @@ export default function MobileTopCategoriesStrip({ categories = [] }: { categori
             typeof metadata.icon === "string" ? metadata.icon : undefined
           )
           const FallbackIcon = fallbackIcons[iconName as keyof typeof fallbackIcons] || Box
-          const isActive = Boolean(pathname && pathname.includes(`/kategoriler/${category.handle}`))
+          const isActive = Boolean(pathname && pathname.includes(categoryPath(category)))
 
           return (
             <LocalizedClientLink
               key={category.id}
-              href={`/kategoriler/${category.handle}`}
+              href={categoryPath(category)}
               className="group relative flex flex-col items-center text-center shrink-0 w-[72px] cursor-pointer pb-2"
             >
               {/* Round Circle Badge with Active Orange Highlight */}

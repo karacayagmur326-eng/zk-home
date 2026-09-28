@@ -3,6 +3,7 @@ import { ensureCommerceSchema } from "@lib/commerce/schema"
 import { getBaseURL } from "@lib/util/env"
 import { NextResponse } from "next/server"
 import { escapeXml, lastModifiedXml } from "@lib/seo/indexing"
+import { isStoreReady } from "@lib/security/store-readiness"
 
 export const dynamic = "force-dynamic"
 
@@ -11,11 +12,14 @@ export async function GET() {
   await ensureCommerceSchema()
 
   const collections = await query<{ handle: string; updated_at: string }>(
-    `SELECT handle, updated_at FROM store_collection
-     ORDER BY created_at DESC`
+    `SELECT c.handle, c.updated_at FROM store_collection c
+     WHERE c.metadata->>'active' IS DISTINCT FROM 'false'
+       AND c.metadata->>'is_indexable' = 'true'
+       AND EXISTS (SELECT 1 FROM store_product p WHERE p.collection_id=c.id AND p.status='published')
+     ORDER BY c.created_at DESC`
   )
 
-  const xmlRows = collections.map(
+  const xmlRows = (isStoreReady() ? collections : []).map(
     (collection) => `  <url>
     <loc>${escapeXml(`${baseUrl}/markalar/${collection.handle}`)}</loc>
     ${lastModifiedXml(collection.updated_at)}

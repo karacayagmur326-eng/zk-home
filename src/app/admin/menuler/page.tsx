@@ -21,6 +21,7 @@ import {
 } from "@lib/icons"
 import ConfirmModal from "../components/ConfirmModal"
 import MediaSelectorModal from "../components/MediaSelectorModal"
+import { categoryPath } from "@lib/seo/category"
 
 interface MenuItem {
   id: string
@@ -271,7 +272,7 @@ export default function MenusPage() {
       return {
         id: generateId(),
         label: cat?.name || id,
-        url: `/kategoriler/${cat?.handle || id}`,
+        url: cat ? categoryPath(cat) : `/kategoriler/${id}`,
         type: "category",
         children: []
       }
@@ -771,7 +772,7 @@ export default function MenusPage() {
                             const c = categories.find(item => item.id === selectedId)
                             if (c) {
                               setCustomLabel(c.name)
-                              setCustomUrl(`/kategoriler/${c.handle}`)
+                              setCustomUrl(categoryPath(c))
                             }
                           }}
                         >

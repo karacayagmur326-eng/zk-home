@@ -16,6 +16,8 @@ import RefinementList from "@modules/store/components/refinement-list"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import PaginatedProducts from "@modules/store/templates/paginated-products"
 import { getBaseURL } from "@lib/util/env"
+import { categoryPath } from "@lib/seo/category"
+import { turkishTitleCase } from "@lib/util/turkish-title-case"
 
 type DesignItem = {
   title: string
@@ -25,18 +27,18 @@ type DesignItem = {
 
 const defaultFeatures: DesignItem[] = [
   {
-    title: "Yüksek Performans",
-    subtitle: "Güçlü ve dayanıklı",
-    icon: "shield",
+    title: "Özenli Seçki",
+    subtitle: "Evinize uyumlu parçalar",
+    icon: "sparkles",
   },
   {
-    title: "Profesyonel Sonuç",
-    subtitle: "İşinize uygun çözüm",
-    icon: "target",
+    title: "Zamansız Tasarım",
+    subtitle: "Farklı stillere uyum",
+    icon: "heart",
   },
   {
-    title: "Uzun Ömürlü",
-    subtitle: "Kaliteli malzeme",
+    title: "Kaliteli Detaylar",
+    subtitle: "Özenli malzeme seçimi",
     icon: "award",
   },
 ]
@@ -148,7 +150,7 @@ export default async function CategoryTemplate({
   page?: string
   countryCode: string
   optionValueIds?: OptionValueIds
-  collectionId?: string
+  collectionId?: string | string[]
   hideOutOfStock?: string
   priceMin?: string
   priceMax?: string
@@ -184,13 +186,14 @@ export default async function CategoryTemplate({
     "hero_image_url",
     imageValue(metadata, "banner_url", imageValue(metadata, "image_url")),
   )
+  const categoryArtwork = imageValue(metadata, "card_image_url", imageValue(metadata, "icon"))
   const heroMobileImageUrl = imageValue(
     metadata,
     "hero_mobile_image_url",
     heroImageUrl,
   )
   const displayTitle = textValue(metadata, "display_title", category.name)
-  const eyebrow = textValue(metadata, "eyebrow", "ÜRÜN KATEGORİSİ")
+  const eyebrow = textValue(metadata, "eyebrow", "").trim() || parents[0]?.name || "ZK Home Seçkisi"
   const heroHeight = numberValue(metadata, "hero_height", 300, 240, 620)
   const heroMobileHeight = numberValue(
     metadata,
@@ -206,7 +209,7 @@ export default async function CategoryTemplate({
     35,
     70,
   )
-  const titleSize = numberValue(metadata, "title_size", 48, 32, 72)
+  const titleSize = numberValue(metadata, "title_size", 42, 32, 72)
   const titleSizeMobile = numberValue(
     metadata,
     "title_size_mobile",
@@ -223,8 +226,8 @@ export default async function CategoryTemplate({
   const childCardColumns = numberValue(
     metadata,
     "child_card_columns",
-    4,
-    2,
+    3,
+    3,
     4,
   )
   const childCardImageWidth = numberValue(
@@ -259,7 +262,7 @@ export default async function CategoryTemplate({
   const badgeText = textValue(
     metadata,
     "hero_badge_text",
-    textValue(metadata, "badge_text", "Doğru Ekipman Mükemmel Sonuç"),
+    textValue(metadata, "badge_text", "Evinize Uyumlu Seçimler"),
   )
   // Check if sidebar menu defines custom items for this category
   const menuGroup = sidebarMenu?.items?.find((item: any) => {
@@ -274,8 +277,9 @@ export default async function CategoryTemplate({
 
   const rawChildren = category.category_children || []
 
-  const children =
-    menuGroup?.children && menuGroup.children.length > 0
+  const children = rawChildren.length > 0
+    ? rawChildren
+    : menuGroup?.children && menuGroup.children.length > 0
       ? menuGroup.children.map((menuChild: any) => {
           const childHandle = (menuChild.url || "")
             .replace(/^\/kategoriler\//, "")
@@ -314,8 +318,11 @@ export default async function CategoryTemplate({
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Ana Sayfa", item: getBaseURL() },
-      { "@type": "ListItem", position: 2, name: "Mağaza", item: `${getBaseURL()}/magaza` },
-      { "@type": "ListItem", position: 3, name: category.name, item: `${getBaseURL()}/kategoriler/${category.handle}` },
+      ...parents.slice().reverse().map((parent, index) => ({
+        "@type": "ListItem", position: index + 2, name: parent.name,
+        item: `${getBaseURL()}${categoryPath(parent)}`,
+      })),
+      { "@type": "ListItem", position: parents.length + 2, name: category.name, item: `${getBaseURL()}${categoryPath(category)}` },
     ],
   }
 
@@ -352,11 +359,11 @@ export default async function CategoryTemplate({
           >
             Ürün Kategorileri
           </LocalizedClientLink>
-          {parents.map((parent) => (
+          {parents.slice().reverse().map((parent) => (
             <span key={parent.id} className="contents">
               <ChevronRight aria-hidden="true" className="h-3.5 w-3.5" />
               <LocalizedClientLink
-                href={`/kategoriler/${parent.handle}`}
+                href={categoryPath(parent)}
                 className="transition-colors hover:text-primary"
               >
                 {parent.name}
@@ -386,17 +393,18 @@ export default async function CategoryTemplate({
             >
               <div className="relative z-10 flex min-w-0 flex-1 flex-col justify-center p-4 min-[400px]:p-5 sm:p-7 lg:p-9">
                 {eyebrow ? (
-                  <p className="text-xs font-bold uppercase tracking-wider text-primary">
-                    {eyebrow}
+                  <p className="inline-flex items-center gap-2 text-xs font-semibold normal-case tracking-wide text-primary">
+                    <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-primary" />
+                    {turkishTitleCase(eyebrow)}
                   </p>
                 ) : null}
                 <h1
                   data-testid="category-page-title"
-                  className="mt-1.5 max-w-3xl text-[clamp(1.75rem,8.5vw,var(--category-mobile-title-size))] font-bold leading-[1.08] tracking-tight text-slate-800 lg:text-[length:var(--category-title-size)]"
+                  className="mt-2 max-w-3xl text-[clamp(1.75rem,8.5vw,var(--category-mobile-title-size))] font-bold leading-[1.12] tracking-tight text-slate-800 lg:text-[length:var(--category-title-size)]"
                 >
-                  {displayTitle}
+                  {turkishTitleCase(displayTitle)}
                 </h1>
-                <span className="mt-2.5 h-1 w-16 rounded-full bg-primary" />
+                <span className="mt-3 h-0.5 w-12 rounded-full bg-primary/80" />
                 {category.description && (
                   <p className="mt-3 max-w-xl text-[12px] font-normal leading-relaxed text-slate-600 sm:text-sm">
                     {category.description}
@@ -419,7 +427,7 @@ export default async function CategoryTemplate({
                         </span>
                         <span className="min-w-0 flex-1">
                           <strong className="block text-[10px] font-semibold leading-tight text-slate-800 line-clamp-2 transition-colors group-hover/feat:text-primary sm:text-xs sm:font-bold">
-                            {feature.title}
+                            {turkishTitleCase(feature.title)}
                           </strong>
                           <span className="mt-0.5 hidden text-[10px] font-medium text-slate-500 truncate sm:block">
                             {feature.subtitle}
@@ -453,24 +461,31 @@ export default async function CategoryTemplate({
                   )}
                 </div>
               )}
+              {!heroImageUrl && categoryArtwork.startsWith("/") && (
+                <div aria-hidden="true" className="hidden w-[29%] shrink-0 items-center justify-center pr-8 lg:flex">
+                  <div className="flex aspect-square w-full max-w-[210px] items-center justify-center rounded-full border border-rose-100 bg-gradient-to-br from-rose-50/90 via-white to-[#f9eeee] shadow-[0_16px_45px_-28px_rgba(128,75,75,0.38)]">
+                    <SafeImage src={categoryArtwork} alt="" className="h-[70%] w-[70%] object-contain" />
+                  </div>
+                </div>
+              )}
             </header>
 
             {children.length > 0 && (
               <section
-                className="relative z-20 mb-4 sm:mb-8 w-[calc(100%+2rem)] -mx-4 sm:mx-0 sm:w-full max-sm:bg-gradient-to-b max-sm:from-[#F9EEEE] max-sm:via-[#FCF7F6] max-sm:to-white sm:bg-none sm:bg-transparent max-sm:border-b max-sm:border-rose-200/80 p-3 pt-2.5 sm:p-0 max-sm:shadow-2xs sm:shadow-none"
+                className="mb-6 rounded-[20px] border border-[#eee7e2] bg-[#fffdfb] p-4 shadow-[0_10px_30px_rgba(90,63,55,0.06)] sm:mb-8 sm:p-5"
                 aria-labelledby="subcategories-heading"
               >
-                {/* Subcategories Header Label for Mobile */}
-                <div className="sm:hidden flex items-center justify-between mb-1.5 px-1 pt-1">
-                  <span className="text-[11px] font-black text-[#C98484] uppercase tracking-tight">
-                    Alt Kategoriler
-                  </span>
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+                  <h2 id="subcategories-heading" className="text-xl font-semibold tracking-tight text-[#c77e80] sm:text-2xl">Alt Kategoriler</h2>
+                  <a href="#category-products" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#bd6f72] transition-colors hover:text-[#9e5055] hover:underline">
+                    Tüm Kategoriyi Keşfet <ChevronRight className="h-4 w-4" aria-hidden="true" />
+                  </a>
                 </div>
 
-                {/* Subcategories: Horizontal Scrollable Strip on Mobile / 1x4 Responsive Grid on Desktop */}
-                <div className="no-scrollbar flex items-start gap-3 overflow-x-auto py-1 px-1 sm:px-0 touch-pan-x sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-4 sm:overflow-visible">
+                <div className={`grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 ${childCardColumns === 4 ? "2xl:grid-cols-4" : ""}`}>
                   {children.map((child) => {
                     const childMetadata = metadataOf(child)
+                    const grandchildren = Array.isArray(child.category_children) ? child.category_children : []
                     const cardImageUrl = imageValue(
                       childMetadata,
                       "card_image_url",
@@ -503,53 +518,76 @@ export default async function CategoryTemplate({
                         : `${cardTitle} çeşitleri ve modelleri.`
 
                     return (
-                      <LocalizedClientLink
+                      <div
                         key={child.id}
-                        href={`/kategoriler/${child.handle}`}
-                        className="group flex flex-col items-center text-center shrink-0 w-[72px] cursor-pointer sm:w-full sm:flex-row sm:items-center sm:gap-3.5 sm:rounded-2xl sm:border sm:border-slate-200/80 sm:bg-white sm:p-3.5 sm:px-4 sm:shadow-2xs hover:sm:border-rose-300 hover:sm:shadow-md transition-all"
+                        className="group min-w-0 rounded-xl border border-[#eee9e5] bg-white shadow-[0_4px_16px_rgba(99,71,61,0.04)] transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-[#dfb9b5] hover:shadow-[0_10px_24px_rgba(99,71,61,0.10)]"
                       >
-                        {/* Icon Container: Mobile keeps round border badge; Desktop removes icon zemin (sm:bg-transparent sm:border-0) and enlarges icon */}
-                        <div className="relative w-14 h-14 rounded-full border-2 border-slate-200/90 bg-white shadow-2xs transition-all duration-200 group-hover:scale-105 group-hover:border-[#C98484] group-hover:bg-rose-50/80 overflow-hidden flex items-center justify-center p-2 shrink-0 sm:w-10 sm:h-10 sm:rounded-none sm:border-0 sm:bg-transparent sm:shadow-none sm:p-0">
-                          {cardImageUrl ? (
-                            cardImageUrl.startsWith("/") ? (
-                              <Image
-                                src={cardImageUrl}
-                                alt={cardTitle}
-                                fill
-                                sizes="(max-width: 639px) 56px, 32px"
-                                quality={50}
-                                className="object-contain p-0.5 group-hover:scale-110 transition-transform sm:p-1"
-                              />
+                        <LocalizedClientLink
+                          href={categoryPath(child)}
+                          className="flex min-w-0 items-center gap-3 p-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C98484]"
+                        >
+                          <div
+                            className="relative flex max-w-[44%] shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#f5efeb]"
+                            style={{ width: childCardImageWidth, height: childCardImageHeight }}
+                          >
+                            {cardImageUrl ? (
+                              cardImageUrl.startsWith("/") ? (
+                                <Image
+                                  src={cardImageUrl}
+                                  alt=""
+                                  fill
+                                  sizes="(max-width: 639px) 40vw, 145px"
+                                  quality={75}
+                                  className={`${childCardImageFit === "contain" ? "object-contain" : "object-cover"} transition-transform duration-300 group-hover:scale-[1.04]`}
+                                />
+                              ) : (
+                                <SafeImage
+                                  src={cardImageUrl}
+                                  alt=""
+                                  width={childCardImageWidth}
+                                  height={childCardImageHeight}
+                                  className={`h-full w-full ${childCardImageFit === "contain" ? "object-contain" : "object-cover"} transition-transform duration-300 group-hover:scale-[1.04]`}
+                                />
+                              )
                             ) : (
-                              <SafeImage
-                                src={cardImageUrl}
-                                alt={cardTitle}
-                                width={56}
-                                height={56}
-                                className="w-full h-full object-contain p-0.5 group-hover:scale-110 transition-transform sm:p-0 sm:w-8 sm:h-8"
+                              <AppIcon
+                                name={cardIcon}
+                                fallback="box"
+                                className="h-12 w-12 text-[#c98484] transition-transform duration-300 group-hover:scale-110"
                               />
-                            )
-                          ) : (
-                            <AppIcon
-                              name={cardIcon}
-                              fallback="box"
-                              className="w-6 h-6 text-primary group-hover:scale-110 transition-transform sm:w-7 sm:h-7"
-                            />
-                          )}
-                        </div>
+                            )}
+                          </div>
 
-                        {/* Subcategory Name & Description */}
-                        <div className="flex flex-col min-w-0 text-center sm:text-left">
-                          <span className="mt-1.5 sm:mt-0 text-[10.5px] font-bold text-slate-800 leading-tight line-clamp-1 group-hover:text-[#C98484] transition-colors sm:text-xs">
-                            {cardTitle}
-                          </span>
-                          {cardDescription && (
-                            <span className="hidden sm:block mt-0.5 text-[11px] font-normal text-slate-500 line-clamp-1 leading-tight">
-                              {cardDescription}
+                          <div className="flex min-h-[112px] min-w-0 flex-1 flex-col py-1 pr-1">
+                            <span className="line-clamp-2 text-sm font-semibold leading-snug text-[#253047] transition-colors group-hover:text-[#b9686b]">
+                              {cardTitle}
                             </span>
-                          )}
-                        </div>
-                      </LocalizedClientLink>
+                            {cardDescription && (
+                              <span className="mt-1 line-clamp-3 text-xs leading-[1.35] text-[#8490a3]">
+                                {cardDescription}
+                              </span>
+                            )}
+                            <span className="mt-auto inline-flex items-center gap-1.5 pt-2 text-xs font-semibold text-[#bd6f72]">
+                              İncele <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                            </span>
+                          </div>
+                        </LocalizedClientLink>
+                        {grandchildren.length > 0 && (
+                          <ul className="mx-3 mb-2 space-y-0.5 border-t border-[#eee5e1] pt-2" aria-label={`${child.name} alt kategorileri`}>
+                            {grandchildren.map((grandchild) => (
+                              <li key={grandchild.id}>
+                                <LocalizedClientLink
+                                  href={categoryPath(grandchild)}
+                                  className="flex items-center justify-between gap-2 rounded-md px-1.5 py-1.5 text-xs font-medium text-[#655b58] transition-colors hover:bg-[#fbf4f1] hover:text-[#a45d5f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C98484]"
+                                >
+                                  <span>{grandchild.name}</span>
+                                  <ChevronRight aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-[#bd7779]" />
+                                </LocalizedClientLink>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
                     )
                   })}
                 </div>
@@ -558,6 +596,7 @@ export default async function CategoryTemplate({
 
 
 
+            <div id="category-products" className="scroll-mt-28">
             <Suspense
               fallback={
                 <SkeletonProductGrid
@@ -569,7 +608,7 @@ export default async function CategoryTemplate({
                 sortBy={sort}
                 page={pageNumber}
                 categoryId={category.id}
-                title={category.name}
+                title={textValue(metadata, "product_list_title", "").trim() || category.name}
                 collectionId={collectionId}
                 countryCode={countryCode}
                 optionValueIds={optionValueIds}
@@ -580,6 +619,7 @@ export default async function CategoryTemplate({
                 headingLevel={2}
               />
             </Suspense>
+            </div>
           </div>
         </div>
       </div>

@@ -1,7 +1,7 @@
 import { Metadata } from "next"
 import { query } from "@lib/admin/db"
 import { defaultFaqPageContent } from "@lib/content/knowledge-pages"
-import { getCanonicalURL, getBaseURL } from "@lib/util/env"
+import { getCanonicalURL } from "@lib/util/env"
 import PageHero from "../../../components/common/PageHero"
 import FaqContent from "./FaqContent"
 import { getContactInfo } from "@lib/content/contact-info"
@@ -9,7 +9,7 @@ import { serializeJsonLd } from "@lib/security/html"
 
 export const metadata: Metadata = {
   title: "Sıkça Sorulan Sorular (SSS)",
-  description: "Sipariş, kargo, ödeme, garanti, iade ve ürünlerimiz hakkında en çok merak edilen soruların yanıtları.",
+  description: "Yemek takımı, kahve fincanı, dekorasyon, nevresim, havlu, kargo ve iade hakkında 100 sık sorulan sorunun yanıtını keşfedin.",
   alternates: {
     canonical: getCanonicalURL("/sss"),
   },
@@ -19,7 +19,7 @@ export default async function FaqPage() {
   const [dbContent, contact] = await Promise.all([
     query<{ content: Record<string, any> }>(
       "SELECT content FROM content_pages WHERE handle = 'sss' LIMIT 1"
-    ).then((rows) => rows[0]?.content || {}).catch(() => ({})),
+    ).then((rows) => rows[0]?.content || {}).catch((): Record<string, any> => ({})),
     getContactInfo(),
   ])
 
@@ -30,21 +30,21 @@ export default async function FaqPage() {
   const content = {
     ...defaultFaqPageContent,
     ...dbContent,
-    faq_categories: defaultFaqPageContent.faq_categories,
-    faq_items: defaultFaqPageContent.faq_items.map((item) => ({
+    faq_categories: Array.isArray(dbContent.faq_categories) ? dbContent.faq_categories : defaultFaqPageContent.faq_categories,
+    faq_items: (Array.isArray(dbContent.faq_items) ? dbContent.faq_items : defaultFaqPageContent.faq_items).map((item: any) => ({
       ...item,
-      answer: replaceContactTokens(item.answer),
+      answer: replaceContactTokens(String(item.answer || "")),
     })),
-    support_phone: contact.phone,
-    support_email: contact.email,
-    support_address: contact.full_address,
+    support_phone: dbContent.support_phone || contact.phone,
+    support_email: dbContent.support_email || contact.email,
+    support_address: dbContent.support_address || contact.full_address,
   }
 
   const faqItems = (content.faq_items || []).filter(
     (item: any) => item.active !== false
   )
 
-  // Generate Google FAQPage JSON-LD Schema for Search Engine Rich Snippets
+  // Structured data mirrors the active answers available in the accordion.
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -53,9 +53,7 @@ export default async function FaqPage() {
       name: item.question,
       acceptedAnswer: {
         "@type": "Answer",
-        text: `${item.answer} ${
-          item.linkUrl ? `<a href="${getBaseURL()}${item.linkUrl}">${item.linkText || "İlgili Ürünü İncele"}</a>` : ""
-        }`,
+        text: item.answer,
       },
     })),
   }

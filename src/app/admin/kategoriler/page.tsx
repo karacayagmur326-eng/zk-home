@@ -86,9 +86,9 @@ const defaultCategoryDesign = (): CategoryDesignForm => ({
   heroBackground: "#ffffff",
   badgeText: "",
   badgeIcon: "check",
-  titleSize: 48,
+  titleSize: 42,
   titleSizeMobile: 32,
-  childCardColumns: 4,
+  childCardColumns: 3,
   childCardImageWidth: 145,
   childCardImageHeight: 120,
   childCardImageFit: "cover",
@@ -124,6 +124,11 @@ export default function CategoriesPage() {
   const [name, setName] = useState("")
   const [handle, setHandle] = useState("")
   const [description, setDescription] = useState("")
+  const [seoTitle, setSeoTitle] = useState("")
+  const [seoDescription, setSeoDescription] = useState("")
+  const [productListTitle, setProductListTitle] = useState("")
+  const [prettyUrl, setPrettyUrl] = useState(false)
+  const [isIndexable, setIsIndexable] = useState(false)
   const [parentId, setParentId] = useState("")
   const [icon, setIcon] = useState("")
   const [showOnHomepage, setShowOnHomepage] = useState<boolean>(false)
@@ -169,6 +174,11 @@ export default function CategoriesPage() {
     name: string
     handle: string
     description: string
+    seoTitle: string
+    seoDescription: string
+    productListTitle: string
+    prettyUrl: boolean
+    isIndexable: boolean
     parentId: string
     icon: string
     showOnHomepage: boolean
@@ -187,6 +197,11 @@ export default function CategoriesPage() {
         name,
         handle,
         description,
+        seoTitle,
+        seoDescription,
+        productListTitle,
+        prettyUrl,
+        isIndexable,
         parentId,
         icon,
         showOnHomepage,
@@ -228,6 +243,11 @@ export default function CategoriesPage() {
       name !== originalCat.name ||
       handle !== originalCat.handle ||
       description !== (originalCat.description || "") ||
+      seoTitle !== (origMeta.seo_title || "") ||
+      seoDescription !== (origMeta.seo_description || "") ||
+      productListTitle !== (origMeta.product_list_title || "") ||
+      prettyUrl !== Boolean(origMeta.pretty_url) ||
+      isIndexable !== (origMeta.is_indexable === true) ||
       parentId !== (originalCat.parent_category_id || "") ||
       icon !== (origMeta.icon || "") ||
       showOnHomepage !== Boolean(origMeta.show_on_homepage) ||
@@ -267,6 +287,11 @@ export default function CategoriesPage() {
           name,
           handle,
           description,
+          seoTitle,
+          seoDescription,
+          productListTitle,
+          prettyUrl,
+          isIndexable,
           parentId,
           icon,
           showOnHomepage,
@@ -274,13 +299,18 @@ export default function CategoriesPage() {
         },
       }))
     }
-  }, [editId, name, handle, description, parentId, icon, showOnHomepage, design, categories])
+  }, [editId, name, handle, description, seoTitle, seoDescription, productListTitle, prettyUrl, isIndexable, parentId, icon, showOnHomepage, design, categories])
 
   function resetToNewCategory() {
     setEditId(null)
     setName("")
     setHandle("")
     setDescription("")
+    setSeoTitle("")
+    setSeoDescription("")
+    setProductListTitle("")
+    setPrettyUrl(false)
+    setIsIndexable(false)
     setParentId("")
     setIcon("")
     setShowOnHomepage(false)
@@ -335,13 +365,26 @@ export default function CategoriesPage() {
   function autoHandle(n: string) {
     return n
       .toLowerCase()
-      .replace(/\s+/g, "-")
-      .replace(/[^a-z0-9\-ğüşöçı]/g, "")
+      .replace(/ğ/g, "g")
+      .replace(/ü/g, "u")
+      .replace(/ş/g, "s")
+      .replace(/ı/g, "i")
+      .replace(/ö/g, "o")
+      .replace(/ç/g, "c")
+      .replace(/[^a-z0-9]/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "")
+  }
+
+  function newCategoryHandle(categoryName: string, parentCategoryId: string) {
+    const leaf = autoHandle(categoryName)
+    const parent = categories.find((category) => category.id === parentCategoryId)
+    return parent && leaf ? `${parent.handle}/${leaf}` : leaf
   }
 
   function handleNameChange(v: string) {
     setName(v)
-    if (!editId) setHandle(autoHandle(v))
+    if (!editId) setHandle(newCategoryHandle(v, parentId))
     const updatedDesign = {
       ...design,
       cardTitle: !design.cardTitle || design.cardTitle === name ? v : design.cardTitle,
@@ -413,6 +456,11 @@ export default function CategoriesPage() {
 
     const meta: Record<string, any> = {
       icon,
+      seo_title: seoTitle.trim(),
+      seo_description: seoDescription.trim(),
+      product_list_title: productListTitle.trim(),
+      pretty_url: prettyUrl,
+      is_indexable: isIndexable,
       show_on_homepage: Boolean(showOnHomepage),
       homepage_order: Number(homepageOrder || 1),
       homepage_rank: Number(homepageOrder || 1),
@@ -785,15 +833,16 @@ export default function CategoriesPage() {
   async function performDelete() {
     if (!confirmDeleteId) return
     try {
-      await fetch(`/api/admin/categories/${confirmDeleteId}`, {
+      const response = await fetch(`/api/admin/categories/${confirmDeleteId}`, {
         method: "DELETE",
       })
+      if (!response.ok) throw new Error((await response.json()).error || "Kategori silinemedi.")
       if (editId === confirmDeleteId) {
         resetToNewCategory()
       }
       fetchCategories()
     } catch (e) {
-      console.error(e)
+      setError(e instanceof Error ? e.message : "Kategori silinemedi.")
     } finally {
       setConfirmDeleteId(null)
     }
@@ -810,16 +859,28 @@ export default function CategoriesPage() {
     if (selectedIds.length === 0) return
     setDeletingBulk(true)
     try {
-      await Promise.all(
-        selectedIds.map((id) =>
-          fetch(`/api/admin/categories/${id}`, { method: "DELETE" })
-        )
-      )
+      const depth = (id: string) => {
+        let current = categories.find((category) => category.id === id)
+        let level = 0
+        while (current?.parent_category_id && level < categories.length) {
+          level += 1
+          current = categories.find((category) => category.id === current?.parent_category_id)
+        }
+        return level
+      }
+      for (const id of [...selectedIds].sort((a, b) => depth(b) - depth(a))) {
+        const response = await fetch(`/api/admin/categories/${id}`, { method: "DELETE" })
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}))
+          throw new Error(data.error || "Kategori silinemedi")
+        }
+      }
       setSelectedIds([])
       setBulkAction("")
-      fetchCategories()
+      await fetchCategories()
     } catch (e) {
-      console.error(e)
+      setError(e instanceof Error ? e.message : "Kategoriler silinemedi")
+      await fetchCategories()
     } finally {
       setDeletingBulk(false)
       setConfirmBulkDelete(false)
@@ -833,6 +894,11 @@ export default function CategoriesPage() {
     setName(c.name)
     setHandle(c.handle)
     setDescription(c.description || "")
+    setSeoTitle(metadata.seo_title || "")
+    setSeoDescription(metadata.seo_description || "")
+    setProductListTitle(metadata.product_list_title || "")
+    setPrettyUrl(Boolean(metadata.pretty_url))
+    setIsIndexable(metadata.is_indexable === true)
     setParentId(c.parent_category_id || "")
     setIcon(metadata.icon || "")
     setShowOnHomepage(Boolean(metadata.show_on_homepage))
@@ -891,6 +957,11 @@ export default function CategoriesPage() {
       setName(d.name)
       setHandle(d.handle)
       setDescription(d.description)
+      setSeoTitle(d.seoTitle)
+      setSeoDescription(d.seoDescription)
+      setProductListTitle(d.productListTitle)
+      setPrettyUrl(d.prettyUrl)
+      setIsIndexable(d.isIndexable)
       setParentId(d.parentId)
       setIcon(d.icon)
       setShowOnHomepage(d.showOnHomepage)
@@ -934,12 +1005,17 @@ export default function CategoriesPage() {
         .replace(/^-|-$/g, "")
 
     try {
-      await Promise.all(
+      const responses = await Promise.all(
         draftIds.map(async (id) => {
           const d = drafts[id]
           const finalHandle = d.handle.trim() || autoH(d.name)
           const meta: Record<string, any> = {
             icon: d.icon,
+            seo_title: d.seoTitle.trim(),
+            seo_description: d.seoDescription.trim(),
+            product_list_title: d.productListTitle.trim(),
+            pretty_url: d.prettyUrl,
+            is_indexable: d.isIndexable,
             show_on_homepage: Boolean(d.showOnHomepage),
             homepage_order: Number(d.homepageOrder || 1),
             homepage_rank: Number(d.homepageOrder || 1),
@@ -987,6 +1063,12 @@ export default function CategoriesPage() {
           })
         })
       )
+      for (const response of responses) {
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}))
+          throw new Error(data.error || "Kategori kaydedilemedi")
+        }
+      }
 
       setSuccessMessage(
         `${draftIds.length} kategorideki tüm değişiklikler kaydedildi.`
@@ -996,7 +1078,7 @@ export default function CategoriesPage() {
       restoreEditorPosition(editorScrollTop, pageScrollTop)
       setTimeout(() => setSuccessMessage(null), 5000)
     } catch (err) {
-      setError("Toplu kaydetme sırasında bir hata oluştu")
+      setError(err instanceof Error ? err.message : "Toplu kaydetme sırasında bir hata oluştu")
     } finally {
       setSaving(false)
     }
@@ -1007,6 +1089,11 @@ export default function CategoriesPage() {
     setName("")
     setHandle("")
     setDescription("")
+    setSeoTitle("")
+    setSeoDescription("")
+    setProductListTitle("")
+    setPrettyUrl(false)
+    setIsIndexable(false)
     setParentId("")
     setIcon("")
     setShowOnHomepage(false)
@@ -1546,7 +1633,7 @@ export default function CategoriesPage() {
                   }}
                   className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
                 >
-                  <AppIcon name="drill" className="w-3.5 h-3.5" />
+                  <AppIcon name="box" className="w-3.5 h-3.5" />
                 </span>
                 <span
                   style={{
@@ -1556,7 +1643,7 @@ export default function CategoriesPage() {
                   }}
                   className="truncate whitespace-nowrap"
                 >
-                  Akülü Vidalama
+                  Yemek Takımları
                 </span>
               </div>
             </div>
@@ -1707,7 +1794,7 @@ export default function CategoriesPage() {
                     type="text"
                     value={name}
                     onChange={(e) => handleNameChange(e.target.value)}
-                    placeholder="Matkap"
+                    placeholder="Yemek Takımları"
                     className="w-full px-3.5 py-2 border border-slate-300 rounded-xl text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-rose-500/20 focus:border-[#C98484] outline-none transition-all"
                   />
                 </div>
@@ -1724,7 +1811,7 @@ export default function CategoriesPage() {
                       setHandle(val)
                       if (editId) updateDraftFields({ handle: val })
                     }}
-                    placeholder="matkap"
+                    placeholder="yemek-takimlari"
                     className="w-full px-3.5 py-2 border border-slate-300 rounded-xl text-xs font-mono font-semibold text-slate-800 focus:ring-2 focus:ring-rose-500/20 focus:border-[#C98484] outline-none transition-all bg-slate-50/50"
                   />
                 </div>
@@ -1740,18 +1827,21 @@ export default function CategoriesPage() {
                     const val = e.target.value
                     setParentId(val)
                     if (editId) updateDraftFields({ parentId: val })
+                    else setHandle(newCategoryHandle(name, val))
                   }}
                   className="w-full px-3.5 py-2 border border-slate-300 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-rose-500/20 focus:border-[#C98484] outline-none transition-all bg-white cursor-pointer"
                 >
                   <option value="">Bağımsız Kategori (Ana Kategori)</option>
                   {categories
-                    .filter((c) => !c.parent_category_id && c.id !== editId)
+                    .filter((c) => c.id !== editId && c.parent_category_id !== editId &&
+                      (!c.parent_category_id || !categories.find((parent) => parent.id === c.parent_category_id)?.parent_category_id))
                     .map((c) => (
                       <option key={c.id} value={c.id}>
-                        {c.name}
+                        {c.parent_category_id ? "— " : ""}{c.name}
                       </option>
                     ))}
                 </select>
+                <p className="mt-1 text-[10px] text-slate-500">Üç seviye desteklenir. Yeni kategorinin URL yolu üst kategoriye göre otomatik oluşturulur.</p>
               </div>
             </div>
 
@@ -1874,6 +1964,11 @@ export default function CategoriesPage() {
                     <Plus className="w-3.5 h-3.5" />
                     <span>Medyadan Seç</span>
                   </button>
+                  <input type="text" value={design.cardImageUrl}
+                    onChange={(event) => setDesign((current) => ({ ...current, cardImageUrl: event.target.value }))}
+                    placeholder="/category-icons/vazolar.svg veya medya URL’si"
+                    aria-label="Kategori görsel URL’si"
+                    className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-[10px] outline-none focus:border-[#C98484]" />
                 </div>
               </div>
             </div>
@@ -1894,6 +1989,41 @@ export default function CategoriesPage() {
                 placeholder="Kategori hakkında kısa açıklama..."
                 className="w-full px-3.5 py-2 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:ring-2 focus:ring-rose-500/20 focus:border-[#C98484] outline-none transition-all resize-none"
               />
+            </div>
+
+            <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50/70 p-3">
+              <div>
+                <h3 className="text-xs font-extrabold text-slate-900">Kategori SEO</h3>
+                <p className="mt-1 text-[11px] text-slate-500">Arama sonucunda görünen metinleri ve kategori URL’sini buradan yönetin.</p>
+              </div>
+              <label className="block text-xs font-bold text-slate-700">
+                Ürün Listesi Başlığı
+                <input value={productListTitle} onChange={(event) => setProductListTitle(event.target.value)}
+                  placeholder={name || "Kategori adı kullanılır"}
+                  className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-medium outline-none focus:border-[#C98484]" />
+                <span className="mt-1 block text-[10px] font-normal text-slate-500">Kategori görselinin altındaki ürün alanında görünür. Örnek: Yemek Takımı Ürünleri.</span>
+              </label>
+              <label className="block text-xs font-bold text-slate-700">
+                SEO Başlığı
+                <input value={seoTitle} onChange={(event) => setSeoTitle(event.target.value)}
+                  placeholder={`${name || "Kategori"} | ZK Home`}
+                  className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-medium outline-none focus:border-[#C98484]" />
+              </label>
+              <label className="block text-xs font-bold text-slate-700">
+                Meta Açıklaması
+                <textarea rows={3} value={seoDescription} onChange={(event) => setSeoDescription(event.target.value)}
+                  placeholder="Kategoriye özgü, kısa ve açıklayıcı metin"
+                  className="mt-1 w-full resize-none rounded-lg border border-slate-300 bg-white px-3 py-2 font-medium outline-none focus:border-[#C98484]" />
+              </label>
+              <label className="flex items-center gap-2 text-xs font-semibold text-slate-700">
+                <input type="checkbox" checked={prettyUrl} onChange={(event) => setPrettyUrl(event.target.checked)} />
+                Kısa kategori URL’si kullan (ör. /dekorasyon/vazolar)
+              </label>
+              <label className="flex items-center gap-2 text-xs font-semibold text-slate-700">
+                <input type="checkbox" checked={isIndexable} onChange={(event) => setIsIndexable(event.target.checked)} />
+                Arama motorlarında indekslemeye aday olsun
+              </label>
+              <p className="text-[10px] text-slate-500">Ürünsüz kategoriler ve mağaza hazırlık dönemindeki sayfalar otomatik olarak noindex kalır.</p>
             </div>
 
             <div className="space-y-3 border-t border-slate-200 pt-4">
@@ -1937,6 +2067,7 @@ export default function CategoriesPage() {
                             }))
                           }
                           className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs"
+                          placeholder="Boşsa üst kategori adı kullanılır"
                         />
                       </label>
                       <label className="space-y-1">

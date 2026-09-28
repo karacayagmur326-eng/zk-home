@@ -1,3 +1,5 @@
+import faqSeed from "./faq-data.json"
+
 export type ExtendedFaqItem = {
   id: string
   category_id: string
@@ -16,7 +18,22 @@ export type ExtendedFaqCategory = {
   sort_order: number
 }
 
-// ZK Home starts with an empty knowledge base. Categories and answers are
-// created from the admin panel after the new catalogue and policies are ready.
-export const faqCategories: ExtendedFaqCategory[] = []
-export const all500Faqs: ExtendedFaqItem[] = []
+export const faqCategories: ExtendedFaqCategory[] = faqSeed.categories.map((category, index) => ({
+  id: category.id,
+  title: category.title,
+  icon: category.icon,
+  sort_order: index + 1,
+}))
+
+export const all500Faqs: ExtendedFaqItem[] = faqSeed.categories.flatMap((category) =>
+  category.questions.map(([question, answer], index) => ({
+    id: `${category.id}-${String(index + 1).padStart(2, "0")}`,
+    category_id: category.id,
+    question,
+    answer,
+    linkUrl: category.linkUrl,
+    linkText: category.linkText,
+    sort_order: 0,
+    active: true,
+  }))
+).map((item, index) => ({ ...item, sort_order: index + 1 }))
