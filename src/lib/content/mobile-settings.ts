@@ -227,11 +227,16 @@ const merge = (stored: Partial<MobileSettings>): MobileSettings => ({
 })
 
 export const getMobileSettings = cache(async (): Promise<MobileSettings> => {
-  await ensureCommerceSchema()
-  const rows = await query<{ value: Partial<MobileSettings> }>(
-    "SELECT value FROM store_setting WHERE key='mobile_experience' LIMIT 1",
-  )
-  return merge(rows[0]?.value || {})
+  try {
+    await ensureCommerceSchema()
+    const rows = await query<{ value: Partial<MobileSettings> }>(
+      "SELECT value FROM store_setting WHERE key='mobile_experience' LIMIT 1",
+    )
+    return merge(rows[0]?.value || {})
+  } catch (error) {
+    console.error("Mobil mağaza ayarları yüklenemedi:", error)
+    return defaultMobileSettings
+  }
 })
 
 export async function saveMobileSettings(value: MobileSettings) {
