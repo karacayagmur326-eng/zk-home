@@ -298,9 +298,7 @@ const RefinementList = ({
         }
         if (res.categories) {
           const categoryGroups = res.categories.filter(
-            (category: any) =>
-              Array.isArray(category.category_children) &&
-              category.category_children.length > 0
+            (category: any) => !category.parent_category_id && !category.parent_category
           )
           globalNavCache = {
             categories: res.categories,

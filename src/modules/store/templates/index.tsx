@@ -40,9 +40,7 @@ const StoreTemplate = async ({
       `SELECT id,title,handle FROM store_collection ORDER BY title`,
     ).catch(() => []),
   ])
-  const navigationGroups = navigationCategories.filter(
-    (item) => Array.isArray(item.category_children) && item.category_children.length > 0,
-  )
+  const navigationGroups = navigationCategories
   const pageNumber = page ? parseInt(page) : 1
   const sort = sortBy || "created_at"
 
