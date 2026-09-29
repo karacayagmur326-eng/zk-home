@@ -171,7 +171,7 @@ export const APP_ICON_MAP: Record<string, LucideIcon> = {
   PackageOpen, PanelsTopLeft, Percent, Phone, PhoneCall, Plug, PlugZap, Receipt,
   RefreshCw, RotateCcw, Scale, Scissors, Search, Settings, Settings2, Share2,
   Shield, ShieldCheck, ShoppingBag, ShoppingCart, Sliders, Smartphone, Sparkles,
-  SquarePen, Star, Store, Tag, Truck, User, UserCheck, UserCog, Users,
+  SquarePen, Star, Store, Tag, Truck, User, UserCheck, UserCog, Users, X,
   ChevronLeft,
   LayoutGrid,
   Trash2,
