@@ -59,12 +59,14 @@ export async function checkRateLimit(
       allowed: Number(row?.request_count || 0) <= limit,
       remaining: Math.max(0, limit - Number(row?.request_count || 0)),
       resetAt: row?.reset_at,
+      unavailable: false,
     }
   } catch (error) {
     return {
       allowed: !options.failClosed,
       remaining: options.failClosed ? 0 : limit,
       resetAt: new Date().toISOString(),
+      unavailable: true,
     }
   }
 }

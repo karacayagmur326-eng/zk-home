@@ -16,6 +16,12 @@ export async function POST(req: NextRequest) {
         15 * 60,
         { failClosed: true }
       )
+      if (rate.unavailable) {
+        return NextResponse.json(
+          { error: "Giriş hizmeti şu anda kullanılamıyor. Lütfen daha sonra tekrar deneyin." },
+          { status: 503 }
+        )
+      }
       if (!rate.allowed) {
         return NextResponse.json(
           { error: "Çok fazla giriş denemesi yapıldı. Lütfen daha sonra tekrar deneyin." },
