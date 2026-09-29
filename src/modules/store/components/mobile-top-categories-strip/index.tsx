@@ -49,7 +49,7 @@ export default function MobileTopCategoriesStrip({ categories = [] }: { categori
         <span className="text-xs font-black text-slate-900 uppercase tracking-tight">Kategoriler</span>
       </div>
 
-      <div className="grid grid-cols-3 min-[520px]:grid-cols-6 justify-items-center gap-x-2 gap-y-3 py-1 px-4">
+      <div className="no-scrollbar flex items-start gap-3 overflow-x-auto overscroll-x-contain touch-pan-x py-1 px-4" aria-label="Ürün kategorileri">
         {topCategories.map((category) => {
           const metadata = (category.metadata || {}) as Record<string, any>
           const cardImageUrl =
@@ -72,7 +72,7 @@ export default function MobileTopCategoriesStrip({ categories = [] }: { categori
             <LocalizedClientLink
               key={category.id}
               href={categoryPath(category)}
-              className="group relative flex w-full max-w-[76px] flex-col items-center text-center cursor-pointer pb-2"
+              className="group relative flex w-[76px] shrink-0 flex-col items-center text-center cursor-pointer pb-2"
             >
               {/* Round Circle Badge with Active Orange Highlight */}
               <div

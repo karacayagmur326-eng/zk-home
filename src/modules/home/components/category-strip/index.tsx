@@ -26,15 +26,10 @@ export default function CategoryStrip({
     return 0 // 0 means default / unassigned rank
   }
 
-  // Filter categories by metadata.show_on_homepage checkbox (true olanlar) and sort by homepage_order (1, 2, 3... first, 0 afterwards by name/rank)
+  // Keep every active category reachable in the horizontal strip.
   const flattenCategories = (items: HttpTypes.StoreProductCategory[]): HttpTypes.StoreProductCategory[] =>
     items.flatMap((item) => [item, ...flattenCategories(item.category_children || [])])
   const selectedCategories = flattenCategories(categories)
-    .filter(
-      (c) =>
-        Boolean(c.metadata?.show_on_homepage) ||
-        Boolean(c.metadata?.show_in_homepage)
-    )
     .sort((a, b) => {
       const orderA = getHomepageOrder(a)
       const orderB = getHomepageOrder(b)
@@ -55,7 +50,7 @@ export default function CategoryStrip({
       return (a.rank ?? 0) - (b.rank ?? 0) || a.name.localeCompare(b.name, "tr")
     })
 
-  // Eğer hiçbir kategori "Ana Sayfada Göster" olarak seçilmediyse bölümü HİÇ GÖSTERME (return null)
+  // Hide only when the catalog has no active categories.
   if (selectedCategories.length === 0) {
     return null
   }

@@ -7,8 +7,6 @@ import { listActiveSliders } from "@lib/data/sliders"
 import { isStoreReady } from "@lib/security/store-readiness"
 import { getMobileSettings } from "@lib/content/mobile-settings"
 import MobileHomeExperience from "@modules/home/components/mobile-home-experience"
-import { headers } from "next/headers"
-import { isPhoneUserAgent } from "@lib/util/device"
 import { compactProductsForCards } from "@lib/util/product-card"
 import { Metadata } from "next"
 import { getBaseURL } from "@lib/util/env"
@@ -43,8 +41,6 @@ function HomeStructuredData() {
 
 export default async function Home() {
   const countryCode = "tr"
-  const userAgent = (await headers()).get("user-agent")
-  const isPhoneRequest = isPhoneUserAgent(userAgent)
 
   // Start all independent database & content reads concurrently to minimize TTFB
   const regionPromise = getRegion(countryCode).catch(() => null)
@@ -56,12 +52,8 @@ export default async function Home() {
   const articlesPromise = query<HomeArticle>(
     "SELECT id, title, slug, excerpt, image, published_at FROM blog_posts WHERE status = 'published' ORDER BY featured DESC, published_at DESC, created_at DESC LIMIT 3"
   ).catch(() => [])
-  // Phone home uses the slides from mobile settings, not the desktop slider.
-  const slidersPromise = mobileSettingsPromise.then((settings) =>
-    isPhoneRequest && settings.enabled
-      ? []
-      : listActiveSliders().catch(() => [])
-  )
+  // Render both variants so a resized mobile browser can reveal the desktop hero.
+  const slidersPromise = listActiveSliders().catch(() => [])
 
   const productsPromise = regionPromise.then((requestedRegion) => {
     const region =
@@ -91,16 +83,6 @@ export default async function Home() {
   const publicSliders = isStoreReady()
     ? sliders
     : sliders.map(({ top_bar_features: _topBar, ...slider }) => slider)
-
-  // Seed the storefront with real published catalog products.
-  // A deleted or stale showcase tag must not make this sales section empty.
-  if (mobileSettings.enabled && isPhoneRequest) {
-    return (
-      <><HomeStructuredData /><MobileHomeExperience
-        settings={mobileSettings}
-      /><HomeEditorial content={editorialContent} products={initialProducts} region={region} articles={articles} /></>
-    )
-  }
 
   return (
     <>
