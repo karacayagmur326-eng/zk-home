@@ -353,7 +353,6 @@ export default function MobileSiteChrome({ settings, logoUrl }: { settings: Mobi
                 </div>
                 <div>
                   <h3 className="text-xs font-black">ZK Home'ya Hoş Geldiniz</h3>
-                  <p className="text-[10px] font-semibold text-rose-100">Kaliteli Alet & Donanım Mağazası</p>
                 </div>
               </div>
               <div className="mt-2.5 grid grid-cols-2 gap-2">
