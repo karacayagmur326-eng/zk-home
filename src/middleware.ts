@@ -42,18 +42,6 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  if (
-    process.env.VERCEL_ENV === "production" &&
-    request.nextUrl.hostname === "zk-home.com" &&
-    (request.method === "GET" || request.method === "HEAD") &&
-    !privatePage
-  ) {
-    const canonicalUrl = request.nextUrl.clone()
-    canonicalUrl.protocol = "https:"
-    canonicalUrl.hostname = "www.zk-home.com"
-    canonicalUrl.port = ""
-    return finish(NextResponse.redirect(canonicalUrl, 308))
-  }
   return finish(NextResponse.next())
 }
 
