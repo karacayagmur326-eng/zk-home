@@ -50,8 +50,7 @@ export default function CategoryStrip({
     })
   }
 
-  // Compact sizing so items fit smoothly
-  const circlePx = 76
+  const circlePx = 88
 
   return (
     <section

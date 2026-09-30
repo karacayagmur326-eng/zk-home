@@ -517,7 +517,7 @@ export default function HeroSlider({
       role="region"
       aria-roledescription="carousel"
       aria-label="Öne çıkan kampanyalar"
-      className="group relative w-full overflow-hidden bg-[#eef0f2] font-sans aspect-[16/7.5] sm:aspect-[16/6.8] md:aspect-[16/6.2] lg:aspect-[16/5.8] max-h-[510px] min-h-[260px]"
+      className="group relative w-full overflow-hidden bg-[#eef0f2] font-sans aspect-[16/8] sm:aspect-[16/7.4] md:aspect-[16/6.8] lg:aspect-[16/6.4] max-h-[560px] min-h-[280px]"
       style={{ isolation: "isolate" }}
     >
       <style>{`

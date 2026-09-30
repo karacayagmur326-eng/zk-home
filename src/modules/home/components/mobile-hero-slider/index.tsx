@@ -66,7 +66,7 @@ export default function MobileHeroSlider({ slides, prioritize = true }: { slides
         {slides.map((slide, idx) => (
           <article
             key={slide.id || idx}
-            className="relative h-[180px] min-w-full snap-center overflow-hidden rounded-none bg-white shadow-none shrink-0"
+            className="relative h-[200px] min-w-full snap-center overflow-hidden rounded-none bg-white shadow-none shrink-0"
           >
             {slide.image && (idx === 0 || hasInteracted) && (
               <Image
