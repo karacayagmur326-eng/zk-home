@@ -117,6 +117,7 @@ async function prepareAiProviderSchema() {
 }
 
 export async function ensureAiProviderSchema() {
+  if (process.env.NODE_ENV === "production") return
   if (!schemaReady) {
     schemaReady = prepareAiProviderSchema().catch((error) => {
       schemaReady = null

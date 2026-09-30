@@ -1,3 +1,4 @@
+import { emptySitemap } from "@lib/seo/sitemap-response"
 import { query } from "@lib/admin/db"
 import { getBaseURL } from "@lib/util/env"
 import { NextResponse } from "next/server"
@@ -7,6 +8,8 @@ import { isStoreReady } from "@lib/security/store-readiness"
 export const dynamic = "force-dynamic"
 
 export async function GET() {
+  if (!isStoreReady()) return emptySitemap()
+  try {
   const baseUrl = getBaseURL()
   // 2. Fetch Published Blog Posts
   const blogPosts = await query<{ slug: string; title: string; image?: string; updated_at?: string; published_at?: string; created_at?: string }>(
@@ -52,4 +55,8 @@ ${(isStoreReady() ? [mainBlogXml, ...postXmlRows] : []).join("\n")}
       "Cache-Control": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400",
     },
   })
+  } catch {
+    // Report temporary data outages explicitly so crawlers retry later.
+    return emptySitemap(503)
+  }
 }

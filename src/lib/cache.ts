@@ -1,4 +1,4 @@
-import { revalidatePath, revalidateTag } from "next/cache"
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache"
 
 type CacheEntry<T> = {
   value: T
@@ -24,6 +24,11 @@ export async function getCached<T>(
   fetcher: () => Promise<T>,
   ttlSeconds: number = 300
 ): Promise<T> {
+  // The Next Data Cache is shared across Vercel instances and invalidated
+  // with the same catalog tag when a database mutation succeeds.
+  if (process.env.NODE_ENV === "production") {
+    return unstable_cache(fetcher, [key], { tags: ["catalog"], revalidate: ttlSeconds })()
+  }
   const cache = getMemoryCacheMap()
   const now = Date.now()
   const cached = cache.get(key)
@@ -44,6 +49,10 @@ export async function getCached<T>(
  * Flush in-memory cache entries.
  */
 export function clearMemoryCache(pattern?: string): number {
+  if (process.env.NODE_ENV === "production") {
+    try { revalidateTag("catalog") }
+    catch { /* Local migration tools run outside the Next request context. */ }
+  }
   const cache = getMemoryCacheMap()
   if (!pattern) {
     const count = cache.size

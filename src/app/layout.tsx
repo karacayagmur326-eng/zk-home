@@ -64,7 +64,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const keywords =
     settings?.seo_meta_keywords ||
     "zk home, online mağaza, e-ticaret"
-  const ogImage = settings?.seo_og_image_url || "/brand/zkhome-logo.svg"
+  const ogImage = settings?.seo_og_image_url || "/opengraph-image"
   const siteName = settings?.logo_text || "ZK Home"
   const separator = settings?.seo_title_separator || "|"
   const rawPageTemplate =

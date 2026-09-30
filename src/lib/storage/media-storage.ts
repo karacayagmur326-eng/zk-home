@@ -26,10 +26,10 @@ const SUPABASE_MEDIA_BUCKET = "store-media"
 
 function supabaseStorageConfig() {
   const endpoint = (
-    process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
+    process.env.NEXT_PUBLIC_ZK_SUPABASE_SUPABASE_URL || process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
   )?.replace(/\/+$/, "")
   const secretKey =
-    process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
+    process.env.ZK_SUPABASE_SUPABASE_SECRET_KEY || process.env.ZK_SUPABASE_SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
   const bucket = process.env.SUPABASE_MEDIA_BUCKET || SUPABASE_MEDIA_BUCKET
 
   return endpoint && secretKey && bucket

@@ -182,7 +182,7 @@ export default async function ProductPage(props: Props) {
   const isAdmin = !!session
 
   // Calculate price for Schema.org
-  const variant = pricedProduct.variants?.[0] as
+  const variant = (pricedProduct.variants?.find((item) => item.id === selectedVariantId) || pricedProduct.variants?.[0]) as
     | (HttpTypes.StoreProductVariant & {
         prices?: Array<{ amount: number }>
       })
@@ -220,92 +220,36 @@ export default async function ProductPage(props: Props) {
     120
   ).catch(() => [])
 
-  let reviewsList = dbReviews
-  if (reviewsList.length === 0 && Array.isArray(md.reviews) && md.reviews.length > 0) {
-    reviewsList = md.reviews
-  }
-
-  const reviewCount = reviewsList.length > 0 ? reviewsList.length : 1
-  const avgRating =
-    reviewsList.length > 0
-      ? (
-          reviewsList.reduce((acc, r) => acc + (Number(r.rating) || 5), 0) /
-          reviewsList.length
-        ).toFixed(1)
-      : "5.0"
-
-  const finalReviews =
-    reviewsList.length > 0
-      ? reviewsList.map((r: any) => ({
-          "@type": "Review",
-          reviewRating: {
-            "@type": "Rating",
-            ratingValue: String(r.rating || 5),
-            bestRating: "5",
-            worstRating: "1",
-          },
-          author: {
-            "@type": "Person",
-            name: r.author || "Doğrulanmış Müşteri",
-          },
-          datePublished: r.created_at
-            ? new Date(r.created_at).toISOString().split("T")[0]
-            : "2026-01-01",
-          reviewBody:
-            r.comment || "Yüksek kaliteli ürün, hızlı kargo ve güvenilir teslimat.",
-        }))
-      : [
-          {
-            "@type": "Review",
-            reviewRating: {
-              "@type": "Rating",
-              ratingValue: "5",
-              bestRating: "5",
-              worstRating: "1",
-            },
-            author: {
-              "@type": "Person",
-              name: "Doğrulanmış Müşteri",
-            },
-            datePublished: "2026-01-01",
-            reviewBody: "Orijinal ürün, yüksek performans ve mükemmel kalite.",
-          },
-        ]
+  // Only approved, real reviews may contribute to search markup.
+  const reviewsList = dbReviews.filter((r: any) =>
+    Number(r.rating) >= 1 && Number(r.rating) <= 5 &&
+    typeof r.author === "string" && r.author.trim() &&
+    typeof r.comment === "string" && r.comment.trim()
+  )
+  const reviewCount = reviewsList.length
+  const avgRating = reviewCount
+    ? (reviewsList.reduce((sum, r) => sum + Number(r.rating), 0) / reviewCount).toFixed(1)
+    : undefined
+  const finalReviews = reviewsList.map((r: any) => ({
+    "@type": "Review",
+    reviewRating: { "@type": "Rating", ratingValue: String(r.rating), bestRating: "5", worstRating: "1" },
+    author: { "@type": "Person", name: r.author },
+    reviewBody: r.comment,
+    ...(r.created_at && !Number.isNaN(new Date(r.created_at).getTime())
+      ? { datePublished: new Date(r.created_at).toISOString().split("T")[0] } : {}),
+  }))
 
   const brandName =
     (pricedProduct as any).brand ||
-    (pricedProduct.metadata as any)?.brand ||
-    pricedProduct.collection?.title ||
-    "ZK HOME"
+    (pricedProduct.metadata as any)?.brand
 
-  // Future dynamic expiration (always valid into the next year)
-  const nextYear = new Date()
-  nextYear.setFullYear(nextYear.getFullYear() + 1)
-  nextYear.setMonth(11, 31)
-  const priceValidUntil = nextYear.toISOString().split("T")[0]
-
-  const parseDateOnly = (val?: string | null, fallback = "2024-01-01") => {
-    if (!val) return fallback
-    try {
-      const d = new Date(val)
-      if (!isNaN(d.getTime())) {
-        return d.toISOString().split("T")[0]
-      }
-    } catch {}
-    return fallback
-  }
-
-  const validFrom = parseDateOnly(pricedProduct.created_at, "2024-01-01")
   const productSku = variant?.sku || (pricedProduct.variants?.[0] as any)?.sku || pricedProduct.id
   const productMpn = (pricedProduct.metadata as any)?.mpn || productSku
   const productGtin = (pricedProduct.metadata as any)?.gtin || (pricedProduct.metadata as any)?.barcode || undefined
 
   const inStock =
-    variant?.inventory_quantity == null ||
-    variant.inventory_quantity > 0 ||
-    pricedProduct.variants?.some(
-      (v: any) => v.inventory_quantity == null || v.inventory_quantity > 0
-    )
+    !!variant && (variant.manage_inventory === false || variant.allow_backorder === true ||
+      (variant.inventory_quantity != null && variant.inventory_quantity > 0))
 
   // Schema.org Structured Data for Google Rich Snippets & Merchant Listings
   const jsonLdProduct: Record<string, any> = {
@@ -313,87 +257,36 @@ export default async function ProductPage(props: Props) {
     "@type": "Product",
     name: pricedProduct.title,
     image:
-      pricedProduct.images?.map((i) => i.url) ||
+      (pricedProduct.images?.length ? pricedProduct.images.map((i) => i.url) : undefined) ||
       (pricedProduct.thumbnail ? [pricedProduct.thumbnail] : []),
     description:
       pricedProduct.description ||
       `${pricedProduct.title} ürün özellikleri, güncel fiyat ve stok bilgileri.`,
-    sku: productSku,
-    mpn: productMpn,
-    ...(productGtin ? { gtin13: productGtin } : {}),
-    brand: {
+    ...(variant?.sku ? { sku: variant.sku } : {}),
+    ...((pricedProduct.metadata as any)?.mpn ? { mpn: productMpn } : {}),
+    ...(/^\d{13}$/.test(String(productGtin || "")) ? { gtin13: productGtin } : {}),
+    ...(brandName ? { brand: {
       "@type": "Brand",
       name: brandName,
-    },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: String(avgRating),
-      reviewCount: String(reviewCount),
-      bestRating: "5",
-      worstRating: "1",
-    },
-    review: finalReviews,
-    offers: {
-      "@type": "Offer",
-      url: `${getBaseURL()}/urunler/${pricedProduct.handle}`,
-      priceCurrency: "TRY",
-      price: Number(schemaPrice) > 0 ? schemaPrice : "1.00",
-      priceValidUntil: priceValidUntil,
-      validFrom: validFrom,
-      itemCondition: "https://schema.org/NewCondition",
-      availability: inStock
-        ? "https://schema.org/InStock"
-        : "https://schema.org/OutOfStock",
-      seller: {
-        "@type": "Organization",
-        name: brandName || "ZK HOME",
-        url: getBaseURL(),
+    } } : {}),
+    ...(reviewCount ? {
+      aggregateRating: {
+        "@type": "AggregateRating", ratingValue: avgRating,
+        reviewCount, bestRating: "5", worstRating: "1",
       },
-      priceSpecification: {
-        "@type": "UnitPriceSpecification",
-        price: Number(schemaPrice) > 0 ? schemaPrice : "1.00",
+      review: finalReviews,
+    } : {}),
+    ...(Number(schemaPrice) > 0 ? {
+      offers: {
+        "@type": "Offer",
+        url: `${getBaseURL()}/urunler/${pricedProduct.handle}`,
         priceCurrency: "TRY",
-        valueAddedTaxIncluded: true,
-        validFrom: validFrom,
-        priceValidUntil: priceValidUntil,
+        price: schemaPrice,
+        itemCondition: "https://schema.org/NewCondition",
+        availability: inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+        seller: { "@type": "Organization", name: "ZK Home", url: getBaseURL() },
       },
-      hasMerchantReturnPolicy: {
-        "@type": "MerchantReturnPolicy",
-        applicableCountry: "TR",
-        returnPolicyCategory:
-          "https://schema.org/MerchantReturnFiniteReturnWindow",
-        merchantReturnDays: 14,
-        returnMethod: "https://schema.org/ReturnByMail",
-        returnFees: "https://schema.org/FreeReturn",
-      },
-      shippingDetails: {
-        "@type": "OfferShippingDetails",
-        shippingRate: {
-          "@type": "MonetaryAmount",
-          value: "0.00",
-          currency: "TRY",
-        },
-        shippingDestination: {
-          "@type": "DefinedRegion",
-          addressCountry: "TR",
-        },
-        deliveryTime: {
-          "@type": "ShippingDeliveryTime",
-          handlingTime: {
-            "@type": "QuantitativeValue",
-            minValue: 0,
-            maxValue: 1,
-            unitCode: "DAY",
-          },
-          transitTime: {
-            "@type": "QuantitativeValue",
-            minValue: 1,
-            maxValue: 3,
-            unitCode: "DAY",
-          },
-        },
-      },
-    },
+    } : {}),
   }
 
   const jsonLdBreadcrumb = {

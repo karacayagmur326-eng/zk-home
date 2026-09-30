@@ -1,7 +1,7 @@
 import { Pool, PoolClient } from "pg"
 import { getCached, clearMemoryCache } from "@lib/cache"
 
-const CONFIGURED_DATABASE_URL = process.env.DATABASE_URL
+const CONFIGURED_DATABASE_URL = process.env.ZK_SUPABASE_POSTGRES_URL || process.env.DATABASE_URL
 const DATABASE_URL =
   CONFIGURED_DATABASE_URL ||
   (process.env.NODE_ENV === "production"
@@ -26,9 +26,15 @@ export function getDb() {
     const poolSize = Number.isFinite(configuredPoolSize) && configuredPoolSize > 0
       ? configuredPoolSize
       : isLocal ? 10 : 1
+    const connectionUrl = new URL(DATABASE_URL)
+    // pg's URL SSL options otherwise override the verified TLS configuration.
+    for (const key of ["sslmode", "sslcert", "sslkey", "sslrootcert"]) connectionUrl.searchParams.delete(key)
     global._pgPool = new Pool({
-      connectionString: DATABASE_URL,
-      ssl: isLocal ? false : { rejectUnauthorized: false },
+      connectionString: connectionUrl.toString(),
+      ssl: isLocal ? false : {
+        rejectUnauthorized: true,
+        ...(process.env.DATABASE_SSL_CA ? { ca: process.env.DATABASE_SSL_CA.replace(/\\n/g, "\n") } : {}),
+      },
       // Vercel gibi serverless ortamlarda her sıcak instance kendi havuzunu açar.
       // Serverless transaction pooler için varsayılanı tek bağlantıda tutuyoruz.
       max: poolSize,
@@ -66,7 +72,7 @@ export async function query<T = Record<string, unknown>>(
   } catch (error: any) {
     if (error?.code === "ECONNREFUSED" || error?.message?.includes("ECONNREFUSED")) {
       console.warn("Veritabanı bağlantısı kurulamadı (PostgreSQL sunucusu aktif değil veya erişilemiyor).")
-      return []
+      throw error
     }
     throw error
   }

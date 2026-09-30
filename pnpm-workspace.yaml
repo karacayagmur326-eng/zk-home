@@ -1,2 +1,6 @@
 allowBuilds:
   unrs-resolver: true
+overrides:
+  postcss: 8.5.28
+minimumReleaseAgeExclude:
+  - nodemailer@10.0.13

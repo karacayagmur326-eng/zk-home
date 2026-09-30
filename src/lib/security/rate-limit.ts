@@ -5,6 +5,7 @@ import { query } from "@lib/admin/db"
 let tablePromise: Promise<unknown> | null = null
 
 function ensureTable() {
+  if (process.env.NODE_ENV === "production") return Promise.resolve()
   if (!tablePromise) {
     tablePromise = query(`
       CREATE TABLE IF NOT EXISTS api_rate_limits (

@@ -1,3 +1,4 @@
+import { emptySitemap } from "@lib/seo/sitemap-response"
 import { query } from "@lib/admin/db"
 import { ensureCommerceSchema } from "@lib/commerce/schema"
 import { getBaseURL } from "@lib/util/env"
@@ -8,6 +9,8 @@ import { isStoreReady } from "@lib/security/store-readiness"
 export const dynamic = "force-dynamic"
 
 export async function GET() {
+  if (!isStoreReady()) return emptySitemap()
+  try {
   const baseUrl = getBaseURL()
   await ensureCommerceSchema()
 
@@ -49,4 +52,8 @@ ${xmlRows.join("\n")}
       "Cache-Control": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400",
     },
   })
+  } catch {
+    // Report temporary data outages explicitly so crawlers retry later.
+    return emptySitemap(503)
+  }
 }

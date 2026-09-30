@@ -25,7 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: { canonical: getBaseURL() },
     openGraph: {
       title, description, url: getBaseURL(), siteName: "ZK Home", locale: "tr_TR", type: "website",
-      images: [{ url: settings?.seo_og_image_url || "/brand/zkhome-logo.svg", alt: "ZK Home" }],
+      images: [{ url: settings?.seo_og_image_url || "/opengraph-image", alt: "ZK Home" }],
     },
   }
 }

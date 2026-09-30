@@ -1,10 +1,16 @@
-import { query } from "@lib/admin/db"
+import { query as databaseQuery } from "@lib/admin/db"
 import { Metadata } from "next"
 import { notFound, permanentRedirect } from "next/navigation"
 import PageHero from "../../../components/common/PageHero"
 import ContactPage from "../iletisim/page"
 import AboutPage from "../hakkimizda/page"
 import BrandsPage from "../markalar/page"
+
+// Optional CMS content must not turn an unknown URL into a server error.
+async function query<T>(sql: string, params: unknown[] = []): Promise<T[]> {
+  try { return await databaseQuery<T>(sql, params) }
+  catch { return [] }
+}
 
 export const dynamic = "force-dynamic"
 

@@ -11,7 +11,7 @@ const settingPages: Record<string, { path: string; title: string }> = {
 export async function getPublicPageAliases() {
   const rows = await query<{ key: string; value: { custom_slug?: string } }>(
     "SELECT key, value FROM store_settings WHERE key = ANY($1::text[])", [Object.keys(settingPages)],
-  )
+  ).catch(() => [])
   return rows.flatMap(({ key, value }) => {
     const path = value?.custom_slug ? `/${value.custom_slug}` : ""
     return path && isPublicContentPath(path) && path !== settingPages[key].path

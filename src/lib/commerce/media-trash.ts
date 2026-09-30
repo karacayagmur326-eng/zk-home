@@ -8,6 +8,7 @@ declare global {
 
 /** Lightweight, independently versioned migration for the media trash feature. */
 export function ensureMediaTrashSchema() {
+  if (process.env.NODE_ENV === "production") return Promise.resolve()
   if (!global._mediaTrashSchemaPromise) {
     global._mediaTrashSchemaPromise = query(`
       ALTER TABLE store_media ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ;
