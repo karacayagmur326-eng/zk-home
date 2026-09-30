@@ -14,6 +14,7 @@ import { getMobileSettings } from "@lib/content/mobile-settings"
 
 import MaintenanceScreen from "@modules/layout/components/maintenance-screen"
 import { getThemeSettings } from "@lib/content/theme-settings"
+import { getAdminSession } from "@lib/admin/auth"
 
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
@@ -25,7 +26,10 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
   const themeSettings = await getThemeSettings()
 
   if (themeSettings?.maintenance_mode) {
-    return <MaintenanceScreen message={themeSettings.maintenance_message} />
+    const adminSession = await getAdminSession(["Admin"])
+    if (!adminSession) {
+      return <MaintenanceScreen message={themeSettings.maintenance_message} />
+    }
   }
 
   const [cart, mobileSettings] = await Promise.all([
