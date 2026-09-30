@@ -87,7 +87,7 @@ export default function CategoryCard({
     >
       {/* Compact Circular Badge */}
       <div
-        className="relative shrink-0 rounded-full border border-slate-200/90 bg-white shadow-2xs transition-all duration-300 group-hover:scale-105 group-hover:border-[#C98484] group-hover:shadow-md overflow-hidden"
+        className="relative shrink-0 overflow-hidden rounded-full border border-slate-200/90 bg-white shadow-2xs transition-[transform,border-color,box-shadow] duration-300 ease-out group-hover:-translate-y-1 group-hover:scale-105 group-hover:border-[#C98484] group-hover:shadow-[0_8px_24px_rgba(185,132,132,0.22)] group-focus-visible:-translate-y-1 group-focus-visible:scale-105 group-focus-visible:border-[#C98484] group-focus-visible:ring-2 group-focus-visible:ring-[#C98484]/40 group-focus-visible:ring-offset-2 motion-reduce:transition-none motion-reduce:transform-none"
         style={{
           width: `${circlePx}px`,
           height: `${circlePx}px`,
@@ -101,7 +101,7 @@ export default function CategoryCard({
               fill
               sizes={`${circlePx}px`}
               quality={50}
-              className="object-contain p-2 sm:p-2.5 transition-transform duration-300 group-hover:scale-110"
+              className="object-contain p-2 sm:p-2.5 transition-transform duration-300 ease-out group-hover:scale-[1.12] group-focus-visible:scale-[1.12] motion-reduce:transition-none motion-reduce:transform-none"
             />
           ) : (
             <SafeImage
@@ -110,7 +110,7 @@ export default function CategoryCard({
               width={circlePx}
               height={circlePx}
               loading="lazy"
-              className="absolute inset-0 h-full w-full object-contain p-2 sm:p-2.5 transition-transform duration-300 group-hover:scale-110"
+              className="absolute inset-0 h-full w-full object-contain p-2 sm:p-2.5 transition-transform duration-300 ease-out group-hover:scale-[1.12] group-focus-visible:scale-[1.12] motion-reduce:transition-none motion-reduce:transform-none"
             />
           )
         ) : (
