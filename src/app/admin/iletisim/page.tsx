@@ -90,9 +90,9 @@ export default function AdminContactPage() {
     time: string | null
     response: string | null
   }>({
-    status: "success",
-    time: "24 Mayıs 2025 • 15:42",
-    response: "250 OK: Message accepted for delivery",
+    status: null,
+    time: null,
+    response: null,
   })
 
   const [contactInfo, setContactInfo] = useState({
@@ -276,7 +276,7 @@ export default function AdminContactPage() {
         setLastTestResult({
           status: "success",
           time: nowStr,
-          response: "250 OK: Message accepted for delivery",
+          response: "SMTP bağlantısı ve kimlik doğrulaması başarılı. Bu test e-posta göndermez.",
         })
       } else {
         showToast("error", data.error || "SMTP bağlantısı başarısız.")
@@ -288,6 +288,7 @@ export default function AdminContactPage() {
       }
     } catch {
       showToast("error", "Test sırasında bağlantı hatası oluştu.")
+      setLastTestResult({ status: "error", time: new Date().toLocaleString("tr-TR"), response: "Test sırasında bağlantı hatası oluştu." })
     } finally {
       setTestingSmtp(false)
     }
@@ -1105,7 +1106,7 @@ export default function AdminContactPage() {
                 <div>
                   <h2 className="text-base font-black text-slate-900">SMTP Sunucu ve E-Posta Bildirim İzinleri</h2>
                   <p className="text-xs text-slate-400 font-medium mt-0.5">
-                    Müşteriler iletişim formunu doldurduğunda admin'e anlık e-posta bildirimi gönderilmesi için SMTP yapılandırması.
+                    Üyelik doğrulaması, şifre sıfırlama, sipariş ve iletişim e-postaları için gönderim hesabını yapılandırın.
                   </p>
                 </div>
               </div>
@@ -1273,13 +1274,13 @@ export default function AdminContactPage() {
             <div className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-2xs space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className={`w-9 h-9 rounded-full ${lastTestResult.status === "success" ? "bg-emerald-50 border border-emerald-100" : "bg-rose-50 border border-rose-100"} flex items-center justify-center shrink-0`}>
-                    <CheckCircle2 className={`w-4 h-4 ${lastTestResult.status === "success" ? "text-emerald-600" : "text-rose-600"}`} />
+                  <div className={`w-9 h-9 rounded-full ${lastTestResult.status === null ? "bg-slate-50 border border-slate-100" : lastTestResult.status === "success" ? "bg-emerald-50 border border-emerald-100" : "bg-rose-50 border border-rose-100"} flex items-center justify-center shrink-0`}>
+                    <CheckCircle2 className={`w-4 h-4 ${lastTestResult.status === null ? "text-slate-400" : lastTestResult.status === "success" ? "text-emerald-600" : "text-rose-600"}`} />
                   </div>
                   <h3 className="text-xs font-black text-slate-900">Son Test Durumu</h3>
                 </div>
-                <span className={`px-2 py-0.5 rounded-md text-[10px] font-black ${lastTestResult.status === "success" ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"}`}>
-                  {lastTestResult.status === "success" ? "Başarılı" : "Başarısız"}
+                <span className={`px-2 py-0.5 rounded-md text-[10px] font-black ${lastTestResult.status === null ? "bg-slate-100 text-slate-600" : lastTestResult.status === "success" ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"}`}>
+                  {lastTestResult.status === null ? "Test yapılmadı" : lastTestResult.status === "success" ? "Başarılı" : "Başarısız"}
                 </span>
               </div>
 
@@ -1291,7 +1292,7 @@ export default function AdminContactPage() {
                 <div className="space-y-0.5 text-[11px]">
                   <span className="text-slate-400 font-semibold block">Yanıt</span>
                   <p className="text-slate-600 font-mono text-[10px] bg-slate-50 p-2 rounded-lg border border-slate-100 break-all">
-                    {lastTestResult.response || "—"}
+                    {lastTestResult.response || "Bağlantıyı kontrol etmek için SMTP testini çalıştırın."}
                   </p>
                 </div>
               </div>

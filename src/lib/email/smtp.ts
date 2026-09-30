@@ -11,6 +11,24 @@ function escapeHtml(value: unknown) {
     .replaceAll("'", "&#039;")
 }
 
+function smtpConnectionOptions(settings: { host: string; port?: string | number; secure?: boolean }) {
+  const port = Number(settings.port || 587)
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    throw new Error("Geçerli bir SMTP portu girin.")
+  }
+  const secure = port === 465 || settings.secure === true
+  return {
+    host: settings.host,
+    port,
+    secure,
+    requireTLS: !secure,
+    tls: { rejectUnauthorized: true, minVersion: "TLSv1.2" as const },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 20000,
+  }
+}
+
 async function smtpTransport() {
   const rows = await query<{ value: any }>(
     `SELECT value FROM store_settings WHERE key='smtp_settings' LIMIT 1`
@@ -20,9 +38,7 @@ async function smtpTransport() {
   const password =
     decryptSettings(settings.encrypted_pass).pass || settings.pass || ""
   const transporter = nodemailer.createTransport({
-    host: settings.host,
-    port: parseInt(settings.port || "587", 10),
-    secure: Boolean(settings.secure),
+    ...smtpConnectionOptions(settings),
     auth: settings.user
       ? {
           user: settings.user,
@@ -111,9 +127,7 @@ export async function sendContactNotificationEmail(data: {
 export async function testSmtpConnection(settings: any) {
   try {
     const transporter = nodemailer.createTransport({
-      host: settings.host,
-      port: parseInt(settings.port || "587", 10),
-      secure: Boolean(settings.secure),
+      ...smtpConnectionOptions(settings),
       auth: settings.user ? {
         user: settings.user,
         pass: settings.pass || "",
