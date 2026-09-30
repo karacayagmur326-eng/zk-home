@@ -15,39 +15,10 @@ export default function CategoryStrip({
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
 
-  const getHomepageOrder = (c: any): number => {
-    const rawOrder = c.metadata?.homepage_order ?? c.metadata?.homepage_rank
-    if (rawOrder !== undefined && rawOrder !== null && rawOrder !== "") {
-      const parsed = Number(rawOrder)
-      if (!isNaN(parsed) && parsed > 0) {
-        return parsed
-      }
-    }
-    return 0 // 0 means default / unassigned rank
-  }
-
-  // This home-page strip presents only the top-level departments.
-  const selectedCategories = categories
-    .filter((category) => !category.parent_category_id)
-    .sort((a, b) => {
-      const orderA = getHomepageOrder(a)
-      const orderB = getHomepageOrder(b)
-
-      // Both have explicit user-assigned rank (> 0)
-      if (orderA > 0 && orderB > 0) {
-        return orderA - orderB
-      }
-      // Only A has explicit rank -> A comes first
-      if (orderA > 0 && orderB === 0) {
-        return -1
-      }
-      // Only B has explicit rank -> B comes first
-      if (orderA === 0 && orderB > 0) {
-        return 1
-      }
-      // Both are default 0 -> sort by rank then name
-      return (a.rank ?? 0) - (b.rank ?? 0) || a.name.localeCompare(b.name, "tr")
-    })
+  // Match the illustrated category cards in the main navigation menus.
+  const selectedCategories = categories.flatMap(
+    (category) => category.category_children || []
+  )
 
   // Hide only when the catalog has no active categories.
   if (selectedCategories.length === 0) {
