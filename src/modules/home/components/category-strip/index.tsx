@@ -6,6 +6,13 @@ import { ArrowRight, ChevronLeft, ChevronRight } from "@lib/icons"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import CategoryCard from "@modules/home/components/category-card"
 
+const trailingCategoryHandles = new Set([
+  "dekorasyon/dekoratif-objeler",
+  "dekorasyon/duvar-dekorasyonu",
+  "dekorasyon/mum-oda-kokusu",
+  "mutfak-sofra/mutfak-saklama",
+])
+
 export default function CategoryStrip({
   categories = [],
 }: {
@@ -16,9 +23,13 @@ export default function CategoryStrip({
   const [canScrollRight, setCanScrollRight] = useState(false)
 
   // Match the illustrated category cards in the main navigation menus.
-  const selectedCategories = categories.flatMap(
+  const menuCategories = categories.flatMap(
     (category) => category.category_children || []
   )
+  const selectedCategories = [
+    ...menuCategories.filter((category) => !trailingCategoryHandles.has(category.handle)),
+    ...menuCategories.filter((category) => trailingCategoryHandles.has(category.handle)),
+  ]
 
   // Hide only when the catalog has no active categories.
   if (selectedCategories.length === 0) {
