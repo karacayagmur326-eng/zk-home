@@ -14,8 +14,6 @@ import { getMobileSettings } from "@lib/content/mobile-settings"
 
 import MaintenanceScreen from "@modules/layout/components/maintenance-screen"
 import { getThemeSettings } from "@lib/content/theme-settings"
-import { headers } from "next/headers"
-import { isPhoneUserAgent } from "@lib/util/device"
 
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
@@ -24,8 +22,6 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic"
 
 export default async function PageLayout(props: { children: React.ReactNode }) {
-  const userAgent = (await headers()).get("user-agent")
-  const isPhoneRequest = isPhoneUserAgent(userAgent)
   const themeSettings = await getThemeSettings()
 
   if (themeSettings?.maintenance_mode) {
@@ -33,10 +29,7 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
   }
 
   const [cart, mobileSettings] = await Promise.all([
-    // Phone chrome has its own cart entry point and the cart page retrieves
-    // current data itself. Avoid holding every mobile page response behind a
-    // commerce API/cart lookup that is only used by desktop chrome.
-    isPhoneRequest ? Promise.resolve(null) : retrieveCart(),
+    retrieveCart(),
     getMobileSettings(),
   ])
   let shippingOptions: StoreCartShippingOption[] = []
@@ -50,11 +43,10 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
   return (
     <div data-ui-scope="storefront" className="min-h-screen">
       <FavoriteAccountSync enabled={Boolean(cart?.customer_id)} />
-      {(!isPhoneRequest || !mobileSettings.enabled) && (
-        <div className="hidden md:block">
-          <Nav />
-        </div>
-      )}
+      {/* Keep both navigation variants available when the viewport changes. */}
+      <div className="hidden md:block">
+        <Nav />
+      </div>
       <MobileSiteChrome settings={mobileSettings} logoUrl={themeSettings?.footer_logo_url || "/brand/zkhome-logo.svg"} />
       {cart && (
         <FreeShippingPriceNudge
@@ -64,7 +56,7 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
         />
       )}
       <div>{props.children}</div>
-      {!isPhoneRequest && <DesktopCartSidebar cart={cart} />}
+      <DesktopCartSidebar cart={cart} />
       <Footer />
       <AdminQuickEditBar />
     </div>
