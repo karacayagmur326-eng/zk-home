@@ -26,10 +26,9 @@ export default function CategoryStrip({
     return 0 // 0 means default / unassigned rank
   }
 
-  // Keep every active category reachable in the horizontal strip.
-  const flattenCategories = (items: HttpTypes.StoreProductCategory[]): HttpTypes.StoreProductCategory[] =>
-    items.flatMap((item) => [item, ...flattenCategories(item.category_children || [])])
-  const selectedCategories = flattenCategories(categories)
+  // This home-page strip presents only the top-level departments.
+  const selectedCategories = categories
+    .filter((category) => !category.parent_category_id)
     .sort((a, b) => {
       const orderA = getHomepageOrder(a)
       const orderB = getHomepageOrder(b)
