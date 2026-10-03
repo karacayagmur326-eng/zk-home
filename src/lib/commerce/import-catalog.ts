@@ -73,8 +73,9 @@ export function matchSkuImages<T extends {name:string; webkitRelativePath?:strin
   return files.filter(file => {
     if (!/\.(jpe?g|png|webp|avif)$/i.test(file.name)) return false
     const parts = (file.webkitRelativePath || file.name).replace(/\\/g,"/").split("/")
-    // Directory names are the authority; WhatsApp filenames need no SKU.
-    if (parts.length > 1) return parts.slice(0,-1).some(part => normalizedSku(part) === key)
+    // Use the image's own folder, not an ancestor SKU: catalogs can contain
+    // another product folder nested inside a product's directory.
+    if (parts.length > 1) return normalizedSku(parts[parts.length - 2]) === key
     const stem = file.name.replace(/\.[^.]+$/, "")
     return normalizedSku(stem) === key || normalizedSku(stem).startsWith(`${key}_`) || normalizedSku(stem).startsWith(`${key} (`)
   }).sort((a,b) => (a.webkitRelativePath || a.name).localeCompare(b.webkitRelativePath || b.name,"tr",{numeric:true}))
