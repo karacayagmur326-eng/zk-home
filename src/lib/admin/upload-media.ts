@@ -30,7 +30,7 @@ export async function uploadMediaFiles(
         if (!permission.ok) throw new Error(upload.error || "Yükleme izni alınamadı.")
         const stored = await fetch(upload.uploadUrl, {
           method: "PUT",
-          headers: { "Content-Type": file.type || "application/octet-stream" },
+          headers: { "Content-Type": ({ png: "image/png", jpg: "image/jpeg", jpeg: "image/jpeg", webp: "image/webp", avif: "image/avif" } as Record<string, string>)[file.name.split(".").pop()?.toLowerCase() || ""] || file.type || "application/octet-stream" },
           body: file,
         })
         if (!stored.ok) throw new Error(`Medya deposuna yüklenemedi (HTTP ${stored.status}).`)

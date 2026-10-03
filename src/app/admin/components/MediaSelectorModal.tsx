@@ -40,6 +40,7 @@ export default function MediaSelectorModal({
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState("")
+  const [uploadErrors, setUploadErrors] = useState<string[]>([])
   const [search, setSearch] = useState("")
   const [selectedUrls, setSelectedUrls] = useState<string[]>([])
   const [sortBy, setSortBy] = useState<string>(() => {
@@ -78,6 +79,7 @@ export default function MediaSelectorModal({
     const fileList = e.target.files
     if (!fileList?.length) return
     setUploading(true)
+    setUploadErrors([])
     const input = e.target
     const selectedFiles = Array.from(fileList)
     setUploadProgress(`0/${selectedFiles.length}`)
@@ -85,6 +87,7 @@ export default function MediaSelectorModal({
       const { uploaded, errors } = await uploadMediaFiles(selectedFiles, (done, total) => {
         setUploadProgress(`${done}/${total}`)
       })
+      setUploadErrors(errors)
       if (uploaded.length) {
         const newUrls = uploaded.map((file) => file.url)
         if (newUrls.length > 0) {
@@ -108,6 +111,7 @@ export default function MediaSelectorModal({
     } catch (err: any) {
       console.error(err)
       const errorMessage = err?.message ? `Yükleme hatası: ${err.message}` : "Dosya yüklenirken bir bağlantı hatası oluştu."
+      setUploadErrors([errorMessage])
       if (typeof window !== "undefined" && (window as any).showAdminAlert) {
         (window as any).showAdminAlert(errorMessage, "Hata", "error")
       }
@@ -398,6 +402,10 @@ export default function MediaSelectorModal({
 
         {/* Content Body */}
         <div style={{ flex: 1, overflowY: "auto", padding: 24, background: "#ffffff" }}>
+          {uploadErrors.length > 0 && <div role="alert" style={{ background: "#fef2f2", color: "#991b1b", border: "1px solid #fecaca", borderRadius: 10, padding: 12, marginBottom: 16, fontSize: 13 }}>
+            <strong>Yüklenemeyen görseller</strong>
+            {uploadErrors.map((error, index) => <div key={index}>{error}</div>)}
+          </div>}
           {activeTab === "upload" ? (
             <div style={{
               border: "2px dashed #cbd5e1", borderRadius: 16, height: "100%",
@@ -415,7 +423,7 @@ export default function MediaSelectorModal({
                 </svg>
               </div>
               <h4 style={{ margin: "0 0 6px 0", color: "#0f172a", fontSize: 16, fontWeight: 800 }}>Yüklemek için dosyaları buraya sürükleyin</h4>
-              <p style={{ margin: "0 0 20px 0", color: "#64748b", fontSize: 13, fontWeight: 500 }}>PNG, JPG, SVG veya WEBP formatları desteklenmektedir.</p>
+              <p style={{ margin: "0 0 20px 0", color: "#64748b", fontSize: 13, fontWeight: 500 }}>PNG, JPEG, WebP ve AVIF desteklenir. Dosya başına en fazla 8 MB.</p>
               <label style={{
                 background: "linear-gradient(135deg, #C98484, #ff7a28)", border: "none", borderRadius: 12,
                 padding: "11px 24px", fontSize: 13, fontWeight: 800, cursor: "pointer",
