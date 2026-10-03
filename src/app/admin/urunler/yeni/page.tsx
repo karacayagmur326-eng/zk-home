@@ -49,7 +49,6 @@ export default function NewProductPage() {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
   const [activeTab, setActiveTab] = useState("general")
-  const { error, setError, errorField, fieldProps } = useProductFormError(activeTab, setActiveTab)
 
   // Form state
   const [title, setTitle] = useState("")
@@ -67,6 +66,9 @@ export default function NewProductPage() {
   // Pricing
   const [price, setPrice] = useState("")
   const [comparePrice, setComparePrice] = useState("")
+  const hasDiscountPrice = Boolean(price.trim())
+  const effectivePriceInput = hasDiscountPrice ? price : comparePrice
+  const { error, setError, errorField, fieldProps } = useProductFormError(activeTab, setActiveTab, hasDiscountPrice ? "price" : "normal-price")
 
   // Stock / Shipping
   const [sku, setSku] = useState("")
@@ -201,7 +203,7 @@ export default function NewProductPage() {
       setError("Stok kodu (SKU) kullanıcı tarafından girilmelidir.")
       return
     }
-    const parsedPrice = parseTryPriceInput(price)
+    const parsedPrice = parseTryPriceInput(effectivePriceInput)
     if ((publishStatus ?? status) === "published" && (!Number.isFinite(parsedPrice) || parsedPrice <= 0)) {
       setError("Lütfen geçerli bir fiyat girin! Fiyatı 0 TL olan ürünler sitede yayınlanamaz.")
       return
@@ -226,16 +228,16 @@ export default function NewProductPage() {
         shipping_free: shippingFree,
         shipping_fast: shippingFast,
         warranty_years: warrantyYears,
-        original_price: comparePrice.trim()
+        original_price: hasDiscountPrice && comparePrice.trim()
           ? Math.round(parseTryPriceInput(comparePrice) * 100)
-          : undefined,
+          : null,
       },
     }
 
     // Variant with pricing + stock
     const variantPrices = []
-    if (price) {
-      const parsedPrice = parseTryPriceInput(price)
+    if (effectivePriceInput.trim()) {
+      const parsedPrice = parseTryPriceInput(effectivePriceInput)
       variantPrices.push({ currency_code: "try", amount: Math.round(parsedPrice * 100) })
     }
     body.options = [{ title: "Varsayılan", values: ["Default"] }]
@@ -449,29 +451,33 @@ export default function NewProductPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                        Normal Fiyat (TL)
+                        Normal Fiyat (TL){" "}
+                        {!hasDiscountPrice && <span className="text-[#C98484]">*Geçerli Fiyat</span>}
                       </label>
                       <input
                         type="text"
                         value={comparePrice}
-                        onChange={(e) => setComparePrice(e.target.value)}
+                        {...fieldProps("normal-price")}
+                        aria-label="Normal ürün fiyatı"
+                        onChange={(e) => { setComparePrice(e.target.value); if (errorField === "normal-price") setError("") }}
                         onBlur={() => comparePrice && setComparePrice(formatTryPriceInput(comparePrice))}
                         inputMode="decimal"
                         placeholder="0,00"
                         className="w-full h-10 px-3.5 rounded-xl border border-slate-200 bg-slate-50/40 text-xs font-bold text-slate-900 outline-none focus:bg-white focus:border-[#C98484]"
                       />
+                      {errorField === "normal-price" && <p id="product-normal-price-error" className="mt-2 text-xs text-red-700">{error}</p>}
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1.5">
                         İndirimli Fiyat (TL){" "}
-                        <span className="text-red-500 font-extrabold">*Geçerli Fiyat</span>
+                        {hasDiscountPrice && <span className="text-[#C98484]">*Geçerli Fiyat</span>}
                       </label>
                       <input
                         type="text"
                         value={price}
                         {...fieldProps("price")}
-                        aria-label="Geçerli ürün fiyatı"
-                        onChange={(e) => { setPrice(e.target.value); if (errorField === "price") setError("") }}
+                        aria-label="İndirimli ürün fiyatı"
+                        onChange={(e) => { setPrice(e.target.value); if (errorField === "price" || errorField === "normal-price") setError("") }}
                         onBlur={() => price && setPrice(formatTryPriceInput(price))}
                         inputMode="decimal"
                         placeholder="0,00"

@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react"
 
-export function useProductFormError(activeTab: string, setActiveTab: (tab: string) => void) {
+export function useProductFormError(activeTab: string, setActiveTab: (tab: string) => void, priceField = "price") {
   const [failure, setFailure] = useState({ message: "", sequence: 0 })
   const error = failure.message
-  const errorField = /fiyat|price/i.test(error) ? "price"
+  const errorField = /fiyat|price/i.test(error) ? priceField
     : /sku|stok kodu/i.test(error) ? "sku"
     : /ürün adı|title/i.test(error) ? "title" : ""
 
@@ -15,7 +15,7 @@ export function useProductFormError(activeTab: string, setActiveTab: (tab: strin
 
   useEffect(() => {
     if (!error) return
-    const requiredTab = errorField === "sku" ? "stock" : errorField === "price" ? "general" : null
+    const requiredTab = errorField === "sku" ? "stock" : /price/.test(errorField) ? "general" : null
     if (requiredTab && activeTab !== requiredTab) {
       setActiveTab(requiredTab)
       return

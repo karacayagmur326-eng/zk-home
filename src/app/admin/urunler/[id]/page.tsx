@@ -60,7 +60,6 @@ export default function EditProductPage() {
   const [deleting, setDeleting] = useState(false)
   const [saved, setSaved] = useState(false)
   const [activeTab, setActiveTab] = useState("general")
-  const { error, setError, errorField, fieldProps } = useProductFormError(activeTab, setActiveTab)
 
   // Form fields
   const [title, setTitle] = useState("")
@@ -72,6 +71,9 @@ export default function EditProductPage() {
   const [originalHandle, setOriginalHandle] = useState("")
   const [price, setPrice] = useState("")
   const [comparePrice, setComparePrice] = useState("")
+  const hasDiscountPrice = Boolean(price.trim())
+  const effectivePriceInput = hasDiscountPrice ? price : comparePrice
+  const { error, setError, errorField, fieldProps } = useProductFormError(activeTab, setActiveTab, hasDiscountPrice ? "price" : "normal-price")
   const [sku, setSku] = useState("")
   const [barcode, setBarcode] = useState("")
   const [manageInv, setManageInv] = useState(false)
@@ -149,7 +151,11 @@ export default function EditProductPage() {
             setManageInv(v.manage_inventory || false)
             setInventoryQty(v.inventory_quantity?.toString() || "")
             const pr = v.prices?.[0]
-            if (pr) setPrice(formatTryPriceInput(pr.amount / 100))
+            const currentAmount = pr?.amount || 0
+            const normalAmount = Number(p.metadata?.original_price) || 0
+            const discounted = normalAmount > currentAmount && currentAmount > 0
+            setComparePrice(formatTryPriceInput((discounted ? normalAmount : currentAmount || normalAmount) / 100))
+            setPrice(discounted ? formatTryPriceInput(currentAmount / 100) : "")
           }
 
           const md = p.metadata || {}
@@ -169,11 +175,6 @@ export default function EditProductPage() {
           setShippingFree(md.shipping_free || false)
           setShippingFast(md.shipping_fast || false)
           setWarrantyYears(md.warranty_years != null ? String(md.warranty_years) : "")
-          setComparePrice(
-            md.original_price != null
-              ? formatTryPriceInput(parseTryPriceInput(String(md.original_price)) / 100)
-              : ""
-          )
         }
         setLoading(false)
       })
@@ -268,7 +269,7 @@ export default function EditProductPage() {
       setError("Stok kodu (SKU) kullanıcı tarafından girilmelidir.")
       return
     }
-    const parsedPrice = parseTryPriceInput(price)
+    const parsedPrice = parseTryPriceInput(effectivePriceInput)
     if ((forcedStatus ?? status) === "published" && (!Number.isFinite(parsedPrice) || parsedPrice <= 0)) {
       setError("Lütfen geçerli bir fiyat girin! Fiyatı 0 TL olan ürünler sitede yayınlanamaz.")
       return
@@ -297,9 +298,9 @@ export default function EditProductPage() {
           shipping_free: Boolean(shippingFree),
           shipping_fast: Boolean(shippingFast),
           warranty_years: safeWarranty || undefined,
-          original_price: safeComparePrice
+          original_price: hasDiscountPrice && safeComparePrice
             ? Math.round(parseTryPriceInput(safeComparePrice) * 100)
-            : undefined,
+            : null,
         },
       }
 
@@ -307,8 +308,8 @@ export default function EditProductPage() {
         body.handle = safeHandle
       }
 
-      const parsedPrice = price ? parseTryPriceInput(price) : 0
-      const variantPrices = price ? [{ currency_code: "try", amount: Math.round(parsedPrice * 100) }] : []
+      const parsedPrice = parseTryPriceInput(effectivePriceInput)
+      const variantPrices = effectivePriceInput.trim() ? [{ currency_code: "try", amount: Math.round(parsedPrice * 100) }] : []
       const variantData: Record<string, unknown> = {
         title: "Varsayılan",
         prices: variantPrices,
@@ -554,29 +555,33 @@ export default function EditProductPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                        Normal Fiyat (TL)
+                        Normal Fiyat (TL){" "}
+                        {!hasDiscountPrice && <span className="text-[#C98484]">*Geçerli Fiyat</span>}
                       </label>
                       <input
                         type="text"
                         value={comparePrice}
-                        onChange={(e) => setComparePrice(e.target.value)}
+                        {...fieldProps("normal-price")}
+                        aria-label="Normal ürün fiyatı"
+                        onChange={(e) => { setComparePrice(e.target.value); if (errorField === "normal-price") setError("") }}
                         onBlur={() => comparePrice && setComparePrice(formatTryPriceInput(comparePrice))}
                         inputMode="decimal"
                         placeholder="0,00"
                         className="w-full h-10 px-3.5 rounded-xl border border-slate-200 bg-slate-50/40 text-xs font-bold text-slate-900 outline-none focus:bg-white focus:border-[#C98484]"
                       />
+                      {errorField === "normal-price" && <p id="product-normal-price-error" className="mt-2 text-xs text-red-700">{error}</p>}
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1.5">
                         İndirimli Fiyat (TL){" "}
-                        <span className="text-red-500 font-extrabold">*Geçerli Fiyat</span>
+                        {hasDiscountPrice && <span className="text-[#C98484]">*Geçerli Fiyat</span>}
                       </label>
                       <input
                         type="text"
                         value={price}
                         {...fieldProps("price")}
-                        aria-label="Geçerli ürün fiyatı"
-                        onChange={(e) => { setPrice(e.target.value); if (errorField === "price") setError("") }}
+                        aria-label="İndirimli ürün fiyatı"
+                        onChange={(e) => { setPrice(e.target.value); if (errorField === "price" || errorField === "normal-price") setError("") }}
                         onBlur={() => price && setPrice(formatTryPriceInput(price))}
                         inputMode="decimal"
                         placeholder="0,00"

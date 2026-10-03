@@ -482,7 +482,9 @@ export async function updateStoreProduct(id: string, body: any) {
           priceFrom(body, currentVariant?.prices?.[0]?.amount || 0),
           metadata.original_price
             ? number(metadata.original_price)
-            : currentVariant?.calculated_price?.original_amount || null,
+            : Object.prototype.hasOwnProperty.call(body.metadata || {}, "original_price")
+              ? null
+              : currentVariant?.calculated_price?.original_amount || null,
           publicUrl(variant.thumbnail || body.thumbnail || existing.thumbnail),
           variant.metadata || currentVariant?.metadata || {},
         ]
