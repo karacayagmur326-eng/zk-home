@@ -1,238 +1,114 @@
 "use client"
-import { useState, useRef } from "react"
-import { useRouter } from "next/navigation"
+import { useMemo, useRef, useState } from "react"
+import type { WorkBook } from "@e965/xlsx"
+import { IMPORT_FIELDS, CatalogRow, ColumnMapping, defaultColumnMapping, importColumns, matchSkuImages, normalizedSku, parseCatalogRows } from "@lib/commerce/import-catalog"
+import { uploadMediaFiles, UploadedMedia } from "@lib/admin/upload-media"
 
+const fileKey = (f:File) => `${f.webkitRelativePath || f.name}|${f.size}|${f.lastModified}`
+const emptyMapping = Object.fromEntries(IMPORT_FIELDS.map(([field])=>[field,null])) as ColumnMapping
 export default function ExcelImportPage() {
-  const router = useRouter()
-  const [importing, setImporting] = useState(false)
-  const [dragActive, setDragActive] = useState(false)
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true)
-    } else if (e.type === "dragleave") {
-      setDragActive(false)
-    }
+  const [book,setBook]=useState<WorkBook|null>(null), [fileName,setFileName]=useState("")
+  const [sheetName,setSheetName]=useState(""), [mapping,setMapping]=useState<ColumnMapping>(emptyMapping)
+  const [files,setFiles]=useState<File[]>([]), [covers,setCovers]=useState<Record<number,string>>({})
+  const [selected,setSelected]=useState<Set<number>>(new Set()), [existing,setExisting]=useState<string[]>([])
+  const [categoryIssues,setCategoryIssues]=useState<Record<number,string[]>>({})
+  const [previewed,setPreviewed]=useState(false), [busy,setBusy]=useState(false)
+  const [status,setStatus]=useState("draft"), [progress,setProgress]=useState(""), [error,setError]=useState("")
+  const [results,setResults]=useState<Record<number,string>>({})
+  const uploaded=useRef(new Map<string,UploadedMedia>())
+  const sheet=book?.Sheets[sheetName]
+  const columns=useMemo(()=>sheet?importColumns(sheet):[],[sheet])
+  const rows=useMemo(()=>sheet?parseCatalogRows(sheet,mapping):[],[sheet,mapping])
+  const matches=useMemo(()=>new Map(rows.map(row=>[row.sourceRow,matchSkuImages(files,row.sku)])),[rows,files])
+  const existingSet=new Set(existing)
+  const issuesFor=(row:CatalogRow,extra=categoryIssues) => [
+    ...row.issues, ...(extra[row.sourceRow]||[]),
+    ...(!matches.get(row.sourceRow)?.length?["Stok koduyla eşleşen görsel yok."]:[]),
+    ...(matches.get(row.sourceRow)?.some(f=>f.size>8*1024*1024)?["Bir görsel 8 MB sınırını aşıyor."]:[]),
+    ...(status==="published" && (row.salePrice??row.regularPrice)<=0?["Yayınlamak için fiyat gerekli."]:[]),
+  ]
+  const reset=()=>{setPreviewed(false);setSelected(new Set());setResults({});setCategoryIssues({});setError("");setProgress("")}
+  async function chooseExcel(file?:File){
+    if(!file)return
+    reset();setBook(null);setFileName("")
+    if(!/\.xlsx$/i.test(file.name)||file.size>10*1024*1024){setError("10 MB veya daha küçük bir .xlsx dosyası seçin.");return}
+    setBusy(true)
+    try{
+      const xlsx=await import("@e965/xlsx")
+      const next=xlsx.read(await file.arrayBuffer(),{type:"array",sheetRows:5002,cellFormula:false})
+      const name=next.SheetNames[0]
+      if(!name)throw new Error("Excel dosyasında çalışma sayfası yok.")
+      setBook(next);setSheetName(name);setMapping(defaultColumnMapping(next.Sheets[name]));setFileName(file.name)
+    }catch(e){setError(e instanceof Error?e.message:"Excel okunamadı.")}finally{setBusy(false)}
   }
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setDragActive(false)
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const file = e.dataTransfer.files[0]
-      if (file.name.toLocaleLowerCase("tr-TR").endsWith(".xlsx")) {
-        setSelectedFile(file)
-      } else {
-        showError("Lütfen yalnızca Excel (.xlsx) dosyası yükleyin.")
-      }
-    }
+  async function preview(){
+    reset();setBusy(true)
+    try{
+      if(mapping.sku===null||mapping.title===null)throw new Error("Stok kodu ve ürün adı sütunlarını eşleştirin.")
+      if(!rows.length)throw new Error("Aktarılacak ürün satırı yok.")
+      const res=await fetch("/api/admin/products/import/catalog",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"preview",rows:rows.filter(row=>!row.issues.length)})})
+      const data=await res.json();if(!res.ok)throw new Error(data.error||"Ön kontrol başarısız.")
+      const found:string[]=data.existingSkus||[],extra:Record<number,string[]>=data.categoryIssuesByRow||{}
+      setExisting(found);setCategoryIssues(extra);setPreviewed(true)
+      setSelected(new Set(rows.filter(row=>!issuesFor(row,extra).length&&!found.includes(normalizedSku(row.sku))).map(row=>row.sourceRow)))
+    }catch(e){setError(e instanceof Error?e.message:"Ön kontrol başarısız.")}finally{setBusy(false)}
   }
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0])
-    }
-  }
-
-  const triggerFileSelect = () => {
-    fileInputRef.current?.click()
-  }
-
-  const showError = (msg: string) => {
-    if (typeof window !== "undefined") {
-      ;(window as any).showAdminAlert?.(msg, "Hata", "error")
-    }
-  }
-
-  async function handleExcelImport() {
-    if (!selectedFile) return
-    setImporting(true)
-    try {
-      const formData = new FormData()
-      formData.append("file", selectedFile)
-
-      const res = await fetch("/api/admin/products/import", {
-        method: "POST",
-        body: formData
-      })
-      const data = await res.json()
-      
-      if (res.ok && data.success) {
-        if (typeof window !== "undefined") {
-          ;(window as any).showAdminAlert?.(
-            `${data.createdCount} yeni ürün eklendi. ${data.createdBrandCount} yeni marka oluşturuldu. ${data.linkedBrandCount} mevcut ürün markasına bağlandı. ${data.skippedCount} ürün zaten mevcuttu.`,
-            "İçe Aktarım Başarılı",
-            "success"
-          )
+  async function startImport(){
+    const queue=rows.filter(row=>selected.has(row.sourceRow)&&!issuesFor(row).length&&!existingSet.has(normalizedSku(row.sku)))
+    setBusy(true);setError("")
+    let added=0,failed=0,skipped=0
+    for(let i=0;i<queue.length;i++){
+      const row=queue[i]
+      if(results[row.sourceRow]?.startsWith("Eklendi")){skipped++;continue}
+      try{
+        const candidates=[...(matches.get(row.sourceRow)||[])]
+        const cover=covers[row.sourceRow]||fileKey(candidates[0])
+        candidates.sort((a,b)=>Number(fileKey(b)===cover)-Number(fileKey(a)===cover))
+        const imageIds:string[]=[]
+        for(let n=0;n<candidates.length;n++){
+          const file=candidates[n],key=fileKey(file)
+          setProgress(`${i+1}/${queue.length} · ${row.sku} · Görsel ${n+1}/${candidates.length} yükleniyor`)
+          let media=uploaded.current.get(key)
+          if(!media){
+            const outcome=await uploadMediaFiles([file]);media=outcome.uploaded[0]
+            if(!media||outcome.errors.length)throw new Error(outcome.errors.join(" · ")||"Görsel yüklenemedi.")
+            uploaded.current.set(key,media)
+          }
+          imageIds.push(media.id)
         }
-        router.push("/admin/urunler")
-      } else {
-        throw new Error(data.error || "İçe aktarım işlemi sırasında bir hata oluştu.")
-      }
-    } catch (e: any) {
-      showError(e.message)
-    } finally {
-      setImporting(false)
+        const res=await fetch("/api/admin/products/import/catalog",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({row,status,imageIds})})
+        const data=await res.json();if(!res.ok||!data.success)throw new Error(data.error||"Ürün kaydedilemedi.")
+        if(data.skipped)skipped++;else added++
+        setResults(previous=>({...previous,[row.sourceRow]:data.skipped?"Zaten mevcut; atlandı.":`Eklendi (${status==="draft"?"taslak":"yayında"})`}))
+      }catch(e){failed++;setResults(previous=>({...previous,[row.sourceRow]:`Hata: ${e instanceof Error?e.message:"Aktarılamadı."}`}))}
     }
+    setProgress(`İçe aktarma tamamlandı: ${added} ürün eklendi, ${skipped} mevcut ürün atlandı, ${failed} hata.`);setBusy(false)
   }
-
-  return (
-    <div style={{ maxWidth: 650, margin: "32px auto" }}>
-      <div className="admin-card" style={{ padding: "32px 40px", borderRadius: 16 }}>
-        {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 24 }}>
-          <div style={{
-            width: 48, height: 48, borderRadius: 12,
-            background: "rgba(201,132,132,0.1)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            color: "#C98484"
-          }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-              <polyline points="14 2 14 8 20 8"></polyline>
-              <line x1="16" y1="13" x2="8" y2="13"></line>
-              <line x1="16" y1="17" x2="8" y2="17"></line>
-              <polyline points="10 9 9 9 8 9"></polyline>
-            </svg>
-          </div>
-          <div>
-            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "#1d2327" }}>
-              Excel Katalog İçe Aktarım
-            </h2>
-            <p style={{ margin: "4px 0 0 0", color: "#646970", fontSize: 13 }}>
-              Excel dosyanızı yükleyerek tüm katalog verilerini anında güncelleyin.
-            </p>
-          </div>
-        </div>
-
-        {/* Drag and Drop Zone */}
-        <div
-          onDragEnter={handleDrag}
-          onDragOver={handleDrag}
-          onDragLeave={handleDrag}
-          onDrop={handleDrop}
-          onClick={triggerFileSelect}
-          style={{
-            border: dragActive ? "2px dashed #C98484" : "2px dashed #cbd5e1",
-            borderRadius: 12,
-            backgroundColor: dragActive ? "rgba(201,132,132,0.02)" : "#f8fafc",
-            padding: "48px 24px",
-            textAlign: "center",
-            cursor: "pointer",
-            transition: "all 0.2s ease",
-            marginBottom: 24,
-            position: "relative"
-          }}
-        >
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".xlsx"
-            onChange={handleFileChange}
-            style={{ display: "none" }}
-          />
-
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
-            <div style={{ color: selectedFile ? "#C98484" : "#64748b" }}>
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="17 8 12 3 7 8"></polyline>
-                <line x1="12" y1="3" x2="12" y2="15"></line>
-              </svg>
-            </div>
-            {selectedFile ? (
-              <div>
-                <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: "#1e293b" }}>
-                  {selectedFile.name}
-                </p>
-                <p style={{ margin: "4px 0 0 0", fontSize: 12, color: "#64748b" }}>
-                  {(selectedFile.size / 1024).toFixed(1)} KB - Değiştirmek için tıklayın veya sürükleyin
-                </p>
-              </div>
-            ) : (
-              <div>
-                <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "#1e293b" }}>
-                  Excel dosyasını buraya sürükleyin veya tıklayıp seçin
-                </p>
-                <p style={{ margin: "4px 0 0 0", fontSize: 12, color: "#64748b" }}>
-                  Desteklenen biçim: .xlsx (en fazla 10 MB)
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, borderTop: "1px solid #e2e8f0", paddingTop: 20 }}>
-          <button
-            onClick={() => router.push("/admin/urunler")}
-            className="admin-btn admin-btn-secondary"
-            disabled={importing}
-            style={{ borderRadius: 8 }}
-          >
-            Vazgeç
-          </button>
-
-          {!selectedFile ? (
-            <button
-              onClick={triggerFileSelect}
-              className="admin-btn admin-btn-primary"
-              disabled={importing}
-              style={{ borderRadius: 8 }}
-            >
-              Dosya Seç
-            </button>
-          ) : (
-            <>
-              <button
-                onClick={triggerFileSelect}
-                className="admin-btn admin-btn-secondary"
-                disabled={importing}
-                style={{ borderRadius: 8 }}
-              >
-                Dosya Değiştir
-              </button>
-              <button
-                onClick={handleExcelImport}
-                className="admin-btn admin-btn-primary"
-                disabled={importing}
-                style={{ minWidth: 160, justifyContent: "center", borderRadius: 8 }}
-              >
-                {importing ? (
-                  <>
-                    <span className="admin-loader-spinner" />
-                    Aktarılıyor...
-                  </>
-                ) : (
-                  "İçeri Aktar"
-                )}
-              </button>
-            </>
-          )}
-        </div>
-      </div>
-
-      <style jsx global>{`
-        .admin-loader-spinner {
-          display: inline-block;
-          width: 14 h-14;
-          width: 14px;
-          height: 14px;
-          border: 2px solid #fff;
-          border-top-color: transparent;
-          border-radius: 50%;
-          animation: adminSpin 0.8s linear infinite;
-          margin-right: 8px;
-        }
-        @keyframes adminSpin {
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
-    </div>
-  )
+  const eligible=rows.filter(row=>selected.has(row.sourceRow)&&!issuesFor(row).length&&!existingSet.has(normalizedSku(row.sku))&&!results[row.sourceRow]?.startsWith("Eklendi"))
+  return <div className="mx-auto max-w-7xl space-y-6 pb-12">
+    <div><h1 className="text-2xl font-semibold">Excel Katalog İçe Aktarım</h1><p className="mt-2 text-sm text-slate-500">Excel sütunlarını eşleştirin, stok kodu klasörlerindeki görselleri seçin ve aktarılacak ürünleri kontrol edin.</p></div>
+    {error&&<div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">{error}</div>}
+    <fieldset disabled={busy} className="space-y-6 disabled:opacity-70">
+      <section className="admin-card p-6"><h2 className="mb-4 text-lg font-semibold">1. Excel dosyası</h2>
+        <input aria-label="Excel dosyası" type="file" accept=".xlsx" onChange={e=>void chooseExcel(e.target.files?.[0])}/>
+        {book&&<div className="mt-4 flex flex-wrap items-center gap-4"><span className="text-sm">{fileName}</span><label>Çalışma sayfası <select aria-label="Çalışma sayfası" className="rounded border p-2" value={sheetName} onChange={e=>{reset();setSheetName(e.target.value);setMapping(defaultColumnMapping(book.Sheets[e.target.value]))}}>{book.SheetNames.map(name=><option key={name}>{name}</option>)}</select></label><span className="text-sm text-slate-500">{rows.length} ürün satırı · En fazla 5.000 satır</span></div>}
+      </section>
+      {book&&<section className="admin-card p-6"><h2 className="mb-2 text-lg font-semibold">2. Sütun eşleştirme</h2><p className="mb-5 text-sm text-slate-500">Her site alanının Excel sütununu seçin. Sütun harfleri aynı başlıklı alanları ayırt eder. Kullanılmayacak alanı boş bırakın.</p>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{IMPORT_FIELDS.map(([field,label])=><label key={field} className="text-sm font-medium">{label}<select aria-label={label} value={mapping[field]??""} onChange={e=>{reset();setMapping({...mapping,[field]:e.target.value===""?null:Number(e.target.value)})}} className="mt-2 block w-full rounded-lg border border-slate-200 bg-white p-3"><option value="">Aktarılmayacak</option>{columns.map(column=><option key={column.index} value={column.index}>{column.label}</option>)}</select></label>)}</div>
+        <p className="mt-5 text-sm text-slate-500">Stok kodları metin olarak korunur. * ile ayrılan kategorilerin tümü atanır. İndirimli fiyat boşsa normal fiyat kullanılır. “Adet” stok sayısı değilse Stok adedi alanını aktarılmayacak olarak seçin. Yeni markalar otomatik eklenir.</p>
+      </section>}
+      <section className="admin-card p-6"><h2 className="mb-2 text-lg font-semibold">3. Ürün görselleri</h2><p className="mb-4 text-sm text-slate-500">ZK klasörünü seçin. Her stok kodunun klasöründeki ilk görsel kapak, diğerleri galeri olur. Kapağı ön izlemede değiştirebilirsiniz. JPEG, PNG, WebP ve AVIF; görsel başına en fazla 8 MB.</p>
+        <input aria-label="Görsel klasörü" type="file" multiple {...({webkitdirectory:"",directory:""} as Record<string,string>)} onChange={e=>{reset();setFiles(Array.from(e.target.files||[]));setCovers({});uploaded.current.clear()}}/>
+        {files.length>0&&<p className="mt-3 text-sm">{files.length} dosya seçildi. Görseller tek tek yüklenir ve kayıpsız optimize edilir.</p>}
+      </section>
+      <div className="flex flex-wrap items-center gap-4"><label>Aktarım durumu <select aria-label="Aktarım durumu" className="ml-2 rounded-lg border p-3" value={status} onChange={e=>{reset();setStatus(e.target.value)}}><option value="draft">Taslak</option><option value="published">Yayında</option></select></label><button className="admin-btn admin-btn-primary" disabled={!book||!files.length} onClick={()=>void preview()}>Ürünleri Ön İzle</button></div>
+      {previewed&&<section className="admin-card overflow-hidden"><div className="flex flex-wrap items-center justify-between gap-3 p-5"><div><h2 className="text-lg font-semibold">4. Aktarım ön izlemesi</h2><p className="text-sm text-slate-500">{eligible.length} ürün seçili. Eksik alanlı ve mevcut stok kodlu ürünler atlanır.</p></div><div className="flex flex-wrap gap-2"><button className="admin-btn admin-btn-secondary" onClick={()=>setSelected(new Set(rows.filter(row=>!issuesFor(row).length&&!existingSet.has(normalizedSku(row.sku))&&!results[row.sourceRow]?.startsWith("Eklendi")).map(row=>row.sourceRow)))}>Uygunları Seç</button><button className="admin-btn admin-btn-secondary" onClick={()=>setSelected(new Set())}>Seçimi Temizle</button><button className="admin-btn admin-btn-primary" disabled={!eligible.length} onClick={()=>void startImport()}>Seçilen {eligible.length} Ürünü İçeri Aktar</button></div></div>
+        <div className="max-h-[650px] overflow-auto"><table className="w-full text-left text-sm"><thead className="sticky top-0 bg-slate-100"><tr>{["Seç","Satır / Stok kodu","Ürün / Kategoriler","Fiyat / Stok","Kapak / Galeri","Durum"].map(t=><th key={t} className="p-3">{t}</th>)}</tr></thead><tbody>{rows.map(row=>{
+          const images=matches.get(row.sourceRow)||[],issues=issuesFor(row),found=existingSet.has(normalizedSku(row.sku)),done=results[row.sourceRow]?.startsWith("Eklendi")
+          return <tr key={row.sourceRow} className="border-t border-slate-100 align-top"><td className="p-3"><input type="checkbox" aria-label={`${row.sku||`Satır ${row.sourceRow}`} seç`} checked={selected.has(row.sourceRow)} disabled={!!issues.length||found||done} onChange={e=>setSelected(previous=>{const next=new Set(previous);if(e.target.checked)next.add(row.sourceRow);else next.delete(row.sourceRow);return next})}/></td><td className="p-3"><span className="text-slate-400">{row.sourceRow}</span><div className="font-medium">{row.sku||"Eksik"}</div></td><td className="min-w-48 p-3"><div className="font-medium">{row.title}</div><div className="mt-1 text-slate-500">{row.categories.join(" · ")}</div><details className="mt-2"><summary className="cursor-pointer text-[#C98484]">Yazıları kontrol et</summary><p className="mt-2 whitespace-pre-wrap"><b>Ürün Özeti</b><br/>{row.summary}</p><p className="mt-2 whitespace-pre-wrap"><b>Ürün Açıklaması</b><br/>{row.description}</p></details></td><td className="whitespace-nowrap p-3">{(row.salePrice??row.regularPrice).toLocaleString("tr-TR")} TL<div className="text-slate-500">Stok: {row.stock??"Takip edilmiyor"}</div></td><td className="min-w-52 p-3">{images.length>0&&<select aria-label={`${row.sku} kapak görseli`} className="max-w-64 rounded border p-2" value={covers[row.sourceRow]||fileKey(images[0])} onChange={e=>setCovers({...covers,[row.sourceRow]:e.target.value})}>{images.map(file=><option key={fileKey(file)} value={fileKey(file)}>{file.name}</option>)}</select>}<div className="mt-2 text-slate-500">{images.length?`1 kapak + ${images.length-1} galeri görseli`:"Görsel yok"}</div></td><td className={`min-w-40 p-3 ${results[row.sourceRow]?.startsWith("Hata")||issues.length?"text-red-600":"text-emerald-700"}`}>{results[row.sourceRow]||(found?"Zaten mevcut; atlanacak.":issues.join(" · ")||"Aktarıma hazır")}</td></tr>
+        })}</tbody></table></div>
+      </section>}
+    </fieldset>
+    {(busy||progress)&&<div role="status" className="admin-card p-4 text-sm">{progress||"Dosya kontrol ediliyor…"}{busy&&<p className="mt-2 text-slate-500">Aktarım bitene kadar bu sekmeyi açık tutun.</p>}</div>}
+  </div>
 }
