@@ -1,11 +1,10 @@
 import { Metadata } from "next"
 import { notFound, permanentRedirect } from "next/navigation"
-import { listProducts } from "@lib/data/products"
+import { getProductForStorefront } from "@lib/commerce/product-preview"
 import { listCategories } from "@lib/data/categories"
 import { getRegion } from "@lib/data/regions"
 import ProductTemplate from "@modules/products/templates"
 import { HttpTypes } from "@medusajs/types"
-import { getAdminSession } from "@lib/admin/auth"
 import { getBaseURL } from "@lib/util/env"
 import ProductHistoryTracker from "@modules/products/components/product-history-tracker"
 import { query, cachedQuery } from "@lib/admin/db"
@@ -84,15 +83,11 @@ function getImagesForVariant(
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params
   const { handle } = params
-  const [product, settings] = await Promise.all([
-    listProducts({
-      countryCode: "tr",
-      queryParams: { handle },
-    })
-      .then(({ response }) => response.products?.[0])
-      .catch(() => null),
+  const [view, settings] = await Promise.all([
+    getProductForStorefront(handle).catch(() => ({ product: null, isPreview: false })),
     getThemeSettings().catch(() => null),
   ])
+  const { product, isPreview } = view
 
   if (!product) {
     const redirectHandle = await findProductRedirectHandle(handle)
@@ -136,6 +131,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
   return {
     title: { absolute: title },
+    ...(isPreview ? { robots: { index: false, follow: false } } : {}),
     description,
     alternates: { canonical: `${getBaseURL()}/urunler/${product.handle}` },
     openGraph: {
@@ -151,16 +147,12 @@ export default async function ProductPage(props: Props) {
   const searchParams = await props.searchParams
   const selectedVariantId = searchParams.v_id
 
-  const [region, pricedProduct, rawCategories] = await Promise.all([
+  const [region, view, rawCategories] = await Promise.all([
     getRegion("tr").catch(() => null),
-    listProducts({
-      countryCode: "tr",
-      queryParams: { handle: params.handle },
-    })
-      .then(({ response }) => response.products?.[0])
-      .catch(() => null),
+    getProductForStorefront(params.handle).catch(() => ({ product: null, isPreview: false })),
     listCategories().catch(() => []),
   ])
+  const { product: pricedProduct, isPreview } = view
 
   if (!pricedProduct || !region) {
     const redirectHandle = await findProductRedirectHandle(params.handle)
@@ -177,9 +169,6 @@ export default async function ProductPage(props: Props) {
   )
 
   const images = getImagesForVariant(pricedProduct, selectedVariantId)
-
-  const session = await getAdminSession().catch(() => null)
-  const isAdmin = !!session
 
   // Calculate price for Schema.org
   const variant = (pricedProduct.variants?.find((item) => item.id === selectedVariantId) || pricedProduct.variants?.[0]) as
@@ -322,16 +311,21 @@ export default async function ProductPage(props: Props) {
 
   return (
     <>
-      <ProductHistoryTracker product={{ id: pricedProduct.id, title: pricedProduct.title, handle: pricedProduct.handle, thumbnail: pricedProduct.thumbnail, price: schemaPrice !== "0" ? `${Number(schemaPrice).toLocaleString("tr-TR", { minimumFractionDigits: 2 })} TL` : null }} />
+      {isPreview && (
+        <div role="status" className="border-b border-rose-200 bg-rose-50 px-6 py-3 text-center text-sm text-rose-900">
+          <strong>Taslak ürün ön izlemesi</strong> — Bu ürün henüz yayımlanmadı. Yalnızca yönetici oturumuyla görüntülenebilir.
+        </div>
+      )}
+      {!isPreview && <ProductHistoryTracker product={{ id: pricedProduct.id, title: pricedProduct.title, handle: pricedProduct.handle, thumbnail: pricedProduct.thumbnail, price: schemaPrice !== "0" ? `${Number(schemaPrice).toLocaleString("tr-TR", { minimumFractionDigits: 2 })} TL` : null }} />}
       {/* Schema.org Structured Data for Google Rich Snippets */}
-      <script
+      {!isPreview && <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLdProduct) }}
-      />
-      <script
+      />}
+      {!isPreview && <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLdBreadcrumb) }}
-      />
+      />}
 
       <ProductTemplate
         product={safeProduct}
