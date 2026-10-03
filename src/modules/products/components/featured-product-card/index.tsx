@@ -16,11 +16,13 @@ export default function FeaturedProductCard({
   region,
   badgeText,
   showAddToCart = false,
+  showSummary = false,
 }: {
   product: HttpTypes.StoreProduct
   region: HttpTypes.StoreRegion
   badgeText?: string
   showAddToCart?: boolean
+  showSummary?: boolean
 }) {
   const [isAdding, setIsAdding] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
@@ -145,6 +147,11 @@ export default function FeaturedProductCard({
             <span>{product.title}</span>
           </h3>
         </LocalizedClientLink>
+        {showSummary && typeof metadata.product_summary === "string" && metadata.product_summary && (
+          <p className="mb-2 min-h-[36px] line-clamp-2 text-xs leading-[1.5] text-[#827b78]">
+            {metadata.product_summary}
+          </p>
+        )}
       </div>
 
       {/* Bottom Price Section */}

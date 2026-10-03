@@ -22,6 +22,18 @@ export function compactProductForCard(
       .filter((key) => metadata[key] !== undefined)
       .map((key) => [key, metadata[key]])
   )
+  const summary = metadata.product_summary || product.subtitle || product.description
+  if (typeof summary === "string") {
+    const entities: Record<string, string> = { amp: "&", quot: '"', apos: "'", lt: "<", gt: ">", nbsp: " " }
+    cardMetadata.product_summary = summary
+      .replace(/<[^>]*>/g, " ")
+      .replace(/&(#x[\da-f]+|#\d+|amp|quot|apos|lt|gt|nbsp);/gi, (match, key: string) => {
+        if (!key.startsWith("#")) return entities[key.toLowerCase()] || match
+        const code = key[1].toLowerCase() === "x" ? parseInt(key.slice(2), 16) : Number(key.slice(1))
+        return code > 0 && code <= 0x10ffff ? String.fromCodePoint(code) : " "
+      })
+      .replace(/\s+/g, " ").trim().slice(0, 600)
+  }
 
   return {
     id: product.id,

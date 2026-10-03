@@ -62,8 +62,8 @@ export default function HomeEditorial({
 
       {content.highlights_active && (products.length > 0 || activeCards(content.highlight_cards).length > 0) && <section aria-label={content.highlights_title}>
         <SectionIntro title={products.length > 0 ? "Öne Çıkan Ürünler" : content.highlights_title} description={content.highlights_description} href="/magaza" linkText="Tüm Ürünleri Gör" />
-        {products.length > 0 ? <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-          {products.slice(0, 4).map((product) => <div key={product.id} className="rounded-[18px] border border-[#eee9e5] bg-white p-2 shadow-sm"><FeaturedProductCard product={product} region={region} /></div>)}
+        {products.length > 0 ? <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-5">
+          {products.slice(0, 5).map((product) => <div key={product.id} className="rounded-[18px] border border-[#eee9e5] bg-white p-2 shadow-sm"><FeaturedProductCard product={product} region={region} showSummary /></div>)}
         </div> : <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           {activeCards(content.highlight_cards).map((card) => <Link key={card.id} href={card.href} className="group overflow-hidden rounded-[18px] border border-[#eee9e5] bg-white transition-shadow hover:shadow-[0_14px_30px_rgba(102,74,65,0.11)]">
             <div className="relative aspect-[4/3] overflow-hidden bg-[#f4efea]">{card.image && <Image src={card.image} alt={card.title} fill sizes="(max-width: 640px) 50vw, 25vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.035]" />}</div>
