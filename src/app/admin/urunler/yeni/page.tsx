@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import MediaSelectorModal from "../../components/MediaSelectorModal"
 import ProductCategoryPicker from "../../components/ProductCategoryPicker"
 import RichTextEditorField from "../../components/RichTextEditorField"
+import ProductUsageFields from "../../components/ProductUsageFields"
 import { formatTryPriceInput, parseTryPriceInput } from "@lib/util/money"
 import { useProductFormError } from "@lib/admin/use-product-form-error"
 import {
@@ -53,6 +54,8 @@ export default function NewProductPage() {
   // Form state
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
+  const [usageTitle, setUsageTitle] = useState("")
+  const [usageContent, setUsageContent] = useState("")
   const [shortDesc, setShortDesc] = useState("")
   const [status, setStatus] = useState<"draft" | "published">("draft")
   const [thumbnail, setThumbnail] = useState("")
@@ -220,6 +223,8 @@ export default function NewProductPage() {
       status: finalStatus,
       metadata: {
         product_summary: shortDesc.trim(),
+        usage_title: usageTitle.trim(),
+        usage_content: usageContent.trim(),
         features: [],
         features_content: featuresContent.trim(),
         package_content: packageContent.filter((c) => c.trim()),
@@ -497,6 +502,7 @@ export default function NewProductPage() {
                       rows={10}
                     />
                   </div>
+                  <ProductUsageFields title={usageTitle} content={usageContent} onTitleChange={setUsageTitle} onContentChange={setUsageContent} />
                 </div>
               )}
 

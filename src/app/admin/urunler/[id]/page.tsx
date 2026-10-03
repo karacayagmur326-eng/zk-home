@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation"
 import MediaSelectorModal from "../../components/MediaSelectorModal"
 import ProductCategoryPicker from "../../components/ProductCategoryPicker"
 import RichTextEditorField from "../../components/RichTextEditorField"
+import ProductUsageFields from "../../components/ProductUsageFields"
 import { formatTryPriceInput, parseTryPriceInput } from "@lib/util/money"
 import { useProductFormError } from "@lib/admin/use-product-form-error"
 import ConfirmModal from "../../components/ConfirmModal"
@@ -64,6 +65,8 @@ export default function EditProductPage() {
   // Form fields
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
+  const [usageTitle, setUsageTitle] = useState("")
+  const [usageContent, setUsageContent] = useState("")
   const [status, setStatus] = useState<"draft" | "published">("draft")
   const [thumbnail, setThumbnail] = useState("")
   const [images, setImages] = useState<string[]>([])
@@ -159,6 +162,8 @@ export default function EditProductPage() {
           }
 
           const md = p.metadata || {}
+          setUsageTitle(typeof md.usage_title === "string" ? md.usage_title : "")
+          setUsageContent(typeof md.usage_content === "string" ? md.usage_content : "")
           setShortDesc(
             typeof md.product_summary === "string"
               ? md.product_summary
@@ -290,6 +295,8 @@ export default function EditProductPage() {
         status: forcedStatus ?? status,
         metadata: {
           product_summary: shortDesc.trim(),
+          usage_title: usageTitle.trim(),
+          usage_content: usageContent.trim(),
           features: [],
           features_content: featuresContent.trim(),
           package_content: (packageContent || []).filter((c) => typeof c === "string" && c.trim()),
@@ -601,6 +608,7 @@ export default function EditProductPage() {
                       rows={10}
                     />
                   </div>
+                  <ProductUsageFields title={usageTitle} content={usageContent} onTitleChange={setUsageTitle} onContentChange={setUsageContent} />
                 </div>
               )}
 

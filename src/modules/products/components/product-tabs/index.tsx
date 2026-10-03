@@ -72,6 +72,10 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
     typeof md.features_content === "string"
       ? sanitizeRichTextHtml(md.features_content).trim()
       : ""
+  const usageTitle = typeof md.usage_title === "string" ? md.usage_title.trim() : ""
+  const usageParagraphs = typeof md.usage_content === "string"
+    ? md.usage_content.trim().split(/\n\s*\n/).filter(Boolean)
+    : []
   const rawDescription =
     typeof product.description === "string" ? product.description : ""
   const descriptionWithPreservedLines =
@@ -185,6 +189,14 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
                   <p className="text-xs sm:text-sm text-slate-500 italic">
                     Bu ürün için henüz detaylı açıklama girilmemiş.
                   </p>
+                )}
+                {usageParagraphs.length > 0 && (
+                  <section aria-labelledby="product-usage-heading" className="mt-6 border-t border-[#eadfda] pt-6">
+                    <h2 id="product-usage-heading" className="mb-3 text-base font-semibold text-slate-900 sm:text-lg">{usageTitle || "Kullanım ve Sunum Önerileri"}</h2>
+                    <div className="space-y-3 text-sm leading-7 text-slate-700">
+                      {usageParagraphs.map((paragraph, index) => <p key={index} className="whitespace-pre-line">{paragraph}</p>)}
+                    </div>
+                  </section>
                 )}
               </div>
             )}
