@@ -216,6 +216,28 @@ export function persistentStorageConfigured() {
   return Boolean(supabaseStorageConfig() || s3Config())
 }
 
+export async function createDirectMediaUpload() {
+  const config = supabaseStorageConfig()
+  if (!config) return null
+  await ensureSupabaseBucket()
+  const key = `pending/${randomUUID()}`
+  const response = await supabaseStorageRequest("POST", `/object/upload/sign/${encodeURIComponent(config.bucket)}/${key}`, JSON.stringify({ upsert: false }), "application/json")
+  if (!response.ok) throw new Error(`Yükleme izni alınamadı (HTTP ${response.status}).`)
+  const data = await response.json()
+  return { key, uploadUrl: `${config.endpoint}/storage/v1${data.url}` }
+}
+
+export async function readDirectMediaUpload(key: string) {
+  if (!/^pending\/[0-9a-f-]{36}$/.test(key)) throw new Error("Geçersiz yükleme anahtarı.")
+  const config = supabaseStorageConfig()
+  if (!config) throw new Error("Supabase Storage yapılandırılmamış.")
+  const response = await supabaseStorageRequest("GET", `/object/${encodeURIComponent(config.bucket)}/${key}`)
+  if (!response.ok) throw new Error("Yüklenen görsel okunamadı.")
+  const bytes = Buffer.from(await response.arrayBuffer())
+  if (bytes.length > 8 * 1024 * 1024) throw new Error("Dosya başına 8 MB izin verilir.")
+  return bytes
+}
+
 export async function storeMedia(input: PutInput): Promise<StoredMedia> {
   if (supabaseStorageConfig()) {
     const key = `uploads/${Date.now()}-${randomUUID()}-${input.filename}`

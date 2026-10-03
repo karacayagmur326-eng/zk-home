@@ -939,8 +939,10 @@ export default function NewProductPage() {
       <MediaSelectorModal
         isOpen={isGalleryModalOpen}
         onClose={() => setIsGalleryModalOpen(false)}
-        onSelect={(urls) => setImages((prev) => [...prev, ...urls])}
+        onSelect={(urls) => setImages((prev) => Array.from(new Set([...prev, ...urls])).filter(url => url !== thumbnail))}
+        addedUrls={[...images, thumbnail].filter(Boolean)}
         multi={true}
+        allowIcons={false}
       />
     </div>
   )

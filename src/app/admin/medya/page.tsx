@@ -1,6 +1,7 @@
 "use client"
 import React, { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import { uploadMediaFiles } from "@lib/admin/upload-media"
 import ConfirmModal from "../components/ConfirmModal"
 import { Check, FileUp, Grid2X2, ImageIcon, List, LoaderCircle, RotateCcw, Trash2 } from "@lib/icons"
 
@@ -33,6 +34,7 @@ export default function MediaLibraryPage() {
   const [files, setFiles] = useState<MediaFile[]>([])
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState("")
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null)
   const [view, setView] = useState<"grid" | "list">("grid")
   const [search, setSearch] = useState("")
@@ -137,23 +139,27 @@ export default function MediaLibraryPage() {
     const fileList = e.target.files
     if (!fileList?.length) return
     setUploading(true)
-    const form = new FormData()
-    Array.from(fileList).forEach(f => form.append("files", f))
+    const input = e.target
+    const selectedFiles = Array.from(fileList)
+    setUploadProgress(`0/${selectedFiles.length}`)
     try {
-      const res = await fetch("/api/admin/uploads", { method: "POST", body: form })
-      if (res.ok) {
-        const data = await res.json()
-        const uploadedCount = Array.isArray(data.files) ? data.files.length : fileList.length
+      const { uploaded, errors } = await uploadMediaFiles(selectedFiles, (done, total) => {
+        setUploadProgress(`${done}/${total}`)
+      })
+      if (uploaded.length) {
         handleSortChange("date_desc")
-        showToast(`${uploadedCount} dosya yüklendi!`, "success")
         await fetchMedia()
       }
-      else { const d = await res.json(); showToast("Hata: " + (d.error || "Yükleme başarısız"), "error") }
+      showToast(
+        errors.length ? `${uploaded.length} görsel yüklendi. ${errors.join("\n")}` : `${uploaded.length} dosya yüklendi!`,
+        errors.length ? "error" : "success",
+      )
     } catch (err: any) {
       showToast("Hata: " + err.message, "error")
     } finally {
       setUploading(false)
-      e.target.value = ""
+      input.value = ""
+      setUploadProgress("")
     }
   }
 
@@ -459,7 +465,7 @@ export default function MediaLibraryPage() {
               cursor: uploading ? "not-allowed" : "pointer",
               border: "1px solid " + (uploading ? "#c3c4c7" : "#d94f00"),
             }}>
-              {uploading ? <><LoaderCircle size={16} className="animate-spin" /> Yükleniyor...</> : <><FileUp size={16} /> Dosya Ekle</>}
+              {uploading ? <><LoaderCircle size={16} className="animate-spin" /> Yükleniyor... {uploadProgress}</> : <><FileUp size={16} /> Dosya Ekle</>}
               <input type="file" accept="image/*" multiple onChange={handleUpload}
                 disabled={uploading} style={{ display: "none" }} />
             </label>}

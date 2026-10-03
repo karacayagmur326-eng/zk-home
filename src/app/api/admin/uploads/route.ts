@@ -4,9 +4,11 @@ import { query } from "@lib/admin/db"
 import { ensureCommerceSchema } from "@lib/commerce/schema"
 import { createId, slugify } from "@lib/commerce/repository"
 import * as path from "path"
+import sharp from "sharp"
 import {
   deleteMedia,
   storeMedia,
+  readDirectMediaUpload,
 } from "@lib/storage/media-storage"
 
 const MAX_FILE_SIZE = 8 * 1024 * 1024
@@ -59,13 +61,26 @@ export async function POST(req: NextRequest) {
   if (!session)
     return NextResponse.json({ error: "Yetkisiz işlem." }, { status: 401 })
 
+  let pendingKey: string | undefined
   try {
     await ensureCommerceSchema()
-    const formData = await req.formData()
+    let values: FormDataEntryValue[]
+    if (req.headers.get("content-type")?.includes("application/json")) {
+      const input = await req.json()
+      if (typeof input.key !== "string" || !/^pending\/[0-9a-f-]{36}$/.test(input.key) || typeof input.filename !== "string") {
+        return NextResponse.json({ error: "Geçersiz yükleme bilgisi." }, { status: 400 })
+      }
+      pendingKey = input.key
+      const bytes = await readDirectMediaUpload(input.key)
+      values = [new File([new Uint8Array(bytes)], input.filename)]
+    } else {
+      const formData = await req.formData()
+      values = Array.from(formData.values())
+    }
     const files = []
     let requestSize = 0
 
-    for (const value of formData.values()) {
+    for (const value of values) {
       if (!(value instanceof File) || value.size === 0) continue
       requestSize += value.size
       if (value.size > MAX_FILE_SIZE || requestSize > MAX_REQUEST_SIZE) {
@@ -74,8 +89,8 @@ export async function POST(req: NextRequest) {
           { status: 413 }
         )
       }
-      const bytes = Buffer.from(await value.arrayBuffer())
-      const detectedExtension = detectImageExtension(bytes)
+      let bytes: Buffer = Buffer.from(await value.arrayBuffer())
+      let detectedExtension = detectImageExtension(bytes)
       if (!detectedExtension) {
         return NextResponse.json(
           {
@@ -84,6 +99,17 @@ export async function POST(req: NextRequest) {
           },
           { status: 415 }
         )
+      }
+      // Lossless encoding preserves decoded pixels, dimensions and transparency.
+      // Animated images remain untouched to preserve every frame.
+      const image = sharp(bytes, { limitInputPixels: 40_000_000 })
+      const metadata = await image.metadata()
+      if ((metadata.pages || 1) === 1) {
+        const optimized = await image.keepMetadata().webp({ lossless: true, effort: 4 }).toBuffer()
+        if (optimized.length < bytes.length) {
+          bytes = optimized
+          detectedExtension = ".webp"
+        }
       }
       const requested = safeFilename(value.name, detectedExtension)
       const id = createId("media")
@@ -106,7 +132,7 @@ export async function POST(req: NextRequest) {
             path.basename(stored.storageKey),
             stored.storageKey,
             mimeType,
-            value.size,
+            bytes.length,
             stored.databaseBytes || null,
             mediaTitle(requested),
             null,
@@ -124,7 +150,7 @@ export async function POST(req: NextRequest) {
         filename: path.basename(stored.storageKey),
         storage_key: stored.storageKey,
         mime_type: mimeType,
-        size: value.size,
+        size: bytes.length,
         created_at: nowIso,
       })
     }
@@ -141,5 +167,7 @@ export async function POST(req: NextRequest) {
       { error: "Dosya yüklenemedi. Medya deposu yapılandırmasını kontrol edin." },
       { status: 500 },
     )
+  } finally {
+    if (pendingKey) await deleteMedia(pendingKey).catch(() => undefined)
   }
 }

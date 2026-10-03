@@ -1,5 +1,6 @@
 "use client"
 import React, { useEffect, useState } from "react"
+import { uploadMediaFiles } from "@lib/admin/upload-media"
 import {
   APP_ICON_OPTIONS as SELECTABLE_ICONS,
   Wrench,
@@ -23,6 +24,7 @@ interface MediaSelectorModalProps {
   onSelect: (urls: string[]) => void
   multi?: boolean
   allowIcons?: boolean
+  addedUrls?: string[]
 }
 
 export default function MediaSelectorModal({
@@ -31,11 +33,13 @@ export default function MediaSelectorModal({
   onSelect,
   multi = false,
   allowIcons = true,
+  addedUrls = [],
 }: MediaSelectorModalProps) {
   const [activeTab, setActiveTab] = useState<"upload" | "library" | "icons">("library")
   const [files, setFiles] = useState<MediaFile[]>([])
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState("")
   const [search, setSearch] = useState("")
   const [selectedUrls, setSelectedUrls] = useState<string[]>([])
   const [sortBy, setSortBy] = useState<string>(() => {
@@ -74,13 +78,15 @@ export default function MediaSelectorModal({
     const fileList = e.target.files
     if (!fileList?.length) return
     setUploading(true)
-    const form = new FormData()
-    Array.from(fileList).forEach((f) => form.append("files", f))
+    const input = e.target
+    const selectedFiles = Array.from(fileList)
+    setUploadProgress(`0/${selectedFiles.length}`)
     try {
-      const res = await fetch("/api/admin/uploads", { method: "POST", body: form })
-      const data = await res.json().catch(() => ({}))
-      if (res.ok) {
-        const newUrls = data.urls || (data.files ? data.files.map((f: any) => f.url) : [])
+      const { uploaded, errors } = await uploadMediaFiles(selectedFiles, (done, total) => {
+        setUploadProgress(`${done}/${total}`)
+      })
+      if (uploaded.length) {
+        const newUrls = uploaded.map((file) => file.url)
         if (newUrls.length > 0) {
           if (multi) {
             setSelectedUrls(prev => Array.from(new Set([...prev, ...newUrls])))
@@ -88,17 +94,16 @@ export default function MediaSelectorModal({
             setSelectedUrls([newUrls[0]])
           }
         }
-        if (typeof window !== "undefined" && (window as any).showAdminAlert) {
-          (window as any).showAdminAlert("Dosya yüklendi ve otomatik seçildi!", "Başarılı", "success")
-        }
         handleSortChange("date_desc")
         fetchMedia()
         setActiveTab("library")
-      } else {
-        const errorMessage = data.error || data.message || `Yükleme başarısız (Sunucu Yanıtı: ${res.status})`
-        if (typeof window !== "undefined" && (window as any).showAdminAlert) {
-          (window as any).showAdminAlert(errorMessage, "Hata", "error")
-        }
+      }
+      if (typeof window !== "undefined" && (window as any).showAdminAlert) {
+        (window as any).showAdminAlert(
+          errors.length ? `${uploaded.length} görsel yüklendi. ${errors.join("\n")}` : `${uploaded.length} görsel yüklendi ve otomatik seçildi!`,
+          errors.length ? "Yükleme sonucu" : "Başarılı",
+          errors.length ? "error" : "success",
+        )
       }
     } catch (err: any) {
       console.error(err)
@@ -108,7 +113,8 @@ export default function MediaSelectorModal({
       }
     } finally {
       setUploading(false)
-      e.target.value = ""
+      input.value = ""
+      setUploadProgress("")
     }
   }
 
@@ -415,7 +421,7 @@ export default function MediaSelectorModal({
                 padding: "11px 24px", fontSize: 13, fontWeight: 800, cursor: "pointer",
                 color: "#ffffff", boxShadow: "0 4px 14px rgba(201, 132, 132, 0.35)", transition: "all 0.15s"
               }}>
-                {uploading ? "⏳ Yükleniyor..." : "💻 Bilgisayardan Dosya Seç"}
+                {uploading ? `⏳ Yükleniyor... ${uploadProgress}` : "💻 Bilgisayardan Dosya Seç"}
                 <input type="file" accept="image/*" multiple onChange={handleUpload} disabled={uploading} style={{ display: "none" }} />
               </label>
             </div>
@@ -432,16 +438,27 @@ export default function MediaSelectorModal({
                 }}>
                   {filteredMedia.map((file) => {
                     const isSelected = selectedUrls.includes(file.url)
+                    const isAdded = addedUrls.includes(file.url)
                     const displayName = getDisplayName(file)
                     return (
                       <div
                         key={file.id}
-                        onClick={() => toggleSelect(file.url)}
-                        title={displayName}
+                        onClick={() => { if (!isAdded) toggleSelect(file.url) }}
+                        role="button"
+                        tabIndex={isAdded ? -1 : 0}
+                        aria-disabled={isAdded}
+                        aria-label={`${displayName}${isAdded ? " — Eklendi" : ""}`}
+                        onKeyDown={(event) => {
+                          if (!isAdded && (event.key === "Enter" || event.key === " ")) {
+                            event.preventDefault()
+                            toggleSelect(file.url)
+                          }
+                        }}
+                        title={isAdded ? `${displayName} — Bu ürüne eklendi` : displayName}
                         style={{
-                          border: isSelected ? "2.5px solid #C98484" : "1.5px solid #e2e8f0",
-                          borderRadius: 14, overflow: "hidden", cursor: "pointer", position: "relative",
-                          background: isSelected ? "#fcf7f6" : "#ffffff", boxSizing: "border-box",
+                          border: isAdded ? "2.5px solid #16a34a" : isSelected ? "2.5px solid #C98484" : "1.5px solid #e2e8f0",
+                          borderRadius: 14, overflow: "hidden", cursor: isAdded ? "default" : "pointer", position: "relative",
+                          background: isAdded ? "#f0fdf4" : isSelected ? "#fcf7f6" : "#ffffff", boxSizing: "border-box",
                           display: "flex", flexDirection: "column", alignItems: "center",
                           padding: 6, transition: "all 0.15s ease-in-out"
                         }}
@@ -469,7 +486,8 @@ export default function MediaSelectorModal({
                               transition: "transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)"
                             }}
                           />
-                          {isSelected && (
+                          {isAdded && <span style={{ position: "absolute", top: 6, right: 6, background: "#15803d", color: "white", borderRadius: 6, padding: "4px 7px", fontSize: 11, fontWeight: 600, zIndex: 5 }}>✓ Eklendi</span>}
+                          {isSelected && !isAdded && (
                             <div style={{
                               position: "absolute", top: 6, right: 6,
                               background: "linear-gradient(135deg, #C98484, #ff7a28)",
@@ -558,7 +576,7 @@ export default function MediaSelectorModal({
                 <polyline points="17 8 12 3 7 8"></polyline>
                 <line x1="12" y1="3" x2="12" y2="15"></line>
               </svg>
-              <span>{uploading ? "Yükleniyor..." : "Bilgisayardan Yükle & Seç"}</span>
+              <span>{uploading ? `Yükleniyor... ${uploadProgress}` : "Bilgisayardan Yükle & Seç"}</span>
               <input
                 type="file"
                 accept="image/*"
