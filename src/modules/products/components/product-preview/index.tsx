@@ -1,4 +1,5 @@
 import { getProductPrice } from "@lib/util/get-product-price"
+import { productSummaryForCard } from "@lib/util/product-card"
 import { Battery, Settings2, Star, Zap } from "@lib/icons"
 import { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -25,6 +26,7 @@ export default function ProductPreview({
 }) {
   const { cheapestPrice } = getProductPrice({ product })
   const metadata = (product.metadata || {}) as Record<string, unknown>
+  const summary = productSummaryForCard(product)
   const tagValues = (product.tags || []).map((tag) => tag.value.toLowerCase())
   const badges = [
     tagValues.includes("yeni") ? "YENİ" : null,
@@ -109,6 +111,7 @@ export default function ProductPreview({
                 {product.title}
               </h2>
             </LocalizedClientLink>
+            {summary && <p className="mt-2 line-clamp-2 text-xs leading-[1.5] text-[#827b78]">{summary}</p>}
             {specs.length > 0 && (
               <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted">
                 {specs.map(({ icon: Icon, value }) => (
@@ -191,6 +194,8 @@ export default function ProductPreview({
             {product.title}
           </h2>
         </LocalizedClientLink>
+
+        {summary && <p className="min-h-[36px] line-clamp-2 text-xs leading-[1.5] text-[#827b78]">{summary}</p>}
 
         {reviewCount > 0 && (
           <div className="flex items-center gap-0.5">
