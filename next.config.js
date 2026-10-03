@@ -50,6 +50,12 @@ const nextConfig = {
     ],
   },
   async headers() {
+    const mediaEndpoint = process.env.NEXT_PUBLIC_ZK_SUPABASE_SUPABASE_URL || process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
+    let mediaOrigin = ""
+    try {
+      const url = new URL(mediaEndpoint)
+      if (url.protocol === "https:") mediaOrigin = ` ${url.origin}`
+    } catch { /* No external media connection when storage is not configured. */ }
     const contentSecurityPolicy = [
       "default-src 'self'",
       "base-uri 'self'",
@@ -62,7 +68,7 @@ const nextConfig = {
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
-      "connect-src 'self' https://api.stripe.com https://*.iyzipay.com https://www.google-analytics.com https://*.google-analytics.com https://vitals.vercel-insights.com",
+      `connect-src 'self' https://api.stripe.com https://*.iyzipay.com https://www.google-analytics.com https://*.google-analytics.com https://vitals.vercel-insights.com${mediaOrigin}`,
       "frame-src https://js.stripe.com https://hooks.stripe.com https://www.google.com https://maps.google.com https://*.iyzipay.com",
       "worker-src 'self' blob:",
       process.env.NODE_ENV === "production" ? "upgrade-insecure-requests" : "",

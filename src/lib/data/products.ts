@@ -38,7 +38,7 @@ export const listProducts = async ({
   nextPage: number | null
   queryParams?: ProductListQueryParams
 }> => {
-  if (process.env.NODE_ENV === "production" && !process.env.DATABASE_URL) {
+  if (process.env.NODE_ENV === "production" && !process.env.ZK_SUPABASE_POSTGRES_URL && !process.env.DATABASE_URL) {
     return {
       response: { products: [], count: 0 },
       nextPage: null,
@@ -99,7 +99,7 @@ export const listProducts = async ({
 }
 
 export async function retrieveProduct(idOrHandle: string) {
-  if (process.env.NODE_ENV === "production" && !process.env.DATABASE_URL) {
+  if (process.env.NODE_ENV === "production" && !process.env.ZK_SUPABASE_POSTGRES_URL && !process.env.DATABASE_URL) {
     return null
   }
   return (await getStoreProduct(idOrHandle)) as

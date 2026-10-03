@@ -3,8 +3,10 @@
 import { useEffect, useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import MediaSelectorModal from "../../components/MediaSelectorModal"
+import ProductCategoryPicker from "../../components/ProductCategoryPicker"
 import RichTextEditorField from "../../components/RichTextEditorField"
 import { formatTryPriceInput, parseTryPriceInput } from "@lib/util/money"
+import { useProductFormError } from "@lib/admin/use-product-form-error"
 import {
   Bold,
   Italic,
@@ -46,8 +48,8 @@ interface Tag {
 export default function NewProductPage() {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
-  const [error, setError] = useState("")
   const [activeTab, setActiveTab] = useState("general")
+  const { error, setError, errorField, fieldProps } = useProductFormError(activeTab, setActiveTab)
 
   // Form state
   const [title, setTitle] = useState("")
@@ -199,6 +201,11 @@ export default function NewProductPage() {
       setError("Stok kodu (SKU) kullanıcı tarafından girilmelidir.")
       return
     }
+    const parsedPrice = parseTryPriceInput(price)
+    if ((publishStatus ?? status) === "published" && (!Number.isFinite(parsedPrice) || parsedPrice <= 0)) {
+      setError("Lütfen geçerli bir fiyat girin! Fiyatı 0 TL olan ürünler sitede yayınlanamaz.")
+      return
+    }
     setSaving(true)
     setError("")
 
@@ -287,7 +294,7 @@ export default function NewProductPage() {
     <div className="space-y-6 font-sans text-slate-800 pb-16">
 
       {error && (
-        <div className="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs font-bold shadow-xs">
+        <div id="product-form-error" role="alert" tabIndex={-1} className="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs font-bold shadow-xs">
           {error}
         </div>
       )}
@@ -304,7 +311,10 @@ export default function NewProductPage() {
               <input
                 type="text"
                 value={title}
+                {...fieldProps("title")}
+                aria-label="Ürün adı"
                 onChange={(e) => {
+                  if (errorField === "title") setError("")
                   const val = e.target.value
                   setTitle(val)
                   const trMap: Record<string, string> = {
@@ -335,6 +345,7 @@ export default function NewProductPage() {
                 placeholder="Ürün adı"
                 className="w-full h-11 px-4 rounded-xl border border-slate-200/90 bg-slate-50/40 text-sm font-semibold text-slate-900 outline-none focus:bg-white focus:border-[#C98484] transition-all placeholder:text-slate-300"
               />
+              {errorField === "title" && <p id="product-title-error" className="mt-2 text-xs text-red-700">{error}</p>}
 
               {/* Permalink */}
               {title && (
@@ -458,12 +469,15 @@ export default function NewProductPage() {
                       <input
                         type="text"
                         value={price}
-                        onChange={(e) => setPrice(e.target.value)}
+                        {...fieldProps("price")}
+                        aria-label="Geçerli ürün fiyatı"
+                        onChange={(e) => { setPrice(e.target.value); if (errorField === "price") setError("") }}
                         onBlur={() => price && setPrice(formatTryPriceInput(price))}
                         inputMode="decimal"
                         placeholder="0,00"
                         className="w-full h-10 px-3.5 rounded-xl border border-slate-200 bg-slate-50/40 text-xs font-bold text-slate-900 outline-none focus:bg-white focus:border-[#C98484]"
                       />
+                      {errorField === "price" && <p id="product-price-error" className="mt-2 text-xs text-red-700">{error}</p>}
                     </div>
                   </div>
 
@@ -491,12 +505,15 @@ export default function NewProductPage() {
                       <input
                         type="text"
                         value={sku}
-                        onChange={(e) => setSku(e.target.value)}
+                        {...fieldProps("sku")}
+                        aria-label="Stok kodu (SKU)"
+                        onChange={(e) => { setSku(e.target.value); if (errorField === "sku") setError("") }}
                         required
                         autoComplete="off"
                         placeholder="Stok kodunu girin"
                         className="w-full h-10 px-3.5 rounded-xl border border-slate-200 bg-slate-50/40 text-xs font-bold text-slate-900 outline-none focus:bg-white focus:border-[#C98484]"
                       />
+                      {errorField === "sku" && <p id="product-sku-error" className="mt-2 text-xs text-red-700">{error}</p>}
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1.5">
@@ -761,31 +778,7 @@ export default function NewProductPage() {
             <h3 className="text-sm font-extrabold text-slate-900 border-b border-slate-100 pb-3">
               Ürün Kategorileri
             </h3>
-            <div className="max-h-48 overflow-y-auto space-y-2 text-xs font-semibold text-slate-700 pr-1">
-              {categories.length === 0 ? (
-                <p className="text-slate-400">Kategori yükleniyor...</p>
-              ) : (
-                categories.map((cat) => {
-                  const isSelected = selectedCats.includes(cat.id)
-                  return (
-                    <label
-                      key={cat.id}
-                      className={`flex items-center gap-2.5 p-2 rounded-xl transition-all cursor-pointer ${
-                        isSelected ? "bg-rose-50/80 font-bold text-slate-900" : "hover:bg-slate-50"
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => toggleCat(cat.id)}
-                        className="accent-[#C98484] h-4 w-4 rounded"
-                      />
-                      <span>{cat.name}</span>
-                    </label>
-                  )
-                })
-              )}
-            </div>
+            <ProductCategoryPicker categories={categories} selected={selectedCats} onToggle={toggleCat} />
             <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
               <input
                 type="text"
