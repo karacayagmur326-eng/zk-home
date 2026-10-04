@@ -16,6 +16,7 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import FooterMobileSections from "@modules/layout/components/footer-mobile-sections"
 import { isStoreReady } from "@lib/security/store-readiness"
 import { turkishTitleCase } from "@lib/util/turkish-title-case"
+import EditorialNewsletter from "@modules/home/components/editorial-newsletter"
 import "./footer-light.css"
 
 const InstagramIcon = () => (
@@ -44,6 +45,9 @@ const LinkedinIcon = () => (
 
 export default async function Footer() {
   const storeReady = isStoreReady()
+  const footerNewsletterPromise = query<{ content: { footer_newsletter_active?: boolean } }>(
+    "SELECT content FROM homepage_editorial WHERE id = 'main' LIMIT 1"
+  ).then((rows) => rows[0]?.content?.footer_newsletter_active !== false).catch(() => true)
   const [
     themeSettings,
     kurumsalMenu,
@@ -59,6 +63,7 @@ export default async function Footer() {
   ])
 
   const footerFeaturesActive = themeSettings?.footer_features_active !== false
+  const footerNewsletterActive = await footerNewsletterPromise
   const rawFeatures = themeSettings?.footer_features
   let footerFeatures: Array<{ title: string; subtitle: string; icon: string }> = []
   if (typeof rawFeatures === "string") {
@@ -262,6 +267,7 @@ export default async function Footer() {
               <p className="text-[13px] text-white/75 leading-relaxed">
                 {col5Desc}
               </p>
+              {footerNewsletterActive && <EditorialNewsletter compact title={col5Title} description={col5Desc} />}
               <div className="flex items-center gap-2.5 pt-1">
                 {socialInstagram && (
                   <a
@@ -434,6 +440,7 @@ export default async function Footer() {
               <p className="text-[13px] text-white/75 leading-relaxed">
                 {col5Desc}
               </p>
+              {footerNewsletterActive && <EditorialNewsletter compact title={col5Title} description={col5Desc} />}
               <div className="flex items-center gap-2.5 pt-2">
                 {socialInstagram && (
                   <a

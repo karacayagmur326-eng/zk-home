@@ -89,6 +89,8 @@ export default function HomeEditorialAdminPage() {
 
     <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <SectionHeading title="E-posta Bülteni" enabled={content.newsletter_active} onEnabled={(value) => update("newsletter_active", value)} />
+      <SectionHeading title="Footer E-posta Kayıt Kutusu" enabled={content.footer_newsletter_active} onEnabled={(value) => update("footer_newsletter_active", value)} />
+      <p className="text-xs text-slate-500">Aboneleri <a href="/admin/bulten" className="font-semibold text-[#C98484] underline">E-posta Bülteni</a> sayfasından, sosyal medya bağlantılarını <a href="/admin/tema-ayarlari" className="font-semibold text-[#C98484] underline">Tema Ayarları → Footer</a> bölümünden yönetin.</p>
       <div className="grid gap-4 sm:grid-cols-2"><TextField label="Başlık" value={content.newsletter_title} onChange={(value) => update("newsletter_title", value)} /><TextField label="Açıklama" value={content.newsletter_description} onChange={(value) => update("newsletter_description", value)} /></div>
     </section>
   </div>

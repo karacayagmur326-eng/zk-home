@@ -218,7 +218,7 @@ export default async function BlogPage({
               {pageContent.newsletter_description || "İpuçları, rehberler ve kampanyalardan ilk siz haberdar olun."}
             </p>
           </div>
-          <form action="/api/newsletter" method="post" className="flex w-full gap-2 sm:w-auto">
+          <form action="/api/newsletter" method="post" className="flex w-full flex-wrap gap-2 sm:w-auto sm:max-w-md">
             <input
               required
               type="email"
@@ -229,6 +229,7 @@ export default async function BlogPage({
             <button className="rounded-xl bg-[#C98484] px-5 py-3 text-xs font-extrabold text-white hover:bg-[#A95E5E] transition cursor-pointer">
               Abone Ol
             </button>
+            <label className="flex w-full items-start gap-2 text-[11px] text-slate-500"><input type="checkbox" name="consent" required className="mt-0.5 accent-[#C98484]" />Kampanya ve yenilikler için e-posta almak istiyorum.</label>
           </form>
         </section>
 

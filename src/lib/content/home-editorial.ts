@@ -33,6 +33,7 @@ export type HomeEditorialContent = {
   inspiration_title: string
   inspiration_description: string
   newsletter_active: boolean
+  footer_newsletter_active: boolean
   newsletter_title: string
   newsletter_description: string
 }
@@ -77,6 +78,7 @@ export const defaultHomeEditorialContent: HomeEditorialContent = {
   inspiration_title: "İlham Köşesi",
   inspiration_description: "Eviniz için fikirler, dekorasyon önerileri ve trendler.",
   newsletter_active: true,
+  footer_newsletter_active: true,
   newsletter_title: "Yeni koleksiyonlar ve ilham veren seçkiler için bültenimize katılın.",
   newsletter_description: "E-posta tercihinizi dilediğiniz zaman değiştirebilirsiniz.",
 }
