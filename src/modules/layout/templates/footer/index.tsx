@@ -16,7 +16,6 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import FooterMobileSections from "@modules/layout/components/footer-mobile-sections"
 import { isStoreReady } from "@lib/security/store-readiness"
 import { turkishTitleCase } from "@lib/util/turkish-title-case"
-import EditorialNewsletter from "@modules/home/components/editorial-newsletter"
 import "./footer-light.css"
 
 const InstagramIcon = () => (
@@ -45,9 +44,6 @@ const LinkedinIcon = () => (
 
 export default async function Footer() {
   const storeReady = isStoreReady()
-  const footerNewsletterPromise = query<{ content: { footer_newsletter_active?: boolean } }>(
-    "SELECT content FROM homepage_editorial WHERE id = 'main' LIMIT 1"
-  ).then((rows) => rows[0]?.content?.footer_newsletter_active !== false).catch(() => true)
   const [
     themeSettings,
     kurumsalMenu,
@@ -63,7 +59,6 @@ export default async function Footer() {
   ])
 
   const footerFeaturesActive = themeSettings?.footer_features_active !== false
-  const footerNewsletterActive = await footerNewsletterPromise
   const rawFeatures = themeSettings?.footer_features
   let footerFeatures: Array<{ title: string; subtitle: string; icon: string }> = []
   if (typeof rawFeatures === "string") {
@@ -156,6 +151,14 @@ export default async function Footer() {
   const mersisNo = storeReady ? (themeSettings?.footer_mersis_no as string | undefined) || "" : ""
   const kepAddress = storeReady ? (themeSettings?.footer_kep_address as string | undefined) || "" : ""
   const showPaymentBadges = themeSettings?.footer_show_payment_badges !== false
+
+  const paymentLogos = [
+    { key: "iyzico", name: "iyzico ile Öde", src: themeSettings?.payment_logo_iyzico },
+    { key: "mastercard", name: "Mastercard", src: themeSettings?.payment_logo_mastercard },
+    { key: "visa", name: "Visa", src: themeSettings?.payment_logo_visa },
+    { key: "amex", name: "American Express", src: themeSettings?.payment_logo_amex },
+    { key: "troy", name: "Troy", src: themeSettings?.payment_logo_troy },
+  ]
 
   // Fallback Menu Arrays
   const defaultKurumsalItems = [
@@ -267,7 +270,6 @@ export default async function Footer() {
               <p className="text-[13px] text-white/75 leading-relaxed">
                 {col5Desc}
               </p>
-              {footerNewsletterActive && <EditorialNewsletter compact title={col5Title} description={col5Desc} />}
               <div className="flex items-center gap-2.5 pt-1">
                 {socialInstagram && (
                   <a
@@ -440,7 +442,6 @@ export default async function Footer() {
               <p className="text-[13px] text-white/75 leading-relaxed">
                 {col5Desc}
               </p>
-              {footerNewsletterActive && <EditorialNewsletter compact title={col5Title} description={col5Desc} />}
               <div className="flex items-center gap-2.5 pt-2">
                 {socialInstagram && (
                   <a
@@ -539,11 +540,7 @@ export default async function Footer() {
 
           {showPaymentBadges && (
             <div className="zk-payment-logos" role="group" aria-label="Ödeme logoları">
-              <span role="img" aria-label="iyzico ile Öde" className="zk-payment-logo zk-payment-iyzico" />
-              <span role="img" aria-label="Mastercard" className="zk-payment-logo zk-payment-mastercard" />
-              <span role="img" aria-label="Visa" className="zk-payment-logo zk-payment-visa" />
-              <span role="img" aria-label="American Express" className="zk-payment-logo zk-payment-amex" />
-              <span role="img" aria-label="Troy" className="zk-payment-logo zk-payment-troy" />
+              {paymentLogos.map((logo) => <img key={logo.key} src={logo.src || `/brand/payment-${logo.key}.svg`} alt={logo.name} className="zk-payment-logo" loading="lazy" />)}
             </div>
           )}
         </div>

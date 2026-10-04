@@ -15,8 +15,8 @@ export default async function NewsletterSubscribers({ searchParams }: { searchPa
   ])
   const count = Number(counts[0]?.count || 0)
   return <div className="space-y-6 p-5 sm:p-8">
-    <div><h1 className="text-xl font-semibold text-slate-900">E-posta Bülteni</h1><p className="mt-1 text-sm text-slate-500">Bülten kayıtları ve footer kontrolleri.</p></div>
-    <div className="flex flex-wrap gap-3"><Link href="/admin/anasayfa-vitrini" className="admin-btn admin-btn-secondary">Bülten kutularını aç / kapat</Link><Link href="/admin/tema-ayarlari" className="admin-btn admin-btn-secondary">Sosyal medya ve footer metinleri</Link></div>
+    <div><h1 className="text-xl font-semibold text-slate-900">E-posta Bülteni</h1><p className="mt-1 text-sm text-slate-500">Bülten kayıtları ve abonelik kutusu ayarları.</p></div>
+    <div className="flex flex-wrap gap-3"><Link href="/admin/anasayfa-vitrini" className="admin-btn admin-btn-secondary">Bülten kutusunu aç / kapat</Link><Link href="/admin/tema-ayarlari" className="admin-btn admin-btn-secondary">Sosyal medya ve footer metinleri</Link></div>
     <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
       <h2 className="border-b border-slate-200 p-4 font-semibold">Aboneler ({count})</h2>
       <div className="overflow-x-auto"><table className="w-full text-left text-sm"><thead className="bg-slate-50 text-slate-600"><tr><th className="p-4">E-posta</th><th className="p-4">Kayıt Tarihi</th></tr></thead><tbody>{subscribers.map((subscriber) => <tr key={subscriber.email} className="border-t border-slate-100"><td className="p-4">{subscriber.email}</td><td className="whitespace-nowrap p-4">{new Date(subscriber.created_at).toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" })}</td></tr>)}</tbody></table></div>

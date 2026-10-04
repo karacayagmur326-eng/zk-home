@@ -44,17 +44,11 @@
   background: #fff;
 }
 
-/* Display the supplied artwork at half resolution, preserving each original logo. */
 .zk-payment-logo {
   display: block;
   flex-shrink: 0;
-  background-image: url("/brand/payment-logos.png");
-  background-repeat: no-repeat;
-  background-size: 722px 85.5px;
+  width: auto;
+  height: 36px;
+  max-width: 122px;
+  object-fit: contain;
 }
-
-.zk-payment-iyzico { width: 122px; height: 40px; background-position: -88px -34px; }
-.zk-payment-mastercard { width: 55px; height: 40px; background-position: -240px -34px; }
-.zk-payment-visa { width: 80px; height: 30px; background-position: -327px -38px; }
-.zk-payment-amex { width: 55px; height: 40px; background-position: -438px -33px; }
-.zk-payment-troy { width: 78px; height: 38px; background-position: -528px -36px; }

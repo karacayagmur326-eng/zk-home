@@ -20,11 +20,11 @@ export const getThemeSettings = cache(async () =>
         favicon_url: normalizePublicImageUrl(settings.favicon_url, "/brand/zkhome-favicon.svg"),
         admin_logo_url: normalizePublicImageUrl(settings.admin_logo_url, "/brand/zkhome-logo.svg"),
         mini_logo_url: normalizePublicImageUrl(settings.mini_logo_url, "/brand/zkhome-favicon.svg"),
-        payment_logo_iyzico: normalizePublicImageUrl(settings.payment_logo_iyzico, "/brand/placeholder.svg"),
-        payment_logo_mastercard: normalizePublicImageUrl(settings.payment_logo_mastercard, "/brand/placeholder.svg"),
-        payment_logo_visa: normalizePublicImageUrl(settings.payment_logo_visa, "/brand/placeholder.svg"),
-        payment_logo_amex: normalizePublicImageUrl(settings.payment_logo_amex, "/brand/placeholder.svg"),
-        payment_logo_troy: normalizePublicImageUrl(settings.payment_logo_troy, "/brand/placeholder.svg"),
+        payment_logo_iyzico: normalizePublicImageUrl(settings.payment_logo_iyzico, "/brand/payment-iyzico.svg"),
+        payment_logo_mastercard: normalizePublicImageUrl(settings.payment_logo_mastercard, "/brand/payment-mastercard.svg"),
+        payment_logo_visa: normalizePublicImageUrl(settings.payment_logo_visa, "/brand/payment-visa.svg"),
+        payment_logo_amex: normalizePublicImageUrl(settings.payment_logo_amex, "/brand/payment-amex.svg"),
+        payment_logo_troy: normalizePublicImageUrl(settings.payment_logo_troy, "/brand/payment-troy.svg"),
       }
     })
     .catch(() => null)
