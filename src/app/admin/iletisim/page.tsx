@@ -49,22 +49,28 @@ interface ContactMessage {
 function Toggle({
   checked,
   onChange,
+  label = "Bildirim izni",
 }: {
   checked: boolean
   onChange: (v: boolean) => void
+  label?: string
 }) {
   return (
     <button
       type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-label={label}
       onClick={() => onChange(!checked)}
-      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
-        checked ? "bg-[#C98484]" : "bg-slate-200"
+      style={{ width: 44, height: 24, minHeight: 24, padding: 0, border: 0 }}
+      className={`relative inline-flex shrink-0 cursor-pointer rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C98484] focus-visible:ring-offset-2 motion-reduce:transition-none ${
+        checked ? "bg-[#C98484] hover:bg-[#b87171]" : "bg-slate-300 hover:bg-slate-400"
       }`}
     >
       <span
-        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
-          checked ? "translate-x-5" : "translate-x-0"
-        }`}
+        aria-hidden="true"
+        style={{ position: "absolute", top: 3, left: 3, width: 18, height: 18, transform: checked ? "translateX(20px)" : "translateX(0)" }}
+        className="pointer-events-none rounded-full bg-white shadow-sm transition-transform duration-200 ease-in-out motion-reduce:transition-none"
       />
     </button>
   )
@@ -838,6 +844,7 @@ export default function AdminContactPage() {
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] font-bold text-slate-500">{contactInfo.whatsapp_enabled ? "Aktif" : "Pasif"}</span>
                       <Toggle
+                        label="WhatsApp iletişimi"
                         checked={Boolean(contactInfo.whatsapp_enabled)}
                         onChange={(value) => setContactInfo({ ...contactInfo, whatsapp_enabled: value })}
                       />
@@ -1113,10 +1120,11 @@ export default function AdminContactPage() {
 
               <div className="flex items-center gap-3 shrink-0 self-start sm:self-auto bg-slate-50/50 px-3 py-1.5 rounded-xl border border-slate-100">
                 <Toggle
+                  label="E-posta bildirimleri"
                   checked={smtpSettings.enable_notifications}
                   onChange={(v) => setSmtpSettings({ ...smtpSettings, enable_notifications: v })}
                 />
-                <span className="text-xs font-extrabold text-slate-800">E-Posta Bildirimleri Aktif</span>
+                <span className="text-xs font-extrabold text-slate-800">E-Posta Bildirimleri {smtpSettings.enable_notifications ? "Aktif" : "Kapalı"}</span>
               </div>
             </div>
 
