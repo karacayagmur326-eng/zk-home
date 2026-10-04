@@ -74,7 +74,7 @@ export default function ProductPreview({
   if (viewMode === "list") {
     return (
       <article
-        className="group relative flex w-full flex-col gap-5 overflow-hidden rounded-xl border border-border bg-card p-4 shadow-sm transition-all hover:border-[#C98484] hover:shadow-lg sm:flex-row"
+        className="group relative flex h-full w-full flex-col gap-4 overflow-hidden rounded-xl border border-border bg-card p-4 shadow-sm transition-all hover:border-[#C98484] hover:shadow-lg sm:grid sm:grid-cols-[112px_minmax(0,1fr)] sm:gap-x-4 sm:gap-y-3 xl:grid-cols-[136px_minmax(0,1fr)]"
         data-testid="product-wrapper"
       >
         <div className="absolute left-3 top-3 z-10 flex flex-col items-start gap-1">
@@ -93,7 +93,7 @@ export default function ProductPreview({
         />
         <LocalizedClientLink
           href={`/urunler/${product.handle}`}
-          className="relative block h-44 w-full flex-shrink-0 bg-white sm:w-44"
+          className="relative block h-44 w-full flex-shrink-0 bg-white sm:row-span-2 sm:h-full sm:min-h-44"
         >
           <Thumbnail
             thumbnail={product.thumbnail}
@@ -137,9 +137,9 @@ export default function ProductPreview({
             )}
           </div>
         </div>
-        <div className="flex min-w-[180px] flex-col items-start justify-between border-border py-1 sm:items-end sm:border-l sm:pl-6">
+        <div className="flex min-w-0 flex-col items-start justify-end border-t border-border pt-3 sm:col-start-2">
           {cheapestPrice && (
-            <div className="mb-4 flex items-center">
+            <div className="mb-3 flex flex-wrap items-center">
               <PreviewPrice price={cheapestPrice} />
             </div>
           )}

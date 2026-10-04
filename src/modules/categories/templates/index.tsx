@@ -215,7 +215,10 @@ export default async function CategoryTemplate({
     24,
     48,
   )
-  const heroBackground = textValue(metadata, "hero_background", "#ffffff")
+  const configuredHeroBackground = textValue(metadata, "hero_background", "#ffffff")
+  const heroBackground = /^(#fff(?:fff)?|white)$/i.test(configuredHeroBackground.trim())
+    ? "#f2eae5"
+    : configuredHeroBackground
   const heroObjectPosition = textValue(
     metadata,
     "hero_object_position",
@@ -444,7 +447,7 @@ export default async function CategoryTemplate({
 
             {children.length > 0 && (
               <section
-                className="mb-6 rounded-[20px] border border-[#eee7e2] bg-[#fffdfb] p-4 shadow-[0_10px_30px_rgba(90,63,55,0.06)] sm:mb-8 sm:p-5"
+                className="mb-6 rounded-[20px] border border-[#e7dcd5] bg-[#f2eae5] p-4 shadow-[0_10px_30px_rgba(90,63,55,0.06)] sm:mb-8 sm:p-5"
                 aria-labelledby="subcategories-heading"
               >
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-2">

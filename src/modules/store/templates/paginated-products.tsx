@@ -208,7 +208,7 @@ export default async function PaginatedProducts({
           <ul
             className={
               viewMode === "list"
-                ? "hidden sm:flex flex-col gap-4 w-full"
+              ? "hidden sm:grid grid-cols-1 lg:grid-cols-2 gap-4 w-full"
                 : "hidden sm:grid grid-cols-2 w-full lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-8"
             }
             data-testid="products-list"
