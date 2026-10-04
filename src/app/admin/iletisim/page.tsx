@@ -1384,13 +1384,17 @@ export default function AdminContactPage() {
                     <li key={entry.id} className={`rounded-2xl border p-4 ${entry.direction === "incoming" ? "mr-6 border-slate-200 bg-slate-50" : "ml-6 border-rose-100 bg-rose-50/60"}`}>
                       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                         <strong>{entry.direction === "incoming" ? "Müşteriden gelen" : "Müşteriye yanıt"}</strong>
+                        {entry.direction === "outgoing" && (
+                          <span className={`inline-flex items-center gap-1 text-[11px] font-semibold ${entry.delivery_status === "delivered" ? "text-emerald-600" : entry.delivery_status === "failed" ? "text-red-600" : "text-slate-500"}`}
+                            title={entry.delivery_status === "delivered" ? "Müşteri bu e-postaya yanıt verdi; ulaştığı doğrulandı." : entry.delivery_status === "sent" ? "E-posta sunucusu gönderimi kabul etti; teslimat henüz doğrulanmadı." : undefined}>
+                            {entry.delivery_status === "delivered" ? <CheckCircle2 size={16} /> : entry.delivery_status === "failed" ? <AlertCircle size={16} /> : <Send size={14} />}
+                            {entry.delivery_status === "delivered" ? "Ulaştı" : entry.delivery_status === "sent" ? "Gönderildi" : entry.delivery_status === "failed" ? "Gönderilemedi" : entry.delivery_status === "unknown" ? "Eski kayıt" : "Kuyrukta"}
+                          </span>
+                        )}
                         <time dateTime={entry.created_at} className="text-[11px] text-slate-500">{new Date(entry.created_at).toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" })}</time>
                       </div>
                       <p className="mb-2 break-all text-[11px] text-slate-500">{entry.direction === "incoming" ? entry.sender : selectedMessage.email}</p>
                       <p className="whitespace-pre-wrap break-words leading-relaxed text-slate-800">{entry.body}</p>
-                      {entry.direction === "outgoing" && <p className="mt-3 text-[11px] font-semibold text-slate-600">
-                        {entry.delivery_status === "sent" ? `E-posta sunucusu kabul etti${entry.sent_at ? ` · ${new Date(entry.sent_at).toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" })}` : ""}. Gelen kutusuna teslim doğrulanmadı.` : entry.delivery_status === "failed" ? "Gönderim başarısız; e-posta iletilemedi." : entry.delivery_status === "unknown" ? "Eski kayıt: gönderim durumu bilinmiyor." : "E-posta gönderim kuyruğunda; henüz iletilmedi."}
-                      </p>}
                     </li>
                   ))}
                 </ol>

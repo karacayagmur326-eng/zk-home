@@ -62,10 +62,10 @@ export async function sendSmtpEmail(input: {
     return { sent: false, configured: false }
   }
   const receipt = await configured.transporter.sendMail({
-    from:
+    from: { name: "ZK HOME", address:
       configured.settings.from_email ||
       configured.settings.user ||
-      "no-reply@zk-home.com",
+      "no-reply@zk-home.com" },
     to: input.to,
     subject: input.subject,
     html: input.html,
@@ -118,7 +118,7 @@ export async function sendContactNotificationEmail(data: {
     `
 
     await transporter.sendMail({
-      from: settings.from_email || settings.user || "no-reply@zk-home.com",
+      from: { name: "ZK HOME", address: settings.from_email || settings.user || "no-reply@zk-home.com" },
       to: settings.recipient_email,
       subject: `[İletişim Formu] ${data.subject || 'Yeni Mesaj'} - ${data.name}`,
       html: htmlContent,

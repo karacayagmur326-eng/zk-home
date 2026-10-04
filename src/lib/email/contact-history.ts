@@ -19,7 +19,8 @@ export async function contactHistory(id: string) {
       message AS body, created_at, 'received' AS delivery_status, NULL AS sent_at
     FROM contact_messages WHERE id=$1
     UNION ALL
-    SELECT id, 'outgoing', 'ZK Home', payload->>'reply', created_at, status, sent_at
+    SELECT id, 'outgoing', 'ZK HOME', payload->>'reply', created_at,
+      CASE WHEN payload->>'receipt_reply_id' IS NOT NULL THEN 'delivered' ELSE status END, sent_at
     FROM notification_outbox
     WHERE type='contact_reply_customer' AND payload->>'message_id'=$1::text
     UNION ALL

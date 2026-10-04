@@ -130,7 +130,7 @@ export async function PATCH(request: Request) {
           customerId,
           "contact_reply_customer",
           message.email,
-          `[ZK Talep #${message.id}] ${message.subject || "İletişim Talebi"} — ${brand.brandName}`,
+          `ZK HOME #${message.id} Talep — ${message.subject || "İletişim Talebi"}`,
           payload,
         ],
       ]

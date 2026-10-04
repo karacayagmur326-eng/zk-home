@@ -47,7 +47,7 @@ export async function syncContactInbox() {
       const ids = [...references.matchAll(/<(notif_contact_[^<>]+)@zk-home\.com>/g)].map(match=>match[1])
       const linked = ids.length ? await query<{ contact_id: string }>(
         "SELECT DISTINCT payload->>'message_id' AS contact_id FROM notification_outbox WHERE id=ANY($1::text[])", [ids]) : []
-      const marker = mail.subject?.match(/\[ZK Talep #(\d+)\]/)?.[1]
+      const marker = mail.subject?.match(/(?:\[ZK Talep #|ZK HOME #)(\d+)(?:\]|\s+Talep)/i)?.[1]
       const matching = candidates.filter(candidate => linked.some(link=>String(link.contact_id)===String(candidate.id)) || String(candidate.id)===marker)
       // Legacy mail can only be linked by a unique, explicit subject; never by sender alone.
       const normalizedSubject = (mail.subject || "").replace(/^(?:(?:re|fw|fwd|ynt|yanıt)\s*:\s*)+/i, "").trim()
@@ -65,6 +65,12 @@ export async function syncContactInbox() {
           VALUES ($1,$2,$3,$4,$5) ON CONFLICT(id) DO NOTHING RETURNING id`,
           [key,contact.id,sender,mail.text!.trim().slice(0,50000),item.internalDate || new Date()])
         if (result.rowCount) await db.query("UPDATE contact_messages SET status='new' WHERE id=$1", [contact.id])
+        // Only a reply referencing this exact outgoing email confirms customer receipt.
+        if (ids.length) await db.query(`UPDATE notification_outbox
+          SET payload=payload || jsonb_build_object('receipt_reply_id',$4::text)
+          WHERE id=ANY($1::text[]) AND type='contact_reply_customer'
+            AND payload->>'message_id'=$2::text AND LOWER(recipient)=$3 AND status='sent'`,
+          [ids,String(contact.id),sender,key])
         return result.rowCount || 0
       })
       imported += added
