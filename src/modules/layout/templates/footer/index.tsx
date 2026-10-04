@@ -6,7 +6,6 @@ import {
   ChevronRight,
   FileText,
   Headphones,
-  Lock,
   Mail,
   MapPin,
   Phone,
@@ -151,7 +150,7 @@ export default async function Footer() {
   const brandSubtext = (themeSettings?.footer_brand_subtext as string | undefined) || ""
   const mersisNo = storeReady ? (themeSettings?.footer_mersis_no as string | undefined) || "" : ""
   const kepAddress = storeReady ? (themeSettings?.footer_kep_address as string | undefined) || "" : ""
-  const showPaymentBadges = storeReady && themeSettings?.footer_show_payment_badges !== false
+  const showPaymentBadges = themeSettings?.footer_show_payment_badges !== false
 
   // Fallback Menu Arrays
   const defaultKurumsalItems = [
@@ -532,39 +531,12 @@ export default async function Footer() {
           </div>
 
           {showPaymentBadges && (
-            <div className="flex items-center gap-2 shrink-0">
-              {/* iyzico badge */}
-              <div className="bg-white rounded-md px-2.5 py-1.5 flex items-center justify-center shadow-xs">
-                <span className="text-[13px] font-black tracking-tight text-[#0066CC]">
-                  iyzico
-                </span>
-              </div>
-              {/* VISA badge */}
-              <div className="bg-white rounded-md px-2.5 py-1.5 flex items-center justify-center shadow-xs">
-                <span className="text-[13px] font-black italic tracking-tighter text-[#1A1F71]">
-                  VISA
-                </span>
-              </div>
-              {/* MasterCard badge */}
-              <div className="bg-white rounded-md px-2.5 py-1.5 flex items-center justify-center shadow-xs">
-                <div className="flex items-center">
-                  <div className="w-3.5 h-3.5 rounded-full bg-[#EB001B]"></div>
-                  <div className="w-3.5 h-3.5 rounded-full bg-[#F79E1B] -ml-1.5 opacity-90"></div>
-                </div>
-              </div>
-              {/* Troy badge */}
-              <div className="bg-white rounded-md px-2.5 py-1.5 flex items-center justify-center shadow-xs">
-                <span className="text-[12px] font-black tracking-wider text-[#004B93]">
-                  troy
-                </span>
-              </div>
-              {/* 256 bit SSL badge */}
-              <div className="bg-slate-900 border border-slate-700 rounded-md px-2.5 py-1 flex items-center gap-1.5 shadow-xs">
-                <Lock className="w-3 h-3 text-emerald-400" />
-                <span className="text-[10px] font-bold text-slate-200 uppercase tracking-tighter">
-                  256 bit <span className="text-emerald-400">SSL</span>
-                </span>
-              </div>
+            <div className="zk-payment-logos" role="group" aria-label="Ödeme logoları">
+              <span role="img" aria-label="iyzico ile Öde" className="zk-payment-logo zk-payment-iyzico" />
+              <span role="img" aria-label="Mastercard" className="zk-payment-logo zk-payment-mastercard" />
+              <span role="img" aria-label="Visa" className="zk-payment-logo zk-payment-visa" />
+              <span role="img" aria-label="American Express" className="zk-payment-logo zk-payment-amex" />
+              <span role="img" aria-label="Troy" className="zk-payment-logo zk-payment-troy" />
             </div>
           )}
         </div>

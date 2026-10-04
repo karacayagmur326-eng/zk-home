@@ -4186,7 +4186,7 @@ export default function ThemeSettingsPage(props: any = {}) {
                   style={{ width: 18, height: 18, accentColor: "#C98484", cursor: "pointer" }}
                 />
                 <span style={{ fontSize: 13, fontWeight: 700, color: "#1e293b" }}>
-                  Alt Bantta Güvenli Ödeme Logoları (iyzico, Visa, Mastercard, Troy, 256bit SSL) Gösterilsin
+                  Alt Bantta Ödeme Logoları (iyzico, Mastercard, Visa, American Express, Troy) Gösterilsin
                 </span>
               </label>
               <button
