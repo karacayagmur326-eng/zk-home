@@ -98,6 +98,7 @@ export default function RelatedProductsCarousel({
             <div key={p.id} className="w-[185px] sm:w-[240px] shrink-0 flex flex-col">
               <FeaturedProductCard
                 product={p}
+                showSummary
                 region={
                   {
                     id: "local-fallback",
