@@ -3,6 +3,7 @@
 import { useState, useRef } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { getProductPrice } from "@lib/util/get-product-price"
+import { productSummaryForCard } from "@lib/util/product-card"
 import { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Thumbnail from "../thumbnail"
@@ -35,6 +36,7 @@ export default function FeaturedProductCard({
 
   const { cheapestPrice } = getProductPrice({ product })
   const metadata = (product.metadata || {}) as Record<string, any>
+  const summary = productSummaryForCard(product)
 
   const hasDiscount =
     cheapestPrice?.price_type === "sale" ||
@@ -147,9 +149,9 @@ export default function FeaturedProductCard({
             <span>{product.title}</span>
           </h3>
         </LocalizedClientLink>
-        {showSummary && typeof metadata.product_summary === "string" && metadata.product_summary && (
+        {showSummary && summary && (
           <p className="mb-2 min-h-[36px] line-clamp-2 text-xs leading-[1.5] text-[#827b78]">
-            {metadata.product_summary}
+            {summary}
           </p>
         )}
       </div>
