@@ -44,6 +44,7 @@ interface ContactMessage {
   admin_reply?: string
   replied_at?: string
   created_at: string
+  history?: Array<{ id: string; direction: string; sender: string; body: string; created_at: string; delivery_status: string; sent_at?: string }>
 }
 
 function Toggle({
@@ -88,6 +89,7 @@ export default function AdminContactPage() {
   const [errorMsg, setErrorMsg] = useState("")
   const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null)
   const [replyText, setReplyText] = useState("")
+  const [syncingInbox, setSyncingInbox] = useState(false)
   const [sendingReply, setSendingReply] = useState(false)
   const [testingSmtp, setTestingSmtp] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -221,11 +223,11 @@ export default function AdminContactPage() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || "Yanıt gönderilemedi.")
       setSelectedMessage(data.message)
-      setReplyText(data.message?.admin_reply || replyText)
+      setReplyText("")
       showToast(
         "success",
-        data.notifications?.sent
-          ? "Yanıt müşteriye gönderildi ve admin adresine bilgi kopyası iletildi."
+        data.notifications?.customer_sent
+          ? "Yanıt müşterinin e-posta sunucusuna iletilmek üzere kabul edildi. Gelen kutusuna teslim henüz doğrulanmadı."
           : "Yanıt kaydedildi; e-postalar gönderim kuyruğuna alındı."
       )
       fetchMessages(statusFilter)
@@ -618,7 +620,7 @@ export default function AdminContactPage() {
                                 type="button"
                                 onClick={() => {
                                   setSelectedMessage(m)
-                                  setReplyText(m.admin_reply || "")
+                                  setReplyText("")
                                   if (m.status === "new") handleUpdateStatus(m.id, "read")
                                 }}
                                 className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2 py-1.5 text-[10px] font-bold text-slate-600 hover:bg-slate-50 cursor-pointer"
@@ -631,7 +633,7 @@ export default function AdminContactPage() {
                                 type="button"
                                 onClick={() => {
                                   setSelectedMessage(m)
-                                  setReplyText(m.admin_reply || "")
+                                  setReplyText("")
                                   if (m.status === "new") handleUpdateStatus(m.id, "read")
                                 }}
                                 className="inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50 px-2 py-1.5 text-[10px] font-bold text-[#C98484] hover:bg-rose-100 cursor-pointer"
@@ -1356,12 +1358,43 @@ export default function AdminContactPage() {
                 </span>
               </div>
 
-              <div>
-                <span className="text-slate-400 font-bold block mb-1.5 uppercase tracking-wide text-[10px]">Mesaj İçeriği</span>
-                <div className="p-4 bg-slate-50 rounded-2xl text-slate-700 leading-relaxed font-medium whitespace-pre-wrap border border-slate-200/60 max-h-52 overflow-y-auto text-xs">
-                  {selectedMessage.message}
+              <section aria-label="Yazışma geçmişi" className="space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h4 className="text-sm font-bold text-slate-800">Yazışma Geçmişi</h4>
+                  <button type="button" disabled={syncingInbox} className="rounded-lg border border-slate-200 px-3 py-2 font-semibold hover:bg-slate-50 disabled:opacity-50"
+                    onClick={async () => {
+                      setSyncingInbox(true)
+                      try {
+                        const response = await fetch("/api/admin/contact-messages", { method: "POST" })
+                        const result = await response.json()
+                        if (!response.ok) throw new Error(result.error)
+                        const refreshed = await fetch("/api/admin/contact-messages").then(r=>r.json())
+                        const current = refreshed.messages?.find((m: ContactMessage)=>String(m.id)===String(selectedMessage.id))
+                        if (current) setSelectedMessage(current)
+                        fetchMessages(statusFilter)
+                        showToast("success", `${result.imported} yeni müşteri yanıtı eklendi.`)
+                      } catch (error: any) { showToast("error",error.message || "Posta kutusu okunamadı.") }
+                      finally { setSyncingInbox(false) }
+                    }}>
+                    {syncingInbox ? "Posta kutusu okunuyor…" : "E-posta Yanıtlarını Al"}
+                  </button>
                 </div>
-              </div>
+                <ol className="space-y-3">
+                  {(selectedMessage.history || [{ id: `original_${selectedMessage.id}`, direction: "incoming", sender: selectedMessage.email, body: selectedMessage.message, created_at: selectedMessage.created_at, delivery_status: "received", sent_at: undefined }]).map(entry => (
+                    <li key={entry.id} className={`rounded-2xl border p-4 ${entry.direction === "incoming" ? "mr-6 border-slate-200 bg-slate-50" : "ml-6 border-rose-100 bg-rose-50/60"}`}>
+                      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                        <strong>{entry.direction === "incoming" ? "Müşteriden gelen" : "Müşteriye yanıt"}</strong>
+                        <time dateTime={entry.created_at} className="text-[11px] text-slate-500">{new Date(entry.created_at).toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" })}</time>
+                      </div>
+                      <p className="mb-2 break-all text-[11px] text-slate-500">{entry.direction === "incoming" ? entry.sender : selectedMessage.email}</p>
+                      <p className="whitespace-pre-wrap break-words leading-relaxed text-slate-800">{entry.body}</p>
+                      {entry.direction === "outgoing" && <p className="mt-3 text-[11px] font-semibold text-slate-600">
+                        {entry.delivery_status === "sent" ? `E-posta sunucusu kabul etti${entry.sent_at ? ` · ${new Date(entry.sent_at).toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" })}` : ""}. Gelen kutusuna teslim doğrulanmadı.` : entry.delivery_status === "failed" ? "Gönderim başarısız; e-posta iletilemedi." : entry.delivery_status === "unknown" ? "Eski kayıt: gönderim durumu bilinmiyor." : "E-posta gönderim kuyruğunda; henüz iletilmedi."}
+                      </p>}
+                    </li>
+                  ))}
+                </ol>
+              </section>
 
               <div>
                 <span className="text-slate-400 font-bold block mb-1.5 uppercase tracking-wide text-[10px]">Müşteriye Yanıt</span>
@@ -1387,11 +1420,6 @@ export default function AdminContactPage() {
                     {sendingReply ? "Gönderiliyor…" : "Yanıtı Gönder"}
                   </button>
                 </div>
-                {selectedMessage.admin_reply && (
-                  <p className="mt-2 rounded-xl bg-emerald-50 px-3 py-2 text-[10px] font-semibold text-emerald-700">
-                    Son yanıt {selectedMessage.replied_at ? new Date(selectedMessage.replied_at).toLocaleString("tr-TR") : "gönderildi"}.
-                  </p>
-                )}
               </div>
             </div>
 

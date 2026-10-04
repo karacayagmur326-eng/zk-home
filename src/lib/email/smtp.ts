@@ -55,12 +55,13 @@ export async function sendSmtpEmail(input: {
   html: string
   replyTo?: string
   bcc?: string | string[]
+  messageId?: string
 }) {
   const configured = await smtpTransport()
   if (!configured) {
     return { sent: false, configured: false }
   }
-  await configured.transporter.sendMail({
+  const receipt = await configured.transporter.sendMail({
     from:
       configured.settings.from_email ||
       configured.settings.user ||
@@ -68,10 +69,16 @@ export async function sendSmtpEmail(input: {
     to: input.to,
     subject: input.subject,
     html: input.html,
+    ...(input.messageId ? { messageId: input.messageId } : {}),
     ...(input.replyTo ? { replyTo: input.replyTo } : {}),
     ...(input.bcc ? { bcc: input.bcc } : {}),
   })
-  return { sent: true, configured: true }
+  return { sent: true, configured: true, receipt: {
+    messageId: receipt.messageId,
+    response: receipt.response,
+    accepted: receipt.accepted.map(String),
+    rejected: receipt.rejected.map(String),
+  } }
 }
 
 export async function sendContactNotificationEmail(data: {

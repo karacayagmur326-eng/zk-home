@@ -238,7 +238,7 @@ export async function processNotificationOutbox(
         ADMIN_COPY_TYPES.has(row.type)
           ? brand.adminEmails.filter((email) => email !== row.recipient.toLowerCase())
           : []
-      if (apiKey && from) {
+      if (apiKey && from && !row.type.startsWith("contact_")) {
         const response = await fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: {
@@ -266,12 +266,18 @@ export async function processNotificationOutbox(
           to: row.recipient,
           subject: brandedSubject,
           html: emailHtml(row, brand),
+          messageId: `<${row.id}@zk-home.com>`,
           replyTo: String(row.payload.reply_to || brand.replyTo || replyTo || ""),
           bcc: adminCopy.length ? adminCopy : undefined,
         })
         if (!result.configured) {
           throw new Error(EMAIL_PROVIDER_NOT_CONFIGURED)
         }
+        if (!result.receipt?.accepted.some(address => address.toLowerCase() === row.recipient.toLowerCase())) {
+          throw new Error("Alıcı adresi SMTP sunucusu tarafından kabul edilmedi.")
+        }
+        await query(`UPDATE notification_outbox SET payload=payload || $2::jsonb WHERE id=$1`,
+          [row.id, JSON.stringify({ delivery_receipt: result.receipt })])
         configured = true
       }
       await query(
