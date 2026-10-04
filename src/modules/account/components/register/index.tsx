@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react"
 import { signup, type CustomerAuthState } from "@lib/data/customer"
 import { LOGIN_VIEW } from "@modules/account/templates/login-template"
+import LocationSelect from "./location-select"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { TURKEY_CITIES, getDistrictsForCity } from "@lib/util/turkey-cities"
 import { PasswordStrengthBar } from "../profile-template"
@@ -22,7 +23,6 @@ import {
   Eye,
   EyeOff,
   Loader2,
-  ChevronDown,
   ArrowRight,
 } from "@lib/icons"
 
@@ -51,6 +51,7 @@ const Register = ({ setCurrentView }: Props) => {
 
   const handleCityChange = (cityName: string) => {
     setSelectedCity(cityName)
+    setInvalidFields(fields => fields.filter(field => field !== "city" && field !== "district"))
     const newDistricts = getDistrictsForCity(cityName)
     setDistricts(newDistricts)
     setSelectedDistrict("")
@@ -63,7 +64,7 @@ const Register = ({ setCurrentView }: Props) => {
   })
 
   const focusField = (form: HTMLFormElement, name: string) => {
-    const field = form.elements.namedItem(name)
+    const field = form.querySelector<HTMLButtonElement>(`[data-location-field="${name}"]`) || form.elements.namedItem(name)
     if (field instanceof HTMLElement) {
       field.scrollIntoView({ block: "center", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" })
       field.focus({ preventScroll: true })
@@ -134,7 +135,7 @@ const Register = ({ setCurrentView }: Props) => {
       )}
 
       <form ref={formRef} onSubmit={handleSubmit} noValidate autoComplete="off" className="w-full space-y-5 [&_[aria-invalid=true]]:border-red-500 [&_[aria-invalid=true]]:bg-red-50 [&_[aria-invalid=true]]:ring-2 [&_[aria-invalid=true]]:ring-red-200">
-        <fieldset disabled={isPending || message?.state === "verification_required"} className="contents">
+        <fieldset disabled={isPending || message?.state === "verification_required"} className="min-w-0 space-y-5">
         {/* Top Options Box: Address Type, Address Title & Default Toggles */}
         <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-4 flex flex-col lg:flex-row items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
@@ -446,58 +447,15 @@ const Register = ({ setCurrentView }: Props) => {
               </div>
             </div>
 
-            {/* İl */}
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                İl <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none z-10" />
-                <select
-                  name="city"
-                  {...fieldProps("city")}
-                  required
-                  value={selectedCity}
-                  onChange={(e) => handleCityChange(e.target.value)}
-                  className="w-full h-11 rounded-xl border border-slate-200 bg-white pl-10 pr-8 text-xs font-semibold text-slate-800 outline-none focus:border-[#C98484] focus:ring-2 focus:ring-[#C98484]/15 transition-all appearance-none cursor-pointer"
-                >
-                  <option value="">İl Seçiniz</option>
-                  {TURKEY_CITIES.map((c) => (
-                    <option key={c.id} value={c.name}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
-              </div>
-            </div>
-
-            {/* İlçe */}
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                İlçe <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none z-10" />
-                <select
-                  name="district"
-                  {...fieldProps("district")}
-                  required
-                  value={selectedDistrict}
-                  onChange={(e) => setSelectedDistrict(e.target.value)}
-                  className="w-full h-11 rounded-xl border border-slate-200 bg-white pl-10 pr-8 text-xs font-semibold text-slate-800 outline-none focus:border-[#C98484] focus:ring-2 focus:ring-[#C98484]/15 transition-all appearance-none cursor-pointer"
-                >
-                  <option value="">İlçe Seçiniz</option>
-                  {districts.map((d) => (
-                    <option key={d} value={d}>
-                      {d}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
-              </div>
-            </div>
-
+            <LocationSelect name="city" label="İl" value={selectedCity}
+              options={TURKEY_CITIES.map(city => city.name)} invalid={invalidFields.includes("city")}
+              onChange={handleCityChange} />
+            <LocationSelect name="district" label="İlçe" value={selectedDistrict}
+              options={districts} invalid={invalidFields.includes("district")} disabled={!selectedCity}
+              onChange={district => {
+                setSelectedDistrict(district)
+                setInvalidFields(fields => fields.filter(field => field !== "district"))
+              }} />
             {/* Mahalle */}
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1.5">
