@@ -4,8 +4,11 @@ import {
   checkPassword,
   COOKIE_NAME,
   verifyAdminTotp,
+  type AdminRole,
 } from "@lib/admin/auth"
 import { checkRateLimit, requestIp } from "@lib/security/rate-limit"
+import { findLoginAccount } from "@lib/commerce/login-identity"
+import { verifyPassword } from "@lib/commerce/customer-auth"
 
 export async function POST(req: NextRequest) {
   try {
@@ -31,17 +34,34 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json().catch(() => ({}))
+    const identifier = String(body.username || body.email || "").trim().toLowerCase()
     const password = String(body.password || "").trim()
 
-    if (!password) {
-      return NextResponse.json({ error: "Şifre zorunludur." }, { status: 400 })
+    if (!identifier || identifier.length > 254 || !password || password.length > 256) {
+      return NextResponse.json({ error: "Kullanıcı adı veya e-posta ve şifre zorunludur." }, { status: 400 })
     }
 
-    const isMaster = checkPassword(password) && verifyAdminTotp(String(body.otp || ""))
-    if (isMaster) {
-      const token = await signAdminToken(
-        process.env.ADMIN_EMAIL || "admin@zk-home.com"
-      )
+    const masterEmail = (process.env.ADMIN_EMAIL || "admin@zk-home.com").trim().toLowerCase()
+    const masterUsername = (process.env.ADMIN_USERNAME || "admin").trim().toLowerCase()
+    const matchesMaster = identifier === masterUsername || identifier === masterEmail
+    let email: string | null = null
+    let role: AdminRole = "Admin"
+    if (matchesMaster && checkPassword(password)) {
+      email = masterEmail
+    } else {
+      const account = await findLoginAccount(identifier)
+      if (account?.id === "cust_admin_master") {
+        // Always use the current configured password, never the legacy bootstrap hash.
+        if (checkPassword(password)) email = account.email
+      } else if (account && account.email_verified &&
+        ["Admin", "Yönetici", "Editör"].includes(account.role || "") &&
+        verifyPassword(password, account.password_hash)) {
+        email = account.email
+        role = account.role as AdminRole
+      }
+    }
+    if (email && verifyAdminTotp(String(body.otp || ""))) {
+      const token = await signAdminToken(email, role)
       const response = NextResponse.json({ success: true })
       response.cookies.set(COOKIE_NAME, token, {
         httpOnly: true,
@@ -53,7 +73,7 @@ export async function POST(req: NextRequest) {
       return response
     }
 
-    return NextResponse.json({ error: "Geçersiz şifre." }, { status: 401 })
+    return NextResponse.json({ error: "Kullanıcı adı, e-posta, şifre veya doğrulama kodu hatalı." }, { status: 401 })
   } catch (error: any) {
     console.error("Login Route Error:", error)
     return NextResponse.json(

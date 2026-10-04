@@ -1,12 +1,11 @@
 "use client"
 
-import React, { useState } from "react"
-import { useFormState as useActionState } from "react-dom"
-import { signup } from "@lib/data/customer"
+import React, { useEffect, useRef, useState } from "react"
+import { signup, type CustomerAuthState } from "@lib/data/customer"
 import { LOGIN_VIEW } from "@modules/account/templates/login-template"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { TURKEY_CITIES, getDistrictsForCity } from "@lib/util/turkey-cities"
-import { PasswordStrengthBar, getPasswordStrength } from "../profile-template"
+import { PasswordStrengthBar } from "../profile-template"
 import {
   User,
   Mail,
@@ -32,7 +31,11 @@ type Props = {
 }
 
 const Register = ({ setCurrentView }: Props) => {
-  const [message, formAction, isPending] = useActionState(signup, null)
+  const [message, setMessage] = useState<CustomerAuthState>(null)
+  const [isPending, setIsPending] = useState(false)
+  const submitting = useRef(false)
+  const formRef = useRef<HTMLFormElement>(null)
+  const [invalidFields, setInvalidFields] = useState<string[]>([])
 
   const [addressType, setAddressType] = useState<"bireysel" | "kurumsal">("bireysel")
   const [showPassword, setShowPassword] = useState(false)
@@ -53,12 +56,68 @@ const Register = ({ setCurrentView }: Props) => {
     setSelectedDistrict("")
   }
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const fieldProps = (name: string) => ({
+    "aria-invalid": invalidFields.includes(name),
+    "aria-describedby": invalidFields.includes(name) ? "register-validation-error" : undefined,
+    onInput: () => setInvalidFields((fields) => fields.filter((field) => field !== name)),
+  })
+
+  const focusField = (form: HTMLFormElement, name: string) => {
+    const field = form.elements.namedItem(name)
+    if (field instanceof HTMLElement) {
+      field.scrollIntoView({ block: "center", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" })
+      field.focus({ preventScroll: true })
+    }
+  }
+
+  useEffect(() => {
+    if (!isPending && message?.state === "error" && message.field && formRef.current) {
+      focusField(formRef.current, message.field)
+    }
+  }, [isPending, message])
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (submitting.current) return
+    const form = e.currentTarget
+    setMessage(null)
     setPasswordMismatchError(null)
-    if (password && confirmPassword && password !== confirmPassword) {
-      e.preventDefault()
-      setPasswordMismatchError("Girdiğiniz şifreler birbiriyle eşleşmiyor.")
+
+    const fields = Array.from(form.elements).filter(
+      (field): field is HTMLInputElement | HTMLSelectElement =>
+        (field instanceof HTMLInputElement || field instanceof HTMLSelectElement) &&
+        !field.disabled && field.willValidate
+    )
+    const errors = fields.filter((field) => !field.validity.valid || (field.required && !field.value.trim()))
+    if (errors.length) {
+      setInvalidFields(errors.map((field) => field.name))
+      const first = errors[0]
+      const label = first.closest(".relative")?.parentElement?.querySelector("label")?.textContent?.replace("*", "").trim() || "Bu alan"
+      setPasswordMismatchError(first.validity.typeMismatch ? `${label}: geçerli bir e-posta adresi girin.` : first.name === "password" && first.value ? "Şifre en az 10, en fazla 256 karakter olmalı." : `${label} alanını doldurun.`)
+      focusField(form, first.name)
       return
+    }
+    if (password !== confirmPassword) {
+      setInvalidFields(["password_confirm"])
+      setPasswordMismatchError("Girdiğiniz şifreler birbiriyle eşleşmiyor.")
+      focusField(form, "password_confirm")
+      return
+    }
+    setInvalidFields([])
+    submitting.current = true
+    setIsPending(true)
+    try {
+      // An ordinary submit handler keeps the form intact when the server rejects it.
+      const result = await signup(null, new FormData(form))
+      setMessage(result)
+      if (result?.state === "error" && result.field) {
+        setInvalidFields([result.field])
+      }
+    } catch {
+      setMessage({ state: "error", error: "Kayıt tamamlanamadı. Bilgileriniz korunuyor; lütfen tekrar deneyin." })
+    } finally {
+      submitting.current = false
+      setIsPending(false)
     }
   }
 
@@ -74,7 +133,8 @@ const Register = ({ setCurrentView }: Props) => {
         </div>
       )}
 
-      <form action={formAction} onSubmit={handleSubmit} autoComplete="off" className="w-full space-y-5">
+      <form ref={formRef} onSubmit={handleSubmit} noValidate autoComplete="off" className="w-full space-y-5 [&_[aria-invalid=true]]:border-red-500 [&_[aria-invalid=true]]:bg-red-50 [&_[aria-invalid=true]]:ring-2 [&_[aria-invalid=true]]:ring-red-200">
+        <fieldset disabled={isPending || message?.state === "verification_required"} className="contents">
         {/* Top Options Box: Address Type, Address Title & Default Toggles */}
         <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-4 flex flex-col lg:flex-row items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
@@ -167,6 +227,7 @@ const Register = ({ setCurrentView }: Props) => {
                 <input
                   type="text"
                   name="first_name"
+                  {...fieldProps("first_name")}
                   required
                   autoComplete="off"
                   placeholder="Adınız"
@@ -185,6 +246,7 @@ const Register = ({ setCurrentView }: Props) => {
                 <input
                   type="text"
                   name="last_name"
+                  {...fieldProps("last_name")}
                   required
                   autoComplete="off"
                   placeholder="Soyadınız"
@@ -203,6 +265,7 @@ const Register = ({ setCurrentView }: Props) => {
                 <input
                   type="email"
                   name="email"
+                  {...fieldProps("email")}
                   required
                   autoComplete="off"
                   placeholder="ornek@domain.com"
@@ -223,6 +286,7 @@ const Register = ({ setCurrentView }: Props) => {
                 <input
                   type="tel"
                   name="phone"
+                  {...fieldProps("phone")}
                   required
                   autoComplete="off"
                   placeholder="5XX XXX XX XX"
@@ -241,8 +305,10 @@ const Register = ({ setCurrentView }: Props) => {
                   <input
                     type={showPassword ? "text" : "password"}
                     name="password"
+                  {...fieldProps("password")}
                     required
-                    minLength={6}
+                    minLength={10}
+                    maxLength={256}
                     autoComplete="new-password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -274,8 +340,10 @@ const Register = ({ setCurrentView }: Props) => {
                 <input
                   type={showConfirmPassword ? "text" : "password"}
                   name="password_confirm"
+                  {...fieldProps("password_confirm")}
                   required
-                  minLength={6}
+                  minLength={10}
+                  maxLength={256}
                   autoComplete="new-password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
@@ -309,6 +377,7 @@ const Register = ({ setCurrentView }: Props) => {
                   <input
                     type="text"
                     name="company"
+                  {...fieldProps("company")}
                     required={addressType === "kurumsal"}
                     placeholder="Şirket Tam Ünvanı"
                     className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50/50 pl-10 pr-3.5 text-xs font-medium text-slate-800 outline-none focus:border-[#C98484] focus:bg-white transition-colors"
@@ -325,6 +394,7 @@ const Register = ({ setCurrentView }: Props) => {
                   <input
                     type="text"
                     name="tax_office"
+                  {...fieldProps("tax_office")}
                     required={addressType === "kurumsal"}
                     placeholder="Vergi Dairesi Adı"
                     className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50/50 pl-10 pr-3.5 text-xs font-medium text-slate-800 outline-none focus:border-[#C98484] focus:bg-white transition-colors"
@@ -341,6 +411,7 @@ const Register = ({ setCurrentView }: Props) => {
                   <input
                     type="text"
                     name="tax_number"
+                  {...fieldProps("tax_number")}
                     required={addressType === "kurumsal"}
                     placeholder="10 Haneli VKN"
                     className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50/50 pl-10 pr-3.5 text-xs font-medium text-slate-800 outline-none focus:border-[#C98484] focus:bg-white transition-colors"
@@ -384,6 +455,7 @@ const Register = ({ setCurrentView }: Props) => {
                 <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none z-10" />
                 <select
                   name="city"
+                  {...fieldProps("city")}
                   required
                   value={selectedCity}
                   onChange={(e) => handleCityChange(e.target.value)}
@@ -409,6 +481,7 @@ const Register = ({ setCurrentView }: Props) => {
                 <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none z-10" />
                 <select
                   name="district"
+                  {...fieldProps("district")}
                   required
                   value={selectedDistrict}
                   onChange={(e) => setSelectedDistrict(e.target.value)}
@@ -453,6 +526,7 @@ const Register = ({ setCurrentView }: Props) => {
                 <input
                   type="text"
                   name="postal_code"
+                  {...fieldProps("postal_code")}
                   required
                   defaultValue=""
                   placeholder="34XXX"
@@ -471,6 +545,7 @@ const Register = ({ setCurrentView }: Props) => {
                 <input
                   type="text"
                   name="address_1"
+                  {...fieldProps("address_1")}
                   required
                   placeholder="Cadde, sokak, bina ve kapı no yazın"
                   className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50/50 pl-10 pr-3.5 text-xs font-medium text-slate-800 outline-none focus:border-[#C98484] focus:bg-white transition-colors"
@@ -506,16 +581,17 @@ const Register = ({ setCurrentView }: Props) => {
           </span>
         </div>
 
-        {passwordMismatchError && (
-          <div className="rounded-2xl bg-red-50 border border-red-200 p-3.5 text-xs font-bold text-red-600">
-            {passwordMismatchError}
-          </div>
-        )}
-
+        <div id="register-validation-error" role="alert" aria-live="polite">
+          {passwordMismatchError && (
+            <div className="rounded-2xl bg-red-50 border border-red-200 p-3.5 text-xs font-bold text-red-600">
+              {passwordMismatchError}
+            </div>
+          )}
         <ErrorMessage
           error={message?.state === "error" ? message.error : null}
           data-testid="register-error"
         />
+        </div>
 
         {/* Submit Register Button */}
         <button
@@ -533,6 +609,7 @@ const Register = ({ setCurrentView }: Props) => {
             </>
           )}
         </button>
+        </fieldset>
       </form>
 
       <div className="text-center pt-2">

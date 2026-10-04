@@ -19,9 +19,11 @@ import { getCanonicalURL } from "@lib/util/env"
 import { checkRateLimit } from "@lib/security/rate-limit"
 import { processNotificationOutbox } from "@lib/notifications/outbox"
 import { getEmailBrandSettings } from "@lib/email/brand-settings"
+import { findLoginAccount } from "@lib/commerce/login-identity"
+import { checkPassword, verifyAdminTotp } from "@lib/admin/auth"
 
 export type CustomerAuthState =
-  | { state: "error"; error: string }
+  | { state: "error"; error: string; field?: string }
   | { state: "verification_required"; email: string }
   | { state: "success" }
   | null
@@ -274,12 +276,16 @@ export async function signup(
     return {
       state: "error",
       error: "Şifreler birbiriyle eşleşmiyor.",
+      field: "password_confirm",
     }
   }
-  if (!email || password.length < 10 || password.length > 256)
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+    return { state: "error", error: "Geçerli bir e-posta adresi girin.", field: "email" }
+  if (password.length < 10 || password.length > 256)
     return {
       state: "error",
-      error: "Geçerli e-posta ve en az 10 karakter parola girin.",
+      error: "Şifre en az 10, en fazla 256 karakter olmalı.",
+      field: "password",
     }
   const existing = await query<any>(
     `SELECT id,password_hash FROM store_customer WHERE email=$1 LIMIT 1`,
@@ -287,7 +293,7 @@ export async function signup(
   )
   let id = existing[0]?.id
   if (existing[0]?.password_hash)
-    return { state: "error", error: "Bu e-posta zaten kayıtlı." }
+    return { state: "error", error: "Bu e-posta zaten kayıtlı.", field: "email" }
 
   const firstName = String(formData.get("first_name") || "").trim()
   const lastName = String(formData.get("last_name") || "").trim()
@@ -298,12 +304,14 @@ export async function signup(
     return {
       state: "error",
       error: "Lütfen ad ve soyad alanlarını doldurun.",
+      field: !firstName ? "first_name" : "last_name",
     }
   }
   if (!phone) {
     return {
       state: "error",
       error: "Lütfen telefon numaranızı girin.",
+      field: "phone",
     }
   }
 
@@ -406,13 +414,12 @@ export async function login(
   formData: FormData
 ): Promise<CustomerAuthState> {
   await ensureCommerceSchema()
-  const email = String(formData.get("email") || "")
+  const identifier = String(formData.get("identifier") || formData.get("email") || "")
     .trim()
     .toLowerCase()
-    .slice(0, 254)
   const password = String(formData.get("password") || "")
   const loginRate = await checkRateLimit(
-    `customer-login:${tokenHash(email).slice(0, 32)}`,
+    `customer-login:${tokenHash(identifier).slice(0, 32)}`,
     10,
     15 * 60,
     { failClosed: true }
@@ -423,22 +430,22 @@ export async function login(
       error: "Çok fazla giriş denemesi yapıldı. Lütfen daha sonra tekrar deneyin.",
     }
   }
-  if (!email || password.length === 0 || password.length > 256) {
-    return { state: "error", error: "E-posta veya parola hatalı." }
+  if (!identifier || identifier.length > 254 || password.length === 0 || password.length > 256) {
+    return { state: "error", error: "Kullanıcı adı, e-posta veya şifre hatalı." }
   }
-  const rows = await query<any>(
-    `SELECT id,password_hash,email_verified FROM store_customer WHERE email=$1 AND COALESCE(status, 'Aktif')='Aktif' LIMIT 1`,
-    [email]
-  )
-  if (!rows[0] || !verifyPassword(password, rows[0].password_hash))
-    return { state: "error", error: "E-posta veya parola hatalı." }
-  if (!rows[0].email_verified) {
-    await queueEmailVerification(rows[0].id, email)
-    return { state: "verification_required", email }
+  const account = await findLoginAccount(identifier)
+  const passwordValid = account?.id === "cust_admin_master"
+    ? checkPassword(password) && verifyAdminTotp(String(formData.get("otp") || ""))
+    : Boolean(account && verifyPassword(password, account.password_hash))
+  if (!account || !passwordValid)
+    return { state: "error", error: "Kullanıcı adı, e-posta veya şifre hatalı." }
+  if (!account.email_verified) {
+    await queueEmailVerification(account.id, account.email)
+    return { state: "verification_required", email: account.email }
   }
-  await setCustomerSession(rows[0].id)
+  await setCustomerSession(account.id)
   await transferFavorites(
-    rows[0].id,
+    account.id,
     String(formData.get("guest_favorites") || "")
   )
   await transferCart()

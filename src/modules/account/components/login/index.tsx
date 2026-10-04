@@ -49,16 +49,18 @@ const Login = ({ setCurrentView }: Props) => {
         {/* E-posta */}
         <div>
           <label className="block text-xs font-bold text-slate-700 mb-1.5">
-            E-posta
+            Kullanıcı adı veya e-posta
           </label>
           <div className="relative">
             <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
             <input
-              type="email"
+              type="text"
               name="email"
               required
-              autoComplete="email"
-              placeholder="ornek@email.com"
+              autoComplete="username"
+              maxLength={254}
+              aria-label="Kullanıcı adı veya e-posta"
+              placeholder="Kullanıcı adınız veya e-posta adresiniz"
               className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50/50 pl-10 pr-4 text-xs font-medium text-slate-800 outline-none focus:border-[#C98484] focus:bg-white focus:ring-2 focus:ring-[#C98484]/15 transition-all"
               data-testid="email-input"
             />

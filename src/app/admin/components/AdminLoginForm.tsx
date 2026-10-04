@@ -77,15 +77,18 @@ export default function AdminLoginForm({ onSuccess }: { onSuccess?: () => void }
         <form onSubmit={submit} className="space-y-4 text-xs font-bold text-slate-300">
           {/* Username Field */}
           <div>
-            <label className="block mb-1.5 text-slate-300">Kullanıcı Adı</label>
+            <label className="block mb-1.5 text-slate-300" htmlFor="admin-login-identifier">Kullanıcı adı veya e-posta</label>
             <div className="relative">
               <User className="h-4 w-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
+                id="admin-login-identifier"
+                autoComplete="username"
+                maxLength={254}
                 required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="kullaniciadi"
+                placeholder="Kullanıcı adınız veya e-posta adresiniz"
                 style={{ paddingLeft: "42px" }}
                 className="w-full h-11 bg-[#181f33] border border-slate-700/80 rounded-xl pr-4 text-xs font-semibold text-white placeholder:text-slate-500 outline-none focus:border-[#C98484] focus:ring-2 focus:ring-[#C98484]/20 transition-all"
               />
