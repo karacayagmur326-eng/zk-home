@@ -37,10 +37,16 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 12px 24px;
+  gap: 12px;
   max-width: 100%;
-  padding: 8px 12px;
-  border-radius: 10px;
+}
+
+.zk-payment-logo-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 6px;
   background: #fff;
 }
 
@@ -51,4 +57,39 @@
   height: 36px;
   max-width: 122px;
   object-fit: contain;
+}
+
+.zk-footer-light a.zk-footer-instagram {
+  display: inline-flex;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e8aeac;
+  border-radius: 50%;
+  background: #f4ded6;
+  color: #8b4449;
+  transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+
+.zk-footer-instagram svg {
+  width: 21px;
+  height: 21px;
+}
+
+.zk-footer-light a.zk-footer-instagram:hover {
+  background: #c98484;
+  color: #fff;
+  box-shadow: 0 0 0 4px rgb(201 132 132 / 20%);
+}
+
+.zk-footer-light a.zk-footer-instagram:focus-visible {
+  outline: 2px solid #f4ded6;
+  outline-offset: 4px;
+  background: #c98484;
+  color: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zk-footer-light a.zk-footer-instagram { transition: none; }
 }

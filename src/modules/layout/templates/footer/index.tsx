@@ -158,7 +158,7 @@ export default async function Footer() {
     { key: "visa", name: "Visa", src: themeSettings?.payment_logo_visa },
     { key: "amex", name: "American Express", src: themeSettings?.payment_logo_amex },
     { key: "troy", name: "Troy", src: themeSettings?.payment_logo_troy },
-  ]
+  ].filter((logo) => logo.src && logo.src !== "/brand/placeholder.svg")
 
   // Fallback Menu Arrays
   const defaultKurumsalItems = [
@@ -277,7 +277,7 @@ export default async function Footer() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="Instagram"
-                    className="w-9 h-9 rounded-full bg-white/10 hover:bg-[#C98484] flex items-center justify-center text-white transition-all"
+                    className="zk-footer-instagram"
                   >
                     <InstagramIcon />
                   </a>
@@ -449,7 +449,7 @@ export default async function Footer() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="Instagram"
-                    className="w-9 h-9 rounded-full bg-white/10 hover:bg-[#C98484] flex items-center justify-center text-white transition-all transform hover:scale-105"
+                    className="zk-footer-instagram"
                   >
                     <InstagramIcon />
                   </a>
@@ -538,9 +538,9 @@ export default async function Footer() {
             )}
           </div>
 
-          {showPaymentBadges && (
+          {showPaymentBadges && paymentLogos.length > 0 && (
             <div className="zk-payment-logos" role="group" aria-label="Ödeme logoları">
-              {paymentLogos.map((logo) => <img key={logo.key} src={logo.src || `/brand/payment-${logo.key}.svg`} alt={logo.name} className="zk-payment-logo" loading="lazy" />)}
+              {paymentLogos.map((logo) => <span key={logo.key} className="zk-payment-logo-item"><img src={logo.src} alt={logo.name} className="zk-payment-logo" loading="lazy" /></span>)}
             </div>
           )}
         </div>
