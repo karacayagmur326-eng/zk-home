@@ -235,7 +235,7 @@ export default function MobileSiteChrome({ settings, logoUrl }: { settings: Mobi
             {settings.announcementText}
           </Link>
         )}
-        <header className="flex h-[56px] items-center justify-between border-b border-slate-100 bg-white px-3 shadow-xs">
+        <header className="grid h-16 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center border-b border-slate-100 bg-white px-3 shadow-xs">
           {/* Hamburger Menu Toggle Button (ALWAYS ON LEFT) */}
           <button
             type="button"
@@ -246,20 +246,20 @@ export default function MobileSiteChrome({ settings, logoUrl }: { settings: Mobi
             <AppIcon name="Menu" className="h-5 w-5" />
           </button>
 
-          {/* Logo (Consistent h-8 w-32 size across all mobile screens) */}
-          <Link href="/" className="relative h-8 w-32 shrink-0 flex items-center justify-center">
+          {/* Equal side columns keep the logo centered between unequal action groups. */}
+          <Link href="/" className="relative flex h-10 w-[min(176px,calc(100vw_-_192px))] items-center justify-center">
             <Image
               src={logoUrl}
               alt="ZK Home"
-              width={128}
-              height={32}
+              width={176}
+              height={40}
               priority
               className="h-full w-full object-contain"
             />
           </Link>
 
           {/* Top Right Actions: Search & Sepet */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center justify-self-end gap-1">
             <button
               type="button"
               onClick={() => setSearchOpen((prev) => !prev)}
