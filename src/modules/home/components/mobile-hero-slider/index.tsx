@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useRef, useCallback } from "react"
 import Image from "@components/common/SmartImage"
 import Link from "next/link"
+import useFadeSlider from "../use-fade-slider"
 
 type Slide = {
   id: string
@@ -17,58 +17,28 @@ type Slide = {
 }
 
 export default function MobileHeroSlider({ slides, prioritize = true }: { slides: Slide[]; prioritize?: boolean }) {
-  const [activeIndex, setActiveIndex] = useState(0)
-  const [hasInteracted, setHasInteracted] = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
-  const isScrollingRef = useRef(false)
-
-  // Scroll to targeted slide index smoothly
-  const scrollToSlide = useCallback((index: number) => {
-    setHasInteracted(true)
-    if (!containerRef.current) return
-    const width = containerRef.current.clientWidth
-    containerRef.current.scrollTo({
-      left: width * index,
-      behavior: "smooth",
-    })
-    setActiveIndex(index)
-  }, [])
-
-  // Track active slide on scroll with RAF throttle
-  const handleScroll = () => {
-    if (isScrollingRef.current) return
-    isScrollingRef.current = true
-    requestAnimationFrame(() => {
-      isScrollingRef.current = false
-      if (!containerRef.current) return
-      const { scrollLeft, clientWidth } = containerRef.current
-      if (scrollLeft > 2) setHasInteracted(true)
-      if (clientWidth > 0) {
-        const idx = Math.round(scrollLeft / clientWidth)
-        if (idx >= 0 && idx < slides.length && idx !== activeIndex) {
-          setActiveIndex(idx)
-        }
-      }
-    })
-  }
+  const { activeIndex, select: scrollToSlide, gestures } = useFadeSlider(slides.length, false)
 
   if (!slides || slides.length === 0) return null
 
   return (
-    <div className="relative w-full overflow-hidden select-none">
+    <div className="relative w-full overflow-hidden select-none" role="region" aria-label="Mobil kampanyalar" aria-roledescription="carousel" {...gestures}>
       {/* ── Scroll Track ── */}
       <div
-        ref={containerRef}
-        onScroll={handleScroll}
-        onPointerDown={() => setHasInteracted(true)}
-        className="flex snap-x snap-mandatory overflow-x-auto px-0 pt-0 pb-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden scroll-smooth"
+        className="relative h-[200px] touch-pan-y"
       >
         {slides.map((slide, idx) => (
           <article
             key={slide.id || idx}
-            className="relative h-[200px] min-w-full snap-center overflow-hidden rounded-none bg-white shadow-none shrink-0"
+            className="zkhome-fade-slide absolute inset-0 h-[200px] w-full overflow-hidden rounded-none bg-white shadow-none"
+            data-active={idx === activeIndex}
+            aria-hidden={idx !== activeIndex}
+            inert={idx !== activeIndex}
+            role="group"
+            aria-roledescription="slide"
+            aria-label={`${idx + 1} / ${slides.length}`}
           >
-            {slide.image && (idx === 0 || hasInteracted) && (
+            {slide.image && (
               <Image
                 src={slide.image}
                 alt={slide.title || "Mobil slider"}
@@ -81,7 +51,7 @@ export default function MobileHeroSlider({ slides, prioritize = true }: { slides
               />
             )}
             <div className="absolute inset-0 bg-gradient-to-r from-white via-white/85 to-transparent" />
-            <div className="absolute inset-y-0 left-0 z-10 flex w-[62%] flex-col items-start justify-center px-5">
+            <div className="zkhome-slide-content absolute inset-y-0 left-0 z-10 flex w-[62%] flex-col items-start justify-center px-5">
               {slide.badge && (
                 <span className="mb-2 rounded-full bg-[#C98484] px-2.5 py-1 font-[family-name:var(--font-barlow-condensed)] text-[8px] font-black tracking-wider text-white shadow-xs">
                   {slide.badge}
@@ -131,6 +101,7 @@ export default function MobileHeroSlider({ slides, prioritize = true }: { slides
                 key={idx}
                 type="button"
                 aria-label={`Slayt ${idx + 1} göster`}
+                aria-current={isActive ? "true" : undefined}
                 onClick={() => scrollToSlide(idx)}
                 style={{
                   width: "32px",

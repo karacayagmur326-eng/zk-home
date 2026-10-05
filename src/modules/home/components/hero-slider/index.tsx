@@ -1,10 +1,8 @@
 "use client"
 
-import React, { useCallback, useEffect, useRef, useState } from "react"
+import React, { useEffect, useState } from "react"
 import Image from "@components/common/SmartImage"
-import { useTheme } from "next-themes"
-import useEmblaCarousel from "embla-carousel-react"
-import Autoplay from "embla-carousel-autoplay"
+import useFadeSlider from "../use-fade-slider"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { AppIcon, ArrowLeft, ArrowRight, Pause, Play } from "@lib/icons"
 import { turkishTitleCase } from "@lib/util/turkish-title-case"
@@ -373,26 +371,12 @@ export default function HeroSlider({
   initialSliders?: any[]
 }) {
   const [sliders, setSliders] = useState<any[]>(initialSliders)
-  const autoplay = useRef(
-    Autoplay({
-      delay: 5000,
-      stopOnInteraction: false,
-      stopOnMouseEnter: true,
-      stopOnFocusIn: true,
-    })
-  )
-  // Avoid cloned slide DOM: clones duplicate headings and controls for AT/SEO.
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false }, [
-    autoplay.current,
-  ])
-  const [selectedIndex, setSelectedIndex] = useState(0)
-  const [isPlaying, setIsPlaying] = useState(true)
+  const { activeIndex: selectedIndex, select: scrollTo, isPlaying, paused, toggle: toggleAutoplay, gestures } = useFadeSlider(sliders.length)
 
   // Admin gibi canlı önizleme kullanan ekranlarda gelen veriyi anında yansıt.
   useEffect(() => {
     if (initialSliders && initialSliders.length > 0) {
       setSliders(initialSliders)
-      setSelectedIndex(0)
     }
   }, [initialSliders])
 
@@ -412,52 +396,6 @@ export default function HeroSlider({
         .catch(() => setSliders([]))
     }
   }, [])
-
-  const scrollTo = useCallback(
-    (index: number) => emblaApi && emblaApi.scrollTo(index),
-    [emblaApi]
-  )
-
-  const onSelect = useCallback(() => {
-    if (!emblaApi) return
-    setSelectedIndex(emblaApi.selectedScrollSnap())
-  }, [emblaApi, setSelectedIndex])
-
-  useEffect(() => {
-    if (!emblaApi) return
-    onSelect()
-    emblaApi.on("select", onSelect)
-    emblaApi.on("reInit", onSelect)
-    emblaApi.on("autoplay:play", () => setIsPlaying(true))
-    emblaApi.on("autoplay:stop", () => setIsPlaying(false))
-  }, [emblaApi, onSelect])
-
-  useEffect(() => {
-    if (!emblaApi) return
-
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)")
-    const applyMotionPreference = () => {
-      if (reducedMotion.matches) {
-        autoplay.current.stop()
-        setIsPlaying(false)
-      }
-    }
-
-    applyMotionPreference()
-    reducedMotion.addEventListener("change", applyMotionPreference)
-    return () =>
-      reducedMotion.removeEventListener("change", applyMotionPreference)
-  }, [emblaApi])
-
-  const toggleAutoplay = () => {
-    if (autoplay.current.isPlaying()) {
-      autoplay.current.stop()
-      setIsPlaying(false)
-    } else {
-      autoplay.current.play()
-      setIsPlaying(true)
-    }
-  }
 
   const resolveSlideLink = (link: string) =>
     link === "/store" ? "/magaza" : link
@@ -517,6 +455,7 @@ export default function HeroSlider({
       role="region"
       aria-roledescription="carousel"
       aria-label="Öne çıkan kampanyalar"
+      {...gestures}
       className="group relative w-full overflow-hidden bg-[#eef0f2] font-sans aspect-[16/8] sm:aspect-[16/7.4] md:aspect-[16/6.8] lg:aspect-[16/6.4] max-h-[560px] min-h-[280px]"
       style={{ isolation: "isolate" }}
     >
@@ -762,9 +701,8 @@ export default function HeroSlider({
 
       <div
         className="zkhome-slider-motion h-full w-full overflow-hidden"
-        ref={emblaRef}
       >
-        <div className="flex h-full w-full">
+        <div className="relative h-full w-full touch-pan-y">
           {sliders.map((slider, index) => {
             const isActive = index === selectedIndex
             const HeadingTag = index === 0 ? "h1" : "h2"
@@ -810,7 +748,9 @@ export default function HeroSlider({
 
             return (
               <div
-                className="zkhome-hero-slide-item relative flex-[0_0_100%] h-full w-full min-w-0"
+                className="zkhome-hero-slide-item zkhome-fade-slide absolute inset-0 h-full w-full min-w-0"
+                data-active={isActive}
+                inert={!isActive}
                 key={slider.id || index}
                 role="group"
                 aria-roledescription="slide"
@@ -852,7 +792,7 @@ export default function HeroSlider({
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-6 w-full sm:items-center">
                     {/* Left Column: Staggered entrance animations and hover states */}
                     <div
-                      className="zkhome-mobile-content col-span-12 lg:col-span-8 max-w-[680px] lg:max-w-[620px] xl:max-w-[700px] flex flex-col items-start z-20"
+                      className="zkhome-mobile-content zkhome-slide-content col-span-12 lg:col-span-8 max-w-[680px] lg:max-w-[620px] xl:max-w-[700px] flex flex-col items-start z-20"
                       style={{ color: textColor }}
                     >
                       {/* 1. Badge with double slashes (Orange background, white text) */}
@@ -1146,11 +1086,11 @@ export default function HeroSlider({
       <button
         type="button"
         onClick={toggleAutoplay}
-        aria-label={isPlaying ? "Slaytı duraklat" : "Slaytı oynat"}
-        aria-pressed={!isPlaying}
+        aria-label={paused ? "Slaytı oynat" : "Slaytı duraklat"}
+        aria-pressed={paused}
         className="absolute bottom-7 right-8 z-20 hidden h-10 w-10 items-center justify-center rounded-circle border border-white/20 bg-black/40 text-white backdrop-blur-sm transition-colors hover:bg-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:flex"
       >
-        {isPlaying ? (
+        {!paused ? (
           <Pause aria-hidden="true" className="h-4 w-4" />
         ) : (
           <Play aria-hidden="true" className="h-4 w-4" />
@@ -1162,7 +1102,7 @@ export default function HeroSlider({
         type="button"
         aria-label="Önceki slayt"
         className="absolute left-6 top-1/2 z-20 hidden h-12 w-12 -translate-y-1/2 cursor-pointer items-center justify-center rounded-circle border border-white/20 bg-black/30 text-white opacity-0 backdrop-blur-sm transition-all hover:border-primary hover:bg-primary hover:text-white focus:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white group-hover:opacity-100 sm:flex"
-        onClick={() => emblaApi?.scrollPrev()}
+        onClick={() => scrollTo(selectedIndex - 1)}
       >
         <ArrowLeft aria-hidden="true" className="h-5 w-5" strokeWidth={2.5} />
       </button>
@@ -1170,7 +1110,7 @@ export default function HeroSlider({
         type="button"
         aria-label="Sonraki slayt"
         className="absolute right-6 top-1/2 z-20 hidden h-12 w-12 -translate-y-1/2 cursor-pointer items-center justify-center rounded-circle border border-white/20 bg-black/30 text-white opacity-0 backdrop-blur-sm transition-all hover:border-primary hover:bg-primary hover:text-white focus:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white group-hover:opacity-100 sm:flex"
-        onClick={() => emblaApi?.scrollNext()}
+        onClick={() => scrollTo(selectedIndex + 1)}
       >
         <ArrowRight aria-hidden="true" className="h-5 w-5" strokeWidth={2.5} />
       </button>

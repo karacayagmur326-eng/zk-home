@@ -643,4 +643,42 @@ textarea {
 @keyframes order-step-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
 @keyframes order-truck-float { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-3px) rotate(1deg); } }
 @media (prefers-reduced-motion: reduce) { .order-journey__progress { transition: none; } .order-journey__node.is-active, .order-journey__traveller { animation: none; } }
+/* Homepage motion: fade slides, gentle text entrance and cascading card reveals. */
+.zkhome-fade-slide {
+  opacity: 0;
+  pointer-events: none;
+  z-index: 0;
+  transition: opacity 300ms ease;
+}
+.zkhome-fade-slide[data-active="true"] {
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 1;
+}
+.zkhome-fade-slide[data-active="true"] .zkhome-slide-content {
+  animation: zkhome-content-enter 1s cubic-bezier(0.2, 0.65, 0.3, 1) 100ms both;
+  transform-origin: left center;
+}
+.zkhome-slide-content [style*="animation"] {
+  animation: none !important;
+  opacity: 1 !important;
+}
+@keyframes zkhome-content-enter {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: scale(1); }
+}
+.home-motion-pending { opacity: 0; }
+.home-motion-visible {
+  animation: zkhome-home-enter 600ms ease var(--home-motion-delay, 0ms) both;
+}
+@keyframes zkhome-home-enter {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .zkhome-fade-slide { transition: none; }
+  .zkhome-fade-slide .zkhome-slide-content,
+  .home-motion-visible { animation: none !important; }
+  .home-motion-pending { opacity: 1; }
+}
 

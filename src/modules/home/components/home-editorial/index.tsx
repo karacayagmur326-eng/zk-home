@@ -5,6 +5,7 @@ import { ArrowRight } from "@lib/icons"
 import type { EditorialCard, HomeEditorialContent } from "@lib/content/home-editorial"
 import FeaturedProductCard from "@modules/products/components/featured-product-card"
 import EditorialNewsletter from "@modules/home/components/editorial-newsletter"
+import HomeMotion from "@modules/home/components/home-motion"
 
 export type HomeArticle = {
   id: string
@@ -43,7 +44,7 @@ export default function HomeEditorial({
   region: HttpTypes.StoreRegion
   articles: HomeArticle[]
 }) {
-  return <div className="bg-[#fffdfb] pb-14 text-[#302b2a]">
+  return <HomeMotion><div className="bg-[#fffdfb] pb-14 text-[#302b2a]">
     <div className="content-container space-y-11 pt-9 sm:space-y-14 sm:pt-12">
       {content.collections_active && activeCards(content.collection_cards).length > 0 && <section aria-label={content.collections_title}>
         <SectionIntro title={content.collections_title} description={content.collections_description} href={content.collections_link_href} linkText={content.collections_link_text} />
@@ -105,5 +106,5 @@ export default function HomeEditorial({
 
       {content.newsletter_active && <div className="relative left-1/2 w-[calc(100vw-2rem)] max-w-[1680px] -translate-x-1/2"><EditorialNewsletter title={content.newsletter_title} description={content.newsletter_description} /></div>}
     </div>
-  </div>
+  </div></HomeMotion>
 }
