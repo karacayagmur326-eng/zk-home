@@ -32,8 +32,9 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
       lineId: item.id,
       quantity,
     })
-      .catch((err) => {
-        setError(err.message)
+      .then((result) => { if (!result.success) setError(result.error) })
+      .catch(() => {
+        setError("Ürün adedi güncellenemedi. Lütfen tekrar deneyin.")
       })
       .finally(() => {
         setUpdating(false)

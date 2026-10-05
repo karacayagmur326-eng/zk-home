@@ -31,6 +31,12 @@ export async function PUT(req: NextRequest) {
   if (!body || typeof body !== "object") {
     return NextResponse.json({ error: "Geçersiz ayar verisi." }, { status: 400 })
   }
+  const validMoney = (value: unknown) => typeof value === "number" && Number.isSafeInteger(value) && value >= 0 && value <= 10_000_000_000
+  if (Array.isArray(body.shipping_methods) && body.shipping_methods.some((method: any) =>
+    !validMoney(method.price) || (method.freeThreshold !== null && method.freeThreshold !== "" && !validMoney(method.freeThreshold))
+  )) {
+    return NextResponse.json({ error: "Kargo ücreti ve ücretsiz kargo alt limiti geçerli, sıfır veya pozitif tutarlar olmalıdır." }, { status: 400 })
+  }
   const current = await getCommerceSettings()
   const shippingMethods = Array.isArray(body.shipping_methods)
     ? body.shipping_methods.slice(0, 20).map((method: any, index: number) => ({

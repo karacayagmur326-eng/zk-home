@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
+import FeedbackPopup from "@modules/common/components/feedback-popup"
 import { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Thumbnail from "@modules/products/components/thumbnail"
@@ -23,6 +24,11 @@ import {
 } from "@lib/icons"
 import type { MobileSettings } from "@lib/content/mobile-settings"
 
+function resolvedCartError(error: any, fallback: string) {
+  const message = String(error?.message || "")
+  return /^(Bu üründen en fazla|Ürün sepetinizde|Sepet oturumunuz|Geçerli bir ürün)/.test(message) ? message : fallback
+}
+
 export default function CartTemplate({
   cart,
   customer,
@@ -33,6 +39,7 @@ export default function CartTemplate({
   mobileSettings?: MobileSettings
 }) {
   const [items, setItems] = useState<any[]>(() => cart?.items || [])
+  const [popupMessage, setPopupMessage] = useState("")
   const [updatingId, setUpdatingId] = useState<string | null>(null)
 
   useEffect(() => {
@@ -50,8 +57,7 @@ export default function CartTemplate({
   )
   const shippingTotal = cart?.shipping_total || 0
   const discountTotal = cart?.discount_total || 0
-  const taxTotal = cart?.tax_total || 0
-  const grandTotal = Math.max(0, subtotal + shippingTotal - discountTotal)
+  const grandTotal = Math.max(0, (cart?.total ?? (subtotal + shippingTotal - discountTotal)) + subtotal - (cart?.subtotal ?? subtotal))
 
   const currencyCode = cart?.currency_code || "TRY"
 
@@ -86,6 +92,7 @@ export default function CartTemplate({
     setUpdatingId(itemId)
     try {
       const res = await updateLineItem({ lineId: itemId, quantity: newQty })
+      if (!res.success) throw new Error(res.error)
       if (res?.count !== undefined && typeof window !== "undefined") {
         window.dispatchEvent(
           new CustomEvent("cart_updated", { detail: { count: res.count } })
@@ -102,7 +109,7 @@ export default function CartTemplate({
           new CustomEvent("cart_updated", { detail: { count: rollbackCount } })
         )
       }
-      alert(err?.message || "Ürün adeti güncellenirken bir hata oluştu.")
+      setPopupMessage(resolvedCartError(err, "Ürün adedi güncellenemedi. Sepetiniz korundu; lütfen tekrar deneyin."))
     } finally {
       setUpdatingId(null)
     }
@@ -142,7 +149,7 @@ export default function CartTemplate({
           new CustomEvent("cart_updated", { detail: { count: rollbackCount } })
         )
       }
-      alert(err?.message || "Ürün sepetten çıkarılırken bir hata oluştu.")
+      setPopupMessage("Ürün sepetten çıkarılamadı. Sepetiniz korundu; lütfen tekrar deneyin.")
     } finally {
       setUpdatingId(null)
     }
@@ -180,6 +187,7 @@ export default function CartTemplate({
   }
 
   return (<>
+    <FeedbackPopup message={popupMessage} title="Sepet güncellenemedi" onClose={() => setPopupMessage("")} />
     {mobileSettings?.enabled && <main className="bg-[#f5f6f7] pb-24 md:hidden overflow-x-hidden w-full">
       <div className="flex items-center justify-between bg-white px-4 py-4 border-b border-slate-100">
         <div>
@@ -459,17 +467,12 @@ export default function CartTemplate({
                 </div>
                 <span className="font-bold text-slate-900">
                   {shippingTotal === 0
-                    ? "Sipariş adımında hesaplanır"
+                    ? (cart?.shipping_methods?.length ? "Ücretsiz" : "Teslimat seçiminizde hesaplanır")
                     : convertToLocale({ amount: shippingTotal, currency_code: currencyCode })}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between text-slate-600 font-medium">
-                <span>Vergiler</span>
-                <span className="font-bold text-slate-900">
-                  {convertToLocale({ amount: taxTotal, currency_code: currencyCode })}
-                </span>
-              </div>
+
 
               <div className="border-t border-slate-100 pt-4 flex items-baseline justify-between">
                 <div>

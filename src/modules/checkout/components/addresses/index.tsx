@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
+import FeedbackPopup from "@modules/common/components/feedback-popup"
 import Link from "next/link"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { HttpTypes } from "@medusajs/types"
@@ -89,23 +90,23 @@ export default function Addresses({
     Boolean(cart?.shipping_methods?.length)
   )
   const [shippingLoading, setShippingLoading] = useState(false)
+  const [shippingError, setShippingError] = useState("")
+  const currentShippingId = cart?.shipping_methods?.[0]?.shipping_option_id || cart?.shipping_methods?.[0]?.id || ""
+  useEffect(() => { setSelectedShippingMethod(currentShippingId); setShippingReady(Boolean(currentShippingId)) }, [currentShippingId])
 
   const chooseShippingMethod = async (id: string) => {
     if (!cart?.id || shippingLoading) return
     setShippingLoading(true)
     setErrorMsg(null)
     try {
-      await setShippingMethod({ cartId: cart.id, shippingMethodId: id })
+      const result = await setShippingMethod({ cartId: cart.id, shippingMethodId: id })
+      if (!result.success) { setShippingError(result.error); return }
       setSelectedShippingMethod(id)
       setShippingReady(true)
       router.refresh()
     } catch (error) {
       setShippingReady(false)
-      setErrorMsg(
-        error instanceof Error
-          ? error.message
-          : "Teslimat yöntemi seçilemedi."
-      )
+      setShippingError("Teslimat yöntemi seçilemedi. Lütfen tekrar deneyin.")
     } finally {
       setShippingLoading(false)
     }
@@ -279,6 +280,7 @@ export default function Addresses({
 
   return (
     <div className="space-y-4 font-sans text-slate-900">
+      <FeedbackPopup message={shippingError} title="Teslimat seçilemedi" onClose={() => setShippingError("")} />
       {/* STEP 1: TESLİMAT ADRESİ (Active / Expandable) */}
       <div className="space-y-6 rounded-none sm:rounded-3xl border-x-0 sm:border border-y border-slate-200/80 sm:border-slate-100 bg-white p-4 sm:p-8 shadow-none sm:shadow-soft">
         {/* Step Header */}
@@ -1139,7 +1141,7 @@ export default function Addresses({
               Teslimat Yöntemi
             </h3>
             <p className="mt-0.5 text-xs font-medium text-slate-400">
-              Yönetim panelinde tanımlanan teslimat seçeneklerinden birini seçin.
+              Size uygun teslimat yöntemini seçin.
             </p>
           </div>
         </div>
@@ -1185,8 +1187,7 @@ export default function Addresses({
           </div>
         ) : (
           <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-            Kullanılabilir teslimat yöntemi bulunmuyor. Yönetim panelindeki
-            kargo ayarlarını tamamlayın.
+            Şu anda teslimat seçeneği bulunmuyor. Yardım için bizimle iletişime geçin.
           </div>
         )}
       </div>

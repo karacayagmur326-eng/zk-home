@@ -137,10 +137,11 @@ const Shipping: React.FC<ShippingProps> = ({
     })
 
     await setShippingMethod({ cartId: cart.id, shippingMethodId: id })
+      .then((result) => { if (!result.success) { setShippingMethodId(currentId); setError(result.error) } })
       .catch((err) => {
         setShippingMethodId(currentId)
 
-        setError(err.message)
+        setError("Teslimat yöntemi seçilemedi. Lütfen tekrar deneyin.")
       })
       .finally(() => {
         setIsLoading(false)

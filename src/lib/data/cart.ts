@@ -5,6 +5,7 @@ import { query, withTransaction } from "@lib/admin/db"
 import { ensureCommerceSchema } from "@lib/commerce/schema"
 import { createId } from "@lib/commerce/repository"
 import { getCommerceSettings } from "@lib/commerce/settings"
+import { buildShippingOptions, selectedShippingOption } from "@lib/commerce/shipping"
 import { revalidateTag } from "next/cache"
 import { headers } from "next/headers"
 import { redirect } from "next/navigation"
@@ -288,9 +289,8 @@ async function shapeCart(id: string) {
   })
   const subtotal = shapedItems.reduce((sum, item) => sum + item.total, 0)
   const shippingSettings = await getCommerceSettings()
-  const shippingTotal = cart.shipping_method
-    ? calculateShippingAmount(subtotal, shippingSettings.shipping_methods)
-    : 0
+  const selectedShipping = selectedShippingOption(subtotal, shippingSettings.shipping_methods, cart.shipping_method)
+  const shippingTotal = selectedShipping?.amount || 0
   const paymentProviderId = cart.metadata?.payment_provider_id
   const paymentData = cart.metadata?.payment_data || {}
 
@@ -389,7 +389,7 @@ async function shapeCart(id: string) {
     total: finalTotal,
     original_total: subtotal + shippingTotal + codFee,
     promotions,
-    shipping_methods: cart.shipping_method ? [{ ...cart.shipping_method, id: "shipping_standard", name: "Standart Kargo", amount: shippingTotal }] : [],
+    shipping_methods: selectedShipping ? [selectedShipping] : [],
     payment_collection: {
       id: `paycol_${cart.id}`,
       status: "not_paid",
@@ -547,7 +547,8 @@ export async function updateLineItem({
   quantity: number
 }) {
   const cartId = await getCartId()
-  if (!cartId) throw new Error("Sepet bulunamadı.")
+  if (!cartId) return { success: false as const, error: "Sepet oturumunuz sona erdi. Sayfayı yenileyip tekrar deneyin." }
+  if (!Number.isInteger(quantity)) return { success: false as const, error: "Geçerli bir ürün adedi seçin." }
   await releaseCartInventoryReservation(cartId)
   if (quantity <= 0) return deleteLineItem(lineId)
   const rows = await query<{
@@ -562,13 +563,13 @@ export async function updateLineItem({
     [lineId, cartId]
   )
   const variant = rows[0]
-  if (!variant) throw new Error("Sepet ürünü bulunamadı.")
+  if (!variant) return { success: false as const, error: "Ürün sepetinizde bulunamadı. Sayfayı yenileyin." }
   if (
     variant.manage_inventory &&
     !variant.allow_backorder &&
     Number(variant.stock) < quantity
   ) {
-    throw new Error(`Bu üründen en fazla ${Number(variant.stock)} adet ekleyebilirsiniz.`)
+    return { success: false as const, error: `Bu üründen en fazla ${Number(variant.stock)} adet ekleyebilirsiniz. Sepetinizdeki adet korundu.` }
   }
   await query(
     `UPDATE store_cart_item SET quantity=$3,updated_at=NOW()
@@ -580,7 +581,7 @@ export async function updateLineItem({
     `SELECT COALESCE(SUM(quantity), 0) AS sum FROM store_cart_item WHERE cart_id=$1`,
     [cartId]
   ).catch(() => [{ sum: "0" }])
-  return { success: true, count: Number(countRes[0]?.sum || 0) }
+  return { success: true as const, count: Number(countRes[0]?.sum || 0) }
 }
 
 export async function deleteLineItem(lineId: string) {
@@ -596,7 +597,7 @@ export async function deleteLineItem(lineId: string) {
     `SELECT COALESCE(SUM(quantity), 0) AS sum FROM store_cart_item WHERE cart_id=$1`,
     [cartId]
   ).catch(() => [{ sum: "0" }])
-  return { success: true, count: Number(countRes[0]?.sum || 0) }
+  return { success: true as const, count: Number(countRes[0]?.sum || 0) }
 }
 
 export async function setShippingMethod({
@@ -608,16 +609,17 @@ export async function setShippingMethod({
 }) {
   const cookieCartId = await getCartId()
   if (!cookieCartId || cookieCartId !== cartId) {
-    throw new Error("Sepet oturumu doğrulanamadı.")
+    return { success: false as const, error: "Sepet oturumunuz sona erdi. Sayfayı yenileyip tekrar deneyin." }
   }
   await releaseCartInventoryReservation(cartId)
   const option = (await shippingOptions(cartId)).find((item) => item.id === shippingMethodId)
-  if (!option) throw new Error("Teslimat seçeneği bulunamadı.")
+  if (!option) return { success: false as const, error: "Bu teslimat seçeneği artık kullanılamıyor. Başka bir yöntem seçin." }
   await query(
     `UPDATE store_cart SET shipping_method=$2,updated_at=NOW() WHERE id=$1`,
     [cartId, option]
   )
   await refreshCart()
+  return { success: true as const }
 }
 
 export async function initiatePaymentSession(
@@ -1252,22 +1254,7 @@ async function shippingOptions(cartId?: string) {
     )
     subtotal = Number(rows[0]?.subtotal || 0)
   }
-  return [{
-    id: "shipping_standard",
-    name: "Standart Kargo",
-    amount: calculateShippingAmount(subtotal, settings.shipping_methods),
-    price_type: "flat",
-    metadata: { coverage: "Tüm Türkiye" },
-    service_zone: { fulfillment_set: { type: "shipping" } },
-  }]
-}
-
-function calculateShippingAmount(subtotal: number, methods: Array<{ active: boolean; name: string; price: number }>) {
-  if (subtotal >= 1_000_000) return 0
-  if (subtotal >= 500_000) return 60_000
-  if (subtotal >= 200_000) return 30_000
-  const standard = methods.find((method) => method.active && !/mağazadan|teslim alma|pickup/i.test(method.name))
-  return Math.max(0, Number(standard?.price ?? 9900))
+  return buildShippingOptions(subtotal, settings.shipping_methods)
 }
 
 export async function listCartOptions(cartId?: string) {

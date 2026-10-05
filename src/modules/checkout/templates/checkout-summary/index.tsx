@@ -28,7 +28,6 @@ export default function CheckoutSummary({
   const subtotal = cart?.subtotal || 0
   const discountTotal = cart?.discount_total || 0
   const shippingTotal = cart?.shipping_total || 0
-  const taxTotal = cart?.tax_total || 0
   const total = cart?.total || 0
 
   return (
@@ -78,19 +77,13 @@ export default function CheckoutSummary({
                 {convertToLocale({ amount: shippingTotal, currency_code: currencyCode })}
               </span>
             ) : (
-              <div className="flex items-center gap-2">
-                <span className="text-slate-400 line-through">99,00 TL</span>
-                <span className="font-bold text-emerald-600">Ücretsiz</span>
-              </div>
+              <span className={cart?.shipping_methods?.length ? "font-bold text-emerald-600" : "text-slate-500"}>
+                {cart?.shipping_methods?.length ? "Ücretsiz" : "Teslimat yöntemini seçin"}
+              </span>
             )}
           </div>
 
-          <div className="flex items-center justify-between text-slate-600 font-medium">
-            <span>Vergiler</span>
-            <span className="font-semibold text-slate-500">
-              {convertToLocale({ amount: taxTotal, currency_code: currencyCode })}
-            </span>
-          </div>
+
 
           <div className="border-t border-slate-100 pt-3.5 flex items-baseline justify-between">
             <div>
