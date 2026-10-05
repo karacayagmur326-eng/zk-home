@@ -9,6 +9,7 @@ import {
   slugify,
 } from "@lib/commerce/repository"
 import { query } from "@lib/admin/db"
+import { splitImportCategories, normalizedName } from "@lib/commerce/import-catalog"
 import { splitImportedDescriptionHtml } from "@lib/commerce/import-description"
 import * as fs from "fs"
 import * as path from "path"
@@ -227,7 +228,7 @@ export async function POST(req: NextRequest) {
     const categories = await listStoreCategories(false)
     const categoryMap = new Map(
       categories.map((category) => [
-        category.name.toLocaleLowerCase("tr-TR"),
+        normalizedName(category.name),
         category.id,
       ])
     )
@@ -284,6 +285,19 @@ export async function POST(req: NextRequest) {
         brandMap.set(brandKey, brandId)
         createdBrandCount++
       }
+      const categoryNames = splitImportCategories(String(value(row, ["Kategori İsmi", "Kategori", "Kategori Ä°smi"]) || "Genel"))
+      const categoryIds: string[] = []
+      for (const categoryName of categoryNames) {
+        const categoryKey = normalizedName(categoryName)
+        let categoryId = categoryMap.get(categoryKey)
+        if (!categoryId) {
+          const category = await createStoreCategory({ name: categoryName, is_active: true })
+          categoryId = category.id
+          categoryMap.set(categoryKey, category.id)
+        }
+        categoryIds.push(categoryId)
+      }
+
       const existingProduct =
         productBySku.get(sku) ||
         existing.products.find(
@@ -306,24 +320,13 @@ export async function POST(req: NextRequest) {
              WHERE id=$1`,
             [existingProduct.id, brandId, brandName]
           )
+          for (const categoryId of categoryIds) {
+            await query("INSERT INTO store_product_category (product_id,category_id) VALUES ($1,$2) ON CONFLICT DO NOTHING", [existingProduct.id, categoryId])
+          }
           linkedBrandCount++
         }
         skippedCount++
         continue
-      }
-
-      const categoryName = String(
-        value(row, ["Kategori İsmi", "Kategori", "Kategori Ä°smi"]) || "Genel"
-      ).trim()
-      const categoryKey = categoryName.toLocaleLowerCase("tr-TR")
-      let categoryId = categoryMap.get(categoryKey)
-      if (!categoryId) {
-        const category = await createStoreCategory({
-          name: categoryName,
-          is_active: true,
-        })
-        categoryId = category.id
-        categoryMap.set(categoryKey, category.id)
       }
 
       const barcode = String(value(row, ["Barkod"]) || sku)
@@ -366,7 +369,7 @@ export async function POST(req: NextRequest) {
         collection_id: brandId,
         thumbnail: images[0] || "/images/placeholder.svg",
         images: images.map((url) => ({ url })),
-        categories: [{ id: categoryId }],
+        categories: categoryIds.map(id => ({ id })),
         variants: [
           {
             title: "Standart",

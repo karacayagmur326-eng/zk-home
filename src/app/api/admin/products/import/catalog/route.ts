@@ -4,7 +4,7 @@ import { getAdminSession } from "@lib/admin/auth"
 import { query } from "@lib/admin/db"
 import { createId, createStoreProduct, listStoreCategories, slugify } from "@lib/commerce/repository"
 import { flushAllSiteCache } from "@lib/cache"
-import { normalizedName, normalizedSku } from "@lib/commerce/import-catalog"
+import { normalizedName, normalizedSku, splitImportCategories } from "@lib/commerce/import-catalog"
 import { ensureCommerceSchema } from "@lib/commerce/schema"
 
 const rowSchema = z.object({
@@ -22,7 +22,7 @@ const descriptionHtml = (text:string) => text.split(/\r?\n/).map(line => {
 async function categoryResolution(names:string[]) {
   const categories = await listStoreCategories(false)
   const ids:string[] = [], issues:string[] = []
-  for (const name of names) {
+  for (const name of [...new Set(names.flatMap(splitImportCategories))]) {
     const matches = categories.filter(category => normalizedName(category.name) === normalizedName(name))
     if (matches.length !== 1) issues.push(matches.length ? `Kategori adı belirsiz: ${name}` : `Kategori bulunamadı: ${name}`)
     else ids.push(matches[0].id)

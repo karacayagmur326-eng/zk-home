@@ -367,34 +367,6 @@ export default function ProductsPage() {
     }
   }
 
-  const [importing, setImporting] = useState(false)
-
-  async function handleExcelImport() {
-    setImporting(true)
-    try {
-      const res = await fetch("/api/admin/products/import", { method: "POST" })
-      const data = await res.json()
-      if (res.ok && data.success) {
-        if (typeof window !== "undefined") {
-          ;(window as any).showAdminAlert?.(
-            `${data.createdCount} yeni ürün eklendi. ${data.skippedCount} ürün atlandı.`,
-            "İçe Aktarım Başarılı",
-            "success"
-          )
-        }
-        fetchProducts(page)
-      } else {
-        throw new Error(data.error || "İçe aktarım başarısız")
-      }
-    } catch (e: any) {
-      if (typeof window !== "undefined") {
-        ;(window as any).showAdminAlert?.(e.message, "Hata", "error")
-      }
-    } finally {
-      setImporting(false)
-    }
-  }
-
   function handleSort(key: string) {
     if (sortKey === key) {
       setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))
@@ -478,15 +450,12 @@ export default function ProductsPage() {
       {/* ── Breadcrumbs & Page Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-2.5">
-          <button
-            type="button"
-            onClick={handleExcelImport}
-            disabled={importing}
-            className="px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 font-bold text-xs hover:bg-slate-50 hover:border-slate-300 transition-all flex items-center gap-2 shadow-2xs disabled:opacity-60 cursor-pointer"
-          >
-            <Download className="w-4 h-4 text-slate-500" />
-            <span>{importing ? "Aktarılıyor..." : "Excel'den İçe Aktar"}</span>
-          </button>
+          <Link href="/admin/urunler/ice-aktar" className="px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 font-bold text-xs hover:bg-slate-50 flex items-center gap-2">
+            <Download className="w-4 h-4" />Excel'den İçe Aktar
+          </Link>
+          <a href="/api/admin/products/export" className="px-3.5 py-2.5 rounded-xl border border-[#C98484] bg-white text-[#C98484] font-bold text-xs hover:bg-rose-50 flex items-center gap-2">
+            <Download className="w-4 h-4" />Excel'e Dışa Aktar
+          </a>
 
           <Link
             href="/admin/urunler/yeni"
@@ -811,7 +780,9 @@ export default function ProductsPage() {
                       <td className="px-3 py-3 font-bold text-slate-900 whitespace-nowrap">{price}</td>
 
                       {/* Category */}
-                      <td className="px-3 py-3 font-medium text-slate-600 max-w-[150px] truncate">{cats}</td>
+                      <td className="px-3 py-3 font-medium text-slate-600 min-w-[180px]">
+                        <div className="flex flex-wrap gap-1" title={cats}>{p.categories?.length ? p.categories.map(c => <span key={c.id} className="rounded-md border border-rose-100 bg-rose-50 px-2 py-1 text-[10px]">{c.name}</span>) : "—"}</div>
+                      </td>
 
                       {/* Status */}
                       <td className="px-3 py-3 whitespace-nowrap">

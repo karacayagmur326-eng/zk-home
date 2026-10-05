@@ -18,7 +18,13 @@ export type CatalogRow = {
 export const normalizedName = (value: string) => value.normalize("NFKC").trim().replace(/\s+/g, " ").toLocaleLowerCase("tr-TR")
 export const normalizedSku = (value: string) => value.trim().toUpperCase()
 export function splitImportCategories(value: string) {
-  return [...new Set(value.split(/\*|;|\r?\n/).map(part => part.trim()).filter(Boolean))]
+  const parts = value.includes("*") ? value.split(/\*|;/) : value.split(/;|\r?\n/)
+  const unique = new Map<string, string>()
+  for (const part of parts) {
+    const name = part.trim().replace(/\s+/g, " ")
+    if (name) unique.set(normalizedName(name), name)
+  }
+  return [...unique.values()]
 }
 export function importColumns(sheet: xlsx.WorkSheet) {
   const range = xlsx.utils.decode_range(sheet["!ref"] || "A1:A1")

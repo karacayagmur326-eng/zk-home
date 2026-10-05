@@ -28,6 +28,7 @@
     "embla-carousel": "^8.6.0",
     "embla-carousel-autoplay": "^8.6.0",
     "embla-carousel-react": "^8.6.0",
+    "exceljs": "^4.4.0",
     "imapflow": "^2.2.2",
     "jose": "^6.2.3",
     "lucide-react": "^1.25.0",
