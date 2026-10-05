@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useMemo } from "react"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { useToast } from "@modules/common/components/feedback"
-import { addToCart } from "@lib/data/cart"
+import { addToCart } from "@lib/util/cart-feedback"
 import {
   Heart,
   ShoppingBag,
@@ -80,6 +80,7 @@ export default function FavoritesTemplate({ mobileSettings }: { mobileSettings?:
           quantity: 1,
           countryCode: "tr",
         })
+        if (newCount === null) return
         if (typeof window !== "undefined") {
           window.dispatchEvent(
             new CustomEvent("cart_updated", { detail: { count: newCount } })

@@ -8,7 +8,7 @@ import { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Thumbnail from "../thumbnail"
 import { Heart, ShoppingCart, Star, Loader2, Check } from "@lib/icons"
-import { addToCart } from "@lib/data/cart"
+import { addToCart } from "@lib/util/cart-feedback"
 import { useToast } from "@modules/common/components/feedback"
 import { FavoriteButton } from "../product-card-actions"
 
@@ -69,6 +69,7 @@ export default function FeaturedProductCard({
 
     try {
       const newCount = await addToCart({ variantId, quantity: 1, countryCode })
+      if (newCount === null) { addingRef.current = false; return }
       setIsSuccess(true)
       if (typeof window !== "undefined") {
         window.dispatchEvent(

@@ -492,19 +492,27 @@ export async function addToCart({
   countryCode: string
 }) {
   if (!variantId) throw new Error("Varyant bilgisi eksik.")
+  if (!Number.isInteger(quantity) || quantity < 1) return { success: false as const, error: "Geçerli bir ürün adedi seçin." }
   const cart = await getOrSetCart(countryCode)
   if (!cart) throw new Error("Sepet oluşturulamadı.")
   await releaseCartInventoryReservation(cart.id)
-  const variants = await query<{ price: string; stock: number; allow_backorder: boolean }>(
-    `SELECT price,stock,allow_backorder FROM store_variant WHERE id=$1`,
+  const variants = await query<{ price: string; stock: number; allow_backorder: boolean; manage_inventory: boolean }>(
+    `SELECT price,stock,allow_backorder,manage_inventory FROM store_variant WHERE id=$1`,
     [variantId]
   )
+
   const variant = variants[0]
   if (!variant) throw new Error("Ürün varyantı bulunamadı.")
   const existing = await query<{ quantity: number; updated_at: Date | null; created_at: Date | null }>(
     `SELECT quantity, updated_at, created_at FROM store_cart_item WHERE cart_id=$1 AND variant_id=$2`,
     [cart.id, variantId]
   )
+
+  const requestedQuantity = Number(existing[0]?.quantity || 0) + quantity
+  if (variant.manage_inventory && !variant.allow_backorder && Number(variant.stock) < requestedQuantity)
+    return { success: false as const, error: Number(variant.stock) > 0
+      ? `Bu üründen en fazla ${Number(variant.stock)} adet ekleyebilirsiniz. Sepetinizdeki adet korundu.`
+      : "Bu ürün şu anda stokta bulunmuyor. Sepetinizdeki adet korundu." }
 
   // Double-tap debounce guard: if the same variant was updated/added in this cart within the last 800ms
   // and request quantity is 1, treat as duplicate tap and return existing count
@@ -519,9 +527,6 @@ export async function addToCart({
     }
   }
 
-  const requestedQuantity = Number(existing[0]?.quantity || 0) + quantity
-  if (!variant.allow_backorder && Number(variant.stock) < requestedQuantity)
-    throw new Error("Yeterli stok bulunmuyor.")
   await query(
     `INSERT INTO store_cart_item (id,cart_id,variant_id,quantity,unit_price)
      VALUES ($1,$2,$3,$4,$5)

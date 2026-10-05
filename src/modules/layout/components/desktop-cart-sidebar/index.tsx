@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState, useTransition } from "react"
 import { usePathname } from "next/navigation"
 import { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import { deleteLineItem, updateLineItem } from "@lib/data/cart"
+import { deleteLineItem } from "@lib/data/cart"
+import { updateLineItem } from "@lib/util/cart-feedback"
 import { ShoppingCart, Trash2, ChevronRight, ChevronLeft, Loader2 } from "@lib/icons"
 import { convertToLocale } from "@lib/util/money"
 
@@ -55,7 +56,8 @@ export default function DesktopCartSidebar({
         if (newQty <= 0) {
           await deleteLineItem(lineId)
         } else {
-          await updateLineItem({ lineId, quantity: newQty })
+          const result = await updateLineItem({ lineId, quantity: newQty })
+          if (!result.success) { setItems(previousItems); return }
         }
         if (typeof window !== "undefined") {
           window.dispatchEvent(new CustomEvent("cart_updated"))

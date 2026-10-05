@@ -9,11 +9,14 @@ import {
   X,
 } from "@lib/icons"
 import clsx from "clsx"
+import FeedbackPopup from "@modules/common/components/feedback-popup"
+import { CART_WARNING_EVENT } from "@lib/util/cart-feedback"
 import {
   createContext,
   ReactNode,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react"
@@ -163,6 +166,12 @@ const ToastContext = createContext<ToastContextValue | null>(null)
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([])
+  const [cartWarning, setCartWarning] = useState("")
+  useEffect(() => {
+    const warn = (event: Event) => setCartWarning(String((event as CustomEvent).detail?.message || ""))
+    window.addEventListener(CART_WARNING_EVENT, warn)
+    return () => window.removeEventListener(CART_WARNING_EVENT, warn)
+  }, [])
 
   const dismiss = useCallback((id: number) => {
     setToasts((current) => current.filter((item) => item.id !== id))
@@ -186,6 +195,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={value}>
       {children}
+      <FeedbackPopup message={cartWarning} title="Sepet uyarısı" onClose={() => setCartWarning("")} />
       <div
         role="region"
         aria-label="Bildirimler"

@@ -1,6 +1,6 @@
 "use client"
 
-import { addToCart } from "@lib/data/cart"
+import { addToCart } from "@lib/util/cart-feedback"
 import { Heart, ShoppingCart, Check, Loader2 } from "@lib/icons"
 import { useToast } from "@modules/common/components/feedback"
 import clsx from "clsx"
@@ -150,6 +150,7 @@ export function AddToCartButton({
     setIsAdding(true)
     try {
       const newCount = await addToCart({ variantId, quantity: 1, countryCode })
+      if (newCount === null) { addingRef.current = false; return }
       setIsSuccess(true)
       if (typeof window !== "undefined") {
         window.dispatchEvent(

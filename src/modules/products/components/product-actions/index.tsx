@@ -1,6 +1,6 @@
 "use client"
 
-import { addToCart } from "@lib/data/cart"
+import { addToCart, showCartWarning } from "@lib/util/cart-feedback"
 import { HttpTypes } from "@medusajs/types"
 import OptionSelect from "@modules/products/components/product-actions/option-select"
 import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation"
@@ -82,6 +82,14 @@ export default function ProductActions({
     }))
   }
 
+  const increaseQuantity = () => {
+    if (selectedVariant?.manage_inventory && !selectedVariant.allow_backorder && quantity >= Number(selectedVariant.inventory_quantity || 0)) {
+      showCartWarning(`Bu üründen en fazla ${Number(selectedVariant.inventory_quantity || 0)} adet ekleyebilirsiniz.`)
+      return
+    }
+    setQuantity(quantity + 1)
+  }
+
   const isValidVariant = useMemo(() => {
     if (product.variants?.length === 1) return true
     return product.variants?.some((v) => {
@@ -109,6 +117,7 @@ export default function ProductActions({
         quantity: quantity,
         countryCode,
       })
+      if (newCount === null) { addingRef.current = false; return }
       setIsSuccess(true)
       if (typeof window !== "undefined") {
         window.dispatchEvent(
@@ -137,6 +146,7 @@ export default function ProductActions({
         quantity: quantity,
         countryCode,
       })
+      if (newCount === null) { addingRef.current = false; return }
       if (typeof window !== "undefined") {
         window.dispatchEvent(
           new CustomEvent("cart_updated", { detail: { count: newCount } })
@@ -192,7 +202,7 @@ export default function ProductActions({
               <span className="px-3.5 text-xs font-black text-slate-900">{quantity}</span>
               <button
                 type="button"
-                onClick={() => setQuantity(quantity + 1)}
+                onClick={increaseQuantity}
                 disabled={isAdding}
                 className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-700 hover:bg-white hover:text-slate-900 transition-colors font-bold text-sm cursor-pointer shadow-2xs"
               >
@@ -282,7 +292,7 @@ export default function ProductActions({
             <span className="px-2 text-xs font-black text-slate-900">{quantity}</span>
             <button
               type="button"
-              onClick={() => setQuantity(quantity + 1)}
+              onClick={increaseQuantity}
               disabled={isAdding}
               className="flex h-6 w-6 items-center justify-center rounded text-slate-700 font-bold text-xs"
             >
