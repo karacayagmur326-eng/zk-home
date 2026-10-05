@@ -44,7 +44,7 @@ export default function Addresses({
     id: string
     name: string
     amount: number
-    metadata?: { coverage?: string; estimated_days?: string }
+    metadata?: { coverage?: string; estimated_days?: string; free_threshold?: number | null; base_price?: number }
   }>
 }) {
   const searchParams = useSearchParams()
@@ -1174,7 +1174,9 @@ export default function Addresses({
                       {option.metadata?.estimated_days || "Teslimat süresi belirtilmedi"}
                       {" · "}
                       {option.amount === 0
-                        ? "Ücretsiz"
+                        ? (option.metadata?.base_price && option.metadata?.free_threshold != null
+                            ? `${convertToLocale({ amount: option.metadata.free_threshold, currency_code: "TRY" })} üzeri ücretsiz`
+                            : "Ücretsiz")
                         : convertToLocale({
                             amount: option.amount,
                             currency_code: "TRY",

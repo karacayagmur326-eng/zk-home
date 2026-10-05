@@ -12,7 +12,7 @@ export function buildShippingOptions(subtotal: number, methods: ShippingMethodSe
     name: method.name,
     amount: shippingAmount(subtotal, method),
     price_type: "flat",
-    metadata: { method_id: method.id, coverage: method.coverage, estimated_days: method.estimatedDays },
+    metadata: { method_id: method.id, coverage: method.coverage, estimated_days: method.estimatedDays, free_threshold: method.freeThreshold, base_price: method.price },
     service_zone: { fulfillment_set: { type: method.icon === "store" ? "pickup" : "shipping" } },
   }))
 }

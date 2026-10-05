@@ -5,6 +5,7 @@ import { parseMoneyInput } from "@lib/util/money-input"
 import FeedbackPopup from "@modules/common/components/feedback-popup"
 
 const tl = (value: unknown) => (Number(value || 0) / 100).toFixed(2)
+const money = (value: unknown) => (Number(value || 0) / 100).toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 const kurus = (value: unknown) =>
   Math.max(0, Math.round(Number(String(value).replace(",", ".")) * 100))
 
@@ -86,7 +87,7 @@ export default function MagazaAyarlariPage() {
       <section className="mb-5 rounded border border-slate-300 bg-white">
         <header className="border-b border-slate-300 px-4 py-3 font-bold">Teslimat yöntemleri</header>
         <div className="space-y-3 p-4">
-          <p className="text-xs text-slate-600">Ücretleri TL olarak girin (örnek: 125,50). Alt limit boşsa ücretsiz kargo sınırı uygulanmaz; ücret 0 ise teslimat ücretsizdir. Kaydettiğiniz tutarlar ödeme ekranına uygulanır.</p>
+          <p className="text-sm text-slate-600">Kargo ücreti sipariş toplamına eklenir. Yalnızca “Belirli tutardan sonra ücretsiz” seçeneğini açarsanız, belirlediğiniz tutara ulaşan siparişlerde kargo ücretsiz olur.</p>
           {settings.shipping_methods.map((method: any, index: number) => (
             <div key={method.id} className="grid gap-3 rounded border border-slate-200 p-3 md:grid-cols-7">
               <input className="rounded border p-2 md:col-span-2" value={method.name} placeholder="Yöntem adı" onChange={(e) => {
@@ -96,15 +97,25 @@ export default function MagazaAyarlariPage() {
                 const rows = [...settings.shipping_methods]; rows[index] = { ...method, coverage: e.target.value }; setSettings({ ...settings, shipping_methods: rows })
               }} />
               <label className="min-w-0 text-xs font-semibold text-slate-600">Kargo ücreti (TL)
-                <input className="mt-1 w-full rounded border p-2 text-sm" type="text" inputMode="decimal" value={method._priceDraft ?? tl(method.price)} aria-label="Kargo ücreti TL" onChange={(e) => {
+                <div className="relative"><input className="mt-1 w-full rounded border p-2 pr-9 text-sm" type="text" inputMode="decimal" value={method._priceDraft ?? money(method.price)} aria-label="Kargo ücreti TL" onBlur={() => {
+                  const value = method._priceDraft === undefined ? method.price : parseMoneyInput(method._priceDraft)
+                  if (value !== null) { const rows = [...settings.shipping_methods]; rows[index] = { ...method, price: value, _priceDraft: money(value) }; setSettings({ ...settings, shipping_methods: rows }) }
+                }} onChange={(e) => {
                   const rows = [...settings.shipping_methods]; rows[index] = { ...method, _priceDraft: e.target.value }; setSettings({ ...settings, shipping_methods: rows })
-                }} />
+                }} /><span className="absolute right-3 top-3 text-sm text-slate-500">TL</span></div>
               </label>
-              <label className="min-w-0 text-xs font-semibold text-slate-600">Ücretsiz kargo alt limiti (TL)
-                <input className="mt-1 w-full rounded border p-2 text-sm" type="text" inputMode="decimal" value={method._thresholdDraft ?? (method.freeThreshold === null ? "" : tl(method.freeThreshold))} aria-label="Ücretsiz kargo alt limiti TL" placeholder="Limit yok" onChange={(e) => {
+              <div className="min-w-0 text-xs font-semibold text-slate-600">
+                <label className="flex items-center gap-2"><input type="checkbox" checked={method.freeThreshold !== null} onChange={(e) => {
+                  const rows = [...settings.shipping_methods]; rows[index] = { ...method, freeThreshold: e.target.checked ? (method.freeThreshold ?? 250000) : null, _thresholdDraft: e.target.checked ? money(method.freeThreshold ?? 250000) : "" }; setSettings({ ...settings, shipping_methods: rows })
+                }} />Belirli tutardan sonra ücretsiz</label>
+                <div className="relative"><input className="mt-1 w-full rounded border p-2 pr-9 text-sm disabled:bg-slate-100" type="text" inputMode="decimal" disabled={method.freeThreshold === null} value={method._thresholdDraft ?? (method.freeThreshold === null ? "" : money(method.freeThreshold))} aria-label="Ücretsiz kargo alt limiti TL" placeholder="Ücretsiz kargo kapalı" onBlur={() => {
+                  const value = method._thresholdDraft === undefined ? method.freeThreshold : parseMoneyInput(method._thresholdDraft)
+                  if (value !== null) { const rows = [...settings.shipping_methods]; rows[index] = { ...method, freeThreshold: value, _thresholdDraft: money(value) }; setSettings({ ...settings, shipping_methods: rows }) }
+                }} onChange={(e) => {
                   const rows = [...settings.shipping_methods]; rows[index] = { ...method, _thresholdDraft: e.target.value }; setSettings({ ...settings, shipping_methods: rows })
-                }} />
-              </label>
+                }} /><span className="absolute right-3 top-3 text-sm text-slate-500">TL</span></div>
+                <p className="mt-1 font-normal">{(method._thresholdDraft !== undefined ? method._thresholdDraft === "" : method.freeThreshold === null) ? "Kargo ücreti tüm siparişlere eklenir." : "Bu tutar ve üzerindeki siparişlerde kargo ücreti alınmaz."}</p>
+              </div>
               <input className="rounded border p-2" value={method.estimatedDays} placeholder="2-4 iş günü" onChange={(e) => {
                 const rows = [...settings.shipping_methods]; rows[index] = { ...method, estimatedDays: e.target.value }; setSettings({ ...settings, shipping_methods: rows })
               }} />
