@@ -1,4 +1,4 @@
-import { deleteLineItem } from "@lib/data/cart"
+import { deleteLineItem } from "@lib/util/cart-feedback"
 import { Spinner, Trash } from "@lib/icons"
 import { clx } from "@modules/common/components/ui"
 import { useState } from "react"

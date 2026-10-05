@@ -37,7 +37,7 @@ const Summary = ({ cart }: SummaryProps) => {
         href={"/checkout?step=" + step}
         data-testid="checkout-button"
       >
-        <Button className="h-12 w-full bg-[#C98484] font-bold text-white hover:bg-[#d94f00]">
+        <Button className="h-12 w-full bg-[#C98484] font-bold text-white hover:bg-[#A95E5E]">
           Ödemeye Geç
         </Button>
       </LocalizedClientLink>

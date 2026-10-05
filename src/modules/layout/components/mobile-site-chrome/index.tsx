@@ -6,6 +6,8 @@ import { SellerQuestionButton } from "@components/common/SellerQuestion"
 import Image from "@components/common/SmartImage"
 import { usePathname, useRouter } from "next/navigation"
 import { AppIcon, ChevronDown, ChevronRight, Building2, Headphones, FileText } from "@lib/icons"
+import type { HttpTypes } from "@medusajs/types"
+import { useCartState } from "@lib/util/cart-state"
 import type { MobileSettings } from "@lib/content/mobile-settings"
 
 interface CategoryItem {
@@ -27,7 +29,7 @@ interface MenuSection {
   items: MenuItem[]
 }
 
-export default function MobileSiteChrome({ settings, logoUrl }: { settings: MobileSettings; logoUrl: string }) {
+export default function MobileSiteChrome({ settings, logoUrl, initialCart }: { settings: MobileSettings; logoUrl: string; initialCart?: HttpTypes.StoreCart | null }) {
   const pathname = usePathname()
   const router = useRouter()
   const [searchOpen, setSearchOpen] = useState(false)
@@ -35,7 +37,8 @@ export default function MobileSiteChrome({ settings, logoUrl }: { settings: Mobi
   const [searchQuery, setSearchQuery] = useState("")
   const [categories, setCategories] = useState<CategoryItem[]>([])
   const [categoriesLoaded, setCategoriesLoaded] = useState(false)
-  const [cartCount, setCartCount] = useState<number>(0)
+  const { cart } = useCartState(initialCart)
+  const cartCount = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0
   const inputRef = useRef<HTMLInputElement>(null)
 
   // Dynamic menus loaded from Admin database
@@ -83,38 +86,6 @@ export default function MobileSiteChrome({ settings, logoUrl }: { settings: Mobi
       [key]: !prev[key],
     }))
   }
-
-  const fetchCartCount = () => {
-    fetch(`/api/cart/count?_t=${Date.now()}`, {
-      cache: "no-store",
-      headers: { "Cache-Control": "no-cache" },
-    })
-      .then((res) => (res.ok ? res.json() : { count: 0 }))
-      .then((data) => {
-        if (typeof data?.count === "number") {
-          setCartCount(data.count)
-        }
-      })
-      .catch(() => {})
-  }
-
-  useEffect(() => {
-    fetchCartCount()
-    const handleCartUpdate = (e?: Event) => {
-      const customEvent = e as CustomEvent<{ count?: number }>
-      if (typeof customEvent?.detail?.count === "number") {
-        setCartCount(customEvent.detail.count)
-      } else {
-        fetchCartCount()
-      }
-    }
-    window.addEventListener("cart_updated", handleCartUpdate)
-    window.addEventListener("focus", handleCartUpdate)
-    return () => {
-      window.removeEventListener("cart_updated", handleCartUpdate)
-      window.removeEventListener("focus", handleCartUpdate)
-    }
-  }, [pathname])
 
   useEffect(() => {
     if (searchOpen) {

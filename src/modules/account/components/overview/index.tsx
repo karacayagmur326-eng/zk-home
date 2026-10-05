@@ -58,10 +58,18 @@ const Overview = ({ customer, orders, mobileSettings }: OverviewProps) => {
     : customer?.first_name || customer?.email?.split("@")[0] || "Değerli Müşterimiz"
   const email = customer?.email || ""
   const showRolePanel = userRole === "Admin" || userRole === "Yönetici" || userRole === "Editör"
+  const showMobileAdminPanel = userRole === "Admin" || userRole === "Yönetici"
 
   return (<>
     {mobileSettings?.enabled && <div className="-mx-4 min-h-screen bg-[#f5f6f7] pb-24 md:hidden">
       <section className="bg-white px-4 py-5"><div className="flex items-center gap-3"><span className="grid h-14 w-14 place-items-center rounded-full border-[3px] border-[#C98484] text-lg font-black text-slate-900">{userRole === "Admin" ? "A" : `${customer?.first_name?.[0] || customer?.email?.[0] || "S"}${customer?.last_name?.[0] || ""}`.toUpperCase()}</span><div><h1 className="text-lg font-black text-slate-950">{userRole === "Admin" ? "Admin" : customer?.first_name ? `${customer.first_name} ${customer.last_name || ""}` : mobileSettings.account.title}</h1><p className="text-[11px] text-slate-500">{customer?.email || mobileSettings.account.description}</p></div></div></section>
+      {showMobileAdminPanel && (
+        <LocalizedClientLink href="/admin" className="mx-3 mt-3 flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-xs font-bold text-white transition-colors hover:bg-[#A95E5E]">
+          <ShieldCheck aria-hidden="true" className="h-4 w-4" />
+          <span>Yönetim panelini aç</span>
+          <ChevronRight aria-hidden="true" className="h-4 w-4" />
+        </LocalizedClientLink>
+      )}
       <section className="m-3 flex items-center gap-3 rounded-2xl border border-rose-100 bg-rose-50 p-4"><PackageCheck className="h-6 w-6 text-[#C98484]" /><div><h2 className="text-xs font-black">{mobileSettings.account.noticeTitle}</h2><p className="mt-1 text-[10px] leading-relaxed text-slate-500">{mobileSettings.account.noticeDescription}</p></div></section>
       <div className="px-3 pb-2 pt-3"><h2 className="text-sm font-black">Hızlı İşlemler</h2></div><section className="grid grid-cols-2 gap-2.5 px-3">{mobileSettings.account.menuItems.filter((item) => item.active).map((item) => <LocalizedClientLink key={item.id} href={item.href} className="flex min-h-20 items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 text-[11px] font-extrabold shadow-sm"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-rose-50 text-[#C98484]"><AppIcon name={item.icon} className="h-5 w-5" /></span><span>{item.label}</span></LocalizedClientLink>)}</section>
       <div className="m-3 mt-5 rounded-2xl border border-slate-200 bg-white p-4"><div className="flex items-center justify-between text-xs"><span className="font-bold text-slate-500">Profil tamamlanma</span><b className="text-[#C98484]">%{profilePercent}</b></div><div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-[#C98484]" style={{ width: `${profilePercent}%` }} /></div></div>

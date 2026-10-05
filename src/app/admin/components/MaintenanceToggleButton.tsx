@@ -90,20 +90,21 @@ export default function MaintenanceToggleButton() {
       {/* ── Custom Brand Confirm Modal ── */}
       {showConfirmModal && (
         <div className="fixed inset-0 z-[9999] bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="relative w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl space-y-5 text-left animate-in zoom-in-95 duration-200">
+          <div role="dialog" aria-modal="true" aria-labelledby="maintenance-confirm-title" className="relative w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-2xl space-y-5 text-left animate-in zoom-in-95 duration-200">
             {/* Close Button */}
             <button
               type="button"
               onClick={() => setShowConfirmModal(false)}
+              aria-label="Pencereyi kapat"
               className="admin-icon-button absolute right-4 top-4"
             >
               <X className="w-5 h-5" />
             </button>
 
             {/* Icon Header */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 pr-8">
               <div
-                className={`flex h-11 w-11 items-center justify-center rounded-xl border ${
+                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border ${
                   isTurningOn
                     ? "border-rose-200 bg-rose-50 text-rose-600"
                     : "border-emerald-200 bg-emerald-50 text-emerald-700"
@@ -119,7 +120,7 @@ export default function MaintenanceToggleButton() {
                 <span className="text-[11px] font-black uppercase tracking-wider text-slate-400">
                   Sistem Yönetimi
                 </span>
-                <h3 className="text-lg font-bold text-slate-900">
+                <h3 id="maintenance-confirm-title" className="text-base sm:text-lg font-bold text-slate-900">
                   {isTurningOn ? "Siteyi Bakım Moduna Al" : "Siteyi Yayına Al"}
                 </h3>
               </div>
@@ -133,11 +134,11 @@ export default function MaintenanceToggleButton() {
             </p>
 
             {/* Modal Actions */}
-            <div className="pt-2 flex items-center justify-end gap-3">
+            <div className="pt-2 flex flex-col-reverse sm:flex-row items-stretch sm:items-center sm:justify-end gap-3">
               <button
                 type="button"
                 onClick={() => setShowConfirmModal(false)}
-                className="admin-btn admin-btn-secondary"
+                className="admin-btn admin-btn-secondary whitespace-nowrap"
               >
                 Vazgeç
               </button>
@@ -145,7 +146,7 @@ export default function MaintenanceToggleButton() {
               <button
                 type="button"
                 onClick={executeToggle}
-                className={`admin-btn ${
+                className={`admin-btn whitespace-nowrap ${
                   isTurningOn
                     ? "admin-btn-danger-solid"
                     : "admin-btn-primary"

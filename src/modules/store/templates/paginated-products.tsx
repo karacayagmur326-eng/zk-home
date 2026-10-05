@@ -57,7 +57,7 @@ export default async function PaginatedProducts({
   const isPriceFiltered = priceMin !== undefined || priceMax !== undefined
 
   const queryParams: PaginatedProductsParams = {
-    limit: isPriceFiltered ? 100 : 12,
+    limit: PRODUCT_LIMIT,
   }
 
   if (collectionId) {
@@ -101,49 +101,15 @@ export default async function PaginatedProducts({
   const {
     response: { products: rawProducts, count: rawCount },
   } = await listProductsWithSort({
-    page: isPriceFiltered ? 1 : page, // If filtering by price, fetch from page 1
+    page,
     queryParams,
     sortBy,
     countryCode,
     optionValueIds,
   })
 
-  let products = rawProducts
-  let count = rawCount
-
-  if (isPriceFiltered) {
-    products = products.filter((p) => {
-      if (!p.variants || p.variants.length === 0) return false
-      const variant = p.variants[0] as (typeof p.variants)[number] & {
-        prices?: Array<{ amount: number }>
-      }
-      let rawAmount = 0
-
-      // Attempt to get calculated or price amount
-      if (
-        variant.calculated_price &&
-        variant.calculated_price.calculated_amount
-      ) {
-        rawAmount = variant.calculated_price.calculated_amount
-      } else if (variant.prices && variant.prices.length > 0) {
-        rawAmount = variant.prices[0].amount
-      }
-
-      // Convert cents to TL
-      const amountInTL = rawAmount / 100
-
-      const minVal = priceMin ? parseFloat(priceMin) : undefined
-      const maxVal = priceMax ? parseFloat(priceMax) : undefined
-
-      if (minVal !== undefined && !isNaN(minVal) && amountInTL < minVal) return false
-      if (maxVal !== undefined && !isNaN(maxVal) && amountInTL > maxVal) return false
-
-      return true
-    })
-    count = products.length
-    // Manual pagination for filtered products
-    products = products.slice((page - 1) * PRODUCT_LIMIT, page * PRODUCT_LIMIT)
-  }
+  const products = rawProducts
+  const count = rawCount
 
   const totalPages = Math.ceil(count / PRODUCT_LIMIT)
   const hasActiveFilters = Boolean(

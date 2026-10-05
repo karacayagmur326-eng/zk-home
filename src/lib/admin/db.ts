@@ -25,7 +25,7 @@ export function getDb() {
     const configuredPoolSize = Number.parseInt(process.env.DATABASE_POOL_MAX || "", 10)
     const poolSize = Number.isFinite(configuredPoolSize) && configuredPoolSize > 0
       ? configuredPoolSize
-      : isLocal ? 10 : 1
+      : isLocal ? 10 : 3
     const connectionUrl = new URL(DATABASE_URL)
     // pg's URL SSL options otherwise override the verified TLS configuration.
     for (const key of ["sslmode", "sslcert", "sslkey", "sslrootcert"]) connectionUrl.searchParams.delete(key)
@@ -36,7 +36,7 @@ export function getDb() {
         ...(process.env.DATABASE_SSL_CA ? { ca: process.env.DATABASE_SSL_CA.replace(/\\n/g, "\n") } : {}),
       },
       // Vercel gibi serverless ortamlarda her sıcak instance kendi havuzunu açar.
-      // Serverless transaction pooler için varsayılanı tek bağlantıda tutuyoruz.
+      // Sınırlı paralel sorgular aynı sayfanın birbirini beklemesini önler.
       max: poolSize,
       idleTimeoutMillis: 20000,
       connectionTimeoutMillis: 5000,
@@ -63,8 +63,8 @@ export async function query<T = Record<string, unknown>>(
     const result = await db.query(sql, params)
     
     // Auto-invalidate memory cache on data modifications
-    const isMutation = /^\s*(INSERT|UPDATE|DELETE|ALTER|DROP|TRUNCATE)\b/i.test(sql)
-    if (isMutation) {
+    const isMutation = /\b(INSERT\s+INTO|UPDATE|DELETE\s+FROM|ALTER\s+TABLE|DROP\s+TABLE|TRUNCATE)\b/i.test(sql)
+    if (isMutation && (result.rowCount === null || result.rowCount > 0) && !/^\s*(?:INSERT\s+INTO|UPDATE|DELETE\s+FROM)\s+store_cart(?:_item)?\b/i.test(sql)) {
       clearMemoryCache()
     }
 
@@ -96,14 +96,15 @@ export async function cachedQuery<T = Record<string, unknown>>(
 }
 
 export async function withTransaction<T>(
-  work: (client: PoolClient) => Promise<T>
+  work: (client: PoolClient) => Promise<T>,
+  options: { invalidateCatalog?: boolean } = {}
 ): Promise<T> {
   const client = await getDb().connect()
   try {
     await client.query("BEGIN")
     const result = await work(client)
     await client.query("COMMIT")
-    clearMemoryCache()
+    if (options.invalidateCatalog !== false) clearMemoryCache()
     return result
   } catch (error) {
     await client.query("ROLLBACK")

@@ -1,4 +1,4 @@
-import { query } from "@lib/admin/db"
+import { query, cachedQuery } from "@lib/admin/db"
 import { ensureCommerceSchema } from "@lib/commerce/schema"
 import { cache } from "react"
 import { normalizePublicImageUrl } from "@lib/security/public-assets"
@@ -234,7 +234,8 @@ const merge = (stored: Partial<MobileSettings>): MobileSettings => ({
 export const getMobileSettings = cache(async (): Promise<MobileSettings> => {
   try {
     await ensureCommerceSchema()
-    const rows = await query<{ value: Partial<MobileSettings> }>(
+    const rows = await cachedQuery<{ value: Partial<MobileSettings> }>(
+      "mobile-experience-settings",
       "SELECT value FROM store_setting WHERE key='mobile_experience' LIMIT 1",
     )
     return merge(rows[0]?.value || {})

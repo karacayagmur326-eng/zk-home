@@ -1,7 +1,6 @@
 "use server"
 
 import { OptionValueIds } from "@lib/util/product-option-filters"
-import { sortProducts } from "@lib/util/sort-products"
 import { HttpTypes } from "@medusajs/types"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import {
@@ -11,6 +10,7 @@ import {
 
 type ProductListQueryParams = (HttpTypes.FindParams &
   HttpTypes.StoreProductListParams) & {
+  sort?: SortOptions
   options?: string[]
   option_value_id?: string | string[]
   hide_out_of_stock?: string
@@ -66,6 +66,9 @@ export const listProducts = async ({
 
   const { products, count } = await listStoreProducts({
     q: queryParams?.q,
+    sort: queryParams?.sort,
+    includeCounts: false,
+    stock: queryParams?.hide_out_of_stock === "true" ? "available" : undefined,
     status: String(queryParams?.status || "published"),
     categoryId: categorySingle || (categoryVals?.length === 1 ? categoryVals[0] : categoryVals?.[0]),
     categoryIds: categoryMultiple,
@@ -78,21 +81,8 @@ export const listProducts = async ({
     limit,
     offset,
   })
-  const filtered =
-    queryParams?.hide_out_of_stock === "true"
-      ? products.filter((product) =>
-          product.variants?.some(
-            (variant: any) =>
-              variant.inventory_quantity > 0 || variant.allow_backorder
-          )
-        )
-      : products
   return {
-    response: {
-      products: filtered as unknown as HttpTypes.StoreProduct[],
-      count:
-        queryParams?.hide_out_of_stock === "true" ? filtered.length : count,
-    },
+    response: { products: products as unknown as HttpTypes.StoreProduct[], count },
     nextPage: count > offset + limit ? page + 1 : null,
     queryParams,
   }
@@ -124,17 +114,9 @@ export const listProductsWithSort = async ({
   queryParams?: ProductListQueryParams
 }> => {
   const limit = Number(queryParams?.limit || 12)
-  const all = await listProducts({
-    pageParam: 1,
-    queryParams: { ...queryParams, limit: 500, offset: 0 },
+  return listProducts({
+    pageParam: page,
+    queryParams: { ...queryParams, limit, sort: sortBy },
     countryCode,
   })
-  const sorted = sortProducts(all.response.products, sortBy)
-  const start = Math.max(page - 1, 0) * limit
-  const paginated = sorted.slice(start, start + limit)
-  return {
-    response: { products: paginated, count: sorted.length },
-    nextPage: sorted.length > start + limit ? page + 1 : null,
-    queryParams,
-  }
 }

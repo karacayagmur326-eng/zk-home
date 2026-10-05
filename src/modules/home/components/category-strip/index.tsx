@@ -31,11 +31,6 @@ export default function CategoryStrip({
     ...menuCategories.filter((category) => trailingCategoryHandles.has(category.handle)),
   ]
 
-  // Hide only when the catalog has no active categories.
-  if (selectedCategories.length === 0) {
-    return null
-  }
-
   const checkScroll = () => {
     const el = scrollRef.current
     if (!el) return
@@ -50,6 +45,11 @@ export default function CategoryStrip({
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
   }, [selectedCategories.length])
+
+  // Hide only when the catalog has no active categories.
+  if (selectedCategories.length === 0) {
+    return null
+  }
 
   const handleScroll = (direction: "left" | "right") => {
     const el = scrollRef.current

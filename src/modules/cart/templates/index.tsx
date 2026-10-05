@@ -1,13 +1,14 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState } from "react"
+import { useCartState } from "@lib/util/cart-state"
 import FeedbackPopup from "@modules/common/components/feedback-popup"
 import { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Thumbnail from "@modules/products/components/thumbnail"
 import DiscountCode from "@modules/checkout/components/discount-code"
 import { convertToLocale } from "@lib/util/money"
-import { updateLineItem, deleteLineItem } from "@lib/data/cart"
+import { updateLineItem, deleteLineItem } from "@lib/util/cart-feedback"
 import {
   Trash,
   Plus,
@@ -24,13 +25,8 @@ import {
 } from "@lib/icons"
 import type { MobileSettings } from "@lib/content/mobile-settings"
 
-function resolvedCartError(error: any, fallback: string) {
-  const message = String(error?.message || "")
-  return /^(Bu üründen en fazla|Ürün sepetinizde|Sepet oturumunuz|Geçerli bir ürün)/.test(message) ? message : fallback
-}
-
 export default function CartTemplate({
-  cart,
+  cart: initialCart,
   customer,
   mobileSettings,
 }: {
@@ -38,15 +34,10 @@ export default function CartTemplate({
   customer: HttpTypes.StoreCustomer | null
   mobileSettings?: MobileSettings
 }) {
-  const [items, setItems] = useState<any[]>(() => cart?.items || [])
+  const { cart, pending } = useCartState(initialCart)
+  const items = cart?.items || []
   const [popupMessage, setPopupMessage] = useState("")
   const [updatingId, setUpdatingId] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (cart?.items) {
-      setItems(cart.items)
-    }
-  }, [cart?.items])
 
   const totalItemCount = items.reduce((acc, i) => acc + (Number(i.quantity) || 1), 0)
 
@@ -63,96 +54,15 @@ export default function CartTemplate({
 
   const handleUpdateQuantity = async (itemId: string, newQty: number) => {
     if (newQty < 1) return
-    const prevItems = items
-    const targetItem = items.find((i) => i.id === itemId)
-    if (!targetItem) return
-
-    // Optimistic UI update
-    const updatedItems = items.map((i) =>
-      i.id === itemId
-        ? {
-            ...i,
-            quantity: newQty,
-            total: (Number(i.unit_price) || 0) * newQty,
-          }
-        : i
-    )
-    setItems(updatedItems)
-
-    const newCount = updatedItems.reduce(
-      (acc, i) => acc + (Number(i.quantity) || 1),
-      0
-    )
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(
-        new CustomEvent("cart_updated", { detail: { count: newCount } })
-      )
-    }
-
     setUpdatingId(itemId)
-    try {
-      const res = await updateLineItem({ lineId: itemId, quantity: newQty })
-      if (!res.success) throw new Error(res.error)
-      if (res?.count !== undefined && typeof window !== "undefined") {
-        window.dispatchEvent(
-          new CustomEvent("cart_updated", { detail: { count: res.count } })
-        )
-      }
-    } catch (err: any) {
-      setItems(prevItems)
-      const rollbackCount = prevItems.reduce(
-        (acc, i) => acc + (Number(i.quantity) || 1),
-        0
-      )
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(
-          new CustomEvent("cart_updated", { detail: { count: rollbackCount } })
-        )
-      }
-      setPopupMessage(resolvedCartError(err, "Ürün adedi güncellenemedi. Sepetiniz korundu; lütfen tekrar deneyin."))
-    } finally {
-      setUpdatingId(null)
-    }
+    try { await updateLineItem({ lineId: itemId, quantity: newQty }) }
+    finally { setUpdatingId(null) }
   }
-
   const handleDeleteItem = async (itemId: string) => {
-    const prevItems = items
-    const updatedItems = items.filter((i) => i.id !== itemId)
-    setItems(updatedItems)
-
-    const newCount = updatedItems.reduce(
-      (acc, i) => acc + (Number(i.quantity) || 1),
-      0
-    )
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(
-        new CustomEvent("cart_updated", { detail: { count: newCount } })
-      )
-    }
-
     setUpdatingId(itemId)
-    try {
-      const res = await deleteLineItem(itemId)
-      if (res?.count !== undefined && typeof window !== "undefined") {
-        window.dispatchEvent(
-          new CustomEvent("cart_updated", { detail: { count: res.count } })
-        )
-      }
-    } catch (err: any) {
-      setItems(prevItems)
-      const rollbackCount = prevItems.reduce(
-        (acc, i) => acc + (Number(i.quantity) || 1),
-        0
-      )
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(
-          new CustomEvent("cart_updated", { detail: { count: rollbackCount } })
-        )
-      }
-      setPopupMessage("Ürün sepetten çıkarılamadı. Sepetiniz korundu; lütfen tekrar deneyin.")
-    } finally {
-      setUpdatingId(null)
-    }
+    try { await deleteLineItem(itemId) }
+    catch { setPopupMessage("Ürün sepetten çıkarılamadı. Sepetiniz korundu; lütfen tekrar deneyin.") }
+    finally { setUpdatingId(null) }
   }
 
   if (items.length === 0) {
@@ -205,7 +115,7 @@ export default function CartTemplate({
       </div>
       <div className="bg-white border-y border-slate-200/80 divide-y divide-slate-100">
         {items.map((item: any) => {
-          const isUpdating = updatingId === item.id;
+          const isUpdating = pending || updatingId === item.id;
           return (
             <article key={item.id} className="p-4 bg-white space-y-3">
               <div className="flex gap-3">
@@ -325,7 +235,7 @@ export default function CartTemplate({
             {/* Cart Line Items */}
             <div className="divide-y divide-slate-100">
               {items.map((item: any) => {
-                const isUpdating = updatingId === item.id
+                const isUpdating = pending || updatingId === item.id
                 const unitPriceFormatted = convertToLocale({
                   amount: item.unit_price,
                   currency_code: currencyCode,

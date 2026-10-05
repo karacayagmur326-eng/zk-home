@@ -1,10 +1,11 @@
 "use client"
 
+import type { CartPreview } from "@lib/util/cart-state"
 import { addToCart } from "@lib/util/cart-feedback"
 import { Heart, ShoppingCart, Check, Loader2 } from "@lib/icons"
 import { useToast } from "@modules/common/components/feedback"
 import clsx from "clsx"
-import { useParams, useRouter } from "next/navigation"
+import { useParams } from "next/navigation"
 import { useEffect, useState, useRef } from "react"
 
 export const FAVORITES_STORAGE_KEY = "zkhome:favorites"
@@ -15,6 +16,7 @@ export type FavoriteProduct = {
   title: string
   handle: string
   thumbnail?: string | null
+  preview?: CartPreview
   variantId?: string | null
   price?: string | null
 }
@@ -131,16 +133,17 @@ export function FavoriteButton({
 
 export function AddToCartButton({
   variantId,
+  preview,
   className,
 }: {
   variantId?: string | null
+  preview?: CartPreview
   className?: string
 }) {
   const [isAdding, setIsAdding] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const addingRef = useRef(false)
   const params = useParams()
-  const router = useRouter()
   const { toast } = useToast()
   const countryCode = (params?.countryCode as string) || "tr"
 
@@ -149,15 +152,9 @@ export function AddToCartButton({
     addingRef.current = true
     setIsAdding(true)
     try {
-      const newCount = await addToCart({ variantId, quantity: 1, countryCode })
+      const newCount = await addToCart({ variantId, quantity: 1, countryCode }, preview)
       if (newCount === null) { addingRef.current = false; return }
       setIsSuccess(true)
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(
-          new CustomEvent("cart_updated", { detail: { count: newCount } })
-        )
-      }
-      router.refresh()
       setTimeout(() => {
         setIsSuccess(false)
         addingRef.current = false
@@ -183,7 +180,7 @@ export function AddToCartButton({
         "inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-colors disabled:cursor-not-allowed",
         isSuccess
           ? "bg-emerald-600 hover:bg-emerald-700"
-          : "bg-[#C98484] hover:bg-[#d94f00] disabled:bg-gray-300",
+          : "bg-[#C98484] hover:bg-[#A95E5E] disabled:bg-gray-300",
         className,
       )}
     >

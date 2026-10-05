@@ -1,6 +1,6 @@
 "use client"
 
-import Image from "@components/common/SmartImage"
+import SliderImage from "../slider-image"
 import Link from "next/link"
 import useFadeSlider from "../use-fade-slider"
 
@@ -39,7 +39,7 @@ export default function MobileHeroSlider({ slides, prioritize = true }: { slides
             aria-label={`${idx + 1} / ${slides.length}`}
           >
             {slide.image && (
-              <Image
+              <SliderImage
                 src={slide.image}
                 alt={slide.title || "Mobil slider"}
                 fill

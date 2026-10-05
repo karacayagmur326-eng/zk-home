@@ -154,6 +154,8 @@ export type ProductFilters = {
   priceMin?: number
   priceMax?: number
   stock?: string
+  sort?: "created_at" | "price_asc" | "price_desc"
+  includeCounts?: boolean
   limit?: number
   offset?: number
 }
@@ -252,13 +254,16 @@ export async function listStoreProducts(filters: ProductFilters = {}) {
     )`)
   }
 
+  if (filters.stock === "available") {
+    where.push("EXISTS (SELECT 1 FROM store_variant sv WHERE sv.product_id=p.id AND (sv.stock>0 OR sv.allow_backorder OR NOT sv.manage_inventory))")
+  }
   const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : ""
   const countRows = await query<{ count: number }>(
     `SELECT COUNT(*)::int AS count FROM store_product p ${whereSql}`,
     params
   )
 
-  const [counts] = await query<any>(`
+  const [counts] = filters.includeCounts === false ? [] : await query<any>(`
     SELECT
       (SELECT COUNT(*)::int FROM store_product WHERE deleted_at IS NULL AND status != 'deleted') AS total,
       (SELECT COUNT(*)::int FROM store_product WHERE deleted_at IS NULL AND status = 'published') AS published_count,
@@ -271,10 +276,12 @@ export async function listStoreProducts(filters: ProductFilters = {}) {
 
   const limit = Math.min(Math.max(filters.limit || 100, 1), 500)
   const offset = Math.max(filters.offset || 0, 0)
+  const priceOrder = "(SELECT MIN(sv.price) FROM store_variant sv WHERE sv.product_id=p.id)"
+  const order = filters.sort === "price_asc" ? priceOrder + " ASC NULLS LAST, p.created_at DESC, p.id" : filters.sort === "price_desc" ? priceOrder + " DESC NULLS LAST, p.created_at DESC, p.id" : "p.created_at DESC, p.id"
   const rows = await query<any>(
     `${PRODUCT_SELECT}
      ${whereSql}
-     ORDER BY p.created_at DESC
+     ORDER BY ${order}
      LIMIT ${add(limit)} OFFSET ${add(offset)}`,
     params
   )

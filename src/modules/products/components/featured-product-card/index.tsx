@@ -68,15 +68,9 @@ export default function FeaturedProductCard({
     setIsAdding(true)
 
     try {
-      const newCount = await addToCart({ variantId, quantity: 1, countryCode })
+      const newCount = await addToCart({ variantId, quantity: 1, countryCode }, { id: product.id, title: product.title, handle: product.handle, thumbnail: product.thumbnail, unitPrice: cheapestPrice?.calculated_price_number || 0 })
       if (newCount === null) { addingRef.current = false; return }
       setIsSuccess(true)
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(
-          new CustomEvent("cart_updated", { detail: { count: newCount } })
-        )
-      }
-      router.refresh()
       setTimeout(() => {
         setIsSuccess(false)
         addingRef.current = false

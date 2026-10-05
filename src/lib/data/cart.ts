@@ -1,5 +1,6 @@
 "use server"
 
+import { cache } from "react"
 import { HttpTypes } from "@medusajs/types"
 import { query, withTransaction } from "@lib/admin/db"
 import { ensureCommerceSchema } from "@lib/commerce/schema"
@@ -260,6 +261,7 @@ async function shapeCart(id: string) {
       original_unit_price: unitPrice,
       variant_id: item.variant_id,
       product_id: item.product_id,
+      product_handle: item.handle,
       metadata: {},
       product: {
         id: item.product_id,
@@ -415,7 +417,7 @@ async function shapeCart(id: string) {
   } as unknown as HttpTypes.StoreCart
 }
 
-export async function retrieveCart(cartId?: string) {
+const retrieveCartOnce = cache(async (cartId?: string) => {
   const id = cartId || (await getCartId())
   if (!id) return null
 
@@ -435,6 +437,10 @@ export async function retrieveCart(cartId?: string) {
   }
 
   return cart
+})
+
+export async function retrieveCart(cartId?: string) {
+  return retrieveCartOnce(cartId)
 }
 
 export async function getOrSetCart(_countryCode = "tr") {
@@ -493,41 +499,33 @@ export async function addToCart({
 }) {
   if (!variantId) throw new Error("Varyant bilgisi eksik.")
   if (!Number.isInteger(quantity) || quantity < 1) return { success: false as const, error: "Geçerli bir ürün adedi seçin." }
-  const cart = await getOrSetCart(countryCode)
+  const cookieId = await getCartId()
+  const existingCart = cookieId ? await query<{ id: string }>(`SELECT id FROM store_cart WHERE id=$1 AND completed_at IS NULL`, [cookieId]) : []
+  const cart = existingCart[0] || await getOrSetCart(countryCode)
   if (!cart) throw new Error("Sepet oluşturulamadı.")
   await releaseCartInventoryReservation(cart.id)
-  const variants = await query<{ price: string; stock: number; allow_backorder: boolean; manage_inventory: boolean }>(
-    `SELECT price,stock,allow_backorder,manage_inventory FROM store_variant WHERE id=$1`,
+  await releaseExpiredInventoryReservations()
+  const result = await withTransaction(async (client) => {
+  await client.query(`SELECT id FROM store_cart WHERE id=$1 FOR UPDATE`, [cart.id])
+  const variants = await client.query<{ price: string; stock: number; allow_backorder: boolean; manage_inventory: boolean }>(
+    `SELECT v.price,v.stock,v.allow_backorder,v.manage_inventory FROM store_variant v JOIN store_product p ON p.id=v.product_id WHERE v.id=$1 AND p.status='published'`,
     [variantId]
   )
 
-  const variant = variants[0]
+  const variant = variants.rows[0]
   if (!variant) throw new Error("Ürün varyantı bulunamadı.")
-  const existing = await query<{ quantity: number; updated_at: Date | null; created_at: Date | null }>(
+  const existing = await client.query<{ quantity: number; updated_at: Date | null; created_at: Date | null }>(
     `SELECT quantity, updated_at, created_at FROM store_cart_item WHERE cart_id=$1 AND variant_id=$2`,
     [cart.id, variantId]
   )
 
-  const requestedQuantity = Number(existing[0]?.quantity || 0) + quantity
+  const requestedQuantity = Number(existing.rows[0]?.quantity || 0) + quantity
   if (variant.manage_inventory && !variant.allow_backorder && Number(variant.stock) < requestedQuantity)
     return { success: false as const, error: Number(variant.stock) > 0
       ? `Bu üründen en fazla ${Number(variant.stock)} adet ekleyebilirsiniz. Sepetinizdeki adet korundu.`
       : "Bu ürün şu anda stokta bulunmuyor. Sepetinizdeki adet korundu." }
 
-  // Double-tap debounce guard: if the same variant was updated/added in this cart within the last 800ms
-  // and request quantity is 1, treat as duplicate tap and return existing count
-  if (existing.length > 0 && quantity === 1) {
-    const lastTimestamp = existing[0].updated_at || existing[0].created_at
-    if (lastTimestamp && Date.now() - new Date(lastTimestamp).getTime() < 800) {
-      const countRes = await query<{ sum: string }>(
-        `SELECT COALESCE(SUM(quantity), 0) AS sum FROM store_cart_item WHERE cart_id=$1`,
-        [cart.id]
-      )
-      return Number(countRes[0]?.sum || 1)
-    }
-  }
-
-  await query(
+  await client.query(
     `INSERT INTO store_cart_item (id,cart_id,variant_id,quantity,unit_price)
      VALUES ($1,$2,$3,$4,$5)
      ON CONFLICT (cart_id,variant_id) DO UPDATE SET
@@ -535,13 +533,12 @@ export async function addToCart({
        unit_price=EXCLUDED.unit_price,updated_at=NOW()`,
     [createId("item"), cart.id, variantId, quantity, Number(variant.price)]
   )
-  await refreshCart()
-
-  const countRes = await query<{ sum: string }>(
-    `SELECT COALESCE(SUM(quantity), 0) AS sum FROM store_cart_item WHERE cart_id=$1`,
-    [cart.id]
-  )
-  return Number(countRes[0]?.sum || 1)
+  await client.query(`UPDATE store_cart SET updated_at=NOW() WHERE id=$1`, [cart.id])
+  return { success: true as const }
+  }, { invalidateCatalog: false })
+  if (!result.success) return result
+  const snapshot = await shapeCart(cart.id)
+  return { success: true as const, cart: snapshot, count: snapshot?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0 }
 }
 
 export async function updateLineItem({
@@ -581,12 +578,9 @@ export async function updateLineItem({
      WHERE id=$1 AND cart_id=$2`,
     [lineId, cartId, quantity]
   )
-  await refreshCart()
-  const countRes = await query<{ sum: string }>(
-    `SELECT COALESCE(SUM(quantity), 0) AS sum FROM store_cart_item WHERE cart_id=$1`,
-    [cartId]
-  ).catch(() => [{ sum: "0" }])
-  return { success: true as const, count: Number(countRes[0]?.sum || 0) }
+  await query(`UPDATE store_cart SET updated_at=NOW() WHERE id=$1`, [cartId])
+  const cart = await shapeCart(cartId)
+  return { success: true as const, cart, count: cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0 }
 }
 
 export async function deleteLineItem(lineId: string) {
@@ -597,12 +591,9 @@ export async function deleteLineItem(lineId: string) {
     lineId,
     cartId,
   ])
-  await refreshCart()
-  const countRes = await query<{ sum: string }>(
-    `SELECT COALESCE(SUM(quantity), 0) AS sum FROM store_cart_item WHERE cart_id=$1`,
-    [cartId]
-  ).catch(() => [{ sum: "0" }])
-  return { success: true as const, count: Number(countRes[0]?.sum || 0) }
+  await query(`UPDATE store_cart SET updated_at=NOW() WHERE id=$1`, [cartId])
+  const cart = await shapeCart(cartId)
+  return { success: true as const, cart, count: cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0 }
 }
 
 export async function setShippingMethod({

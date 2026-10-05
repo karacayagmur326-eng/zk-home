@@ -1,11 +1,11 @@
 "use client"
 
-import { useEffect, useMemo, useState, useTransition } from "react"
+import { useEffect, useMemo, useState, useRef, useTransition } from "react"
 import { usePathname } from "next/navigation"
 import { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import { deleteLineItem } from "@lib/data/cart"
-import { updateLineItem } from "@lib/util/cart-feedback"
+import { useCartState } from "@lib/util/cart-state"
+import { deleteLineItem, updateLineItem } from "@lib/util/cart-feedback"
 import { ShoppingCart, Trash2, ChevronRight, ChevronLeft, Loader2 } from "@lib/icons"
 import { convertToLocale } from "@lib/util/money"
 
@@ -14,15 +14,24 @@ function formatMoney(amount: number = 0) {
 }
 
 export default function DesktopCartSidebar({
-  cart,
+  cart: initialCart,
 }: {
   cart?: HttpTypes.StoreCart | null
 }) {
+  const { cart, pending } = useCartState(initialCart)
   const pathname = usePathname()
-  // Sepet ayırıcı her sayfa yüklemesinde kapalı başlar; yalnızca kullanıcı açar.
+
   const [collapsed, setCollapsed] = useState(true)
   const [updatingLineId, setUpdatingLineId] = useState<string | null>(null)
-  const [items, setItems] = useState(() => cart?.items || [])
+  const items = cart?.items || []
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const autoOpened = useRef(false)
+  const interacting = useRef(false)
+  const stopTimer = () => { if (timer.current) clearTimeout(timer.current) }
+  const scheduleClose = () => {
+    stopTimer()
+    if (autoOpened.current && !interacting.current) timer.current = setTimeout(() => setCollapsed(true), 5000)
+  }
   const [, startTransition] = useTransition()
 
   const totalItems = items.reduce((acc, item) => acc + item.quantity, 0)
@@ -32,8 +41,11 @@ export default function DesktopCartSidebar({
   )
 
   useEffect(() => {
-    setItems(cart?.items || [])
-  }, [cart?.updated_at, cart?.items])
+    const openAfterAdd = () => { autoOpened.current = true; setCollapsed(false); scheduleClose() }
+    window.addEventListener("cart_item_added", openAfterAdd)
+    return () => { window.removeEventListener("cart_item_added", openAfterAdd); stopTimer() }
+  }, [])
+  useEffect(() => { if (!pending) scheduleClose(); else stopTimer() }, [pending])
 
   // Hide on checkout / cart pages or mobile
   if (pathname?.includes("/checkout") || pathname?.includes("/sepet")) {
@@ -46,10 +58,6 @@ export default function DesktopCartSidebar({
 
   const handleUpdateQuantity = (lineId: string, currentQty: number, delta: number) => {
     const newQty = currentQty + delta
-    const previousItems = items
-    setItems((current) => newQty <= 0
-      ? current.filter((item) => item.id !== lineId)
-      : current.map((item) => item.id === lineId ? { ...item, quantity: newQty } : item))
     setUpdatingLineId(lineId)
     startTransition(async () => {
       try {
@@ -57,13 +65,9 @@ export default function DesktopCartSidebar({
           await deleteLineItem(lineId)
         } else {
           const result = await updateLineItem({ lineId, quantity: newQty })
-          if (!result.success) { setItems(previousItems); return }
-        }
-        if (typeof window !== "undefined") {
-          window.dispatchEvent(new CustomEvent("cart_updated"))
+          if (!result.success) return
         }
       } catch (err) {
-        setItems(previousItems)
         console.error(err)
       } finally {
         setUpdatingLineId(null)
@@ -72,17 +76,11 @@ export default function DesktopCartSidebar({
   }
 
   const handleDeleteItem = (lineId: string) => {
-    const previousItems = items
-    setItems((current) => current.filter((item) => item.id !== lineId))
     setUpdatingLineId(lineId)
     startTransition(async () => {
       try {
         await deleteLineItem(lineId)
-        if (typeof window !== "undefined") {
-          window.dispatchEvent(new CustomEvent("cart_updated"))
-        }
       } catch (err) {
-        setItems(previousItems)
         console.error(err)
       } finally {
         setUpdatingLineId(null)
@@ -96,8 +94,8 @@ export default function DesktopCartSidebar({
       <div className="hidden xl:block fixed right-0 top-1/3 z-[95] font-sans">
         <button
           type="button"
-          onClick={() => setCollapsed(false)}
-          className="flex items-center gap-2 rounded-l-2xl bg-[#C98484] text-white px-3 py-3 shadow-xl hover:bg-rose-600 transition-all cursor-pointer border-y border-l border-rose-400"
+          onClick={() => { autoOpened.current = false; setCollapsed(false); stopTimer() }}
+          className="flex items-center gap-2 rounded-l-2xl bg-[#C98484] text-white px-3 py-3 shadow-xl hover:bg-[#A95E5E] transition-all cursor-pointer border-y border-l border-rose-400"
           title="Sepet Panelini Aç"
         >
           <ChevronLeft className="w-4 h-4 animate-pulse" />
@@ -111,14 +109,14 @@ export default function DesktopCartSidebar({
   }
 
   return (
-    <aside className="hidden xl:flex fixed right-0 top-0 bottom-0 w-[240px] bg-white border-l border-slate-200/90 shadow-2xl z-[95] flex-col justify-between font-sans animate-in slide-in-from-right duration-200">
+    <aside aria-label="Sepet paneli" onMouseEnter={() => { interacting.current = true; stopTimer() }} onMouseLeave={() => { interacting.current = false; scheduleClose() }} onFocus={() => { interacting.current = true; stopTimer() }} onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) { interacting.current = false; scheduleClose() } }} className="hidden xl:flex fixed right-0 top-0 bottom-0 w-[240px] bg-white border-l border-slate-200/90 shadow-2xl z-[95] flex-col justify-between font-sans animate-in slide-in-from-right duration-200">
       {/* ── TOP HEADER SECTION (Trendyol Style Buttons & Subtotal) ── */}
       <div className="p-3 border-b border-slate-100 bg-slate-50/50 space-y-2.5 shrink-0">
         {/* Collapse / Close Control Row */}
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-black uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
             <ShoppingCart className="w-3.5 h-3.5 text-[#C98484]" />
-            <span>Sepet Ayrıcı ({totalItems})</span>
+            <span>Sepetiniz ({totalItems})</span>
           </span>
           <button
             type="button"
@@ -162,7 +160,7 @@ export default function DesktopCartSidebar({
       <div className="flex-1 overflow-y-auto p-2.5 space-y-2.5 no-scrollbar">
         <div className="flex flex-col gap-2">
           {items.map((item) => {
-            const isUpdating = updatingLineId === item.id
+            const isUpdating = pending || updatingLineId === item.id
             const itemPrice = item.unit_price * item.quantity
 
             return (
@@ -227,6 +225,7 @@ export default function DesktopCartSidebar({
                 <button
                   type="button"
                   onClick={() => handleDeleteItem(item.id)}
+                  disabled={isUpdating}
                   className="absolute top-1.5 right-1.5 z-10 w-5 h-5 rounded-full bg-slate-100 hover:bg-red-50 text-slate-400 hover:text-red-500 flex items-center justify-center transition-colors cursor-pointer"
                   title="Kaldır"
                 >

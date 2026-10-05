@@ -4,8 +4,8 @@ import { Fragment, useRef, useState, useTransition } from "react"
 import { Transition } from "@headlessui/react"
 import { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import { deleteLineItem } from "@lib/data/cart"
-import { updateLineItem } from "@lib/util/cart-feedback"
+import { useCartState } from "@lib/util/cart-state"
+import { deleteLineItem, updateLineItem } from "@lib/util/cart-feedback"
 import { convertToLocale } from "@lib/util/money"
 import {
   ShoppingCart,
@@ -23,10 +23,11 @@ function formatMoney(amount: number = 0) {
 }
 
 const CartDropdown = ({
-  cart: cartState,
+  cart: initialCart,
 }: {
   cart?: HttpTypes.StoreCart | null
 }) => {
+  const { cart: cartState, pending } = useCartState(initialCart)
   const [cartDropdownOpen, setCartDropdownOpen] = useState(false)
   const [updatingLineId, setUpdatingLineId] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
@@ -52,9 +53,6 @@ const CartDropdown = ({
           const result = await updateLineItem({ lineId, quantity: newQty })
           if (!result.success) return
         }
-        if (typeof window !== "undefined") {
-          window.dispatchEvent(new CustomEvent("cart_updated"))
-        }
       } catch (err) {
         console.error("Cart update error:", err)
       } finally {
@@ -68,9 +66,6 @@ const CartDropdown = ({
     startTransition(async () => {
       try {
         await deleteLineItem(lineId)
-        if (typeof window !== "undefined") {
-          window.dispatchEvent(new CustomEvent("cart_updated"))
-        }
       } catch (err) {
         console.error("Cart delete error:", err)
       } finally {
@@ -168,7 +163,7 @@ const CartDropdown = ({
                     return (a.created_at ?? "") > (b.created_at ?? "") ? -1 : 1
                   })
                   .map((item) => {
-                    const isUpdating = updatingLineId === item.id
+                    const isUpdating = pending || updatingLineId === item.id
                     const variantTitle = item.variant?.title || "Standart"
 
                     return (
@@ -278,7 +273,7 @@ const CartDropdown = ({
                       Ara Toplam
                     </span>
                     <span className="block text-[10px] font-medium text-slate-500">
-                      Kargo ve vergiler ödeme adımında hesaplanır.
+                      Kargo ödeme adımında hesaplanır.
                     </span>
                   </div>
                 </div>

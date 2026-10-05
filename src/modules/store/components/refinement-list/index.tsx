@@ -717,7 +717,7 @@ const RefinementList = ({
               <button
                 type="button"
                 onClick={applyPriceFilter}
-                className="w-full rounded-md bg-[#C98484] px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-[#d94f00]"
+                className="w-full rounded-md bg-[#C98484] px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-[#A95E5E]"
               >
                 Fiyatı Uygula
               </button>

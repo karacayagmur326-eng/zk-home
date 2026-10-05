@@ -188,7 +188,7 @@ export default function ContactForm({ kvkkUrl = "/kvkk" }: { kvkkUrl?: string })
         <button
           type="submit"
           disabled={status === "sending"}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#C98484] px-8 py-3.5 text-xs font-black text-white shadow-lg shadow-rose-500/25 transition-all hover:bg-[#d94f00] hover:shadow-rose-500/35 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#C98484] px-8 py-3.5 text-xs font-black text-white shadow-lg shadow-rose-500/25 transition-all hover:bg-[#A95E5E] hover:shadow-rose-500/35 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
         >
           {status === "sending" ? (
             <>

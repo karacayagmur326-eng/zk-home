@@ -145,6 +145,7 @@ export default function ProductPreview({
           )}
           <AddToCartButton
             variantId={purchasableVariant?.id}
+            preview={{ id: product.id, title: product.title, handle: product.handle, thumbnail: product.thumbnail, unitPrice: purchasableVariant?.calculated_price?.calculated_amount || 0 }}
             className="w-full"
           />
         </div>
@@ -213,6 +214,7 @@ export default function ProductPreview({
           )}
           <AddToCartButton
             variantId={purchasableVariant?.id}
+            preview={{ id: product.id, title: product.title, handle: product.handle, thumbnail: product.thumbnail, unitPrice: purchasableVariant?.calculated_price?.calculated_amount || 0 }}
             className="w-full !rounded-lg !px-2 !py-2 !text-[11px] !gap-1"
           />
         </div>

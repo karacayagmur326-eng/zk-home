@@ -81,11 +81,6 @@ export default function FavoritesTemplate({ mobileSettings }: { mobileSettings?:
           countryCode: "tr",
         })
         if (newCount === null) return
-        if (typeof window !== "undefined") {
-          window.dispatchEvent(
-            new CustomEvent("cart_updated", { detail: { count: newCount } })
-          )
-        }
       }
       toast({
         title: "Sepete eklendi",

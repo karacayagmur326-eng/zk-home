@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
-import Image from "@components/common/SmartImage"
+import SliderImage from "../slider-image"
 import useFadeSlider from "../use-fade-slider"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { AppIcon, ArrowLeft, ArrowRight, Pause, Play } from "@lib/icons"
@@ -768,7 +768,7 @@ export default function HeroSlider({
                 {slider.image_url && (
                   <div className={slider.image_url === EDITORIAL_HERO_IMAGE ? "absolute inset-0 z-[1] overflow-hidden pointer-events-none bg-[linear-gradient(180deg,#d1c3b6,#c3b5a7)]" : "absolute inset-0 z-[1] flex items-center justify-center content-container overflow-hidden pointer-events-none"}>
                     <div className={slider.image_url === EDITORIAL_HERO_IMAGE ? "absolute inset-y-0 right-0 w-full min-[1900px]:w-[1860px]" : "absolute inset-0"}>
-                    <Image
+                    <SliderImage
                       src={slider.image_url}
                       alt=""
                       fill
@@ -777,7 +777,7 @@ export default function HeroSlider({
                       unoptimized={slider.image_url === EDITORIAL_HERO_IMAGE}
                       priority={index === 0}
                       fetchPriority={index === 0 ? "high" : "auto"}
-                      className={slider.image_url === EDITORIAL_HERO_IMAGE ? "object-cover object-top min-[1900px]:object-[center_20%] zkhome-panorama-img opacity-100" : "object-contain object-center transition-transform [transition-duration:12s] hover:scale-102 mobile-hero-img opacity-100"}
+                      className={slider.image_url === EDITORIAL_HERO_IMAGE ? "object-cover object-top min-[1900px]:object-[center_20%] zkhome-panorama-img" : "object-contain object-center mobile-hero-img"}
                     />
                     </div>
                   </div>

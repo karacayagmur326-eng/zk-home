@@ -164,7 +164,7 @@ export default function ChatbotAdminPage() {
           <h2 className="text-xl font-black text-slate-900">ZK Home Asistan & Canlı İletişim</h2>
           <p className="mt-1 text-xs font-medium text-slate-500">Hazır yanıtları, ZK Home Asistanı ve WhatsApp kanalını tek merkezden yönetin.</p>
         </div>
-        <button onClick={save} disabled={saving} className="inline-flex items-center gap-2 rounded-xl bg-[#C98484] px-5 py-3 text-xs font-extrabold text-white shadow-lg shadow-rose-100 transition hover:bg-[#d94f00] disabled:opacity-50">
+        <button onClick={save} disabled={saving} className="inline-flex items-center gap-2 rounded-xl bg-[#C98484] px-5 py-3 text-xs font-extrabold text-white shadow-lg shadow-rose-100 transition hover:bg-[#A95E5E] disabled:opacity-50">
           <Save className="h-4 w-4" /> {saving ? "Kaydediliyor…" : "Ayarları Kaydet"}
         </button>
       </div>

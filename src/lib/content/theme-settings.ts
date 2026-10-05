@@ -1,13 +1,13 @@
 import "server-only"
 
 import { cache } from "react"
-import { query } from "@lib/admin/db"
+import { cachedQuery } from "@lib/admin/db"
 import { normalizePublicImageUrl } from "@lib/security/public-assets"
 
 // Deduplicate metadata, root layout, storefront shell and navigation reads
 // that happen during the same server render.
 export const getThemeSettings = cache(async () =>
-  query<any>("SELECT * FROM theme_settings WHERE id = 1")
+  cachedQuery<any>("theme-settings", "SELECT * FROM theme_settings WHERE id = 1", [], 60)
     .then((rows) => {
       const settings = rows[0]
       if (!settings) return null

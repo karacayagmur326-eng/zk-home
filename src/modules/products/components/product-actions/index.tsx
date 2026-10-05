@@ -116,15 +116,9 @@ export default function ProductActions({
         variantId: selectedVariant.id,
         quantity: quantity,
         countryCode,
-      })
+      }, { id: product.id, title: product.title, handle: product.handle, thumbnail: product.thumbnail, unitPrice: selectedVariant.calculated_price?.calculated_amount || 0 })
       if (newCount === null) { addingRef.current = false; return }
       setIsSuccess(true)
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(
-          new CustomEvent("cart_updated", { detail: { count: newCount } })
-        )
-      }
-      router.refresh()
       setTimeout(() => {
         setIsSuccess(false)
         addingRef.current = false
@@ -145,13 +139,8 @@ export default function ProductActions({
         variantId: selectedVariant.id,
         quantity: quantity,
         countryCode,
-      })
+      }, { id: product.id, title: product.title, handle: product.handle, thumbnail: product.thumbnail, unitPrice: selectedVariant.calculated_price?.calculated_amount || 0 })
       if (newCount === null) { addingRef.current = false; return }
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(
-          new CustomEvent("cart_updated", { detail: { count: newCount } })
-        )
-      }
       router.push(`/sepet`)
     } catch {
       addingRef.current = false

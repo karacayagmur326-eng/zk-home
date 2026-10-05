@@ -8,8 +8,8 @@
   --admin-text: #172033;
   --admin-muted: #697386;
   --admin-primary: #c98484;
-  --admin-primary-hover: #d94f00;
-  --admin-primary-soft: #fff4ec;
+  --admin-primary-hover: #a95e5e;
+  --admin-primary-soft: #fbf3f3;
   --admin-success: #07884a;
   --admin-success-soft: #ecfdf3;
   --admin-warning: #b54708;
@@ -964,7 +964,7 @@ tr:hover .admin-row-actions {
     display: none;
   }
 
-  .admin-page-actions .admin-btn {
+  .admin-page-actions > .admin-btn {
     width: 34px;
     min-width: 34px;
     min-height: 34px;

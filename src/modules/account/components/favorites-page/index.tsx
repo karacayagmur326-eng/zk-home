@@ -179,7 +179,7 @@ export default function FavoritesPage() {
             </p>
             <LocalizedClientLink
               href="/magaza"
-              className="mt-6 inline-flex rounded-lg bg-[#C98484] px-5 py-3 text-sm font-bold text-white hover:bg-[#d94f00]"
+              className="mt-6 inline-flex rounded-lg bg-[#C98484] px-5 py-3 text-sm font-bold text-white hover:bg-[#A95E5E]"
             >
               Ürünleri İncele
             </LocalizedClientLink>

@@ -1,4 +1,4 @@
-import { query } from "@lib/admin/db"
+import { query, cachedQuery } from "@lib/admin/db"
 import { ensureCommerceSchema } from "./schema"
 
 export type ShippingMethodSetting = {
@@ -229,7 +229,8 @@ export const defaultCommerceSettings: CommerceSettings = {
 
 export async function getCommerceSettings(): Promise<CommerceSettings> {
   await ensureCommerceSchema()
-  const rows = await query<{ value: Partial<CommerceSettings> }>(
+  const rows = await cachedQuery<{ value: Partial<CommerceSettings> }>(
+    "commerce-settings",
     "SELECT value FROM store_setting WHERE key='commerce' LIMIT 1"
   )
   const stored = rows[0]?.value || {}
