@@ -16,6 +16,7 @@ import {
   Tag,
   Plus,
   Minus,
+  Trash2,
 } from "@lib/icons"
 
 
@@ -40,6 +41,13 @@ export default function CheckoutSummary({
   const discountTotal = cart?.discount_total || 0
   const shippingTotal = cart?.shipping_total || 0
   const total = cart?.total || 0
+
+  if (!items.length) return <div data-testid="checkout-summary" className="rounded-none border-y border-slate-200 bg-white p-6 text-slate-900 sm:rounded-3xl sm:border sm:p-7 sm:shadow-soft" aria-busy={pending}>
+    <h2 className="text-lg font-bold">Sepetiniz boş</h2>
+    <p className="mt-2 text-sm text-slate-500">Alışverişe devam ederek sepetinize ürün ekleyebilirsiniz.</p>
+    <LocalizedClientLink href="/magaza" className="mt-5 inline-flex rounded-xl bg-[#C98484] px-5 py-3 text-sm font-bold text-white hover:bg-[#A95E5E]">Alışverişe devam et</LocalizedClientLink>
+    {quantityError && <p role="alert" className="mt-3 text-xs text-[#A95E5E]">{quantityError}</p>}
+  </div>
 
   return (
     <div className="space-y-4 font-sans text-slate-900" data-testid="checkout-summary">
@@ -149,6 +157,7 @@ export default function CheckoutSummary({
                     </div>
                     <span className="font-extrabold text-sm text-[#A95E5E]">{itemPriceFormatted}</span>
                   </div>
+                  <button type="button" aria-label={`${item.title || item.product_title} ürününü sepetten sil`} disabled={pending} onClick={() => changeQuantity(item.id, 0)} className="mt-2 inline-flex min-h-9 items-center gap-1.5 rounded-lg px-2 text-xs font-semibold text-[#A95E5E] hover:bg-[#FCF7F6] disabled:opacity-30"><Trash2 className="h-4 w-4" />Sil</button>
                 </div>
               </div>
             )
