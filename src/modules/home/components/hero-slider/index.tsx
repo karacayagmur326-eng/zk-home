@@ -677,8 +677,8 @@ export default function HeroSlider({
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .zkhome-slider-motion,
-          .zkhome-slider-motion * {
+          html:not([data-site-motion="on"] ) .zkhome-slider-motion,
+          html:not([data-site-motion="on"] ) .zkhome-slider-motion * {
             animation-duration: 0.01ms !important;
             animation-iteration-count: 1 !important;
             scroll-behavior: auto !important;
