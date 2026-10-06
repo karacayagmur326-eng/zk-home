@@ -315,6 +315,8 @@ function TypographySelectors({
 
 
 export default function SlidersPage() {
+  const previewRef = useRef<HTMLDivElement>(null)
+  const [previewHeight, setPreviewHeight] = useState(0)
   const router = useRouter()
   const [sliders, setSliders] = useState<any[]>([])
   const [categories, setCategories] = useState<any[]>([])
@@ -322,6 +324,24 @@ export default function SlidersPage() {
   const [pages, setPages] = useState<Array<{ title: string; url: string }>>(SYSTEM_PAGE_OPTIONS)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  useEffect(() => {
+    const element = previewRef.current
+    const parent = element?.parentElement
+    const child = element?.firstElementChild as HTMLElement | null
+    if (!element || !parent || !child) return
+    const resize = () => {
+      const height = child.offsetHeight
+      const scale = parent.clientWidth / 1440
+      element.style.transform = `scale(${scale})`
+      parent.style.height = `${height * scale}px`
+      setPreviewHeight(height)
+    }
+    const observer = new ResizeObserver(resize)
+    observer.observe(parent)
+    observer.observe(child)
+    resize()
+    return () => observer.disconnect()
+  }, [loading])
   const [saving, setSaving] = useState(false)
   const [activeColorPicker, setActiveColorPicker] = useState<string | null>(null)
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null)
@@ -941,22 +961,13 @@ export default function SlidersPage() {
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
                     <span className="text-xs font-black uppercase tracking-wider text-gray-800">Canlı Önizleme</span>
                   </div>
-                  <span className="text-[10px] font-bold text-gray-400">1440x720 Scaled</span>
+                  <span className="text-[10px] font-bold text-gray-400">1440 × {previewHeight || "…"} px · Ölçekli önizleme</span>
                 </div>
 
-                <div className="relative w-full overflow-hidden rounded-xl border border-gray-200 bg-gray-900 shadow-inner min-h-[220px]">
+                <div className="relative w-full overflow-hidden rounded-xl border border-gray-200 bg-gray-900 shadow-inner">
                   <div
                     style={{ width: "1440px", transformOrigin: "top left", pointerEvents: "none" }}
-                    ref={(element) => {
-                      if (!element) return
-                      const parent = element.parentElement
-                      if (!parent) return
-                      const scale = parent.offsetWidth / 1440
-                      element.style.transform = `scale(${scale})`
-                      const child = element.firstElementChild as HTMLElement | null
-                      const height = child ? (child.offsetHeight || child.scrollHeight || 720) : 720
-                      parent.style.height = `${height * scale}px`
-                    }}
+                    ref={previewRef}
                   >
                     <HeroSlider
                       initialSliders={[{

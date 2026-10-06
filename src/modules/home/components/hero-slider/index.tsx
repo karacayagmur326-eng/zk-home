@@ -665,8 +665,8 @@ export default function HeroSlider({
 
         @media (min-width: 640px) {
           .mobile-hero-img {
-            mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
-            -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+            mask-image: none;
+            -webkit-mask-image: none;
           }
         }
         @media (min-width: 1900px) {
@@ -766,25 +766,26 @@ export default function HeroSlider({
                 }
               >
                 {slider.image_url && (
-                  <div className={slider.image_url === EDITORIAL_HERO_IMAGE ? "absolute inset-0 z-[1] overflow-hidden pointer-events-none bg-[linear-gradient(180deg,#d1c3b6,#c3b5a7)]" : "absolute inset-0 z-[1] flex items-center justify-center content-container overflow-hidden pointer-events-none"}>
+                  <div className={slider.image_url === EDITORIAL_HERO_IMAGE ? "absolute inset-0 z-[1] overflow-hidden pointer-events-none bg-[linear-gradient(180deg,#d1c3b6,#c3b5a7)]" : "absolute inset-0 z-[1] overflow-hidden pointer-events-none"}>
                     <div className={slider.image_url === EDITORIAL_HERO_IMAGE ? "absolute inset-y-0 right-0 w-full min-[1900px]:w-[1860px]" : "absolute inset-0"}>
                     <SliderImage
                       src={slider.image_url}
                       alt=""
                       fill
-                      sizes={slider.image_url === EDITORIAL_HERO_IMAGE ? "100vw" : "(max-width: 640px) 100vw, (max-width: 1200px) 90vw, 1200px"}
+                      sizes={slider.image_url === EDITORIAL_HERO_IMAGE ? "100vw" : "100vw"}
                       quality={75}
                       unoptimized={slider.image_url === EDITORIAL_HERO_IMAGE}
                       priority={index === 0}
                       fetchPriority={index === 0 ? "high" : "auto"}
-                      className={slider.image_url === EDITORIAL_HERO_IMAGE ? "object-cover object-top min-[1900px]:object-[center_20%] zkhome-panorama-img" : "object-contain object-center mobile-hero-img"}
+                      className={slider.image_url === EDITORIAL_HERO_IMAGE ? "object-cover object-top min-[1900px]:object-[center_20%] zkhome-panorama-img" : "object-contain object-right mobile-hero-img"}
                     />
                     </div>
                   </div>
                 )}
-                {/* Mobile Gradient Overlay for text readability */}
+                {/* Desktop text readability; mobile keeps the photo unobstructed. */}
                 <div
-                  className="absolute inset-0 z-10 bg-gradient-to-t sm:hidden pointer-events-none from-white via-white/90 to-white/10"
+                  style={{ background: `linear-gradient(90deg, ${slider.bg_color || "#fffdfc"} 0%, transparent 65%)` }}
+                  className="zkhome-desktop-gradient absolute inset-0 z-10 hidden md:block pointer-events-none"
                 />
                 <div className="absolute inset-0 bg-black/5 dark:bg-black/10 z-11 pointer-events-none" />
 
