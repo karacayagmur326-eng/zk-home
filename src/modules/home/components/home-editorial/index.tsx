@@ -6,7 +6,6 @@ import type { EditorialCard, HomeEditorialContent } from "@lib/content/home-edit
 import FeaturedProductCard from "@modules/products/components/featured-product-card"
 import EditorialNewsletter from "@modules/home/components/editorial-newsletter"
 import HomeMotion from "@modules/home/components/home-motion"
-import CollectionCarousel from "../collection-carousel"
 
 export type HomeArticle = {
   id: string
@@ -50,7 +49,7 @@ export default function HomeEditorial({
     <div className="content-container home-editorial-container space-y-11 pt-9 sm:space-y-14 sm:pt-12">
       {content.collections_active && activeCards(content.collection_cards).length > 0 && <section aria-label={content.collections_title}>
         <SectionIntro title={content.collections_title} description={content.collections_description} href={content.collections_link_href} discover />
-        <CollectionCarousel count={activeCards(content.collection_cards).length}>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {activeCards(content.collection_cards).map((card) => <Link key={card.id} href={card.href} className="group overflow-hidden rounded-[18px] border border-[#eee9e5] bg-[#fbf8f5] transition-shadow hover:shadow-[0_16px_36px_rgba(102,74,65,0.12)]">
             <div className="relative aspect-[16/9] overflow-hidden bg-[#f1ebe6]">
               {card.image && <Image src={card.image} alt={card.title} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.035]" />}
@@ -60,11 +59,11 @@ export default function HomeEditorial({
               <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-[#ad6a6d] shadow-sm transition-colors group-hover:bg-[#C98484] group-hover:text-white"><ArrowRight className="h-4 w-4" /></span>
             </div>
           </Link>)}
-        </CollectionCarousel>
+        </div>
       </section>}
 
       {content.highlights_active && (products.length > 0 || activeCards(content.highlight_cards).length > 0) && <section aria-label={content.highlights_title}>
-        <SectionIntro title={products.length > 0 ? "Öne Çıkan Ürünler" : content.highlights_title} description={content.highlights_description} href="/magaza" linkText="Tüm Ürünleri Gör" />
+        <SectionIntro title={products.length > 0 ? "Öne Çıkan Ürünler" : content.highlights_title} description={content.highlights_description} href="/magaza" discover />
         {products.length > 0 ? <div className="home-featured-grid grid gap-2 sm:gap-4">
           {products.slice(0, 9).map((product, index) => <div key={product.id} data-two={index < Math.floor(Math.min(6, products.length) / 2) * 2} data-three={index < Math.floor(Math.min(9, products.length) / 3) * 3} data-desktop={index < Math.floor(Math.min(5, products.length) / 5) * 5} className="rounded-[18px] border border-[#eee9e5] bg-white p-1 sm:p-2 shadow-sm"><FeaturedProductCard product={product} region={region} showSummary /></div>)}
         </div> : <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
