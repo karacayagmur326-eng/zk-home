@@ -115,7 +115,7 @@ const ImageGallery = ({ images, productTitle, discountBadge, product }: ImageGal
 
       {/* ── MAIN IMAGE STAGE (White Stage with Faint Contour Line) ── */}
       <div
-        className="relative flex-1 w-full min-w-0 aspect-square sm:aspect-auto sm:min-h-[470px] !border-0 !rounded-none !bg-transparent !shadow-none overflow-hidden flex items-center justify-center p-3 sm:p-6 group cursor-zoom-in"
+        className="relative flex-1 w-full min-w-0 aspect-square sm:aspect-auto sm:min-h-[540px] !border-0 !rounded-none !bg-transparent !shadow-none overflow-hidden flex items-center justify-center p-1 sm:p-2 group cursor-zoom-in"
         style={{ border: 0, borderRadius: 0, background: "transparent", boxShadow: "none" }}
         onClick={() => setIsLightboxOpen(true)}
         onTouchStart={handleTouchStart}
@@ -156,8 +156,8 @@ const ImageGallery = ({ images, productTitle, discountBadge, product }: ImageGal
           fill
           unoptimized
           priority
-          className="object-contain p-3 group-hover:scale-[1.03] transition-transform duration-300"
-          sizes="(max-width: 768px) 100vw, 520px"
+          className="object-contain p-1 group-hover:scale-[1.03] transition-transform duration-300"
+          sizes="(max-width: 768px) 100vw, 640px"
         />
 
         {/* Mobile: Prev/Next arrows overlay */}
@@ -226,19 +226,19 @@ const ImageGallery = ({ images, productTitle, discountBadge, product }: ImageGal
       {/* ── COMPACT LIGHTBOX MODAL ── */}
       {isLightboxOpen && (
         <div
-          className="fixed inset-0 z-[999999] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 animate-in fade-in select-none"
+          role="dialog" aria-modal="true" aria-label={`${productTitle} görselleri`} className="fixed inset-0 z-[999999] bg-[#302B2A]/70 backdrop-blur-sm flex items-center justify-center p-2 sm:p-5 animate-in fade-in select-none"
           onClick={() => setIsLightboxOpen(false)}
         >
-          {/* Centered Modal Card */}
+          {/* Large, warm-toned image viewer */}
           <div
-            className="relative w-full max-w-3xl bg-slate-900/95 border border-slate-800 rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col items-center justify-center"
+            className="relative w-full max-w-[1120px] max-h-[94dvh] bg-[#FBF7F4] border border-[#EADBD4] rounded-2xl sm:rounded-3xl p-2 sm:p-3 shadow-2xl flex flex-col items-center justify-center"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Top-Right Close Button */}
             <button
               type="button"
               onClick={() => setIsLightboxOpen(false)}
-              className="absolute top-3 right-3 sm:top-4 sm:right-4 z-30 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/10 hover:bg-white text-white hover:text-slate-900 flex items-center justify-center transition-all cursor-pointer shadow-lg active:scale-95"
+              className="absolute top-3 right-3 sm:top-4 sm:right-4 z-30 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/95 hover:bg-[#F4DED6] text-[#8B4449] hover:text-[#8B4449] flex items-center justify-center transition-all cursor-pointer shadow-lg active:scale-95"
               aria-label="Kapat"
             >
               <X className="w-5 h-5 stroke-[2.5]" />
@@ -246,7 +246,7 @@ const ImageGallery = ({ images, productTitle, discountBadge, product }: ImageGal
 
             {/* Main Lightbox Image Stage */}
             <div
-              className="relative w-full flex items-center justify-center min-h-[280px] max-h-[65vh] py-2"
+              className="relative w-full flex items-center justify-center min-h-0 py-0"
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
@@ -259,14 +259,14 @@ const ImageGallery = ({ images, productTitle, discountBadge, product }: ImageGal
                     e.stopPropagation()
                     handlePrevImage()
                   }}
-                  className="absolute left-1 sm:left-2 z-30 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/20 hover:bg-white text-white hover:text-slate-900 flex items-center justify-center transition-all backdrop-blur-xs cursor-pointer shadow-lg active:scale-95"
+                  className="absolute left-1 sm:left-2 z-30 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/95 hover:bg-[#F4DED6] text-[#8B4449] hover:text-[#8B4449] flex items-center justify-center transition-all backdrop-blur-xs cursor-pointer shadow-lg active:scale-95"
                 >
                   <ChevronLeft className="w-6 h-6 stroke-[2.5]" />
                 </button>
               )}
 
               {/* Main Enlarged Image */}
-              <div className="relative w-full h-[50vh] sm:h-[60vh] max-h-[600px]">
+              <div className="relative w-full h-[72vh] h-[72dvh] sm:h-[78dvh] max-h-[900px]">
                 <Image
                   src={safeUrl(mainImage.url)}
                   alt={`${productTitle} büyük görünüm`}
@@ -285,7 +285,7 @@ const ImageGallery = ({ images, productTitle, discountBadge, product }: ImageGal
                     e.stopPropagation()
                     handleNextImage()
                   }}
-                  className="absolute right-1 sm:right-2 z-30 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/20 hover:bg-white text-white hover:text-slate-900 flex items-center justify-center transition-all backdrop-blur-xs cursor-pointer shadow-lg active:scale-95"
+                  className="absolute right-1 sm:right-2 z-30 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/95 hover:bg-[#F4DED6] text-[#8B4449] hover:text-[#8B4449] flex items-center justify-center transition-all backdrop-blur-xs cursor-pointer shadow-lg active:scale-95"
                 >
                   <ChevronRight className="w-6 h-6 stroke-[2.5]" />
                 </button>
