@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { revalidatePath } from "next/cache"
 
 import { getAdminSession } from "@lib/admin/auth"
 import { shippingRangesError } from "@lib/commerce/shipping"
@@ -161,6 +162,7 @@ export async function PUT(req: NextRequest) {
     },
   }
   const saved = await saveCommerceSettings(settings)
+  revalidatePath("/", "layout")
   return NextResponse.json({
     success: true,
     settings: saved,

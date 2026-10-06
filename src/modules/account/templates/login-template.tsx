@@ -52,7 +52,7 @@ const LoginTemplate = () => {
               <div>
                 <h4 className="text-xs font-bold text-white">Hızlı & Güvenli Teslimat</h4>
                 <p className="text-[11px] text-slate-400 font-medium leading-snug">
-                  2.500 TL üzeri tüm siparişlerde ücretsiz kargo avantajı.
+                  Kargo ücreti sepet tutarınıza göre otomatik hesaplanır.
                 </p>
               </div>
             </div>

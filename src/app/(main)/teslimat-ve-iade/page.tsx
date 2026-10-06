@@ -1,6 +1,10 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { getBaseURL } from "@lib/util/env"
+import { getCommerceSettings } from "@lib/commerce/settings"
+import { convertToLocale } from "@lib/util/money"
+
+export const dynamic = "force-dynamic"
 
 export const metadata: Metadata = {
   title: "Teslimat, İptal ve İade Koşulları",
@@ -16,7 +20,10 @@ const topics = [
   { title: "İade gönderimi ve ücret iadesi", body: "İade kargo bilgilerini size bildiririz. Belirttiğimiz taşıyıcıyla yapılan iade gönderiminde kargo ücreti ödemezsiniz. Hasarlı veya ayıplı ürünlerde durum değerlendirilerek ürünün geri gönderilmesine gerek olmadan da çözüm sunulabilir. Cayma hakkına ilişkin ücret iadesi yürürlükteki mevzuata uygun süre ve yöntemle yapılır." },
 ]
 
-export default function DeliveryAndReturnsPage() {
+export default async function DeliveryAndReturnsPage() {
+  const settings = await getCommerceSettings()
+  const shippingRanges = [...(settings.shipping_ranges || [])].sort((a, b) => a.min - b.min)
+  const money = (amount: number) => convertToLocale({ amount, currency_code: "TRY" })
   return (
     <main className="min-h-screen bg-[#fbf8f7] pb-20">
       <section className="border-b border-rose-100 bg-white py-16 sm:py-20"><div className="content-container max-w-5xl">
@@ -35,11 +42,11 @@ export default function DeliveryAndReturnsPage() {
           <div className="rounded-2xl border border-rose-100 bg-white p-7 shadow-sm">
             <h2 className="text-xl font-bold text-slate-900">Kargo ücretleri</h2>
             <ul className="mt-5 space-y-3 text-sm text-slate-700">
-              <li className="flex justify-between border-b border-rose-50 pb-3"><span>2.000–4.999,99 TL</span><strong>300 TL</strong></li>
-              <li className="flex justify-between border-b border-rose-50 pb-3"><span>5.000–9.999,99 TL</span><strong>600 TL</strong></li>
-              <li className="flex justify-between"><span>10.000 TL ve üzeri</span><strong>Ücretsiz</strong></li>
+              {shippingRanges.map((range) => <li key={range.id} className="flex items-start justify-between gap-4 border-b border-rose-50 pb-3 last:border-0 last:pb-0">
+                <span>{range.max === null ? `${money(range.min)} ve üzeri` : `${money(range.min).replace(/ TL$/, "")}–${money(range.max - 1)}`}</span>
+                <strong className="shrink-0">{range.price === 0 ? "Ücretsiz" : money(range.price)}</strong>
+              </li>)}
             </ul>
-            <p className="mt-5 text-xs leading-relaxed text-slate-500">2.000 TL altındaki siparişlerin kargo tutarı ödeme öncesinde sepetinizde gösterilir.</p>
           </div>
           <div className="rounded-2xl bg-[#f5eae7] p-7">
             <h2 className="text-xl font-bold text-slate-900">İade için bize ulaşın</h2>
