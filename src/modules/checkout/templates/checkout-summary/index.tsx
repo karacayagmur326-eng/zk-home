@@ -2,6 +2,8 @@
 
 import React, { useState } from "react"
 import { useCartState } from "@lib/util/cart-state"
+import { updateLineItem } from "@lib/util/cart-feedback"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { HttpTypes } from "@medusajs/types"
 import { convertToLocale } from "@lib/util/money"
 import DiscountCode from "@modules/checkout/components/discount-code"
@@ -13,6 +15,7 @@ import {
   Headphones,
   Tag,
   Plus,
+  Minus,
 } from "@lib/icons"
 
 
@@ -21,7 +24,13 @@ export default function CheckoutSummary({
 }: {
   cart: HttpTypes.StoreCart | null
 }) {
-  const { cart } = useCartState(initialCart)
+  const { cart, pending } = useCartState(initialCart)
+  const [quantityError, setQuantityError] = useState<string | null>(null)
+  const changeQuantity = async (lineId: string, quantity: number) => {
+    setQuantityError(null)
+    const result = await updateLineItem({ lineId, quantity })
+    if (!result.success) setQuantityError(result.error)
+  }
   const [showDiscountInput, setShowDiscountInput] = useState(false)
   const currencyCode = cart?.currency_code || "TRY"
 
@@ -33,7 +42,7 @@ export default function CheckoutSummary({
   const total = cart?.total || 0
 
   return (
-    <div className="space-y-4 font-sans text-slate-900 lg:sticky lg:top-24">
+    <div className="space-y-4 font-sans text-slate-900" data-testid="checkout-summary">
       {/* Main Sepetiniz Card */}
       <div className="rounded-none sm:rounded-3xl border-x-0 sm:border border-y border-slate-200/80 sm:border-slate-100 bg-white p-4 sm:p-7 shadow-none sm:shadow-soft space-y-5">
         {/* Header */}
@@ -102,14 +111,14 @@ export default function CheckoutSummary({
         <div className="border-t border-slate-100 pt-4 space-y-4">
           {items.map((item: any) => {
             const itemPriceFormatted = convertToLocale({
-              amount: item.total || item.unit_price * (item.quantity || 1),
+              amount: item.unit_price * item.quantity,
               currency_code: currencyCode,
             })
 
             return (
-              <div key={item.id} className="flex items-center gap-3 text-xs">
+              <div key={item.id} className="flex items-start gap-3 rounded-2xl border border-slate-100 bg-slate-50/50 p-3 text-xs" aria-busy={pending}>
                 {/* Thumbnail */}
-                <div className="w-14 h-14 bg-slate-50 border border-slate-100 rounded-xl p-1.5 shrink-0 flex items-center justify-center overflow-hidden">
+                <LocalizedClientLink href={`/urunler/${item.product_handle || item.product?.handle}`} className="w-20 h-24 bg-white border border-slate-100 rounded-xl p-1 shrink-0 flex items-center justify-center overflow-hidden" aria-label={`${item.title || item.product_title} ürününü incele`}>
                   {item.thumbnail ? (
                     <img
                       src={item.thumbnail}
@@ -119,28 +128,35 @@ export default function CheckoutSummary({
                   ) : (
                     <Thumbnail thumbnail={item.thumbnail} images={[]} size="square" />
                   )}
-                </div>
+                </LocalizedClientLink>
 
                 {/* Details */}
                 <div className="flex-1 min-w-0">
+                  <LocalizedClientLink href={`/urunler/${item.product_handle || item.product?.handle}`} className="block text-sm font-bold leading-snug text-slate-900 hover:text-[#A95E5E] transition-colors">
+                    {item.title || item.product_title}
+                  </LocalizedClientLink>
                   <p className="font-semibold text-slate-500 text-[11px] truncate">
-                    Seçenek: {item.variant?.title || item.variant || "Standart"}
+                    Seçenek: {item.variant?.title || "Standart"}
                   </p>
-                  <p className="font-bold text-slate-700 text-xs">
-                    {item.quantity || 1}x {convertToLocale({ amount: item.unit_price, currency_code: currencyCode })}
+                  <p className="mt-1 text-xs text-slate-500">
+                    {convertToLocale({ amount: item.unit_price, currency_code: currencyCode })} / adet
                   </p>
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                    <div className="inline-flex items-center rounded-xl border border-slate-200 bg-white p-1">
+                      <button type="button" aria-label={`${item.title || item.product_title} adet azalt`} disabled={pending || item.quantity <= 1} onClick={() => changeQuantity(item.id, item.quantity - 1)} className="grid h-8 w-8 place-items-center rounded-lg text-[#A95E5E] hover:bg-[#FCF7F6] disabled:opacity-30"><Minus className="h-4 w-4" /></button>
+                      <span className="w-7 text-center text-sm font-bold" aria-live="polite">{item.quantity}</span>
+                      <button type="button" aria-label={`${item.title || item.product_title} adet artır`} disabled={pending} onClick={() => changeQuantity(item.id, item.quantity + 1)} className="grid h-8 w-8 place-items-center rounded-lg bg-[#C98484] text-white hover:bg-[#A95E5E] disabled:opacity-30"><Plus className="h-4 w-4" /></button>
+                    </div>
+                    <span className="font-extrabold text-sm text-[#A95E5E]">{itemPriceFormatted}</span>
+                  </div>
                 </div>
-
-                {/* Total */}
-                <span className="font-extrabold text-slate-900 text-xs shrink-0">
-                  {itemPriceFormatted}
-                </span>
               </div>
             )
           })}
         </div>
 
         {/* Discount Code Accordion / Input */}
+        {quantityError && <p role="alert" className="rounded-xl border border-[#C98484]/30 bg-[#FCF7F6] p-3 text-xs text-[#A95E5E]">{quantityError}</p>}
         <div className="border-t border-slate-100 pt-4">
           {cart ? (
             <DiscountCode cart={cart} />

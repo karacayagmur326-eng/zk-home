@@ -28,7 +28,7 @@ export default async function Checkout() {
             <CheckoutForm cart={cart} customer={customer} />
           </PaymentWrapper>
         </div>
-        <div className="order-1 min-w-0 lg:order-2">
+        <div className="order-1 min-w-0 lg:order-2 lg:self-start">
           <CheckoutSummary cart={cart} />
         </div>
       </div>
