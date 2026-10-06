@@ -682,11 +682,6 @@ textarea {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
 }
-@media (prefers-reduced-motion: reduce) {
-  html:not([data-site-motion="on"]) .mobile-category-track { animation: none; }
-  html:not([data-site-motion="on"]) .mobile-category-window { overflow-x: auto; }
-  html:not([data-site-motion="on"]) .mobile-category-group[aria-hidden="true"] { display: none; }
-}
 .zkhome-fade-slide {
   opacity: 0;
   pointer-events: none;
@@ -699,7 +694,7 @@ textarea {
   z-index: 1;
 }
 .zkhome-slide-image {
-  opacity: 0;
+  opacity: 1;
   transform-origin: center;
 }
 .zkhome-slide-image[data-ready="true"] { opacity: 1; }

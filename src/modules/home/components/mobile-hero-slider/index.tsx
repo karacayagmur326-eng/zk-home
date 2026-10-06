@@ -47,7 +47,8 @@ export default function MobileHeroSlider({ slides, prioritize = true }: { slides
                 sizes="(max-width: 767px) 100vw, 480px"
                 priority={prioritize && idx === 0}
                 fetchPriority={prioritize && idx === 0 ? "high" : "auto"}
-                quality={75}
+                unoptimized
+                loading={idx === 0 ? "eager" : "lazy"}
               />
             )}
             <div className="zkhome-slide-content absolute inset-y-0 left-0 z-10 flex w-[62%] flex-col items-start justify-center px-5">
