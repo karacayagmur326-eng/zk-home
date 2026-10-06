@@ -669,6 +669,20 @@ export default function HeroSlider({
             -webkit-mask-image: none;
           }
         }
+        @media (min-width: 768px) {
+          .mobile-hero-img {
+            width: auto !important;
+            height: auto !important;
+            max-width: 100%;
+            max-height: 100%;
+            left: auto !important;
+            top: 50% !important;
+            bottom: auto !important;
+            transform: translateY(-50%);
+            mask-image: linear-gradient(to right, transparent 0, rgba(0,0,0,.12) 64px, rgba(0,0,0,.55) 176px, rgba(0,0,0,.9) 272px, black 320px);
+            -webkit-mask-image: linear-gradient(to right, transparent 0, rgba(0,0,0,.12) 64px, rgba(0,0,0,.55) 176px, rgba(0,0,0,.9) 272px, black 320px);
+          }
+        }
         @media (min-width: 1900px) {
           .zkhome-panorama-img {
             mask-image: linear-gradient(to right, transparent 0%, black 18%);
