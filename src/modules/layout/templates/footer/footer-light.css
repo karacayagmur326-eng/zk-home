@@ -102,6 +102,49 @@
   box-shadow: 0 4px 12px rgb(0 0 0 / 18%);
 }
 
+@media (max-width: 767px) {
+  .zk-footer-light {
+    padding-bottom: 24px;
+  }
+
+  .zk-footer-mobile-social {
+    align-items: center;
+    text-align: center;
+  }
+
+  .zk-footer-mobile-social p {
+    max-width: 32ch;
+  }
+
+  .zk-footer-bottom {
+    flex-direction: column-reverse;
+    gap: 18px;
+    padding-top: 20px;
+    line-height: 1.6;
+  }
+
+  .zk-payment-logos {
+    width: 100%;
+    max-width: 420px;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .zk-payment-logo-item {
+    min-width: 0;
+    height: 36px;
+    padding: 6px;
+    border-radius: 7px;
+  }
+
+  .zk-payment-logo {
+    width: 100%;
+    max-width: 80px;
+    height: 22px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .zk-payment-logo-item { transition: none; }
   .zk-payment-logo-item:hover { transform: none; }

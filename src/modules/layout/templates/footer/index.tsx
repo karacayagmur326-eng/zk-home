@@ -262,7 +262,7 @@ export default async function Footer() {
             />
 
             {/* Mobile Social Links */}
-            <div className="flex flex-col space-y-3 pt-2">
+            <div className="zk-footer-mobile-social flex flex-col space-y-3 pt-2">
               <h4 className="text-sm font-semibold normal-case text-white tracking-normal flex items-center gap-2">
                 <Users className="w-4 h-4 text-[#C98484] shrink-0" />
                 <span>{col5Title}</span>
@@ -518,7 +518,7 @@ export default async function Footer() {
         )}
 
         {/* Bottom Bar: Telif Hakları & Ödeme Logoları */}
-        <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-white/50">
+        <div className="zk-footer-bottom border-t border-white/10 pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-white/50">
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-4 gap-y-1.5 text-center md:text-left">
             <span>{copyrightText}</span>
             {brandSubtext && (

@@ -259,7 +259,6 @@ textarea {
 
 /* Mobile Bottom Navigation Bar Safety Clearance (Matches exact menu height 68px + safe area) */
 @media (max-width: 767px) {
-  body,
   [data-ui-scope="storefront"] {
     padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px)) !important;
   }
