@@ -772,9 +772,9 @@ export default function HeroSlider({
                       src={slider.image_url}
                       alt=""
                       fill
-                      sizes={slider.image_url === EDITORIAL_HERO_IMAGE ? "100vw" : "100vw"}
+                      sizes="100vw"
                       quality={75}
-                      unoptimized={slider.image_url === EDITORIAL_HERO_IMAGE}
+                      unoptimized
                       priority={index === 0}
                       fetchPriority={index === 0 ? "high" : "auto"}
                       className={slider.image_url === EDITORIAL_HERO_IMAGE ? "object-cover object-top min-[1900px]:object-[center_20%] zkhome-panorama-img" : "object-contain object-right mobile-hero-img"}
