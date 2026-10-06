@@ -51,10 +51,12 @@ export default function CategoryCard({
   category,
   circlePx = 76,
   singleLine = false,
+  tabIndex,
 }: {
   category: HttpTypes.StoreProductCategory
   circlePx?: number
   singleLine?: boolean
+  tabIndex?: number
   iconSize?: string | number
   fontSize?: string | number
   fontWeight?: string | number
@@ -84,6 +86,7 @@ export default function CategoryCard({
     <LocalizedClientLink
       href={categoryPath(category)}
       className="group flex min-w-[70px] sm:min-w-[80px] md:min-w-[88px] lg:min-w-[94px] flex-col items-center px-1 py-0.5 sm:px-1.5 sm:py-1 text-center transition-all duration-300 focus-visible:outline-none"
+      tabIndex={tabIndex}
     >
       {/* Compact Circular Badge */}
       <div

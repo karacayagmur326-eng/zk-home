@@ -644,6 +644,26 @@ textarea {
 @keyframes order-truck-float { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-3px) rotate(1deg); } }
 @media (prefers-reduced-motion: reduce) { .order-journey__progress { transition: none; } .order-journey__node.is-active, .order-journey__traveller { animation: none; } }
 /* Homepage motion: fade slides, gentle text entrance and cascading card reveals. */
+.mobile-category-track {
+  animation: zkhome-categories-left var(--category-duration, 36s) linear infinite;
+}
+.mobile-category-strip[data-paused="true"] .mobile-category-track,
+.mobile-category-window:focus-within .mobile-category-track,
+.mobile-category-window:active .mobile-category-track {
+  animation-play-state: paused;
+}
+@media (hover: hover) {
+  .mobile-category-strip:hover .mobile-category-track { animation-play-state: paused; }
+}
+@keyframes zkhome-categories-left {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mobile-category-track { animation: none; }
+  .mobile-category-window { overflow-x: auto; }
+  .mobile-category-group[aria-hidden="true"], .mobile-category-motion { display: none; }
+}
 .zkhome-fade-slide {
   opacity: 0;
   pointer-events: none;

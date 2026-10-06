@@ -25,12 +25,12 @@ export default function MobileHeroSlider({ slides, prioritize = true }: { slides
     <div className="relative w-full overflow-hidden select-none" role="region" aria-label="Mobil kampanyalar" aria-roledescription="carousel" {...gestures}>
       {/* ── Scroll Track ── */}
       <div
-        className="relative h-[200px] touch-pan-y"
+        className="relative h-[clamp(240px,60vw,280px)] touch-pan-y"
       >
         {slides.map((slide, idx) => (
           <article
             key={slide.id || idx}
-            className="zkhome-fade-slide absolute inset-0 h-[200px] w-full overflow-hidden rounded-none bg-white shadow-none"
+            className="zkhome-fade-slide absolute inset-0 h-full w-full overflow-hidden rounded-none bg-white shadow-none"
             data-active={idx === activeIndex}
             aria-hidden={idx !== activeIndex}
             inert={idx !== activeIndex}

@@ -91,6 +91,7 @@ export default async function Home() {
         <MobileHomeExperience
           prioritizeHero={false}
           settings={mobileSettings}
+          categories={categories}
         />
       )}
       <div className={mobileSettings.enabled ? "hidden md:block" : "block"}>
