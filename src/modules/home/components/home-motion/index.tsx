@@ -1,14 +1,14 @@
 "use client"
 
 import { useEffect, useRef, type ReactNode } from "react"
+import useMotionEnabled from "../use-motion-enabled"
 
 export default function HomeMotion({ children }: { children: ReactNode }) {
   const root = useRef<HTMLDivElement>(null)
+  const enabled = useMotionEnabled()
   useEffect(() => {
     const container = root.current
-    if (!container || !('IntersectionObserver' in window)) return
-    const preference = window.matchMedia("(prefers-reduced-motion: reduce)")
-    if (preference.matches) return
+    if (!container || !enabled || !('IntersectionObserver' in window)) return
     const items = Array.from(container.querySelectorAll<HTMLElement>("section > div:first-child, section > .grid > *, section[aria-label] > .relative"))
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
@@ -28,9 +28,7 @@ export default function HomeMotion({ children }: { children: ReactNode }) {
       observer.observe(node)
     })
     const revealAll = () => items.forEach((node) => node.classList.remove("home-motion-pending"))
-    const onPreference = () => { if (preference.matches) { observer.disconnect(); revealAll() } }
-    preference.addEventListener("change", onPreference)
-    return () => { observer.disconnect(); revealAll(); preference.removeEventListener("change", onPreference) }
-  }, [])
+    return () => { observer.disconnect(); revealAll() }
+  }, [enabled])
   return <div ref={root}>{children}</div>
 }

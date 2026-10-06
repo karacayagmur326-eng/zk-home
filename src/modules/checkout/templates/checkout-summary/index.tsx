@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
+import { useCartState } from "@lib/util/cart-state"
 import { HttpTypes } from "@medusajs/types"
 import { convertToLocale } from "@lib/util/money"
 import DiscountCode from "@modules/checkout/components/discount-code"
@@ -16,10 +17,11 @@ import {
 
 
 export default function CheckoutSummary({
-  cart,
+  cart: initialCart,
 }: {
   cart: HttpTypes.StoreCart | null
 }) {
+  const { cart } = useCartState(initialCart)
   const [showDiscountInput, setShowDiscountInput] = useState(false)
   const currencyCode = cart?.currency_code || "TRY"
 

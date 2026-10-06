@@ -1131,69 +1131,6 @@ export default function Addresses({
         )}
       </div>
 
-      <div className="space-y-4 rounded-none sm:rounded-3xl border-x-0 sm:border border-y border-slate-200/80 sm:border-slate-100 bg-white p-4 sm:p-8 shadow-none sm:shadow-soft">
-        <div className="flex items-center gap-3.5 border-b border-slate-100 pb-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-rose-50 text-[#C98484] border border-rose-100/60">
-            <Truck className="h-6 w-6 stroke-[2.2]" />
-          </div>
-          <div>
-            <h3 className="text-base sm:text-lg font-bold text-slate-900">
-              Teslimat Yöntemi
-            </h3>
-            <p className="mt-0.5 text-xs font-medium text-slate-400">
-              Size uygun teslimat yöntemini seçin.
-            </p>
-          </div>
-        </div>
-        {shippingOptions.length ? (
-          <div className="grid gap-3 sm:grid-cols-2">
-            {shippingOptions.map((option) => (
-              <label
-                key={option.id}
-                className={`cursor-pointer rounded-2xl border-2 p-4 transition-colors ${
-                  selectedShippingMethod === option.id
-                    ? "border-[#C98484] bg-rose-50/40"
-                    : "border-slate-200 hover:border-slate-300"
-                }`}
-              >
-                <div className="flex items-start gap-3">
-                  <input
-                    type="radio"
-                    name="shipping_method"
-                    value={option.id}
-                    checked={selectedShippingMethod === option.id}
-                    disabled={shippingLoading}
-                    onChange={() => chooseShippingMethod(option.id)}
-                    className="mt-1 h-4 w-4 accent-[#C98484]"
-                  />
-                  <span className="min-w-0">
-                    <span className="block text-sm font-bold text-slate-900">
-                      {option.name}
-                    </span>
-                    <span className="mt-1 block text-xs text-slate-500">
-                      {option.metadata?.estimated_days || "Teslimat süresi belirtilmedi"}
-                      {" · "}
-                      {option.amount === 0
-                        ? (option.metadata?.base_price && option.metadata?.free_threshold != null
-                            ? `${convertToLocale({ amount: option.metadata.free_threshold, currency_code: "TRY" })} üzeri ücretsiz`
-                            : "Ücretsiz")
-                        : convertToLocale({
-                            amount: option.amount,
-                            currency_code: "TRY",
-                          })}
-                    </span>
-                  </span>
-                </div>
-              </label>
-            ))}
-          </div>
-        ) : (
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-            Şu anda teslimat seçeneği bulunmuyor. Yardım için bizimle iletişime geçin.
-          </div>
-        )}
-      </div>
-
       {/* STEP: ÖDEME */}
       <div className="space-y-4 rounded-none sm:rounded-3xl border-x-0 sm:border border-y border-slate-200/80 sm:border-slate-100 bg-white p-4 sm:p-8 shadow-none sm:shadow-soft">
         <div className="flex items-center gap-3.5 border-b border-slate-100 pb-4">

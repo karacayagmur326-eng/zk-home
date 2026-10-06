@@ -1,27 +1,23 @@
 "use client"
 
 import { useEffect, useRef, useState, type TouchEvent } from "react"
+import useMotionEnabled from "./use-motion-enabled"
 
 export default function useFadeSlider(count: number, autoplay = true, intervalMs = 5000) {
   const [activeIndex, setActiveIndex] = useState(0)
   const [paused, setPaused] = useState(false)
   const [hovered, setHovered] = useState(false)
   const [focused, setFocused] = useState(false)
-  const [reducedMotion, setReducedMotion] = useState(true)
+  const motionEnabled = useMotionEnabled()
   const [visible, setVisible] = useState(true)
   const touch = useRef<{ x: number; y: number } | null>(null)
-  const isPlaying = autoplay && count > 1 && !paused && !hovered && !focused && !reducedMotion && visible
+  const isPlaying = autoplay && count > 1 && !paused && !hovered && !focused && motionEnabled && visible
 
   useEffect(() => {
-    const preference = window.matchMedia("(prefers-reduced-motion: reduce)")
-    const updateMotion = () => setReducedMotion(preference.matches)
     const updateVisibility = () => setVisible(document.visibilityState === "visible")
-    updateMotion()
     updateVisibility()
-    preference.addEventListener("change", updateMotion)
     document.addEventListener("visibilitychange", updateVisibility)
     return () => {
-      preference.removeEventListener("change", updateMotion)
       document.removeEventListener("visibilitychange", updateVisibility)
     }
   }, [])

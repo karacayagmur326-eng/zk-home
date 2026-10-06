@@ -673,12 +673,10 @@ textarea {
   .home-featured-grid > [data-desktop="false"] { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .collection-carousel-track { transition: none; }
-  .collection-carousel-item img, .collection-carousel-item > a > div:last-child { transition: none; transform: none !important; }
+  html:not([data-site-motion="on"]) .collection-carousel-track { transition: none; }
+  html:not([data-site-motion="on"]) .collection-carousel-item img, html:not([data-site-motion="on"]) .collection-carousel-item > a > div:last-child { transition: none; transform: none !important; }
 }
-.mobile-category-strip[data-paused="true"] .mobile-category-track,
-.mobile-category-window:has(:focus-visible) .mobile-category-track,
-.mobile-category-window:active .mobile-category-track {
+.mobile-category-strip[data-paused="true"] .mobile-category-track {
   animation-play-state: paused;
 }
 @keyframes zkhome-categories-left {
@@ -686,9 +684,9 @@ textarea {
   to { transform: translateX(-50%); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .mobile-category-track { animation: none; }
-  .mobile-category-window { overflow-x: auto; }
-  .mobile-category-group[aria-hidden="true"], .mobile-category-motion { display: none; }
+  html:not([data-site-motion="on"]) .mobile-category-track { animation: none; }
+  html:not([data-site-motion="on"]) .mobile-category-window { overflow-x: auto; }
+  html:not([data-site-motion="on"]) .mobile-category-group[aria-hidden="true"] { display: none; }
 }
 .zkhome-fade-slide {
   opacity: 0;
@@ -734,10 +732,10 @@ textarea {
   to { opacity: 1; transform: translateY(0); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .zkhome-fade-slide { transition: none; }
-  .zkhome-fade-slide .zkhome-slide-content,
-  .zkhome-fade-slide .zkhome-slide-image,
-  .home-motion-visible { animation: none !important; }
-  .zkhome-slide-image { opacity: 1; }
-  .home-motion-pending { opacity: 1; }
+  html:not([data-site-motion="on"]) .zkhome-fade-slide { transition: none; }
+  html:not([data-site-motion="on"]) .zkhome-fade-slide .zkhome-slide-content,
+  html:not([data-site-motion="on"]) .zkhome-fade-slide .zkhome-slide-image,
+  html:not([data-site-motion="on"]) .home-motion-visible { animation: none !important; }
+  html:not([data-site-motion="on"]) .zkhome-slide-image { opacity: 1; }
+  html:not([data-site-motion="on"]) .home-motion-pending { opacity: 1; }
 }

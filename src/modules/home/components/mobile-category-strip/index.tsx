@@ -5,11 +5,13 @@ import type { HttpTypes } from "@medusajs/types"
 import { Pause, Play } from "@lib/icons"
 import CategoryCard from "../category-card"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import useMotionEnabled, { enableSiteMotion } from "../use-motion-enabled"
 
 export default function MobileCategoryStrip({ categories }: {
   categories: HttpTypes.StoreProductCategory[]
 }) {
   const [paused, setPaused] = useState(false)
+  const motionEnabled = useMotionEnabled()
   if (!categories.length) return null
 
   return (
@@ -19,9 +21,9 @@ export default function MobileCategoryStrip({ categories }: {
         <div className="flex items-center gap-2">
           <LocalizedClientLink href="/magaza" className="text-xs font-semibold text-[#A95E5E]">Tümünü Gör</LocalizedClientLink>
           <button type="button" className="mobile-category-motion grid h-9 w-9 place-items-center rounded-full border border-[#C98484]/30 bg-white text-[#A95E5E]"
-            aria-label={paused ? "Kategorileri kaydırmaya devam et" : "Kategori kaymasını duraklat"}
-            onClick={() => setPaused((value) => !value)}>
-            {paused ? <Play className="h-3.5 w-3.5" /> : <Pause className="h-3.5 w-3.5" />}
+            aria-label={!motionEnabled ? "Site animasyonlarını başlat" : paused ? "Kategorileri kaydırmaya devam et" : "Kategori kaymasını duraklat"}
+            onClick={() => { if (!motionEnabled) { enableSiteMotion(); setPaused(false) } else setPaused((value) => !value) }}>
+            {paused || !motionEnabled ? <Play className="h-3.5 w-3.5" /> : <Pause className="h-3.5 w-3.5" />}
           </button>
         </div>
       </div>

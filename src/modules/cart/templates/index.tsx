@@ -109,8 +109,8 @@ export default function CartTemplate({
       <div className="my-2.5 flex gap-3 border-y border-rose-200/80 bg-rose-50/90 px-4 py-3.5">
         <Truck className="h-5 w-5 shrink-0 text-[#C98484]" />
         <div>
-          <h2 className="text-xs font-black text-slate-900">{mobileSettings.cart.freeShippingTitle}</h2>
-          <p className="mt-0.5 text-[10px] leading-relaxed text-slate-600">{mobileSettings.cart.freeShippingDescription}</p>
+          <h2 className="text-xs font-black text-slate-900">Kargo: {shippingTotal === 0 ? "Ücretsiz" : convertToLocale({ amount: shippingTotal, currency_code: currencyCode })}</h2>
+          <p className="mt-0.5 text-[10px] leading-relaxed text-slate-600">Sepet tutarınıza göre otomatik hesaplanır{shippingTotal > 0 ? " ve toplamınıza eklenir." : "; toplamınıza kargo ücreti eklenmez."}</p>
         </div>
       </div>
       <div className="bg-white border-y border-slate-200/80 divide-y divide-slate-100">

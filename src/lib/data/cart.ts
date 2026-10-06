@@ -291,7 +291,7 @@ async function shapeCart(id: string) {
   })
   const subtotal = shapedItems.reduce((sum, item) => sum + item.total, 0)
   const shippingSettings = await getCommerceSettings()
-  const selectedShipping = selectedShippingOption(subtotal, shippingSettings.shipping_methods, cart.shipping_method)
+  const selectedShipping = shapedItems.length ? selectedShippingOption(subtotal, shippingSettings.shipping_methods, cart.shipping_method, shippingSettings.shipping_ranges) : undefined
   const shippingTotal = selectedShipping?.amount || 0
   const paymentProviderId = cart.metadata?.payment_provider_id
   const paymentData = cart.metadata?.payment_data || {}
@@ -1250,7 +1250,7 @@ async function shippingOptions(cartId?: string) {
     )
     subtotal = Number(rows[0]?.subtotal || 0)
   }
-  return buildShippingOptions(subtotal, settings.shipping_methods)
+  return buildShippingOptions(subtotal, settings.shipping_methods, settings.shipping_ranges)
 }
 
 export async function listCartOptions(cartId?: string) {

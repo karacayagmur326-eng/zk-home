@@ -2,6 +2,7 @@
 
 import { useEffect, useSyncExternalStore } from "react"
 import type { HttpTypes } from "@medusajs/types"
+import { rangeShippingAmount } from "@lib/commerce/shipping"
 
 type Cart = HttpTypes.StoreCart | null
 type Change = (cart: Cart) => Cart
@@ -45,8 +46,10 @@ export type CartPreview = {
 
 function withItems(cart: Cart, items: HttpTypes.StoreCartLineItem[]): Cart {
   const subtotal = items.reduce((sum, item) => sum + item.quantity * item.unit_price, 0)
-  const total = Math.max(0, (cart?.total ?? 0) + subtotal - (cart?.subtotal ?? 0))
-  return { ...cart, items, subtotal, item_total: subtotal, total } as HttpTypes.StoreCart
+  const ranges = (cart?.shipping_methods?.[0]?.metadata as any)?.price_ranges
+  const shipping = ranges ? (items.length ? rangeShippingAmount(subtotal, ranges) ?? 0 : 0) : cart?.shipping_total ?? 0
+  const total = Math.max(0, (cart?.total ?? 0) + subtotal - (cart?.subtotal ?? 0) + shipping - (cart?.shipping_total ?? 0))
+  return { ...cart, items, subtotal, item_total: subtotal, shipping_total: shipping, total } as HttpTypes.StoreCart
 }
 
 export function previewAddition(variantId: string, quantity: number, product?: CartPreview): Change {

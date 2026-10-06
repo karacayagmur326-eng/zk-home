@@ -35,15 +35,13 @@ export default function MagazaAyarlariPage() {
       const response = await fetch("/api/admin/commerce-settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...settings, shipping_methods: settings.shipping_methods.map((method: any) => {
-          const price = method.name.trim().toLocaleLowerCase("tr-TR") === "ücretsiz kargo" ? 0 : method._priceDraft === undefined ? method.price : parseMoneyInput(method._priceDraft)
-          const draft = method._thresholdDraft
-          const freeThreshold = draft === undefined ? method.freeThreshold : draft.trim() === "" ? null : parseMoneyInput(draft)
-          if (price === null || (draft?.trim() && freeThreshold === null)) throw new Error((method.name || "Teslimat yöntemi") + ": geçerli bir tutar girin. Örnek: 125,50. Ücretsiz kargo alt limiti boş bırakılabilir.")
-          const { _priceDraft, _thresholdDraft, ...saved } = method
-          return { ...saved, price, freeThreshold }
-        }) }),
-      })
+        body: JSON.stringify({ ...settings, shipping_ranges: settings.shipping_ranges.map((range: any) => {
+          const min = range._minDraft === undefined ? range.min : parseMoneyInput(range._minDraft)
+          const max = range._maxDraft === undefined ? range.max : range._maxDraft.trim() === "" ? null : parseMoneyInput(range._maxDraft)
+          const price = range._priceDraft === undefined ? range.price : parseMoneyInput(range._priceDraft)
+          if (min === null || price === null || (range._maxDraft?.trim() && max === null)) throw new Error("Kargo aralıklarına geçerli tutarlar girin.")
+          return { id: range.id, min, max, price }
+        }) }),      })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error)
       setSettings(data.settings)
@@ -63,7 +61,6 @@ export default function MagazaAyarlariPage() {
 
   if (loading) return <div className="p-8">Mağaza ayarları yükleniyor…</div>
   if (!settings) return <div className="p-8 text-red-700">{error}</div>
-  const freeShippingRule = settings.shipping_methods.find((method: any) => method.active && method.name.trim().toLocaleLowerCase("tr-TR") === "ücretsiz kargo" && method.freeThreshold !== null)
 
   return (
     <main className="min-h-screen bg-[#f0f0f1] p-5 text-[#1d2327]">
@@ -85,60 +82,19 @@ export default function MagazaAyarlariPage() {
 
       <FeedbackPopup message={error || message} title={error ? "Ayarlar kaydedilemedi" : "Ayarlar kaydedildi"} onClose={() => { setError(""); setMessage("") }} />
 
-      <section className="mb-5 rounded border border-slate-300 bg-white">
-        <header className="border-b border-slate-300 px-4 py-3 font-bold">Teslimat yöntemleri</header>
+      <section className="mb-5 rounded-xl border border-slate-200 bg-white">
+        <header className="border-b border-slate-200 px-4 py-3 font-bold">Sepet tutarına göre kargo ücretleri</header>
         <div className="space-y-3 p-4">
-          <p className="text-sm text-slate-600">Kargo ücreti sipariş toplamına eklenir. “Belirli tutardan sonra ücretsiz” sınırına ulaşınca ücret otomatik sıfırlanır. Etkin “Ücretsiz Kargo” satırındaki sınır tüm kargo yöntemlerine uygulanır; müşteri ayrıca seçim yapmaz.</p>
-          {settings.shipping_methods.map((method: any, index: number) => (
-            <div key={method.id} className="grid gap-3 rounded border border-slate-200 p-3 md:grid-cols-7">
-              {method.name.trim().toLocaleLowerCase("tr-TR") === "ücretsiz kargo" && <p className="md:col-span-7 rounded bg-rose-50 p-2 text-sm text-slate-700">Bu satır bir ücretsiz kargo kuralıdır. Kargo ücreti alanı uygulanmaz; sağdaki alt limit esas alınır. Limit ve üzerindeki sepetlerde kargo otomatik ücretsiz olur.</p>}
-              <input className="rounded border p-2 md:col-span-2" value={method.name} placeholder="Yöntem adı" onChange={(e) => {
-                const rows = [...settings.shipping_methods]; rows[index] = { ...method, name: e.target.value }; setSettings({ ...settings, shipping_methods: rows })
-              }} />
-              <input className="rounded border p-2" value={method.coverage} placeholder="Kapsam" onChange={(e) => {
-                const rows = [...settings.shipping_methods]; rows[index] = { ...method, coverage: e.target.value }; setSettings({ ...settings, shipping_methods: rows })
-              }} />
-              <label className="min-w-0 text-xs font-semibold text-slate-600">Kargo ücreti (TL)
-                <div className="relative"><input className="mt-1 w-full rounded border p-2 pr-9 text-sm disabled:bg-slate-100" type="text" inputMode="decimal" disabled={method.name.trim().toLocaleLowerCase("tr-TR") === "ücretsiz kargo"} value={method.name.trim().toLocaleLowerCase("tr-TR") === "ücretsiz kargo" ? money(0) : method._priceDraft ?? money(method.price)} aria-label="Kargo ücreti TL" onBlur={() => {
-                  const value = method._priceDraft === undefined ? method.price : parseMoneyInput(method._priceDraft)
-                  if (value !== null) { const rows = [...settings.shipping_methods]; rows[index] = { ...method, price: value, _priceDraft: money(value) }; setSettings({ ...settings, shipping_methods: rows }) }
-                }} onChange={(e) => {
-                  const rows = [...settings.shipping_methods]; rows[index] = { ...method, _priceDraft: e.target.value }; setSettings({ ...settings, shipping_methods: rows })
-                }} /><span className="absolute right-3 top-3 text-sm text-slate-500">TL</span></div>
-              </label>
-              <div className="min-w-0 text-xs font-semibold text-slate-600">
-                <label className="flex items-center gap-2"><input type="checkbox" checked={method.freeThreshold !== null} onChange={(e) => {
-                  const rows = [...settings.shipping_methods]; rows[index] = { ...method, freeThreshold: e.target.checked ? (method.freeThreshold ?? 250000) : null, _thresholdDraft: e.target.checked ? money(method.freeThreshold ?? 250000) : "" }; setSettings({ ...settings, shipping_methods: rows })
-                }} />Belirli tutardan sonra ücretsiz</label>
-                <div className="relative"><input className="mt-1 w-full rounded border p-2 pr-9 text-sm disabled:bg-slate-100" type="text" inputMode="decimal" disabled={method.freeThreshold === null} value={method._thresholdDraft ?? (method.freeThreshold === null ? "" : money(method.freeThreshold))} aria-label="Ücretsiz kargo alt limiti TL" placeholder="Ücretsiz kargo kapalı" onBlur={() => {
-                  const value = method._thresholdDraft === undefined ? method.freeThreshold : parseMoneyInput(method._thresholdDraft)
-                  if (value !== null) { const rows = [...settings.shipping_methods]; rows[index] = { ...method, freeThreshold: value, _thresholdDraft: money(value) }; setSettings({ ...settings, shipping_methods: rows }) }
-                }} onChange={(e) => {
-                  const rows = [...settings.shipping_methods]; rows[index] = { ...method, _thresholdDraft: e.target.value }; setSettings({ ...settings, shipping_methods: rows })
-                }} /><span className="absolute right-3 top-3 text-sm text-slate-500">TL</span></div>
-                <p className="mt-1 font-normal">{(method._thresholdDraft !== undefined ? method._thresholdDraft === "" : method.freeThreshold === null) ? (freeShippingRule && method.icon !== "store" ? `Genel kural: ${money(freeShippingRule.freeThreshold)} TL ve üzeri ücretsiz.` : "Kargo ücreti tüm siparişlere eklenir.") : "Bu tutar ve üzerindeki siparişlerde kargo ücreti alınmaz."}</p>
-              </div>
-              <input className="rounded border p-2" value={method.estimatedDays} placeholder="2-4 iş günü" onChange={(e) => {
-                const rows = [...settings.shipping_methods]; rows[index] = { ...method, estimatedDays: e.target.value }; setSettings({ ...settings, shipping_methods: rows })
-              }} />
-              <div className="flex items-center justify-between gap-2">
-                <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={method.active} onChange={(e) => {
-                  const rows = [...settings.shipping_methods]; rows[index] = { ...method, active: e.target.checked }; setSettings({ ...settings, shipping_methods: rows })
-                }} /> Etkin</label>
-                <button className="text-sm text-red-600" onClick={() => setSettings({ ...settings, shipping_methods: settings.shipping_methods.filter((_: any, i: number) => i !== index) })}>Sil</button>
-              </div>
-            </div>
-          ))}
-          <button className="rounded border border-[#C98484] px-4 py-2 text-sm font-bold text-[#C98484]" onClick={() => setSettings({
-            ...settings,
-            shipping_methods: [...settings.shipping_methods, {
-              id: `kargo_${Date.now()}`, name: "", coverage: "Tüm Türkiye", price: 0,
-              freeThreshold: null, estimatedDays: "2-4 iş günü", active: true, icon: "truck"
-            }]
-          })}>+ Teslimat yöntemi ekle</button>
+          <p className="text-sm text-slate-600">Kargo, ürünlerin KDV dahil ara toplamına göre otomatik hesaplanır. Alt sınır dahildir, üst sınır bir sonraki aralığa aittir. Son üst sınırı boş bırakın. Ücretsiz kargo için ücreti 0 TL girin.</p>
+          {settings.shipping_ranges.map((range: any, index: number) => <div key={range.id} className="grid gap-3 rounded-xl border border-slate-200 p-3 sm:grid-cols-[1fr_1fr_1fr_auto]">
+            {[["min", "Sepet alt sınırı", false], ["max", "Sepet üst sınırı", true], ["price", "Kargo ücreti", false]].map(([key, label, optional]) => <label key={String(key)} className="text-xs font-semibold text-slate-600">{String(label)} (TL)
+              <div className="relative"><input className="mt-1 w-full rounded-lg border p-2 pr-9 text-sm" inputMode="decimal" aria-label={`${label} ${index + 1}`} placeholder={optional ? "Sınırsız" : "0,00"} value={range[`_${key}Draft`] ?? (range[String(key)] === null ? "" : money(range[String(key)]))} onChange={e => { const rows = [...settings.shipping_ranges]; rows[index] = { ...range, [`_${key}Draft`]: e.target.value }; setSettings({ ...settings, shipping_ranges: rows }) }} onBlur={() => { const draft = range[`_${key}Draft`]; if (draft === undefined) return; const value = optional && !draft.trim() ? null : parseMoneyInput(draft); if (value !== null || (optional && !draft.trim())) { const rows = [...settings.shipping_ranges]; rows[index] = { ...range, [String(key)]: value, [`_${key}Draft`]: value === null ? "" : money(value) }; setSettings({ ...settings, shipping_ranges: rows }) } }} /><span className="absolute right-3 top-3 text-slate-400">TL</span></div>
+            </label>)}
+            <button className="self-end rounded-lg px-3 py-2 text-sm text-red-600" onClick={() => setSettings({ ...settings, shipping_ranges: settings.shipping_ranges.filter((_: any, i: number) => i !== index) })}>Sil</button>
+          </div>)}
+          <button className="rounded-lg border border-[#C98484] px-4 py-2 text-sm font-bold text-[#A95E5E]" onClick={() => setSettings({ ...settings, shipping_ranges: [...settings.shipping_ranges, { id: `range_${Date.now()}`, min: settings.shipping_ranges.at(-1)?.max ?? 0, max: null, price: 0 }] })}>+ Fiyat aralığı ekle</button>
         </div>
       </section>
-
       <div className="grid gap-5 xl:grid-cols-2">
         <section className="rounded border border-slate-300 bg-white">
           <header className="border-b border-slate-300 px-4 py-3 font-bold">Ödeme yöntemleri</header>

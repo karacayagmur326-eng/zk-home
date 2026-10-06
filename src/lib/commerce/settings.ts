@@ -1,5 +1,8 @@
 import { query, cachedQuery } from "@lib/admin/db"
 import { ensureCommerceSchema } from "./schema"
+import { legacyShippingRanges } from "./shipping"
+
+export type ShippingPriceRange = { id: string; min: number; max: number | null; price: number }
 
 export type ShippingMethodSetting = {
   id: string
@@ -82,6 +85,7 @@ export type CommerceSettings = {
   bank_account_name: string
   invoice_provider: string
   shipping_methods: ShippingMethodSetting[]
+  shipping_ranges?: ShippingPriceRange[]
   payment_methods_list: PaymentMethodRow[]
   payment_methods_priority: string[]
   bank_accounts: BankAccountRow[]
@@ -259,6 +263,7 @@ export async function getCommerceSettings(): Promise<CommerceSettings> {
   return {
     ...defaultCommerceSettings,
     ...stored,
+    shipping_ranges: stored.shipping_ranges ?? legacyShippingRanges(stored.shipping_methods ?? defaultCommerceSettings.shipping_methods),
     bank_name:
       legacyDemoIbans.has(normalizedIban(stored.bank_iban)) ? "" : stored.bank_name || "",
     bank_iban:

@@ -25,7 +25,8 @@ function EmphasisHeading({ children }: { children: string }) {
   </h2>
 }
 
-function SectionIntro({ title, description, href, linkText }: { title: string; description: string; href?: string; linkText?: string }) {
+function SectionIntro({ title, description, href, linkText, discover = false }: { title: string; description: string; href?: string; linkText?: string; discover?: boolean }) {
+  if (discover) return <div className="mb-5"><div className="flex items-center justify-between gap-2"><EmphasisHeading>{title}</EmphasisHeading>{href && <Link href={href} className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#C98484] px-3.5 py-2.5 text-xs font-bold text-white shadow-sm transition-colors hover:bg-[#A95E5E]">Keşfet<ArrowRight className="h-3.5 w-3.5" /></Link>}</div><p className="mt-2 text-sm text-[#827b78]">{description}</p></div>
   return <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
     <div><EmphasisHeading>{title}</EmphasisHeading><p className="mt-1 text-sm text-[#827b78]">{description}</p></div>
     {href && linkText && <Link href={href} className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#b86f71] hover:underline">{linkText}<ArrowRight className="h-4 w-4" /></Link>}
@@ -48,7 +49,7 @@ export default function HomeEditorial({
   return <HomeMotion><div className="bg-[#fffdfb] pb-14 text-[#302b2a]">
     <div className="content-container home-editorial-container space-y-11 pt-9 sm:space-y-14 sm:pt-12">
       {content.collections_active && activeCards(content.collection_cards).length > 0 && <section aria-label={content.collections_title}>
-        <SectionIntro title={content.collections_title} description={content.collections_description} href={content.collections_link_href} linkText={content.collections_link_text} />
+        <SectionIntro title={content.collections_title} description={content.collections_description} href={content.collections_link_href} discover />
         <CollectionCarousel count={activeCards(content.collection_cards).length}>
           {activeCards(content.collection_cards).map((card) => <Link key={card.id} href={card.href} className="group overflow-hidden rounded-[18px] border border-[#eee9e5] bg-[#fbf8f5] transition-shadow hover:shadow-[0_16px_36px_rgba(102,74,65,0.12)]">
             <div className="relative aspect-[16/9] overflow-hidden bg-[#f1ebe6]">
