@@ -317,6 +317,13 @@ function TypographySelectors({
 export default function SlidersPage() {
   const previewRef = useRef<HTMLDivElement>(null)
   const [previewHeight, setPreviewHeight] = useState(0)
+  const [previewWidth, setPreviewWidth] = useState(1440)
+  useEffect(() => {
+    const measureViewport = () => setPreviewWidth(document.documentElement.clientWidth)
+    measureViewport()
+    window.addEventListener("resize", measureViewport)
+    return () => window.removeEventListener("resize", measureViewport)
+  }, [])
   const router = useRouter()
   const [sliders, setSliders] = useState<any[]>([])
   const [categories, setCategories] = useState<any[]>([])
@@ -331,7 +338,7 @@ export default function SlidersPage() {
     if (!element || !parent || !child) return
     const resize = () => {
       const height = child.offsetHeight
-      const scale = parent.clientWidth / 1440
+      const scale = parent.clientWidth / previewWidth
       element.style.transform = `scale(${scale})`
       parent.style.height = `${height * scale}px`
       setPreviewHeight(height)
@@ -341,7 +348,7 @@ export default function SlidersPage() {
     observer.observe(child)
     resize()
     return () => observer.disconnect()
-  }, [loading])
+  }, [loading, previewWidth])
   const [saving, setSaving] = useState(false)
   const [activeColorPicker, setActiveColorPicker] = useState<string | null>(null)
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null)
@@ -961,12 +968,12 @@ export default function SlidersPage() {
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
                     <span className="text-xs font-black uppercase tracking-wider text-gray-800">Canlı Önizleme</span>
                   </div>
-                  <span className="text-[10px] font-bold text-gray-400">1440 × {previewHeight || "…"} px · Ölçekli önizleme</span>
+                  <span className="text-[10px] font-bold text-gray-400">{previewWidth} × {previewHeight || "…"} px</span>
                 </div>
 
                 <div className="relative w-full overflow-hidden rounded-xl border border-gray-200 bg-gray-900 shadow-inner">
                   <div
-                    style={{ width: "1440px", transformOrigin: "top left", pointerEvents: "none" }}
+                    style={{ width: `${previewWidth}px`, transformOrigin: "top left", pointerEvents: "none" }}
                     ref={previewRef}
                   >
                     <HeroSlider
@@ -996,6 +1003,7 @@ export default function SlidersPage() {
                 </div>
               </div>
 
+              <p className="text-[11px] leading-relaxed text-gray-500">Ölçüler, bu ekran genişliğindeki gerçek slider alanıdır. Önizleme panele sığacak şekilde küçültülür; ekran genişliği değişince ölçüler güncellenir.</p>
               {/* Slider Görseli & Yayın Ayarları Card */}
               <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm space-y-4">
                 <div className="flex items-center justify-between border-b border-gray-100 pb-2">
