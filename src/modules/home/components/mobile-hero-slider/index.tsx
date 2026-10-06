@@ -50,7 +50,6 @@ export default function MobileHeroSlider({ slides, prioritize = true }: { slides
                 quality={75}
               />
             )}
-            <div className="absolute inset-0 bg-gradient-to-r from-white via-white/85 to-transparent" />
             <div className="zkhome-slide-content absolute inset-y-0 left-0 z-10 flex w-[62%] flex-col items-start justify-center px-5">
               {slide.badge && (
                 <span className="mb-2 rounded-full bg-[#C98484] px-2.5 py-1 font-[family-name:var(--font-barlow-condensed)] text-[8px] font-black tracking-wider text-white shadow-xs">

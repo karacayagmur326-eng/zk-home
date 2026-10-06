@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type TouchEvent } from "react"
 
-export default function useFadeSlider(count: number, autoplay = true) {
+export default function useFadeSlider(count: number, autoplay = true, intervalMs = 5000) {
   const [activeIndex, setActiveIndex] = useState(0)
   const [paused, setPaused] = useState(false)
   const [hovered, setHovered] = useState(false)
@@ -29,9 +29,9 @@ export default function useFadeSlider(count: number, autoplay = true) {
   useEffect(() => { setActiveIndex(0) }, [count])
   useEffect(() => {
     if (!isPlaying) return
-    const timer = window.setTimeout(() => setActiveIndex((index) => (index + 1) % count), 5000)
+    const timer = window.setTimeout(() => setActiveIndex((index) => (index + 1) % count), intervalMs)
     return () => window.clearTimeout(timer)
-  }, [isPlaying, activeIndex, count])
+  }, [isPlaying, activeIndex, count, intervalMs])
 
   const select = (index: number) => { if (count) setActiveIndex((index + count) % count) }
   const gestures = {

@@ -62,7 +62,7 @@ export default async function Home() {
     return listProducts({
       regionId: region.id,
       countryCode,
-      queryParams: { limit: 8 },
+      queryParams: { limit: 9 },
     })
       .then(({ response }) => ({ region, products: response.products }))
       .catch(() => ({ region, products: [] }))

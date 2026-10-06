@@ -6,6 +6,7 @@ import type { EditorialCard, HomeEditorialContent } from "@lib/content/home-edit
 import FeaturedProductCard from "@modules/products/components/featured-product-card"
 import EditorialNewsletter from "@modules/home/components/editorial-newsletter"
 import HomeMotion from "@modules/home/components/home-motion"
+import CollectionCarousel from "../collection-carousel"
 
 export type HomeArticle = {
   id: string
@@ -45,10 +46,10 @@ export default function HomeEditorial({
   articles: HomeArticle[]
 }) {
   return <HomeMotion><div className="bg-[#fffdfb] pb-14 text-[#302b2a]">
-    <div className="content-container space-y-11 pt-9 sm:space-y-14 sm:pt-12">
+    <div className="content-container home-editorial-container space-y-11 pt-9 sm:space-y-14 sm:pt-12">
       {content.collections_active && activeCards(content.collection_cards).length > 0 && <section aria-label={content.collections_title}>
         <SectionIntro title={content.collections_title} description={content.collections_description} href={content.collections_link_href} linkText={content.collections_link_text} />
-        <div className="grid gap-4 md:grid-cols-3">
+        <CollectionCarousel count={activeCards(content.collection_cards).length}>
           {activeCards(content.collection_cards).map((card) => <Link key={card.id} href={card.href} className="group overflow-hidden rounded-[18px] border border-[#eee9e5] bg-[#fbf8f5] transition-shadow hover:shadow-[0_16px_36px_rgba(102,74,65,0.12)]">
             <div className="relative aspect-[16/9] overflow-hidden bg-[#f1ebe6]">
               {card.image && <Image src={card.image} alt={card.title} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.035]" />}
@@ -58,13 +59,13 @@ export default function HomeEditorial({
               <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-[#ad6a6d] shadow-sm transition-colors group-hover:bg-[#C98484] group-hover:text-white"><ArrowRight className="h-4 w-4" /></span>
             </div>
           </Link>)}
-        </div>
+        </CollectionCarousel>
       </section>}
 
       {content.highlights_active && (products.length > 0 || activeCards(content.highlight_cards).length > 0) && <section aria-label={content.highlights_title}>
         <SectionIntro title={products.length > 0 ? "Öne Çıkan Ürünler" : content.highlights_title} description={content.highlights_description} href="/magaza" linkText="Tüm Ürünleri Gör" />
-        {products.length > 0 ? <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-5">
-          {products.slice(0, 5).map((product) => <div key={product.id} className="rounded-[18px] border border-[#eee9e5] bg-white p-2 shadow-sm"><FeaturedProductCard product={product} region={region} showSummary /></div>)}
+        {products.length > 0 ? <div className="home-featured-grid grid gap-2 sm:gap-4">
+          {products.slice(0, 9).map((product, index) => <div key={product.id} data-two={index < Math.floor(Math.min(6, products.length) / 2) * 2} data-three={index < Math.floor(Math.min(9, products.length) / 3) * 3} data-desktop={index < Math.floor(Math.min(5, products.length) / 5) * 5} className="rounded-[18px] border border-[#eee9e5] bg-white p-1 sm:p-2 shadow-sm"><FeaturedProductCard product={product} region={region} showSummary /></div>)}
         </div> : <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           {activeCards(content.highlight_cards).map((card) => <Link key={card.id} href={card.href} className="group overflow-hidden rounded-[18px] border border-[#eee9e5] bg-white transition-shadow hover:shadow-[0_14px_30px_rgba(102,74,65,0.11)]">
             <div className="relative aspect-[4/3] overflow-hidden bg-[#f4efea]">{card.image && <Image src={card.image} alt={card.title} fill sizes="(max-width: 640px) 50vw, 25vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.035]" />}</div>
@@ -82,7 +83,7 @@ export default function HomeEditorial({
       </div>
     </section>}
 
-    <div className="content-container space-y-11 pt-11 sm:space-y-14 sm:pt-14">
+    <div className="content-container home-editorial-container space-y-11 pt-11 sm:space-y-14 sm:pt-14">
       {content.rooms_active && activeCards(content.room_cards).length > 0 && <section aria-label={content.rooms_title}>
         <SectionIntro title={content.rooms_title} description={content.rooms_description} />
         <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">

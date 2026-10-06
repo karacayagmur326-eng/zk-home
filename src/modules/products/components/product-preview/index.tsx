@@ -163,8 +163,7 @@ export default function ProductPreview({
         {/* Square Image */}
         <LocalizedClientLink
           href={`/urunler/${product.handle}`}
-          className="relative block overflow-hidden bg-white cursor-pointer z-10"
-          style={{ aspectRatio: "1 / 1" }}
+          className="relative block aspect-[4/5] md:aspect-square overflow-hidden bg-white cursor-pointer z-10"
         >
           {/* Discount Badge top-left */}
           {cheapestPrice?.percentage_diff && cheapestPrice.percentage_diff !== "0" && (
@@ -178,7 +177,7 @@ export default function ProductPreview({
             alt={product.title}
             size="square"
             isFeatured={isFeatured}
-            className="h-full w-full object-contain p-3 transition-transform duration-300 group-hover:scale-[1.04] pointer-events-none"
+            className="h-full w-full object-contain p-1 md:p-3 transition-transform duration-300 group-hover:scale-[1.04] pointer-events-none"
           />
         </LocalizedClientLink>
 
