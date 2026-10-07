@@ -91,7 +91,7 @@ export default function FeaturedProductCard({
     <div className="group relative flex flex-col justify-between h-full w-full min-w-0 shrink-0 p-1 sm:p-1.5 transition-all duration-200 hover:-translate-y-1">
       <div>
         {/* Product Image Stage */}
-        <div className="relative block aspect-[4/5] md:aspect-square w-full overflow-hidden rounded-2xl p-0.5 mb-2 sm:mb-2.5 transition-all duration-300 cursor-pointer z-10 group/img">
+        <div className="relative block aspect-[4/5] w-full overflow-hidden rounded-xl bg-[#FBF7F4] mb-2 sm:mb-2.5 transition-all duration-300 cursor-pointer z-10 group/img">
           {/* Discount Badge */}
           {hasDiscount && percentageDiff && percentageDiff !== "0" && (
             <span className="absolute top-2 left-2 z-20 rounded-md bg-[#e02b27] px-2 py-0.5 text-[10px] font-black text-white shadow-xs">
@@ -126,7 +126,8 @@ export default function FeaturedProductCard({
               alt={product.title}
               size="square"
               isFeatured={false}
-              className="h-full w-full object-contain p-0 transition-transform duration-300 group-hover/img:scale-105 pointer-events-none"
+              className="h-full w-full pointer-events-none"
+              imageClassName="!p-0 !scale-100"
             />
           </LocalizedClientLink>
         </div>
