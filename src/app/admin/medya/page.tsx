@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { uploadMediaFiles } from "@lib/admin/upload-media"
 import ConfirmModal from "../components/ConfirmModal"
-import { Check, FileUp, Grid2X2, ImageIcon, List, LoaderCircle, RotateCcw, Trash2 } from "@lib/icons"
+import { Check, Download, FileUp, Grid2X2, ImageIcon, List, LoaderCircle, RotateCcw, Trash2 } from "@lib/icons"
 
 interface MediaFile {
   id: string
@@ -44,6 +44,7 @@ export default function MediaLibraryPage() {
   const [lightboxFile, setLightboxFile] = useState<MediaFile | null>(null)
   const [mediaDraft, setMediaDraft] = useState<MediaDraft | null>(null)
   const [savingMedia, setSavingMedia] = useState(false)
+  const [downloadingMedia, setDownloadingMedia] = useState(false)
 
   // Bulk selection state
   const [selectedIds, setSelectedIds] = useState<string[]>([])
@@ -278,13 +279,25 @@ export default function MediaLibraryPage() {
     showToast("Link kopyalandı!", "success")
   }
 
-  function downloadFile(url: string, filename?: string) {
-    const link = document.createElement("a")
-    link.href = url
-    link.download = filename || url.split("/").pop() || "gorsel"
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+  async function downloadFile(url: string, filename?: string) {
+    if (downloadingMedia) return
+    setDownloadingMedia(true)
+    try {
+      const response = await fetch(url)
+      if (!response.ok) throw new Error("Görsel indirilemedi.")
+      const objectUrl = URL.createObjectURL(await response.blob())
+      const link = document.createElement("a")
+      link.href = objectUrl
+      link.download = filename || url.split("/").pop()?.split("?")[0] || "gorsel"
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000)
+    } catch {
+      showToast("Görsel indirilemedi. Lütfen tekrar deneyin.", "error")
+    } finally {
+      setDownloadingMedia(false)
+    }
   }
 
   async function saveMediaDetails() {
@@ -937,6 +950,16 @@ export default function MediaLibraryPage() {
                 </div>
                 <button
                   type="button"
+                  disabled={downloadingMedia}
+                  onClick={() => downloadFile(lightboxFile.url, getDisplayName(lightboxFile))}
+                  className="admin-btn admin-btn-secondary"
+                  style={{ width: "100%", marginBottom: 10, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "11px 14px", borderRadius: 9, cursor: downloadingMedia ? "wait" : "pointer" }}
+                >
+                  {downloadingMedia ? <LoaderCircle size={16} className="animate-spin" /> : <Download size={16} />}
+                  {downloadingMedia ? "İndiriliyor…" : "Görseli İndir"}
+                </button>
+                <button
+                  type="button"
                   disabled={savingMedia}
                   onClick={saveMediaDetails}
                   style={{ width: "100%", border: 0, borderRadius: 9, padding: "11px 14px", background: savingMedia ? "#fdba74" : "#C98484", color: "#fff", fontSize: 12, fontWeight: 800, cursor: savingMedia ? "wait" : "pointer" }}
@@ -986,18 +1009,6 @@ export default function MediaLibraryPage() {
               }}
             >
               📋 Linki Kopyala
-            </button>
-
-            <button
-              onClick={() => downloadFile(lightboxFile.url, getDisplayName(lightboxFile))}
-              style={{
-                padding: "8px 16px", borderRadius: 8, border: "none",
-                background: "rgba(255,255,255,0.15)", color: "#ffffff", fontSize: 12,
-                fontWeight: 700, cursor: "pointer", display: "inline-flex",
-                alignItems: "center", gap: 6
-              }}
-            >
-              ⬇️ İndir
             </button>
 
             {mediaTab === "trash" && (
