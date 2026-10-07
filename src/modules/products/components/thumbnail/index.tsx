@@ -12,6 +12,7 @@ type ThumbnailProps = {
   size?: "small" | "medium" | "large" | "full" | "square"
   isFeatured?: boolean
   className?: string
+  imageClassName?: string
   alt?: string
   "data-testid"?: string
 }
@@ -22,6 +23,7 @@ const Thumbnail: React.FC<ThumbnailProps> = ({
   size = "small",
   isFeatured,
   className,
+  imageClassName,
   alt = "Ürün görseli",
   "data-testid": dataTestid,
 }) => {
@@ -96,7 +98,7 @@ const Thumbnail: React.FC<ThumbnailProps> = ({
         image={initialImage}
         size={size}
         alt={alt}
-        className={clx("transition-opacity duration-300", secondaryImage && secondaryReady && active && "opacity-0")}
+        className={clx("transition-opacity duration-300", imageClassName, secondaryImage && secondaryReady && active && "opacity-0")}
       />
       {secondaryImage && secondaryRequested && (
         <ImageOrPlaceholder
@@ -106,6 +108,7 @@ const Thumbnail: React.FC<ThumbnailProps> = ({
           onLoad={() => setSecondaryReady(true)}
           className={clx(
             "transition-all duration-300",
+            imageClassName,
             secondaryReady && active ? "opacity-100 scale-[1.02]" : "opacity-0"
           )}
         />

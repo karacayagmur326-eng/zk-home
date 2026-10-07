@@ -155,15 +155,15 @@ export default function ProductPreview({
 
   return (
     <article
-      className="group relative flex flex-col bg-white transition-all duration-200"
+      className="group relative flex h-full flex-col overflow-hidden bg-white transition-all duration-200 sm:rounded-2xl sm:border sm:border-[#EADBD4]/70 sm:shadow-sm sm:hover:border-[#C98484]/50 sm:hover:shadow-md"
       data-testid="product-wrapper"
     >
       {/* Discount Badge + Wishlist row */}
       <div className="relative">
-        {/* Square Image */}
+        {/* Portrait image frame keeps the full photo visible. */}
         <LocalizedClientLink
           href={`/urunler/${product.handle}`}
-          className="relative block aspect-[4/5] md:aspect-square overflow-hidden bg-white cursor-pointer z-10"
+          className="relative block aspect-[4/5] overflow-hidden bg-[#FBF7F4] cursor-pointer z-10"
         >
           {/* Discount Badge top-left */}
           {cheapestPrice?.percentage_diff && cheapestPrice.percentage_diff !== "0" && (
@@ -177,7 +177,8 @@ export default function ProductPreview({
             alt={product.title}
             size="square"
             isFeatured={isFeatured}
-            className="h-full w-full object-contain p-1 md:p-3 transition-transform duration-300 group-hover:scale-[1.04] pointer-events-none"
+            className="h-full w-full pointer-events-none"
+            imageClassName="!p-0 !scale-100"
           />
         </LocalizedClientLink>
 
@@ -188,7 +189,7 @@ export default function ProductPreview({
       </div>
 
       {/* Body */}
-      <div className="flex flex-1 flex-col gap-1 px-2.5 pb-3 pt-1.5">
+      <div className="flex flex-1 flex-col gap-1 px-2.5 pb-3 pt-1.5 sm:px-3 sm:pt-3">
         <LocalizedClientLink href={`/urunler/${product.handle}`} className="cursor-pointer block z-10">
           <h2 className="text-[11px] font-semibold leading-snug text-slate-900 line-clamp-2 group-hover:text-[#C98484] min-[390px]:text-[12px] sm:text-[13px]">
             {product.title}
