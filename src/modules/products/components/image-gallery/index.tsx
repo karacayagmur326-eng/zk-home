@@ -4,7 +4,7 @@ import { HttpTypes } from "@medusajs/types"
 import Image from "@components/common/SmartImage"
 import { useState, useRef, useEffect } from "react"
 import clx from "clsx"
-import { Search, ChevronDown, X, ChevronLeft, ChevronRight } from "@lib/icons"
+import { Search, X, ChevronLeft, ChevronRight } from "@lib/icons"
 import { FavoriteButton } from "@modules/products/components/product-card-actions"
 
 type ImageGalleryProps = {
@@ -25,6 +25,7 @@ const safeUrl = (url: string) => {
 const ImageGallery = ({ images, productTitle, discountBadge, product }: ImageGalleryProps) => {
   const [activeIndex, setActiveIndex] = useState(0)
   const [isLightboxOpen, setIsLightboxOpen] = useState(false)
+  const [imageSizes, setImageSizes] = useState<Record<string, { width: number; height: number }>>({})
   const touchStartX = useRef<number | null>(null)
   const touchEndX = useRef<number | null>(null)
 
@@ -52,6 +53,14 @@ const ImageGallery = ({ images, productTitle, discountBadge, product }: ImageGal
   }
 
   const mainImage = images[activeIndex] || images[0]
+  const mainSize = imageSizes[mainImage.url] || { width: 800, height: 1000 }
+  const imageRatio = mainSize.width / mainSize.height
+  const rememberSize = (url: string, image: HTMLImageElement) => {
+    if (!image.naturalWidth || !image.naturalHeight) return
+    setImageSizes((sizes) => sizes[url]?.width === image.naturalWidth && sizes[url]?.height === image.naturalHeight
+      ? sizes
+      : { ...sizes, [url]: { width: image.naturalWidth, height: image.naturalHeight } })
+  }
 
   const handlePrevImage = () => {
     setActiveIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
@@ -82,18 +91,22 @@ const ImageGallery = ({ images, productTitle, discountBadge, product }: ImageGal
   }
 
   return (
-    <div className="relative flex h-full flex-col-reverse items-start gap-3 rounded-2xl border border-slate-200/80 bg-white p-3 shadow-2xs md:flex-row md:gap-4 md:!rounded-none md:!border-0 md:!bg-transparent md:!p-0 md:!shadow-none">
+    <div className="relative flex flex-col-reverse items-start gap-3 md:flex-row md:gap-4">
       {/* ── THUMBNAILS (Vertical on Desktop Left | Horizontal on Mobile Bottom) ── */}
       {images.length > 1 && (
-        <div className="no-scrollbar flex flex-row sm:flex-col gap-2.5 overflow-x-auto sm:overflow-y-auto sm:max-h-[470px] w-full sm:w-16 lg:w-20 shrink-0 sm:py-0.5">
+        <div className="no-scrollbar flex flex-row md:flex-col gap-2.5 overflow-x-auto md:overflow-y-auto md:max-h-[620px] w-full md:w-16 lg:w-20 shrink-0 py-0.5">
           {images.map((image, index) => {
             const isActive = activeIndex === index
             return (
               <button
                 key={image.id || index}
+                type="button"
+                aria-label={`${index + 1}. ürün görselini göster`}
+                aria-pressed={isActive}
                 onClick={() => setActiveIndex(index)}
+                style={{ aspectRatio: imageSizes[image.url] ? imageSizes[image.url].width / imageSizes[image.url].height : 4 / 5 }}
                 className={clx(
-                  "relative aspect-square w-14 sm:w-full rounded-2xl overflow-hidden border-2 transition-all bg-white flex items-center justify-center shrink-0 cursor-pointer p-1 shadow-2xs",
+                  "relative w-14 md:w-full rounded-xl overflow-hidden border-2 transition-colors bg-[#FBF7F4] flex items-center justify-center shrink-0 cursor-pointer shadow-2xs",
                   isActive
                     ? "border-[#C98484] shadow-xs"
                     : "border-slate-200/90 hover:border-slate-300 opacity-80 hover:opacity-100"
@@ -104,7 +117,8 @@ const ImageGallery = ({ images, productTitle, discountBadge, product }: ImageGal
                   alt={`${productTitle} - ${index + 1}. görünüm`}
                   fill
                   unoptimized
-                  className="object-contain p-1"
+                  className="object-contain"
+                  onLoad={(event) => rememberSize(image.url, event.currentTarget)}
                   sizes="100px"
                 />
               </button>
@@ -115,8 +129,8 @@ const ImageGallery = ({ images, productTitle, discountBadge, product }: ImageGal
 
       {/* ── MAIN IMAGE STAGE (White Stage with Faint Contour Line) ── */}
       <div
-        className="relative flex-1 w-full min-w-0 aspect-square sm:aspect-auto sm:min-h-[540px] !border-0 !rounded-none !bg-transparent !shadow-none overflow-hidden flex items-center justify-center p-1 sm:p-2 group cursor-zoom-in"
-        style={{ border: 0, borderRadius: 0, background: "transparent", boxShadow: "none" }}
+        className="relative w-full min-w-0 overflow-hidden rounded-2xl bg-[#FBF7F4] ring-1 ring-[#EADBD4]/60 cursor-zoom-in"
+        style={{ aspectRatio: imageRatio, maxWidth: `min(100%, ${620 * imageRatio}px)` }}
         onClick={() => setIsLightboxOpen(true)}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -156,7 +170,8 @@ const ImageGallery = ({ images, productTitle, discountBadge, product }: ImageGal
           fill
           unoptimized
           priority
-          className="object-contain p-1 group-hover:scale-[1.03] transition-transform duration-300"
+          className="object-contain"
+          onLoad={(event) => rememberSize(mainImage.url, event.currentTarget)}
           sizes="(max-width: 768px) 100vw, 640px"
         />
 
@@ -231,7 +246,7 @@ const ImageGallery = ({ images, productTitle, discountBadge, product }: ImageGal
         >
           {/* Large, warm-toned image viewer */}
           <div
-            className="relative w-full max-w-[1120px] max-h-[94dvh] bg-[#FBF7F4] border border-[#EADBD4] rounded-2xl sm:rounded-3xl p-2 sm:p-3 shadow-2xl flex flex-col items-center justify-center"
+            className="relative w-fit max-w-full max-h-[94dvh] bg-[#FBF7F4] border border-[#EADBD4] rounded-2xl sm:rounded-3xl p-1.5 sm:p-2 shadow-2xl flex flex-col items-center justify-center"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Top-Right Close Button */}
@@ -266,14 +281,17 @@ const ImageGallery = ({ images, productTitle, discountBadge, product }: ImageGal
               )}
 
               {/* Main Enlarged Image */}
-              <div className="relative w-full h-[72vh] h-[72dvh] sm:h-[78dvh] max-h-[900px]">
+              <div className="relative overflow-hidden rounded-xl sm:rounded-2xl">
                 <Image
                   src={safeUrl(mainImage.url)}
                   alt={`${productTitle} büyük görünüm`}
-                  fill
+                  width={mainSize.width}
+                  height={mainSize.height}
                   unoptimized
                   priority
-                  className="object-contain select-none"
+                  className="block h-auto w-auto object-contain select-none"
+                  style={{ maxWidth: "min(1120px, calc(100vw - 40px))", maxHeight: "78dvh", width: "auto", height: "auto" }}
+                  onLoad={(event) => rememberSize(mainImage.url, event.currentTarget)}
                 />
               </div>
 
@@ -300,18 +318,19 @@ const ImageGallery = ({ images, productTitle, discountBadge, product }: ImageGal
                     key={img.id || idx}
                     onClick={() => setActiveIndex(idx)}
                     className={clx(
-                      "relative w-11 h-11 sm:w-13 sm:h-13 rounded-xl overflow-hidden border-2 bg-white shrink-0 transition-all cursor-pointer p-0.5",
+                      "relative w-10 sm:w-12 rounded-lg overflow-hidden border-2 bg-[#FBF7F4] shrink-0 transition-all cursor-pointer",
                       activeIndex === idx
                         ? "border-[#C98484] scale-105 shadow-md"
                         : "border-transparent opacity-60 hover:opacity-100"
                     )}
+                    style={{ aspectRatio: imageSizes[img.url] ? imageSizes[img.url].width / imageSizes[img.url].height : 4 / 5 }}
                   >
                     <Image
                       src={safeUrl(img.url)}
                       alt=""
                       fill
                       unoptimized
-                      className="object-contain p-0.5"
+                      className="object-contain"
                     />
                   </button>
                 ))}
