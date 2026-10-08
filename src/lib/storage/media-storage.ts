@@ -239,8 +239,11 @@ export async function readDirectMediaUpload(key: string) {
 }
 
 export async function storeMedia(input: PutInput): Promise<StoredMedia> {
+  const extension = path.extname(input.filename)
+  const base = path.basename(input.filename, extension)
+  const filename = `${base}-${randomUUID()}${extension}`
   if (supabaseStorageConfig()) {
-    const key = `uploads/${Date.now()}-${randomUUID()}-${input.filename}`
+    const key = `uploads/${filename}`
     return {
       url: await putSupabaseObject(key, input),
       storageKey: key,
@@ -248,16 +251,13 @@ export async function storeMedia(input: PutInput): Promise<StoredMedia> {
   }
   const config = s3Config()
   if (config) {
-    const key = `uploads/${Date.now()}-${input.filename}`
+    const key = `uploads/${filename}`
     return {
       url: await signedS3Request("PUT", key, input),
       storageKey: key,
     }
   }
   if (process.env.VERCEL) {
-    const extension = path.extname(input.filename)
-    const base = path.basename(input.filename, extension)
-    const filename = `${base}-${randomUUID()}${extension}`
     return {
       url: `/uploads/${encodeURIComponent(filename)}`,
       storageKey: filename,
@@ -267,15 +267,8 @@ export async function storeMedia(input: PutInput): Promise<StoredMedia> {
   const uploadDir = path.join(process.cwd(), "public", "uploads")
   try {
     await fs.promises.mkdir(uploadDir, { recursive: true })
-    const extension = path.extname(input.filename)
-    const base = path.basename(input.filename, extension)
-    let filename = input.filename
-    let counter = 1
-    while (fs.existsSync(path.join(uploadDir, filename))) {
-      filename = `${base}-${counter++}${extension}`
-    }
-    await fs.promises.writeFile(path.join(uploadDir, filename), input.bytes)
-    return { url: `/uploads/${filename}`, storageKey: filename }
+    await fs.promises.writeFile(path.join(uploadDir, filename), input.bytes, { flag: "wx" })
+    return { url: `/uploads/${encodeURIComponent(filename)}`, storageKey: filename }
   } catch {
     throw new Error(
       "Kalıcı medya deposu yapılandırılmamış. Görseli base64 olarak veritabanına kaydetmek engellendi."
@@ -309,7 +302,9 @@ export async function renameMedia(
     const oldKey = storageKey.startsWith("uploads/")
       ? storageKey
       : `uploads/${storageKey}`
-    const newKey = `uploads/${Date.now()}-${randomUUID()}-${requestedFilename}`
+    const extension = path.extname(requestedFilename)
+    const base = path.basename(requestedFilename, extension)
+    const newKey = `uploads/${base}-${randomUUID()}${extension}`
     const oldUrl = `${supabase.endpoint}/storage/v1/object/public/${encodeURIComponent(
       supabase.bucket,
     )}/${encodeStoragePath(oldKey)}`
@@ -334,7 +329,9 @@ export async function renameMedia(
     const oldKey = storageKey.startsWith("uploads/")
       ? storageKey
       : `uploads/${storageKey}`
-    const newKey = `uploads/${requestedFilename}`
+    const extension = path.extname(requestedFilename)
+    const base = path.basename(requestedFilename, extension)
+    const newKey = `uploads/${base}-${randomUUID()}${extension}`
     const oldUrl = `${config.publicBase}/${oldKey
       .split("/")
       .map(encodeURIComponent)

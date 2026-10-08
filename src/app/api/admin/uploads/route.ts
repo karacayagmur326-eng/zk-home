@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getAdminSession } from "@lib/admin/auth"
 import { query } from "@lib/admin/db"
 import { ensureCommerceSchema } from "@lib/commerce/schema"
-import { createId, slugify } from "@lib/commerce/repository"
+import { createId } from "@lib/commerce/repository"
 import * as path from "path"
 import sharp from "sharp"
 import {
@@ -51,8 +51,17 @@ function mimeForExtension(extension: string) {
 }
 
 function safeFilename(originalName: string, extension: string) {
-  const baseName = path.basename(originalName, path.extname(originalName))
-  const cleanBase = slugify(baseName) || "gorsel"
+  const leafName = originalName.replace(/\\/g, "/").split("/").pop() || ""
+  const baseName = path.basename(leafName, path.extname(leafName))
+  // Keep the descriptive name, case and separators; normalize only characters
+  // that cannot be used safely across our storage providers.
+  const cleanBase = baseName
+    .replace(/ı/g, "i")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^A-Za-z0-9._ -]+/g, "-")
+    .replace(/^[.\s-]+|[.\s-]+$/g, "")
+    .slice(0, 160) || "gorsel"
   return `${cleanBase}${extension}`
 }
 

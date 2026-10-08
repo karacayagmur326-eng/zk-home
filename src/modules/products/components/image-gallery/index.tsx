@@ -132,10 +132,10 @@ const ImageGallery = ({ images, productTitle, discountBadge, product }: ImageGal
           </span>
         )}
 
-        {/* Floating Favorite Heart Button (Top-Right of Main Image Stage on Mobile) */}
+        {/* Favorite heart stays visible on desktop and mobile. */}
         {product && (
           <div
-            className="absolute top-3 right-3 z-30 sm:hidden"
+            className="absolute top-3 right-3 z-30"
             onClick={(e) => e.stopPropagation()}
           >
             <FavoriteButton
