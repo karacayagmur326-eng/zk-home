@@ -75,6 +75,19 @@ export default function Addresses({
   const [sameAsBilling, setSameAsBilling] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [errorField, setErrorField] = useState("")
+  const errorProps = (name: string) => ({
+    "aria-invalid": errorField === name || undefined,
+    "aria-describedby": errorField === name ? "checkout-address-error" : undefined,
+    style: errorField === name ? { borderColor: "#dc2626", backgroundColor: "#fff5f5", boxShadow: "0 0 0 2px #fecaca" } : undefined,
+  })
+  const focusErrorField = (form: HTMLFormElement, name: string) => {
+    const field = form.elements.namedItem(name)
+    if (field instanceof HTMLElement) {
+      field.scrollIntoView({ behavior: "smooth", block: "center" })
+      field.focus({ preventScroll: true })
+    }
+  }
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(
     cart?.payment_collection?.payment_sessions?.[0]?.provider_id ||
       paymentMethods[0]?.id ||
@@ -254,7 +267,9 @@ export default function Addresses({
     setIsSubmitting(true)
     setErrorMsg(null)
 
-    const formData = new FormData(e.currentTarget)
+    setErrorField("")
+    const form = e.currentTarget
+    const formData = new FormData(form)
 
     // Ensure state-bound select inputs get correctly registered in FormData
     formData.set("shipping_address.city", selectedCity)
@@ -267,6 +282,10 @@ export default function Addresses({
         const res = await setAddresses(null, formData)
         if (res && res.success === false) {
           setErrorMsg(res.error || "Adres kaydedilirken bir hata oluştu.")
+          if (res.field) {
+            setErrorField(res.field)
+            focusErrorField(form, res.field)
+          }
           return
         }
       }
@@ -337,7 +356,20 @@ export default function Addresses({
         </div>
 
         {isAddressOpen ? (
-          <form id="checkout-address-form" onSubmit={handleSubmit} className="space-y-4">
+          <form id="checkout-address-form" onSubmit={handleSubmit} className="space-y-4"
+            onInvalidCapture={(event) => {
+              const field = event.target as HTMLInputElement
+              const firstInvalid = event.currentTarget.querySelector(":invalid")
+              if (field === firstInvalid) {
+                setErrorField(field.name)
+                setErrorMsg(field.validationMessage)
+                focusErrorField(event.currentTarget, field.name)
+              }
+            }}
+            onChangeCapture={(event) => {
+              const field = event.target as HTMLInputElement
+              if (field.name === errorField) { setErrorField(""); setErrorMsg(null) }
+            }}>
             <div>
               {/* Top Bar: Adres Türü + Hızlı Üyelik + Adres Başlığı */}
               <div className="pb-4 border-b border-slate-100">
@@ -432,6 +464,7 @@ export default function Addresses({
                         key={`fn-${addressType}`}
                         type="text"
                         name="shipping_address.first_name"
+                        {...errorProps("shipping_address.first_name")}
                         required
                         defaultValue={addressType === "kurumsal" ? "" : defaultFirstName}
                         placeholder="Adınız"
@@ -451,6 +484,7 @@ export default function Addresses({
                         key={`ln-${addressType}`}
                         type="text"
                         name="shipping_address.last_name"
+                        {...errorProps("shipping_address.last_name")}
                         required
                         defaultValue={addressType === "kurumsal" ? "" : defaultLastName}
                         placeholder="Soyadınız"
@@ -470,6 +504,7 @@ export default function Addresses({
                         key={`email-${addressType}`}
                         type="email"
                         name="email"
+                        {...errorProps("email")}
                         required
                         defaultValue={addressType === "kurumsal" ? "" : defaultEmail}
                         placeholder="ornek@domain.com"
@@ -491,6 +526,7 @@ export default function Addresses({
                         key={`phone-${addressType}`}
                         type="tel"
                         name="shipping_address.phone"
+                        {...errorProps("shipping_address.phone")}
                         required
                         defaultValue={addressType === "kurumsal" ? "" : defaultPhone}
                         placeholder="5XX XXX XX XX"
@@ -513,6 +549,7 @@ export default function Addresses({
                             key={`company-${addressType}`}
                             type="text"
                             name="shipping_address.company"
+                            {...errorProps("shipping_address.company")}
                             required={addressType === "kurumsal"}
                             defaultValue=""
                             placeholder="Şirket Tam Ünvanı"
@@ -556,6 +593,7 @@ export default function Addresses({
                           key={`tax_number-${addressType}`}
                           type="text"
                           name="tax_number"
+                          {...errorProps("tax_number")}
                           required={addressType === "kurumsal"}
                           defaultValue=""
                           placeholder="10 Haneli VKN"
@@ -583,6 +621,7 @@ export default function Addresses({
                       <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
                       <select
                         name="shipping_address.country_code"
+                        {...errorProps("shipping_address.country_code")}
                         disabled
                         defaultValue="tr"
                         className="w-full h-10 rounded-xl border border-slate-200 bg-slate-100/70 pl-9 pr-3 text-xs font-bold text-slate-700 appearance-none cursor-not-allowed"
@@ -603,6 +642,7 @@ export default function Addresses({
                       <select
                         key={`city-${addressType}`}
                         name="shipping_address.city"
+                        {...errorProps("shipping_address.city")}
                         value={selectedCity}
                         onChange={(e) => handleCityChange(e.target.value)}
                         className="w-full h-10 rounded-xl border border-slate-200 bg-white pl-9 pr-8 text-xs font-semibold text-slate-800 outline-none focus:border-[#C98484] focus:ring-2 focus:ring-[#C98484]/15 transition-all appearance-none cursor-pointer"
@@ -628,6 +668,7 @@ export default function Addresses({
                       <select
                         key={`district-${addressType}`}
                         name="shipping_address.province"
+                        {...errorProps("shipping_address.province")}
                         value={selectedDistrict}
                         onChange={(e) => setSelectedDistrict(e.target.value)}
                         className="w-full h-10 rounded-xl border border-slate-200 bg-white pl-9 pr-8 text-xs font-semibold text-slate-800 outline-none focus:border-[#C98484] focus:ring-2 focus:ring-[#C98484]/15 transition-all appearance-none cursor-pointer"
@@ -674,6 +715,7 @@ export default function Addresses({
                         key={`postal-${addressType}`}
                         type="text"
                         name="shipping_address.postal_code"
+                        {...errorProps("shipping_address.postal_code")}
                         required
                         defaultValue={addressType === "kurumsal" ? "" : defaultPostalCode}
                         placeholder="34XXX"
@@ -693,6 +735,7 @@ export default function Addresses({
                         key={`addr1-${addressType}`}
                         type="text"
                         name="shipping_address.address_1"
+                        {...errorProps("shipping_address.address_1")}
                         required
                         defaultValue={addressType === "kurumsal" ? "" : defaultAddress1}
                         placeholder="Cadde, sokak, bina ve kapı no yazın"
@@ -714,6 +757,7 @@ export default function Addresses({
                         key={`addr2-${addressType}`}
                         type="text"
                         name="shipping_address.address_2"
+                        {...errorProps("shipping_address.address_2")}
                         defaultValue={addressType === "kurumsal" ? "" : defaultAddress2}
                         placeholder="Site adı, blok, daire no"
                         className="w-full h-10 rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-xs text-slate-800 outline-none focus:border-[#C98484] transition-colors"
@@ -805,6 +849,7 @@ export default function Addresses({
                         <input
                           type="text"
                           name="billing_address.first_name"
+                          {...errorProps("billing_address.first_name")}
                           required
                           defaultValue={defaultFirstName}
                           placeholder="Adınız"
@@ -823,6 +868,7 @@ export default function Addresses({
                         <input
                           type="text"
                           name="billing_address.last_name"
+                          {...errorProps("billing_address.last_name")}
                           required
                           defaultValue={defaultLastName}
                           placeholder="Soyadınız"
@@ -860,6 +906,7 @@ export default function Addresses({
                         <input
                           type="tel"
                           name="billing_address.phone"
+                          {...errorProps("billing_address.phone")}
                           required
                           defaultValue={defaultPhone}
                           placeholder="5XX XXX XX XX"
@@ -881,6 +928,7 @@ export default function Addresses({
                             <input
                               type="text"
                               name="billing_address.company"
+                              {...errorProps("billing_address.company")}
                               required={billingAddressType === "kurumsal"}
                               defaultValue={defaultCompany}
                               placeholder="Şirket Tam Ünvanı"
@@ -921,6 +969,7 @@ export default function Addresses({
                           <input
                             type="text"
                             name="billing_tax_number"
+                            {...errorProps("billing_tax_number")}
                             required={billingAddressType === "kurumsal"}
                             placeholder="10 Haneli VKN"
                             className="w-full h-10 rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-xs text-slate-800 outline-none focus:border-[#C98484] transition-colors"
@@ -947,6 +996,7 @@ export default function Addresses({
                         <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
                         <select
                           name="billing_address.country_code"
+                          {...errorProps("billing_address.country_code")}
                           disabled
                           defaultValue="tr"
                           className="w-full h-10 rounded-xl border border-slate-200 bg-slate-100/70 pl-9 pr-3 text-xs font-bold text-slate-700 appearance-none cursor-not-allowed"
@@ -966,6 +1016,7 @@ export default function Addresses({
                         <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none z-10" />
                         <select
                           name="billing_address.city"
+                          {...errorProps("billing_address.city")}
                           value={billingSelectedCity}
                           onChange={(e) => handleBillingCityChange(e.target.value)}
                           className="w-full h-10 rounded-xl border border-slate-200 bg-white pl-9 pr-8 text-xs font-semibold text-slate-800 outline-none focus:border-[#C98484] focus:ring-2 focus:ring-[#C98484]/15 transition-all appearance-none cursor-pointer"
@@ -990,6 +1041,7 @@ export default function Addresses({
                         <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none z-10" />
                         <select
                           name="billing_address.province"
+                          {...errorProps("billing_address.province")}
                           value={billingSelectedDistrict}
                           onChange={(e) => setBillingSelectedDistrict(e.target.value)}
                           className="w-full h-10 rounded-xl border border-slate-200 bg-white pl-9 pr-8 text-xs font-semibold text-slate-800 outline-none focus:border-[#C98484] focus:ring-2 focus:ring-[#C98484]/15 transition-all appearance-none cursor-pointer"
@@ -1034,6 +1086,7 @@ export default function Addresses({
                         <input
                           type="text"
                           name="billing_address.postal_code"
+                          {...errorProps("billing_address.postal_code")}
                           required
                           defaultValue={defaultPostalCode}
                           placeholder="34XXX"
@@ -1052,6 +1105,7 @@ export default function Addresses({
                         <input
                           type="text"
                           name="billing_address.address_1"
+                          {...errorProps("billing_address.address_1")}
                           required
                           defaultValue={defaultAddress1}
                           placeholder="Cadde, sokak, bina ve kapı no yazın"
@@ -1072,6 +1126,7 @@ export default function Addresses({
                         <input
                           type="text"
                           name="billing_address.address_2"
+                          {...errorProps("billing_address.address_2")}
                           defaultValue={defaultAddress2}
                           placeholder="Site adı, blok, daire no"
                           className="w-full h-10 rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-xs text-slate-800 outline-none focus:border-[#C98484] transition-colors"
@@ -1092,7 +1147,7 @@ export default function Addresses({
             </div>
 
             {errorMsg && (
-              <div className="rounded-xl bg-red-50 p-3 text-xs font-bold text-red-600">
+              <div id="checkout-address-error" role="alert" className="rounded-xl bg-red-50 p-3 text-xs font-bold text-red-600">
                 {errorMsg}
               </div>
             )}

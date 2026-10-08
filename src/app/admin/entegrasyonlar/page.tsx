@@ -502,6 +502,20 @@ export default function IntegrationsPage() {
                   </div>
                 </div>
 
+                {item.provider === "iyzico" && !item.enabled && (
+                  <div className="mx-6 mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+                    <div className="flex-1 text-xs text-amber-900 space-y-1">
+                      <p className="font-bold">iyzico şu anda ödeme ekranında gösterilmiyor.</p>
+                      <p>Bağlantının doğrulanması ödemeyi etkinleştirmez. Doğruladıktan sonra etkinleştirip kaydedin.</p>
+                    </div>
+                    <button type="button" disabled={!validated[item.provider] || busy === item.provider}
+                      onClick={() => save({ ...item, enabled: true })}
+                      className="rounded-xl bg-[#C98484] px-4 py-3 text-xs font-bold text-white disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
+                      {busy === item.provider ? "Kaydediliyor…" : "Ödemeyi Etkinleştir ve Kaydet"}
+                    </button>
+                  </div>
+                )}
+
                 {/* BIRFATURA CONNECTION GUIDE BOX */}
                 {isBirFatura && (
                   <div className="mx-6 mt-4 p-4 rounded-2xl bg-rose-50/70 border border-rose-200/80 space-y-3">

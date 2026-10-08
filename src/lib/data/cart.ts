@@ -779,7 +779,7 @@ export async function submitPromotionForm(
 export async function setAddresses(
   _currentState: any,
   formData: FormData
-): Promise<{ success: boolean; error?: string } | null> {
+): Promise<{ success: boolean; error?: string; field?: string } | null> {
   const addressType = String(formData.get("address_type") || "bireysel")
   const sameAsBilling = formData.get("same_as_billing") === "on"
   const billingAddressType = sameAsBilling
@@ -794,7 +794,7 @@ export async function setAddresses(
         ).replace(/\D/g, "")
       : ""
   if (billingAddressType === "kurumsal" && !/^\d{10}$/.test(taxNumber)) {
-    return { success: false, error: "Kurumsal fatura için 10 haneli vergi numarası gereklidir." }
+    return { success: false, error: "Kurumsal fatura için 10 haneli vergi numarası gereklidir.", field: sameAsBilling ? "tax_number" : "billing_tax_number" }
   }
   const shippingAddress = {
     first_name: formData.get("shipping_address.first_name"),
@@ -824,18 +824,13 @@ export async function setAddresses(
           phone: formData.get("billing_address.phone"),
         }
   const email = String(formData.get("email") || "").trim().toLowerCase()
-  const requiredValues = [
-    shippingAddress.first_name,
-    shippingAddress.last_name,
-    shippingAddress.address_1,
-    shippingAddress.city,
-    shippingAddress.province,
-  ].map((value) => String(value || "").trim())
-  if (requiredValues.some((value) => !value)) {
-    return { success: false, error: "Teslimat adresindeki zorunlu alanları eksiksiz doldurun." }
+  const requiredFields = ["first_name", "last_name", "address_1", "city", "province"] as const
+  const missingShippingField = requiredFields.find((field) => !String(shippingAddress[field] || "").trim())
+  if (missingShippingField) {
+    return { success: false, error: "Teslimat adresindeki zorunlu alanları eksiksiz doldurun.", field: `shipping_address.${missingShippingField}` }
   }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return { success: false, error: "Geçerli bir e-posta adresi girin." }
+    return { success: false, error: "Geçerli bir e-posta adresi girin.", field: "email" }
   }
   const settings = await getCommerceSettings()
   const customerId = await getCustomerSessionId().catch(() => null)
@@ -847,21 +842,15 @@ export async function setAddresses(
   }
   const phone = String(shippingAddress.phone || "").replace(/\D/g, "")
   if (settings.order_settings.requirePhone && !/^\d{10,11}$/.test(phone)) {
-    return { success: false, error: "Geçerli bir telefon numarası girin." }
+    return { success: false, error: "Geçerli bir telefon numarası girin.", field: "shipping_address.phone" }
   }
   if (String(shippingAddress.address_1 || "").trim().length < 10) {
-    return { success: false, error: "Teslimat adresi en az 10 karakter olmalıdır (Lütfen caddesini, sokağını ve kapı numarasını eksiksiz yazınız)." }
+    return { success: false, error: "Teslimat adresi en az 10 karakter olmalıdır (Lütfen caddesini, sokağını ve kapı numarasını eksiksiz yazınız).", field: "shipping_address.address_1" }
   }
   if (!sameAsBilling) {
-    const billingRequired = [
-      billingAddress.first_name,
-      billingAddress.last_name,
-      billingAddress.address_1,
-      billingAddress.city,
-      billingAddress.province,
-    ].map((value) => String(value || "").trim())
-    if (billingRequired.some((value) => !value)) {
-      return { success: false, error: "Fatura adresindeki zorunlu alanları eksiksiz doldurun." }
+    const missingBillingField = requiredFields.find((field) => !String(billingAddress[field] || "").trim())
+    if (missingBillingField) {
+      return { success: false, error: "Fatura adresindeki zorunlu alanları eksiksiz doldurun.", field: `billing_address.${missingBillingField}` }
     }
   }
   await updateCart({
