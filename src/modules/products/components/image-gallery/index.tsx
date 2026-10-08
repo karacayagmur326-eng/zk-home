@@ -148,7 +148,7 @@ const ImageGallery = ({ images, productTitle, discountBadge, product }: ImageGal
                 price: (product.variants?.[0] as any)?.calculated_price?.calculated_amount || null,
               }}
               variant="icon"
-              className="h-10 w-10 rounded-full bg-white/95 border border-slate-200/90 shadow-md flex items-center justify-center text-slate-700 hover:text-[#C98484] active:scale-95 transition-all cursor-pointer"
+              className="h-10 w-10 rounded-full bg-white/95 border border-slate-200/90 shadow-md flex items-center justify-center hover:text-[#C98484] active:scale-95 transition-all cursor-pointer"
             />
           </div>
         )}
