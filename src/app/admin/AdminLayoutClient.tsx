@@ -5,8 +5,6 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useState, useEffect, type CSSProperties } from "react"
 import {
-  ChevronDown,
-  ChevronRight,
   LogOut,
   PanelLeftClose,
   PanelLeftOpen,
@@ -17,6 +15,7 @@ import {
   X,
   AppIcon,
 } from "@lib/icons"
+import { AdminSidebarItem as NavItem, AdminSidebarGroup } from "@components/admin/AdminSidebarNav"
 import ClearCacheButton from "./components/ClearCacheButton"
 import MaintenanceToggleButton from "./components/MaintenanceToggleButton"
 import "./admin-design-system.css"
@@ -30,213 +29,61 @@ const marketingSubItems = [
 
 const mainNavItems = [
   {
-    href: "/admin/siparisler",
-    label: "Siparişler",
-    icon: (
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-        <polyline points="14 2 14 8 20 8"></polyline>
-        <line x1="16" y1="13" x2="8" y2="13"></line>
-        <line x1="16" y1="17" x2="8" y2="17"></line>
-        <polyline points="10 9 9 9 8 9"></polyline>
-      </svg>
-    ),
+    "href": "/admin/siparisler",
+    "label": "Siparişler"
   },
   {
-    href: "/admin/iadeler",
-    label: "İade Talepleri",
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M3 12a9 9 0 1 0 3-6.7"></path>
-        <path d="M3 3v6h6"></path>
-      </svg>
-    ),
+    "href": "/admin/iadeler",
+    "label": "İadeler & İptaller"
   },
   {
-    href: "/admin/bulten",
-    label: "E-posta Bülteni",
-    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 6 9 7 9-7" /></svg>,
+    "href": "/admin/bulten",
+    "label": "E-posta Bülteni"
   },
   {
-    href: "/admin/kullanicilar",
-    label: "Kullanıcılar",
-    icon: (
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-        <circle cx="9" cy="7" r="4"></circle>
-        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-      </svg>
-    ),
+    "href": "/admin/kullanicilar",
+    "label": "Kullanıcılar"
   },
   {
-    href: "/admin/slaytlar",
-    label: "Sliderlar",
-    icon: (
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-        <circle cx="8.5" cy="8.5" r="1.5"></circle>
-        <polyline points="21 15 16 10 5 21"></polyline>
-      </svg>
-    ),
+    "href": "/admin/slaytlar",
+    "label": "Sliderlar"
   },
   {
-    href: "/admin/mobil",
-    label: "Mobil",
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="6" y="2" width="12" height="20" rx="2"></rect>
-        <path d="M10 18h4"></path>
-      </svg>
-    ),
+    "href": "/admin/mobil",
+    "label": "Mobil"
   },
   {
-    href: "/admin/anasayfa-vitrini",
-    label: "Ana Sayfa Vitrini",
-    icon: <AppIcon name="PanelsTopLeft" size={18} />,
+    "href": "/admin/anasayfa-vitrini",
+    "label": "Ana Sayfa Vitrini"
   },
   {
-    href: "/admin/menuler",
-    label: "Menüler",
-    icon: (
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <line x1="3" y1="12" x2="21" y2="12"></line>
-        <line x1="3" y1="6" x2="21" y2="6"></line>
-        <line x1="3" y1="18" x2="21" y2="18"></line>
-      </svg>
-    ),
+    "href": "/admin/menuler",
+    "label": "Menüler"
   },
   {
-    href: "/admin/sayfalar",
-    label: "Sayfalar",
-    icon: (
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M4 4h16v16H4z"></path>
-        <path d="M8 8h8M8 12h8M8 16h5"></path>
-      </svg>
-    ),
+    "href": "/admin/sayfalar",
+    "label": "Sayfalar"
   },
   {
-    href: "/admin/blog",
-    label: "Blog & Makaleler",
-    icon: (
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-      </svg>
-    ),
+    "href": "/admin/blog",
+    "label": "Blog & Makaleler"
   },
   {
-    href: "/admin/medya",
-    label: "Medya",
-    icon: (
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-      </svg>
-    ),
+    "href": "/admin/medya",
+    "label": "Medya"
   },
   {
-    href: "/admin/iletisim",
-    label: "İletişim & Mesajlar",
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-      </svg>
-    ),
+    "href": "/admin/iletisim",
+    "label": "İletişim & Mesajlar"
   },
   {
-    href: "/admin/chatbot",
-    label: "ZK Home Asistan",
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="7" width="18" height="13" rx="2"></rect>
-        <path d="M12 3v4M8 12h.01M16 12h.01M8 16h8"></path>
-      </svg>
-    ),
+    "href": "/admin/chatbot",
+    "label": "ZK Home Asistan"
   },
-
   {
-    href: "/admin/ayarlar",
-    label: "Ayarlar",
-    icon: (
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <circle cx="12" cy="12" r="3"></circle>
-        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-      </svg>
-    ),
-  },
+    "href": "/admin/ayarlar",
+    "label": "Ayarlar"
+  }
 ]
 
 const productSubItems = [
@@ -253,16 +100,17 @@ const productSubItems = [
 const navIconNames: Record<string, string> = {
   "/admin/siparisler": "ClipboardList",
   "/admin/iadeler": "RotateCcw",
-  "/admin/kullanicilar": "UsersRound",
+  "/admin/kullanicilar": "Users",
   "/admin/slaytlar": "GalleryHorizontalEnd",
   "/admin/anasayfa-vitrini": "PanelsTopLeft",
   "/admin/mobil": "Smartphone",
   "/admin/menuler": "ListTree",
   "/admin/sayfalar": "Files",
-  "/admin/blog": "BookOpen",
+  "/admin/blog": "FileText",
   "/admin/medya": "Images",
   "/admin/iletisim": "MessagesSquare",
-  "/admin/chatbot": "ZK Home Asistan",
+  "/admin/chatbot": "Cpu",
+  "/admin/bulten": "Mail",
   "/admin/ayarlar": "Settings",
 }
 
@@ -440,7 +288,7 @@ export default function AdminLayout({
   const pageSubtitles: Record<string, string> = {
     "/admin": "Mağazanızın genel performansını ve son gelişmeleri buradan takip edebilirsiniz.",
     "/admin/siparisler": "Tüm müşteri siparişlerini yönetin, durumlarını güncelleyin ve kargo takibi yapın.",
-    "/admin/iadeler": "Müşterilerden gelen iade taleplerini inceleyin ve yönetin.",
+    "/admin/iadeler": "Ürün iade taleplerini, iptal edilen siparişleri ve para iadelerini takip edin.",
     "/admin/kullanicilar": "Kullanıcı ve yönetim ekibi hesaplarını yönetin.",
     "/admin/slaytlar": "Ana sayfa slider görsellerini ve duyuru bantlarını yönetin.",
     "/admin/anasayfa-vitrini": "Koleksiyon, seçki, banner, oda ve bülten alanlarını yönetin.",
@@ -604,191 +452,8 @@ export default function AdminLayout({
             />
           )}
 
-          {/* Ürünler collapsible */}
-          <div>
-            <button
-              onClick={() => setProdOpen((o) => !o)}
-              aria-current={isProductsActive ? "page" : undefined}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                width: "100%",
-                gap: 10,
-                padding: collapsed ? "9px 14px" : "9px 16px",
-                border: "none",
-                background: isProductsActive ? C.sidebarHover : "transparent",
-                color: isProductsActive ? "#fff" : C.sidebarText,
-                cursor: "pointer",
-                textAlign: "left",
-                fontSize: 13,
-                borderLeft: isProductsActive
-                  ? `3px solid ${C.sidebarActive}`
-                  : "3px solid transparent",
-                transition: "all 0.15s",
-              }}
-              className="admin-nav-btn"
-            >
-              <span
-                style={{
-                  flexShrink: 0,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: 24,
-                  height: 24,
-                  marginRight: 2,
-                }}
-              >
-                <AppIcon name="PackageOpen" size={18} />
-              </span>
-              {!collapsed && (
-                <>
-                  <span
-                    style={{
-                      flex: 1,
-                      fontWeight: isProductsActive ? 600 : 400,
-                    }}
-                  >
-                    Ürünler
-                  </span>
-                  {prodOpen ? (
-                    <ChevronDown aria-hidden="true" size={15} />
-                  ) : (
-                    <ChevronRight aria-hidden="true" size={15} />
-                  )}
-                </>
-              )}
-            </button>
-
-            {prodOpen && !collapsed && (
-              <div style={{ backgroundColor: "#161b1f" }}>
-                {productSubItems.map((sub) => {
-                  const active =
-                    pathname === sub.href ||
-                    (sub.href !== "/admin/urunler" &&
-                      pathname.startsWith(sub.href))
-                  return (
-                    <Link
-                      key={sub.href}
-                      href={sub.href}
-                      style={{
-                        display: "block",
-                        padding: "7px 16px 7px 42px",
-                        textDecoration: "none",
-                        fontSize: 12,
-                        color: active ? "#fff" : "#8a9099",
-                        fontWeight: active ? 600 : 400,
-                        background: active
-                          ? "rgba(201,132,132,0.15)"
-                          : "transparent",
-                        borderLeft: active
-                          ? `3px solid ${C.sidebarActive}`
-                          : "3px solid transparent",
-                        transition: "all 0.12s",
-                      }}
-                      className="admin-sub-link"
-                    >
-                      {sub.label}
-                    </Link>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* Pazarlama collapsible (Hidden for Editör) */}
-          {userRole !== "Editör" && (
-            <div>
-            <button
-              onClick={() => setMktOpen((o) => !o)}
-              aria-current={isMarketingActive ? "page" : undefined}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  width: "100%",
-                  gap: 10,
-                  padding: collapsed ? "9px 14px" : "9px 16px",
-                  border: "none",
-                  background: isMarketingActive ? C.sidebarHover : "transparent",
-                  color: isMarketingActive ? "#fff" : C.sidebarText,
-                  cursor: "pointer",
-                  textAlign: "left",
-                  fontSize: 13,
-                  borderLeft: isMarketingActive
-                    ? `3px solid ${C.sidebarActive}`
-                    : "3px solid transparent",
-                  transition: "all 0.15s",
-                }}
-                className="admin-nav-btn"
-              >
-                <span
-                  style={{
-                    flexShrink: 0,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: 24,
-                    height: 24,
-                    marginRight: 2,
-                  }}
-                >
-                  <AppIcon name="BadgePercent" size={18} />
-                </span>
-                {!collapsed && (
-                  <>
-                    <span
-                      style={{
-                        flex: 1,
-                        fontWeight: isMarketingActive ? 600 : 400,
-                      }}
-                    >
-                      Pazarlama
-                    </span>
-                    {mktOpen ? (
-                      <ChevronDown aria-hidden="true" size={15} />
-                    ) : (
-                      <ChevronRight aria-hidden="true" size={15} />
-                    )}
-                  </>
-                )}
-              </button>
-
-              {mktOpen && !collapsed && (
-                <div style={{ backgroundColor: "#161b1f" }}>
-                  {marketingSubItems.map((sub) => {
-                    const active =
-                      pathname === sub.href ||
-                      (sub.href !== "/admin/indirimler" &&
-                        pathname.startsWith(sub.href))
-                    return (
-                      <Link
-                        key={sub.href}
-                        href={sub.href}
-                        style={{
-                          display: "block",
-                          padding: "7px 16px 7px 42px",
-                          textDecoration: "none",
-                          fontSize: 12,
-                          color: active ? "#fff" : "#8a9099",
-                          fontWeight: active ? 600 : 400,
-                          background: active
-                            ? "rgba(201,132,132,0.15)"
-                            : "transparent",
-                          borderLeft: active
-                            ? `3px solid ${C.sidebarActive}`
-                            : "3px solid transparent",
-                          transition: "all 0.12s",
-                        }}
-                        className="admin-sub-link"
-                      >
-                        {sub.label}
-                      </Link>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
-          )}
+          <AdminSidebarGroup id="admin-products-menu" icon={<AppIcon name="PackageOpen" size={18} />} label="Ürünler" active={isProductsActive} collapsed={collapsed} expanded={prodOpen} onToggle={() => { if (collapsed) setCollapsed(false); setProdOpen(collapsed || !prodOpen) }} items={productSubItems} pathname={pathname} />
+          {userRole !== "Editör" && <AdminSidebarGroup id="admin-marketing-menu" icon={<AppIcon name="BadgePercent" size={18} />} label="Pazarlama" active={isMarketingActive} collapsed={collapsed} expanded={mktOpen} onToggle={() => { if (collapsed) setCollapsed(false); setMktOpen(collapsed || !mktOpen) }} items={marketingSubItems} pathname={pathname} />}
 
           {/* Main nav items (Filtered by Role) */}
           {mainNavItems
@@ -846,49 +511,8 @@ export default function AdminLayout({
             padding: "8px 0",
           }}
         >
-          <button
-            onClick={() => setCollapsed((c) => !c)}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              width: "100%",
-              padding: collapsed ? "9px 14px" : "9px 16px",
-              border: "none",
-              background: "transparent",
-              color: C.sidebarText,
-              cursor: "pointer",
-              fontSize: 13,
-            }}
-            className="admin-nav-btn admin-sidebar-collapse"
-          >
-            {collapsed ? (
-              <PanelLeftOpen aria-hidden="true" size={17} />
-            ) : (
-              <PanelLeftClose aria-hidden="true" size={17} />
-            )}
-            {!collapsed && <span>Küçült</span>}
-          </button>
-          <button
-            onClick={handleLogout}
-            disabled={loggingOut}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              width: "100%",
-              padding: collapsed ? "9px 14px" : "9px 16px",
-              border: "none",
-              background: "transparent",
-              color: "#f87171",
-              cursor: "pointer",
-              fontSize: 13,
-            }}
-            className="admin-nav-btn"
-          >
-            <LogOut aria-hidden="true" size={17} />
-            {!collapsed && <span>{loggingOut ? "Çıkılıyor..." : "Çıkış"}</span>}
-          </button>
+          <div className="admin-sidebar-collapse"><NavItem onClick={() => setCollapsed(c => !c)} collapsed={collapsed} label={collapsed ? "Menüyü genişlet" : "Küçült"} icon={collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />} /></div>
+          <NavItem onClick={handleLogout} collapsed={collapsed} label={loggingOut ? "Çıkılıyor..." : "Çıkış"} icon={<LogOut size={18} />} disabled={loggingOut} danger />
         </div>
       </aside>
 
@@ -1043,84 +667,8 @@ export default function AdminLayout({
           from { transform: scale(0.95); opacity: 0; }
           to { transform: scale(1); opacity: 1; }
         }
-        .admin-nav-btn:hover { background-color: ${C.sidebarHover} !important; color: #fff !important; }
-        .admin-sub-link:hover { background-color: rgba(255,255,255,0.05) !important; color: #fff !important; }
         
       `}</style>
     </div>
-  )
-}
-
-// ── Reusable NavItem ──────────────────────────────────────────────────────────
-function NavItem({
-  href,
-  icon,
-  label,
-  active,
-  collapsed,
-  badge = 0,
-}: {
-  href: string
-  icon: React.ReactNode
-  label: string
-  active: boolean
-  collapsed: boolean
-  badge?: number
-}) {
-  return (
-    <Link
-      href={href}
-      aria-current={active ? "page" : undefined}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 10,
-        padding: collapsed ? "9px 14px" : "9px 16px",
-        textDecoration: "none",
-        color: active ? "#fff" : "#a7aaad",
-        background: active ? "#2c3338" : "transparent",
-        fontWeight: active ? 600 : 400,
-        borderLeft: active ? "3px solid #C98484" : "3px solid transparent",
-        transition: "all 0.12s",
-        fontSize: 13,
-      }}
-      className="admin-nav-btn"
-    >
-      <span
-        style={{
-          flexShrink: 0,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: 24,
-          height: 24,
-        }}
-      >
-        {icon}
-      </span>
-      {!collapsed && <span style={{ whiteSpace: "nowrap", flex: 1 }}>{label}</span>}
-      {badge > 0 && (
-        <span
-          aria-label={`${badge} yeni bildirim`}
-          style={{
-            minWidth: 20,
-            height: 20,
-            padding: "0 6px",
-            borderRadius: 999,
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: "linear-gradient(135deg,#ff6b18,#ef3f3f)",
-            color: "#fff",
-            fontSize: 10,
-            fontWeight: 800,
-            boxShadow: "0 4px 12px rgba(239,63,63,.32)",
-            marginLeft: collapsed ? -8 : "auto",
-          }}
-        >
-          {badge > 99 ? "99+" : badge}
-        </span>
-      )}
-    </Link>
   )
 }

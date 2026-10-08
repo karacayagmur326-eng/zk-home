@@ -9,7 +9,7 @@ export async function GET() {
     return NextResponse.json({ error: "Yetkisiz işlem." }, { status: 401 })
   }
   await ensureCommerceSchema()
-  const requests = await query(
+  const [requests, cancellations, refunds] = await Promise.all([query(
     `SELECT r.*,o.display_id,o.email,o.total,o.currency_code,
        COALESCE((
          SELECT jsonb_agg(jsonb_build_object(
@@ -22,8 +22,23 @@ export async function GET() {
        ),'[]'::jsonb) AS items
      FROM store_return_request r JOIN store_order o ON o.id=r.order_id
      ORDER BY r.created_at DESC`
-  )
-  return NextResponse.json({ requests })
+  ), query(
+    `SELECT o.id,o.display_id,o.email,o.total,o.currency_code,o.payment_status,
+       COALESCE(h.created_at,o.updated_at) AS created_at,CASE WHEN h.note ILIKE '%anında iade%' THEN 'Müşteri panelinden kargo öncesi sipariş iptali.' ELSE h.note END AS reason,
+       COALESCE(r.amount,0) AS refund_amount,r.status AS refund_status,r.provider_reference
+     FROM store_order o
+     LEFT JOIN LATERAL (SELECT created_at,note FROM store_order_status_history WHERE order_id=o.id AND status='cancelled' ORDER BY created_at DESC LIMIT 1) h ON TRUE
+     LEFT JOIN LATERAL (SELECT SUM(amount)::bigint AS amount,
+       CASE WHEN BOOL_OR(status='pending') THEN 'pending' WHEN BOOL_OR(status='failed') THEN 'failed' WHEN BOOL_AND(status='completed') THEN 'completed' ELSE 'pending' END AS status,
+       BOOL_AND(provider_reference IS NOT NULL AND provider_reference<>'') AS provider_reference
+       FROM store_refund WHERE payment_id IN (SELECT id FROM store_payment WHERE order_id=o.id)) r ON TRUE
+     WHERE o.status='cancelled' ORDER BY COALESCE(h.created_at,o.updated_at) DESC`
+  ), query(
+    `SELECT r.*,o.id AS order_id,o.display_id,o.email,o.currency_code,p.provider_id
+     FROM store_refund r JOIN store_payment p ON p.id=r.payment_id
+     JOIN store_order o ON o.id=p.order_id ORDER BY r.created_at DESC`
+  )])
+  return NextResponse.json({ requests, cancellations, refunds })
 }
 
 export async function PATCH(req: NextRequest) {
@@ -88,7 +103,7 @@ export async function PATCH(req: NextRequest) {
 
     const rows = await client.query(
       `UPDATE store_return_request
-       SET status=$2,admin_note=$3,
+       SET status=$2,admin_note=COALESCE($3,admin_note),
            inventory_restored=inventory_restored OR $4,
            updated_at=NOW()
        WHERE id=$1 RETURNING *`,
