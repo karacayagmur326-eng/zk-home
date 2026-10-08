@@ -1,4 +1,5 @@
 "use client"
+import AdminTabs from "@components/admin/AdminTabs"
 
 import { useUrlState } from "@lib/hooks/use-url-state"
 
@@ -412,25 +413,10 @@ export default function NewProductPage() {
             <h3 className="text-sm font-extrabold text-slate-900">Ürün verisi</h3>
 
             {/* Tabs Header Bar */}
-            <div className="flex items-center gap-1 border-b border-slate-200 pb-0">
-              {tabs.map((tab) => {
-                const isActive = activeTab === tab.key
-                return (
-                  <button
-                    key={tab.key}
-                    type="button"
-                    onClick={() => setActiveTab(tab.key)}
-                    className={`px-4 py-2.5 text-xs font-extrabold transition-all border-b-2 cursor-pointer ${
-                      isActive
-                        ? "border-[#C98484] text-[#C98484]"
-                        : "border-transparent text-slate-400 hover:text-slate-600"
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                )
-              })}
-            </div>
+            <AdminTabs label="Ürün bilgileri"
+              value={activeTab}
+              onChange={setActiveTab}
+              items={tabs.map(({ key, label }) => ({ value: key, label }))}/>
 
             {/* Tab Contents */}
             <div className="pt-2">

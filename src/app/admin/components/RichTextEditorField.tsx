@@ -1,4 +1,5 @@
 "use client"
+import AdminTabs from "@components/admin/AdminTabs"
 
 import React, { useRef, useState, useEffect, useMemo } from "react"
 import {
@@ -518,30 +519,10 @@ export default function RichTextEditorField({
           </div>
 
           {/* Editor Mode Tabs (Right - Classic WordPress Style) */}
-          <div className="flex items-center gap-1 text-xs font-bold">
-            <button
-              type="button"
-              onClick={handleSwitchToVisual}
-              className={`px-4 py-1.5 rounded-t border-t border-x transition-all cursor-pointer text-xs ${
-                activeTab === "visual"
-                  ? "bg-white border-[#dcdcde] text-[#1d2327] font-extrabold border-b-white -mb-px z-10 shadow-2xs"
-                  : "bg-[#e5e5e5] border-[#dcdcde] text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              Görsel
-            </button>
-            <button
-              type="button"
-              onClick={handleSwitchToCode}
-              className={`px-4 py-1.5 rounded-t border-t border-x transition-all cursor-pointer text-xs ${
-                activeTab === "code"
-                  ? "bg-white border-[#dcdcde] text-[#1d2327] font-extrabold border-b-white -mb-px z-10 shadow-2xs"
-                  : "bg-[#e5e5e5] border-[#dcdcde] text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              Kod
-            </button>
-          </div>
+          <AdminTabs label="Düzenleyici modu"
+            value={activeTab}
+            onChange={(value) => value === "visual" ? handleSwitchToVisual() : handleSwitchToCode()}
+            items={[{ value: "visual", label: "Görsel" }, { value: "code", label: "Kod" }]}/>
         </div>
 
         {/* ── TOOLBAR: VISUAL MODE (Classic TinyMCE) ── */}

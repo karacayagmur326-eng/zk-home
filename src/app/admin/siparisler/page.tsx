@@ -1,4 +1,5 @@
 "use client"
+import AdminTabs from "@components/admin/AdminTabs"
 import { useUrlState } from "@lib/hooks/use-url-state"
 
 import CustomerMessageButton from "../components/CustomerMessageButton"
@@ -380,36 +381,10 @@ export default function OrdersPage() {
       </div>
 
       {/* ── Status Nav Tabs Bar ── */}
-      <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200/80 bg-white p-2 shadow-xs text-sm font-bold">
-        {[
-          { key: "", label: "Tümü" },
-          { key: "awaiting_payment", label: "Ödeme bekleyen" },
-          { key: "processing", label: "Hazırlanan" },
-          { key: "completed", label: "Tamamlanan" },
-          { key: "cancelled", label: "İptal" },
-        ].map((tab) => {
-          const isActive = status === tab.key && !dateFilter
-          return (
-            <button
-              key={tab.key}
-              type="button"
-              onClick={() => {
-                setDateFilter("")
-                setStatus(tab.key)
-                setPage(1)
-              }}
-              aria-pressed={isActive}
-              className={`px-4 py-3 rounded-xl transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-[#C98484] ${
-                isActive
-                  ? "bg-[#B98787] text-white shadow-sm font-extrabold"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/60"
-              }`}
-            >
-              {tab.label}
-            </button>
-          )
-        })}
-      </div>
+      <AdminTabs label="Sipariş durumları"
+        value={dateFilter ? null : status}
+        onChange={(value) => { setDateFilter(""); setStatus(value); setPage(1); }}
+        items={[{ value: "", label: "Tümü" }, { value: "awaiting_payment", label: "Ödeme bekleyen" }, { value: "processing", label: "Hazırlanan" }, { value: "completed", label: "Tamamlanan" }, { value: "cancelled", label: "İptal" }]}/>
 
       {/* ── Filter Controls Card ── */}
       <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs grid grid-cols-1 sm:grid-cols-2 items-center gap-3 text-xs">

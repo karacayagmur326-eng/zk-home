@@ -1,4 +1,5 @@
 "use client"
+import AdminTabs from "@components/admin/AdminTabs"
 
 import { useUrlState } from "@lib/hooks/use-url-state"
 
@@ -217,19 +218,10 @@ export default function MobileAdminPage() {
       )}
 
       {/* Tabs */}
-      <div className="w-full flex gap-2 overflow-x-auto rounded-2xl border border-slate-200 bg-white p-2 shadow-xs">
-        {tabs.map(([id, text]) => (
-          <button
-            key={id}
-            onClick={() => setTab(id)}
-            className={`whitespace-nowrap rounded-xl px-5 py-2.5 text-xs font-extrabold transition-all cursor-pointer ${
-              tab === id ? "bg-[#C98484] text-white shadow-xs" : "text-slate-600 hover:bg-slate-50"
-            }`}
-          >
-            {text}
-          </button>
-        ))}
-      </div>
+      <AdminTabs label="Mobil ayarlar"
+        value={tab}
+        onChange={setTab}
+        items={tabs.map(([value, label]) => ({ value, label }))}/>
 
       {/* Tab Panels */}
       {tab === "general" && (

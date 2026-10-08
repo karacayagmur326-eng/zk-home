@@ -1,4 +1,5 @@
 "use client"
+import AdminTabs from "@components/admin/AdminTabs"
 import React, { useState } from "react"
 import MediaSelectorModal from "./MediaSelectorModal"
 import {
@@ -59,51 +60,19 @@ export default function IconPickerModal({
         </div>
 
         {/* Top Navigation Bar */}
-        <div className="flex border-b border-gray-100 px-4 bg-white">
-          <button 
-            className={`px-5 py-3 font-bold text-sm border-b-2 transition-colors flex items-center gap-2 ${activeTab === "library" ? "text-[#C98484] border-[#C98484]" : "text-gray-500 border-transparent hover:text-gray-800"}`}
-            onClick={() => setActiveTab("library")}
-          >
-            <Sparkles className="w-4 h-4 text-[#C98484]" />
-            <span>Kurumsal İkon Seti</span>
-          </button>
-          <button 
-            className={`px-5 py-3 font-bold text-sm border-b-2 transition-colors flex items-center gap-2 ${activeTab === "custom" ? "text-[#C98484] border-[#C98484]" : "text-gray-500 border-transparent hover:text-gray-800"}`}
-            onClick={() => setActiveTab("custom")}
-          >
-            <Folder className="w-4 h-4 text-[#C98484]" />
-            <span>Özel Görsel / SVG Yükle</span>
-          </button>
-        </div>
+        <AdminTabs label="İkon kaynakları"
+          value={activeTab}
+          onChange={setActiveTab}
+          items={[{ value: "library", label: "Kurumsal İkon Seti", icon: Sparkles }, { value: "custom", label: "Özel Görsel / SVG Yükle", icon: Folder }]}/>
 
         {/* Filter bar for library */}
         {activeTab === "library" && (
           <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-3 bg-gray-50/50 border-b border-gray-100">
             <div className="flex gap-1.5 overflow-x-auto py-1">
-              <button
-                onClick={() => setCategoryFilter("all")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${categoryFilter === "all" ? "bg-[#C98484] text-white shadow-sm" : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-100"}`}
-              >
-                Tümü ({SELECTABLE_ICONS.length})
-              </button>
-              <button
-                onClick={() => setCategoryFilter("hirdavat")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${categoryFilter === "hirdavat" ? "bg-[#C98484] text-white shadow-sm" : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-100"}`}
-              >
-                <Wrench className="w-3.5 h-3.5" /> Hırdavat & Aletler
-              </button>
-              <button
-                onClick={() => setCategoryFilter("magaza")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${categoryFilter === "magaza" ? "bg-[#C98484] text-white shadow-sm" : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-100"}`}
-              >
-                <Box className="w-3.5 h-3.5" /> Mağaza & Kargo
-              </button>
-              <button
-                onClick={() => setCategoryFilter("kurumsal")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${categoryFilter === "kurumsal" ? "bg-[#C98484] text-white shadow-sm" : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-100"}`}
-              >
-                <Building2 className="w-3.5 h-3.5" /> Kurumsal
-              </button>
+              <AdminTabs label="İkon kategorileri"
+                value={categoryFilter}
+                onChange={setCategoryFilter}
+                items={[{ value: "all", label: "Tümü", count: SELECTABLE_ICONS.length }, { value: "hirdavat", label: "Hırdavat & Aletler" }, { value: "magaza", label: "Mağaza & Kargo" }, { value: "kurumsal", label: "Kurumsal" }]}/>
             </div>
 
             <input

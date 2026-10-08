@@ -1,4 +1,6 @@
 "use client"
+import { useUrlState } from "@lib/hooks/use-url-state"
+import AdminTabs from "@components/admin/AdminTabs"
 
 import React, { useEffect, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
@@ -123,11 +125,11 @@ export default function ProductsPage() {
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(10)
   const [search, setSearch] = useState("")
-  const [statusTab, setStatusTab] = useState("") // "" = Tümü, "published", "draft", "deleted"
+  const [statusTab, setStatusTab] = useUrlState<string>("", "status", ["", "published", "draft", "deleted"]) // "" = Tümü, "published", "draft", "deleted"
   const [catFilter, setCatFilter] = useState("")
   const [colFilter, setColFilter] = useState("")
   const [typeFilter, setTypeFilter] = useState("")
-  const [stockFilter, setStockFilter] = useState("")
+  const [stockFilter, setStockFilter] = useUrlState<string>("", "stock", ["", "low", "out", "in"])
   
   const [selected, setSelected] = useState<string[]>([])
   const [sortKey, setSortKey] = useState<string>("date")
@@ -468,72 +470,10 @@ export default function ProductsPage() {
       </div>
 
       {/* ── Status Nav Pills Bar ── */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-        {[
-          { key: "", label: "Tümü", count: counts.total, icon: Package },
-          { key: "published", label: "Yayınlanmış", count: counts.published_count, icon: CheckCircle2 },
-          { key: "draft", label: "Taslak", count: counts.draft_count, icon: FileText },
-          { key: "low_stock", label: "Düşük Stok", count: counts.low_stock_count, icon: AlertTriangle },
-          { key: "deleted", label: "Silinenler", count: counts.deleted_count, icon: Trash2 },
-        ].map((tab) => {
-          const isActive =
-            tab.key === "low_stock"
-              ? stockFilter === "low"
-              : statusTab === tab.key && !stockFilter
-
-          const Icon = tab.icon
-
-          return (
-            <button
-              key={tab.key}
-              type="button"
-              onClick={() => {
-                if (tab.key === "low_stock") {
-                  setStockFilter("low")
-                  setStatusTab("")
-                } else {
-                  setStockFilter("")
-                  setStatusTab(tab.key)
-                }
-                setPage(1)
-              }}
-              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border whitespace-nowrap cursor-pointer ${
-                isActive
-                  ? "bg-white border-rose-200 text-slate-900 shadow-sm ring-2 ring-[#C98484]/20"
-                  : tab.key === "deleted"
-                  ? "bg-white border-slate-200/80 text-rose-600 hover:bg-rose-50/50"
-                  : "bg-white border-slate-200/80 text-slate-600 hover:bg-slate-50"
-              }`}
-            >
-              <Icon
-                className={`w-4 h-4 ${
-                  isActive
-                    ? "text-[#C98484]"
-                    : tab.key === "deleted"
-                    ? "text-rose-500"
-                    : tab.key === "published"
-                    ? "text-emerald-500"
-                    : tab.key === "low_stock"
-                    ? "text-amber-500"
-                    : "text-slate-400"
-                }`}
-              />
-              <span>{tab.label}</span>
-              <span
-                className={`px-1.5 py-0.5 rounded-full text-[11px] font-extrabold ${
-                  isActive
-                    ? "bg-rose-100 text-[#C98484]"
-                    : tab.key === "deleted"
-                    ? "bg-rose-100 text-rose-700"
-                    : "bg-slate-100 text-slate-500"
-                }`}
-              >
-                {tab.count}
-              </span>
-            </button>
-          )
-        })}
-      </div>
+      <AdminTabs label="Ürün durumları"
+        value={stockFilter === "low" ? "low_stock" : stockFilter ? null : statusTab}
+        onChange={(value) => { setStockFilter(value === "low_stock" ? "low" : ""); setStatusTab(value === "low_stock" ? "" : value); setPage(1); }}
+        items={[{ value: "", label: "Tümü", count: counts.total }, { value: "published", label: "Yayınlanmış", count: counts.published_count }, { value: "draft", label: "Taslak", count: counts.draft_count }, { value: "low_stock", label: "Düşük Stok", count: counts.low_stock_count }, { value: "deleted", label: "Silinenler", count: counts.deleted_count }]}/>
 
       {/* ── Action & Filter Controls Bar ── */}
       <div className="p-3.5 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex flex-wrap items-center gap-3 text-xs">

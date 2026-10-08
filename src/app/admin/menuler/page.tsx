@@ -1,4 +1,5 @@
 "use client"
+import AdminTabs from "@components/admin/AdminTabs"
 
 import { useUrlState } from "@lib/hooks/use-url-state"
 
@@ -591,39 +592,10 @@ export default function MenusPage() {
       </div>
 
       {/* Tabs */}
-      <div style={{ display: "flex", gap: 10, borderBottom: "1px solid #e2e8f0", marginBottom: 24, paddingBottom: 10 }}>
-        <button
-          type="button"
-          onClick={() => setActiveTab("edit")}
-          style={{
-            display: "flex", alignItems: "center", gap: 9, padding: "10px 18px",
-            fontSize: 13, fontWeight: 700, borderRadius: 8,
-            color: activeTab === "edit" ? "#ffffff" : "#646970",
-            background: activeTab === "edit" ? "#C98484" : "#f1f5f9",
-            boxShadow: activeTab === "edit" ? "0 4px 12px rgba(201, 132, 132, 0.25)" : "none",
-            border: "none", cursor: "pointer", transition: "all 0.2s"
-          }}
-        >
-          <MenuIcon className="w-4.5 h-4.5" />
-          <span>Menüleri Düzenle</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab("locations")}
-          style={{
-            display: "flex", alignItems: "center", gap: 9, padding: "10px 18px",
-            fontSize: 13, fontWeight: 700, borderRadius: 8,
-            color: activeTab === "locations" ? "#ffffff" : "#646970",
-            background: activeTab === "locations" ? "#C98484" : "#f1f5f9",
-            boxShadow: activeTab === "locations" ? "0 4px 12px rgba(201, 132, 132, 0.25)" : "none",
-            border: "none", cursor: "pointer", transition: "all 0.2s"
-          }}
-        >
-          <LayoutGrid className="w-4.5 h-4.5" />
-          <span>Menü Konumları</span>
-        </button>
-      </div>
+      <AdminTabs label="Menü yönetimi"
+        value={activeTab}
+        onChange={setActiveTab}
+        items={[{ value: "edit", label: "Menüleri Düzenle", icon: MenuIcon }, { value: "locations", label: "Menü Konumları", icon: LayoutGrid }]}/>
 
       {activeTab === "edit" && (
         <>

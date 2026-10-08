@@ -1,4 +1,5 @@
 "use client"
+import AdminTabs from "@components/admin/AdminTabs"
 
 import { useUrlState } from "@lib/hooks/use-url-state"
 
@@ -406,48 +407,10 @@ export default function AdminContactPage() {
       </div>
 
       {/* Tab Buttons Row */}
-      <div className="flex flex-wrap items-center gap-3">
-        <button
-          type="button"
-          onClick={() => setActiveTab("messages")}
-          className={`flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
-            activeTab === "messages"
-              ? "bg-white border-[#C98484] text-[#C98484] shadow-2xs ring-1 ring-[#C98484]/20"
-              : "bg-white border-slate-200/80 text-slate-600 hover:bg-slate-50"
-          }`}
-        >
-          <Mail className={`w-4 h-4 ${activeTab === "messages" ? "text-[#C98484]" : "text-slate-400"}`} />
-          Gelen Mesajlar ({totals.messages})
-        </button>
-
-        <button type="button" onClick={() => setActiveTab("questions")} className={`flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-xs font-bold border transition-colors ${activeTab === "questions" ? "bg-white border-[#C98484] text-[#C98484] shadow-2xs ring-1 ring-[#C98484]/20" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"}`}><MessageSquare className="h-4 w-4" />Soru & Cevap ({totals.questions})</button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab("info_settings")}
-          className={`flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
-            activeTab === "info_settings"
-              ? "bg-white border-[#C98484] text-[#C98484] shadow-2xs ring-1 ring-[#C98484]/20"
-              : "bg-white border-slate-200/80 text-slate-600 hover:bg-slate-50"
-          }`}
-        >
-          <Settings className={`w-4 h-4 ${activeTab === "info_settings" ? "text-[#C98484]" : "text-slate-400"}`} />
-          İletişim & Sayfa Ayarları
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab("smtp_settings")}
-          className={`flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
-            activeTab === "smtp_settings"
-              ? "bg-white border-[#C98484] text-[#C98484] shadow-2xs ring-1 ring-[#C98484]/20"
-              : "bg-white border-slate-200/80 text-slate-600 hover:bg-slate-50"
-          }`}
-        >
-          <Mail className={`w-4 h-4 ${activeTab === "smtp_settings" ? "text-[#C98484]" : "text-slate-400"}`} />
-          SMTP / E-posta Gönderme İzinleri
-        </button>
-      </div>
+      <AdminTabs label="İletişim bölümleri"
+        value={activeTab}
+        onChange={setActiveTab}
+        items={[{ value: "messages", label: "Gelen Mesajlar", count: totals.messages, icon: Mail }, { value: "questions", label: "Soru & Cevap", count: totals.questions, icon: MessageSquare }, { value: "info_settings", label: "İletişim & Sayfa Ayarları", icon: Settings }, { value: "smtp_settings", label: "SMTP / E-posta Gönderme İzinleri", icon: Mail }]}/>
 
       {/* ── TAB 1: MESSAGES ─────────────────────────────────────────── */}
       {(activeTab === "messages" || activeTab === "questions") && (

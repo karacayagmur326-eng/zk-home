@@ -1,4 +1,5 @@
 "use client"
+import AdminTabs from "@components/admin/AdminTabs"
 
 import { useUrlState } from "@lib/hooks/use-url-state"
 
@@ -996,36 +997,10 @@ function AdminPagesContent() {
         {/* Tablar & Arama Barı & Toplu İşlemler Toolbar */}
         <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
           {/* Üst Sekmeler */}
-          <div className="flex items-center gap-2 border-b border-slate-100 pb-3 text-xs font-bold">
-            <button
-              onClick={() => { setActiveTab("all"); setSelectedHandles([]); setBulkAction("bulk") }}
-              className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${activeTab === "all" ? "bg-rose-50 text-[#C98484]" : "text-slate-500 hover:text-slate-900"}`}
-            >
-              Tümü ({pages.length})
-            </button>
-            <span className="text-slate-300">|</span>
-            <button
-              onClick={() => { setActiveTab("published"); setSelectedHandles([]); setBulkAction("bulk") }}
-              className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${activeTab === "published" ? "bg-rose-50 text-[#C98484]" : "text-slate-500 hover:text-slate-900"}`}
-            >
-              Yayınlanmış ({publishedCount})
-            </button>
-            <span className="text-slate-300">|</span>
-            <button
-              onClick={() => { setActiveTab("draft"); setSelectedHandles([]); setBulkAction("bulk") }}
-              className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${activeTab === "draft" ? "bg-rose-50 text-[#C98484]" : "text-slate-500 hover:text-slate-900"}`}
-            >
-              Taslak ({draftCount})
-            </button>
-            <span className="text-slate-300">|</span>
-            <button
-              onClick={() => { setActiveTab("deleted"); setSelectedHandles([]); setBulkAction("bulk") }}
-              className={`px-3 py-1.5 rounded-lg transition cursor-pointer inline-flex items-center gap-1.5 ${activeTab === "deleted" ? "bg-rose-50 text-rose-600" : "text-slate-500 hover:text-slate-900"}`}
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-              Silinen Sayfalar ({deletedPages.length})
-            </button>
-          </div>
+          <AdminTabs label="Sayfa durumları"
+            value={activeTab}
+            onChange={(value) => { setActiveTab(value); setSelectedHandles([]); setBulkAction("bulk"); }}
+            items={[{ value: "all", label: "Tümü", count: pages.length }, { value: "published", label: "Yayınlanmış", count: publishedCount }, { value: "draft", label: "Taslak", count: draftCount }, { value: "deleted", label: "Silinen Sayfalar", count: deletedPages.length }]}/>
 
           {/* Toplu İşlem & Arama Barı (Tam Olarak Ürünler Mağaza Ekranı Gibi) */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">

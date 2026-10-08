@@ -1,4 +1,5 @@
 "use client"
+import AdminTabs from "@components/admin/AdminTabs"
 import { useUrlState } from "@lib/hooks/use-url-state"
 import React, { useEffect, useState } from "react"
 import MediaSelectorModal from "../components/MediaSelectorModal"
@@ -177,7 +178,7 @@ export default function ThemeSettingsPage(props: any = {}) {
   const [seoBlogTitleTemplate, setSeoBlogTitleTemplate] = useState("%yazi_basligi% %ayirici% %site_adi%")
   const [seoBlogDescTemplate, setSeoBlogDescTemplate] = useState("%yazi_ozeti%")
   const [seoPageTitleTemplate, setSeoPageTitleTemplate] = useState("%sayfa_adi% %ayirici% %site_adi%")
-  const [activeSeoTemplateTab, setActiveSeoTemplateTab] = useState<"products" | "categories" | "brands" | "pages">("products")
+  const [activeSeoTemplateTab, setActiveSeoTemplateTab] = useUrlState<"products" | "categories" | "brands" | "pages">("products", "seo_template", ["products", "categories", "brands", "pages"])
 
   const [modalTarget, setModalTarget] = useState<string | null>(null)
 
@@ -493,230 +494,10 @@ export default function ThemeSettingsPage(props: any = {}) {
 
       {/* TOP TAB NAVIGATION (Only rendered for theme mode or standalone) */}
       {(mode === "theme" || mode === "all") && (
-        <div
-          style={{
-            display: "flex",
-            gap: 10,
-            flexWrap: "wrap",
-            borderBottom: "1px solid #e2e8f0",
-            marginBottom: 28,
-            paddingBottom: 14,
-          }}
-        >
-          <button
-            type="button"
-            onClick={() => setActiveTab("logos")}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              padding: "10px 18px",
-              fontSize: 13,
-              fontWeight: 700,
-              borderRadius: 12,
-              color: activeTab === "logos" ? "#ffffff" : "#475569",
-              background: activeTab === "logos" ? "#C98484" : "#ffffff",
-              boxShadow:
-                activeTab === "logos"
-                  ? "0 4px 14px rgba(201, 132, 132, 0.3)"
-                  : "0 1px 3px rgba(0,0,0,0.05)",
-              border: `1px solid ${activeTab === "logos" ? "#C98484" : "#e2e8f0"}`,
-              cursor: "pointer",
-              transition: "all 0.2s ease",
-            }}
-          >
-            <div
-              style={{
-                width: 26,
-                height: 26,
-                borderRadius: 8,
-                background: activeTab === "logos" ? "rgba(255,255,255,0.2)" : "#fcf7f6",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: activeTab === "logos" ? "#ffffff" : "#C98484",
-              }}
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                <circle cx="8.5" cy="8.5" r="1.5" />
-                <polyline points="21 15 16 10 5 21" />
-              </svg>
-            </div>
-            <span>Logolar & Görseller</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab("typography")}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              padding: "10px 18px",
-              fontSize: 13,
-              fontWeight: 700,
-              borderRadius: 12,
-              color: activeTab === "typography" ? "#ffffff" : "#475569",
-              background: activeTab === "typography" ? "#C98484" : "#ffffff",
-              boxShadow:
-                activeTab === "typography"
-                  ? "0 4px 14px rgba(201, 132, 132, 0.3)"
-                  : "0 1px 3px rgba(0,0,0,0.05)",
-              border: `1px solid ${activeTab === "typography" ? "#C98484" : "#e2e8f0"}`,
-              cursor: "pointer",
-              transition: "all 0.2s ease",
-            }}
-          >
-            <div
-              style={{
-                width: 26,
-                height: 26,
-                borderRadius: 8,
-                background: activeTab === "typography" ? "rgba(255,255,255,0.2)" : "#fcf7f6",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: activeTab === "typography" ? "#ffffff" : "#C98484",
-              }}
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="4 7 4 4 20 4 20 7" />
-                <line x1="9" y1="20" x2="15" y2="20" />
-                <line x1="12" y1="4" x2="12" y2="20" />
-              </svg>
-            </div>
-            <span>Yazı Tipi & Tipografi</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab("menu")}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              padding: "10px 18px",
-              fontSize: 13,
-              fontWeight: 700,
-              borderRadius: 12,
-              color: activeTab === "menu" ? "#ffffff" : "#475569",
-              background: activeTab === "menu" ? "#C98484" : "#ffffff",
-              boxShadow:
-                activeTab === "menu"
-                  ? "0 4px 14px rgba(201, 132, 132, 0.3)"
-                  : "0 1px 3px rgba(0,0,0,0.05)",
-              border: `1px solid ${activeTab === "menu" ? "#C98484" : "#e2e8f0"}`,
-              cursor: "pointer",
-              transition: "all 0.2s ease",
-            }}
-          >
-            <div
-              style={{
-                width: 26,
-                height: 26,
-                borderRadius: 8,
-                background: activeTab === "menu" ? "rgba(255,255,255,0.2)" : "#fcf7f6",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: activeTab === "menu" ? "#ffffff" : "#C98484",
-              }}
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="3" y1="12" x2="21" y2="12" />
-                <line x1="3" y1="6" x2="21" y2="6" />
-                <line x1="3" y1="18" x2="21" y2="18" />
-              </svg>
-            </div>
-            <span>Header Menü Ayarları</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab("footer")}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              padding: "10px 18px",
-              fontSize: 13,
-              fontWeight: 700,
-              borderRadius: 12,
-              color: activeTab === "footer" ? "#ffffff" : "#475569",
-              background: activeTab === "footer" ? "#C98484" : "#ffffff",
-              boxShadow:
-                activeTab === "footer"
-                  ? "0 4px 14px rgba(201, 132, 132, 0.3)"
-                  : "0 1px 3px rgba(0,0,0,0.05)",
-              border: `1px solid ${activeTab === "footer" ? "#C98484" : "#e2e8f0"}`,
-              cursor: "pointer",
-              transition: "all 0.2s ease",
-            }}
-          >
-            <div
-              style={{
-                width: 26,
-                height: 26,
-                borderRadius: 8,
-                background: activeTab === "footer" ? "rgba(255,255,255,0.2)" : "#fcf7f6",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: activeTab === "footer" ? "#ffffff" : "#C98484",
-              }}
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              </svg>
-            </div>
-            <span>Footer & Güvence Rozetleri</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab("icons")}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              padding: "10px 18px",
-              fontSize: 13,
-              fontWeight: 700,
-              borderRadius: 12,
-              color: activeTab === "icons" ? "#ffffff" : "#475569",
-              background: activeTab === "icons" ? "#C98484" : "#ffffff",
-              boxShadow:
-                activeTab === "icons"
-                  ? "0 4px 14px rgba(201, 132, 132, 0.3)"
-                  : "0 1px 3px rgba(0,0,0,0.05)",
-              border: `1px solid ${activeTab === "icons" ? "#C98484" : "#e2e8f0"}`,
-              cursor: "pointer",
-              transition: "all 0.2s ease",
-            }}
-          >
-            <div
-              style={{
-                width: 26,
-                height: 26,
-                borderRadius: 8,
-                background: activeTab === "icons" ? "rgba(255,255,255,0.2)" : "#fcf7f6",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: activeTab === "icons" ? "#ffffff" : "#C98484",
-              }}
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="7" height="7" />
-                <rect x="14" y="3" width="7" height="7" />
-                <rect x="14" y="14" width="7" height="7" />
-                <rect x="3" y="14" width="7" height="7" />
-              </svg>
-            </div>
-            <span>İkon Kütüphanesi</span>
-          </button>
-        </div>
+        <AdminTabs label="Tema ayarları"
+          value={activeTab}
+          onChange={setActiveTab}
+          items={[{ value: "logos", label: "Logo & Renkler" }, { value: "typography", label: "Tipografi" }, { value: "menu", label: "Menü & Görünüm" }, { value: "footer", label: "Alt Alan & İletişim" }, { value: "icons", label: "İkon Kütüphanesi" }]}/>
       )}
 
 
@@ -2116,36 +1897,10 @@ export default function ThemeSettingsPage(props: any = {}) {
             </div>
 
             {/* Sub-tabs for template types */}
-            <div style={{ display: "flex", gap: 8, borderBottom: "1px solid #e2e8f0", paddingBottom: 10, flexWrap: "wrap" }}>
-              {[
-                { id: "products", label: "🛍️ Ürün Sayfaları" },
-                { id: "categories", label: "📂 Kategori Sayfaları" },
-                { id: "brands", label: "🏷️ Marka Sayfaları" },
-                { id: "pages", label: "📄 Kurumsal Sayfalar" },
-              ].map((tab) => {
-                const isActive = activeSeoTemplateTab === tab.id
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => setActiveSeoTemplateTab(tab.id as any)}
-                    style={{
-                      padding: "8px 16px",
-                      fontSize: 12,
-                      fontWeight: 800,
-                      borderRadius: 10,
-                      border: isActive ? "1px solid #C98484" : "1px solid #e2e8f0",
-                      background: isActive ? "#fcf7f6" : "#ffffff",
-                      color: isActive ? "#C98484" : "#475569",
-                      cursor: "pointer",
-                      transition: "all 0.15s ease",
-                    }}
-                  >
-                    {tab.label}
-                  </button>
-                )
-              })}
-            </div>
+            <AdminTabs label="SEO şablonları"
+              value={activeSeoTemplateTab}
+              onChange={setActiveSeoTemplateTab}
+              items={[{ value: "products", label: "Ürün Sayfaları" }, { value: "categories", label: "Kategori Sayfaları" }, { value: "brands", label: "Marka Sayfaları" }, { value: "pages", label: "Kurumsal Sayfalar" }]}/>
 
             {/* Tab 1: Product SEO Template */}
             {activeSeoTemplateTab === "products" && (
@@ -2985,156 +2740,10 @@ export default function ThemeSettingsPage(props: any = {}) {
                 <span>Özel İkon Yükle / Seç</span>
               </button>
 
-              <button
-                type="button"
-                onClick={() => setIconCategory("all")}
-                className={`admin-btn ${
-                  iconCategory === "all"
-                    ? "admin-btn-primary"
-                    : "admin-btn-secondary"
-                }`}
-                style={{
-                  padding: "5px 12px",
-                  fontSize: 12,
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 6,
-                }}
-              >
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <rect x="3" y="3" width="7" height="7"></rect>
-                  <rect x="14" y="3" width="7" height="7"></rect>
-                  <rect x="14" y="14" width="7" height="7"></rect>
-                  <rect x="3" y="14" width="7" height="7"></rect>
-                </svg>
-                <span>
-                  Tümü ({SELECTABLE_ICONS.length + customIcons.length})
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setIconCategory("hirdavat")}
-                className={`admin-btn ${
-                  iconCategory === "hirdavat"
-                    ? "admin-btn-primary"
-                    : "admin-btn-secondary"
-                }`}
-                style={{
-                  padding: "5px 12px",
-                  fontSize: 12,
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 6,
-                }}
-              >
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
-                </svg>
-                <span>Hırdavat & Aletler</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setIconCategory("magaza")}
-                className={`admin-btn ${
-                  iconCategory === "magaza"
-                    ? "admin-btn-primary"
-                    : "admin-btn-secondary"
-                }`}
-                style={{
-                  padding: "5px 12px",
-                  fontSize: 12,
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 6,
-                }}
-              >
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                </svg>
-                <span>Mağaza & Kargo</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setIconCategory("kurumsal")}
-                className={`admin-btn ${
-                  iconCategory === "kurumsal"
-                    ? "admin-btn-primary"
-                    : "admin-btn-secondary"
-                }`}
-                style={{
-                  padding: "5px 12px",
-                  fontSize: 12,
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 6,
-                }}
-              >
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
-                  <path d="M9 22v-4h6v4"></path>
-                </svg>
-                <span>Kurumsal</span>
-              </button>
-              {customIcons.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setIconCategory("custom")}
-                  className={`admin-btn ${
-                    iconCategory === "custom"
-                      ? "admin-btn-primary"
-                      : "admin-btn-secondary"
-                  }`}
-                  style={{
-                    padding: "5px 12px",
-                    fontSize: 12,
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 6,
-                  }}
-                >
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="17 8 12 3 7 8"></polyline>
-                    <line x1="12" y1="3" x2="12" y2="15"></line>
-                  </svg>
-                  <span>Özel Yüklenenler ({customIcons.length})</span>
-                </button>
-              )}
+              <AdminTabs label="İkon kategorileri"
+                value={iconCategory}
+                onChange={setIconCategory}
+                items={[{ value: "all", label: "Tümü", count: SELECTABLE_ICONS.length }, { value: "hirdavat", label: "Hırdavat & Aletler" }, { value: "magaza", label: "Mağaza & Kargo" }, { value: "kurumsal", label: "Kurumsal" }, ...(customIcons.length ? [{ value: "custom" as const, label: "Özel İkonlar", count: customIcons.length }] : [])]}/>
 
               <input
                 type="text"

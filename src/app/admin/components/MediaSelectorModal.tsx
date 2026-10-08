@@ -1,4 +1,5 @@
 "use client"
+import AdminTabs from "@components/admin/AdminTabs"
 import React, { useEffect, useState } from "react"
 import { uploadMediaFiles } from "@lib/admin/upload-media"
 import {
@@ -243,25 +244,18 @@ export default function MediaSelectorModal({
         .media-modal-card:hover .media-modal-filename {
           opacity: 1 !important;
         }
-        .media-modal-tab-btn {
-          transition: all 0.15s ease-in-out;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          white-space: nowrap;
-        }
-        .media-modal-tab-btn:focus-visible, .media-modal-action:focus-visible {
+
+        .media-modal-action:focus-visible {
           outline: 2px solid #B98787;
           outline-offset: 3px;
         }
         @keyframes media-upload-spin { to { transform: rotate(360deg); } }
         .media-upload-spinner { animation: media-upload-spin 1s linear infinite; }
-        .media-modal-tabs { flex-wrap: wrap; }
+
         .media-modal-footer { flex-wrap: wrap; }
         @media (max-width: 600px) {
-          .media-modal-tabs { width: 100%; }
-          .media-modal-tab-btn { flex: 1; padding: 8px 10px !important; font-size: 12px !important; }
+
+
           .media-modal-footer { padding: 14px 16px !important; }
           .media-modal-footer > div { width: 100%; }
           .media-modal-footer-actions { justify-content: flex-end; flex-wrap: wrap; }
@@ -305,57 +299,10 @@ export default function MediaSelectorModal({
 
         {/* Modern Segmented Tab Bar + Sort Selector */}
         <div style={{ padding: "12px 24px 0 24px", background: "#ffffff", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-          <div className="media-modal-tabs" style={{
-            display: "inline-flex", background: "#f1f5f9", padding: 4, borderRadius: 12, gap: 4
-          }}>
-            <button
-              type="button"
-              className="media-modal-tab-btn"
-              onClick={() => setActiveTab("library")}
-              style={{
-                padding: "8px 16px", border: "none", cursor: "pointer",
-                borderRadius: 9, fontSize: 13, fontWeight: 700,
-                background: activeTab === "library" ? "#ffffff" : "transparent",
-                color: activeTab === "library" ? "#C98484" : "#64748b",
-                boxShadow: activeTab === "library" ? "0 2px 8px rgba(0,0,0,0.06)" : "none"
-              }}
-            >
-              <Images size={17} strokeWidth={1.75} aria-hidden="true" /> Ortam Kütüphanesi
-            </button>
-            {allowIcons && (
-              <button
-                type="button"
-                className="media-modal-tab-btn"
-                onClick={() => setActiveTab("icons")}
-                style={{
-                  padding: "8px 16px", border: "none", cursor: "pointer",
-                  borderRadius: 9, fontSize: 13, fontWeight: 700,
-                  background: activeTab === "icons" ? "#ffffff" : "transparent",
-                  color: activeTab === "icons" ? "#C98484" : "#64748b",
-                  boxShadow: activeTab === "icons" ? "0 2px 8px rgba(0,0,0,0.06)" : "none"
-                }}
-              >
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                  <LayoutGrid aria-hidden="true" size={17} strokeWidth={1.75} />
-                  İkon Kütüphanesi
-                </span>
-              </button>
-            )}
-            <button
-              type="button"
-              className="media-modal-tab-btn"
-              onClick={() => setActiveTab("upload")}
-              style={{
-                padding: "8px 16px", border: "none", cursor: "pointer",
-                borderRadius: 9, fontSize: 13, fontWeight: 700,
-                background: activeTab === "upload" ? "#ffffff" : "transparent",
-                color: activeTab === "upload" ? "#C98484" : "#64748b",
-                boxShadow: activeTab === "upload" ? "0 2px 8px rgba(0,0,0,0.06)" : "none"
-              }}
-            >
-              <Upload size={17} strokeWidth={1.75} aria-hidden="true" /> Yeni Dosya Yükle
-            </button>
-          </div>
+          <AdminTabs label="Medya kaynakları"
+            value={activeTab}
+            onChange={setActiveTab}
+            items={[{ value: "library", label: "Ortam Kütüphanesi", icon: Images }, ...(allowIcons ? [{ value: "icons" as const, label: "İkon Kütüphanesi", icon: LayoutGrid }] : []), { value: "upload", label: "Yeni Dosya Yükle", icon: Upload }]}/>
 
           {/* Sort Selector (Persisted in localStorage) */}
           {activeTab !== "upload" && (

@@ -1,4 +1,6 @@
 "use client"
+import { useUrlState } from "@lib/hooks/use-url-state"
+import AdminTabs from "@components/admin/AdminTabs"
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
@@ -40,7 +42,7 @@ export default function AdminBlogPage() {
   const searchParams = useSearchParams()
 
   // Active Main Tab: 'posts' | 'categories' | 'settings'
-  const [activeMainTab, setActiveMainTab] = useState<"posts" | "categories" | "settings">("posts")
+  const [activeMainTab, setActiveMainTab] = useUrlState<"posts" | "categories" | "settings">("posts", "tab", ["posts", "categories", "settings"])
 
   // Posts State
   const [posts, setPosts] = useState<any[]>([])
@@ -306,55 +308,10 @@ export default function AdminBlogPage() {
       </div>
 
       {/* ── Top Navigation Tabs (Makaleler | Kategoriler | Sayfa & Hero Ayarları) ── */}
-      <div className="flex items-center gap-2 border-b border-slate-200 pb-0">
-        <button
-          type="button"
-          onClick={() => setActiveMainTab("posts")}
-          className={`px-4 py-3 text-xs font-black transition-all border-b-2 flex items-center gap-2 cursor-pointer ${
-            activeMainTab === "posts"
-              ? "border-[#C98484] text-[#C98484]"
-              : "border-transparent text-slate-500 hover:text-slate-900"
-          }`}
-        >
-          <FileText className="w-4 h-4" />
-          <span>Tüm Makaleler</span>
-          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600">
-            {totalCount}
-          </span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveMainTab("categories")}
-          className={`px-4 py-3 text-xs font-black transition-all border-b-2 flex items-center gap-2 cursor-pointer ${
-            activeMainTab === "categories"
-              ? "border-[#C98484] text-[#C98484]"
-              : "border-transparent text-slate-500 hover:text-slate-900"
-          }`}
-        >
-          <FolderPlus className="w-4 h-4" />
-          <span>Kategoriler</span>
-          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600">
-            {categories.length}
-          </span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveMainTab("settings")}
-          className={`px-4 py-3 text-xs font-black transition-all border-b-2 flex items-center gap-2 cursor-pointer ${
-            activeMainTab === "settings"
-              ? "border-[#C98484] text-[#C98484]"
-              : "border-transparent text-slate-500 hover:text-slate-900"
-          }`}
-        >
-          <LayoutTemplate className="w-4 h-4" />
-          <span>Hero & Sayfa Tasarım Ayarları</span>
-          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-[#C98484]">
-            Tasarım
-          </span>
-        </button>
-      </div>
+      <AdminTabs label="Blog bölümleri"
+        value={activeMainTab}
+        onChange={setActiveMainTab}
+        items={[{ value: "posts", label: "Tüm Makaleler", count: totalCount, icon: FileText }, { value: "categories", label: "Kategoriler", count: categories.length, icon: FolderPlus }, { value: "settings", label: "Hero & Sayfa Tasarım Ayarları", icon: LayoutTemplate }]}/>
 
       {/* ══════════════════════════════════════════════════════════════════════════
           TAB 1: MAKALELER LİSTESİ
@@ -362,52 +319,10 @@ export default function AdminBlogPage() {
       {activeMainTab === "posts" && (
         <div className="space-y-6">
           {/* Status Nav Pills Bar */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-            {[
-              { key: "", label: "Tümü", count: totalCount, icon: BookOpen },
-              { key: "published", label: "Yayınlanmış", count: counts.published_count, icon: CheckCircle2 },
-              { key: "draft", label: "Taslak", count: counts.draft_count, icon: FileText },
-            ].map((tab) => {
-              const isActive = statusTab === tab.key
-              const Icon = tab.icon
-
-              return (
-                <button
-                  key={tab.key}
-                  type="button"
-                  onClick={() => {
-                    setStatusTab(tab.key)
-                    setCurrentPage(1)
-                  }}
-                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border whitespace-nowrap cursor-pointer ${
-                    isActive
-                      ? "bg-white border-rose-200 text-slate-900 shadow-sm ring-2 ring-[#C98484]/20"
-                      : "bg-white border-slate-200/80 text-slate-600 hover:bg-slate-50"
-                  }`}
-                >
-                  <Icon
-                    className={`w-4 h-4 ${
-                      isActive
-                        ? "text-[#C98484]"
-                        : tab.key === "published"
-                        ? "text-emerald-500"
-                        : tab.key === "draft"
-                        ? "text-amber-500"
-                        : "text-slate-400"
-                    }`}
-                  />
-                  <span>{tab.label}</span>
-                  <span
-                    className={`px-1.5 py-0.2 rounded-md text-[11px] font-bold ${
-                      isActive ? "bg-rose-100/80 text-[#C98484]" : "bg-slate-100 text-slate-500"
-                    }`}
-                  >
-                    {tab.count}
-                  </span>
-                </button>
-              )
-            })}
-          </div>
+          <AdminTabs label="Makale durumları"
+            value={statusTab}
+            onChange={(value) => { setStatusTab(value); setCurrentPage(1); }}
+            items={[{ value: "", label: "Tümü", count: totalCount }, { value: "published", label: "Yayınlanmış", count: counts.published_count }, { value: "draft", label: "Taslak", count: counts.draft_count }]}/>
 
           {/* Filters & Search Row */}
           <div className="bg-white p-3 rounded-2xl border border-slate-200/80 shadow-xs flex flex-wrap items-center justify-between gap-3">

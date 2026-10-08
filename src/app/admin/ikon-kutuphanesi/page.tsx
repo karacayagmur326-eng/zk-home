@@ -1,4 +1,5 @@
 "use client"
+import AdminTabs from "@components/admin/AdminTabs"
 import React, { useState } from "react"
 import {
   APP_ICON_OPTIONS as SELECTABLE_ICONS,
@@ -43,30 +44,10 @@ export default function IconLibraryPage() {
       {/* Filter and Search Bar */}
       <div style={{ background: "#fff", border: "1px solid #c3c4c7", borderRadius: 6, padding: "14px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <button
-            onClick={() => setCategoryFilter("all")}
-            className={`admin-btn ${categoryFilter === "all" ? "admin-btn-primary" : "admin-btn-secondary"}`}
-          >
-            Tümü ({SELECTABLE_ICONS.length})
-          </button>
-          <button
-            onClick={() => setCategoryFilter("hirdavat")}
-            className={`admin-btn ${categoryFilter === "hirdavat" ? "admin-btn-primary" : "admin-btn-secondary"}`}
-          >
-            <Wrench aria-hidden="true" size={15} /> Hırdavat ve Aletler
-          </button>
-          <button
-            onClick={() => setCategoryFilter("magaza")}
-            className={`admin-btn ${categoryFilter === "magaza" ? "admin-btn-primary" : "admin-btn-secondary"}`}
-          >
-            <Package aria-hidden="true" size={15} /> Mağaza ve Kargo
-          </button>
-          <button
-            onClick={() => setCategoryFilter("kurumsal")}
-            className={`admin-btn ${categoryFilter === "kurumsal" ? "admin-btn-primary" : "admin-btn-secondary"}`}
-          >
-            <Building2 aria-hidden="true" size={15} /> Kurumsal
-          </button>
+          <AdminTabs label="İkon kategorileri"
+            value={categoryFilter}
+            onChange={setCategoryFilter}
+            items={[{ value: "all", label: "Tümü", count: SELECTABLE_ICONS.length }, { value: "hirdavat", label: "Hırdavat & Aletler" }, { value: "magaza", label: "Mağaza & Kargo" }, { value: "kurumsal", label: "Kurumsal" }]}/>
         </div>
 
         <div style={{ position: "relative", width: 240 }}>

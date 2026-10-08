@@ -1,4 +1,5 @@
 "use client"
+import AdminTabs from "@components/admin/AdminTabs"
 
 import { useUrlState } from "@lib/hooks/use-url-state"
 
@@ -384,32 +385,10 @@ export default function KampanyalarPage() {
           </div>
 
           {/* Tabs */}
-          <div className="px-4 border-b border-slate-100 flex gap-0">
-            {[
-              { key: "all", label: "Tümü" },
-              { key: "active", label: "Aktif" },
-              { key: "planned", label: "Planlanan" },
-              { key: "completed", label: "Tamamlanan" },
-              { key: "draft", label: "Taslak" },
-            ].map(({ key, label }) => (
-              <button
-                key={key}
-                onClick={() => { setActiveTab(key); setCurrentPage(1) }}
-                className={`px-4 py-3 text-xs font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
-                  activeTab === key
-                    ? "border-[#C98484] text-[#C98484]"
-                    : "border-transparent text-slate-500 hover:text-slate-700"
-                }`}
-              >
-                {label}
-                <span className={`ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
-                  activeTab === key ? "bg-rose-100 text-[#C98484]" : "bg-slate-100 text-slate-500"
-                }`}>
-                  {tabCounts[key as keyof typeof tabCounts]}
-                </span>
-              </button>
-            ))}
-          </div>
+          <AdminTabs label="Kampanya durumları"
+            value={activeTab}
+            onChange={(value) => { setActiveTab(value); setCurrentPage(1); }}
+            items={[{ value: "all", label: "Tümü", count: tabCounts.all }, { value: "active", label: "Aktif", count: tabCounts.active }, { value: "planned", label: "Planlanan", count: tabCounts.planned }, { value: "completed", label: "Tamamlanan", count: tabCounts.completed }, { value: "draft", label: "Taslak", count: tabCounts.draft }]}/>
 
           {/* Table */}
           <div className="overflow-x-auto">
