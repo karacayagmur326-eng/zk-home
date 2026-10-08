@@ -316,6 +316,7 @@ export default function AdminLayout({
 
   const pageTitle = (() => {
     if (pathname === "/admin") return "Yönetim Paneli"
+    if (pathname === "/admin/ikon-kutuphanesi") return "İkon Kütüphanesi"
     const all = [...productSubItems, ...marketingSubItems, ...mainNavItems]
     // 1. Exact match first
     const exact = all.find((n) => n.href === pathname)

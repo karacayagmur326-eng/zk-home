@@ -1219,3 +1219,37 @@ tr:hover .admin-row-actions {
   margin: 8px 0 !important;
   border-radius: 6px !important;
 }
+
+/* Shared page content primitives; use these instead of page-specific styles. */
+.admin-content-stack { display: flex; flex-direction: column; gap: 20px; }
+.admin-content-toolbar, .admin-content-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.admin-content-toolbar { justify-content: space-between; }
+.admin-content-actions { gap: 8px; }
+.admin-shell .admin-section-title { font-size: 14px; line-height: 1.4; }
+.admin-section-description { margin: 4px 0 0; color: var(--admin-muted); font-size: 12px; }
+.admin-section-heading { min-width: 0; }
+.admin-metrics-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.admin-metric { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.admin-metric-value { display: block; margin: 8px 0 4px; color: var(--admin-text); font-size: 21px; font-weight: 700; }
+.admin-metric .admin-section-icon { width: 40px; height: 40px; flex-basis: 40px; }
+.admin-panel-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 20px; border-bottom: 1px solid var(--admin-border); }
+.admin-panel-header > .admin-status-badge { flex-shrink: 0; white-space: nowrap; }
+.admin-panel-filters { padding: 16px 20px; }
+.admin-search-field { position: relative; display: flex; align-items: center; flex: 1; min-width: 180px; }
+.admin-search-field > svg { position: absolute; left: 12px; color: var(--admin-muted); pointer-events: none; }
+.admin-shell .admin-search-field input { padding-left: 36px !important; }
+.admin-table-scroll { overflow-x: auto; }
+.admin-shell .admin-table--embedded { border: 0 !important; border-radius: 0 !important; box-shadow: none !important; }
+.admin-table--embedded th, .admin-table--embedded td { padding: 14px 20px; }
+.admin-subscriber-cell { display: flex; align-items: center; gap: 10px; overflow-wrap: anywhere; }
+.admin-pagination-bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 16px 20px; border-top: 1px solid var(--admin-border); color: var(--admin-muted); font-size: 12px; }
+.admin-empty-state { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 48px 24px; text-align: center; }
+.admin-empty-state .admin-section-icon { width: 48px; height: 48px; flex-basis: 48px; }
+.admin-shell .admin-empty-state h3 { margin: 0; font-size: 14px; }
+.admin-empty-state p { max-width: 460px; margin: 0; }
+@media (max-width: 767px) {
+  .admin-metrics-grid { grid-template-columns: 1fr; gap: 12px; }
+  .admin-panel-header, .admin-panel-filters, .admin-pagination-bar { padding: 16px; }
+  .admin-content-actions { width: 100%; }
+  .admin-search-field { flex-basis: 100%; }
+}

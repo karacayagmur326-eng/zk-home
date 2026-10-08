@@ -1,4 +1,5 @@
 "use client"
+import { AdminSectionHeading } from "@components/admin/AdminContent"
 import AdminTabs from "@components/admin/AdminTabs"
 import { useUrlState } from "@lib/hooks/use-url-state"
 import React, { useEffect, useState } from "react"
@@ -466,16 +467,7 @@ export default function ThemeSettingsPage(props: any = {}) {
           }}
         >
           <div>
-            <h2
-              style={{
-                margin: 0,
-                fontSize: 23,
-                fontWeight: 400,
-                color: "#1d2327",
-              }}
-            >
-              Tema Ayarları
-            </h2>
+            <AdminSectionHeading title="Tema Ayarları" />
           </div>
           <button
             type="button"

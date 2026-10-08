@@ -1,4 +1,5 @@
 "use client"
+import { AdminSectionHeading } from "@components/admin/AdminContent"
 import AdminTabs from "@components/admin/AdminTabs"
 
 import { useUrlState } from "@lib/hooks/use-url-state"
@@ -584,7 +585,7 @@ export default function MenusPage() {
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: 23, fontWeight: 700, color: "#1d2327" }}>Menü Yönetimi</h2>
+          <AdminSectionHeading title="Menü Yönetimi" />
           <p style={{ margin: "4px 0 0", fontSize: 13, color: "#646970" }}>
             Sayfaları, kategorileri veya özel bağlantıları seçip kolayca menülerinize ekleyin.
           </p>

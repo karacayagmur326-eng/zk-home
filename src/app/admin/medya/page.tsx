@@ -1,4 +1,5 @@
 "use client"
+import { AdminSectionHeading } from "@components/admin/AdminContent"
 
 import { useUrlState } from "@lib/hooks/use-url-state"
 import React, { useEffect, useState } from "react"
@@ -437,7 +438,7 @@ export default function MediaLibraryPage() {
         {/* Title & primary action row */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
           <div>
-            <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: "#172033" }}>Ortam Kütüphanesi</h2>
+            <AdminSectionHeading title="Ortam Kütüphanesi" />
             <p style={{ margin: "3px 0 10px", fontSize: 12, color: "#697386" }}>Görselleri yükleyin, bulun ve SEO bilgilerini yönetin.</p>
             <div style={{ display: "flex", gap: 6 }}>
               <button

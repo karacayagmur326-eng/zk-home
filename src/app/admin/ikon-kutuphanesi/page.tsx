@@ -1,4 +1,5 @@
 "use client"
+import { AdminSectionHeading } from "@components/admin/AdminContent"
 import AdminTabs from "@components/admin/AdminTabs"
 import React, { useState } from "react"
 import {
@@ -28,21 +29,10 @@ export default function IconLibraryPage() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-      {/* Page Header */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div>
-          <h2 style={{ margin: 0, fontSize: 23, fontWeight: 700, color: "#172033", display: "flex", alignItems: "center", gap: 10 }}>
-            <span className="admin-section-icon"><Wrench aria-hidden="true" size={18} /></span>
-            Kurumsal İkon Kütüphanesi
-          </h2>
-          <p style={{ margin: "4px 0 0", color: "#646970", fontSize: 13 }}>
-            Sitede, kategorilerde, sliderlarda ve menülerde kullanabileceğiniz kurumsal SVG ikon seti.
-          </p>
-        </div>
-      </div>
+      <AdminSectionHeading title="Kurumsal İkon Kütüphanesi" description="Sitede, kategorilerde, sliderlarda ve menülerde kullanabileceğiniz kurumsal SVG ikon seti." icon={<Wrench size={18} aria-hidden="true" />} />
 
       {/* Filter and Search Bar */}
-      <div style={{ background: "#fff", border: "1px solid #c3c4c7", borderRadius: 6, padding: "14px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+      <div className="admin-card admin-content-toolbar">
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <AdminTabs label="İkon kategorileri"
             value={categoryFilter}
@@ -64,7 +54,7 @@ export default function IconLibraryPage() {
       </div>
 
       {/* Grid of Icons */}
-      <div style={{ background: "#fff", border: "1px solid #c3c4c7", borderRadius: 6, padding: 20 }}>
+      <div className="admin-card">
         {filteredIcons.length === 0 ? (
           <div style={{ padding: 40, textAlign: "center", color: "#646970", fontSize: 14 }}>
             Aramanızla eşleşen ikon bulunamadı.

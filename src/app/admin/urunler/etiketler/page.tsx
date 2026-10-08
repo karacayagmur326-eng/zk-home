@@ -1,4 +1,5 @@
 "use client"
+import { AdminSectionHeading } from "@components/admin/AdminContent"
 import { useEffect, useState } from "react"
 import ConfirmModal from "../../components/ConfirmModal"
 
@@ -106,7 +107,7 @@ export default function TagsPage() {
     <div style={{ maxWidth: 1000 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: 23, fontWeight: 700, color: "#1d2327" }}>Ürün Etiketleri</h2>
+          <AdminSectionHeading title="Ürün Etiketleri" />
           <p style={{ margin: "4px 0 0", fontSize: 13, color: "#646970" }}>
             Tüm etiketler Google SEO standartlarına göre otomatik küçük harf, Türkçe karaktersiz ve tireli (slug) olarak kaydedilir.
           </p>
