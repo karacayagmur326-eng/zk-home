@@ -43,7 +43,7 @@ function AyarlarContent() {
     setActiveMainTab(tab)
     const url = new URL(window.location.href)
     url.searchParams.set("tab", tab)
-    window.history.replaceState({}, "", url.toString())
+    window.history.replaceState(window.history.state, "", url.toString())
   }
 
   const TABS = [

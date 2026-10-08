@@ -19,7 +19,8 @@ export async function GET() {
       { questions },
       { headers: { "Cache-Control": "no-store" } }
     )
-  } catch {
+  } catch (error) {
+    console.error("[product-questions:GET]", { code: (error as { code?: string }).code || "unknown" })
     return NextResponse.json(
       { error: "Ürün soruları yüklenemedi." },
       { status: 500 }

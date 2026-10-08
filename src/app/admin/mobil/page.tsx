@@ -1,5 +1,7 @@
 "use client"
 
+import { useUrlState } from "@lib/hooks/use-url-state"
+
 import { useEffect, useMemo, useState } from "react"
 import { AppIcon, Plus, Save, Trash2, Smartphone, Sparkles, Image as ImageIcon, X } from "@lib/icons"
 import ImagePickerField from "../components/ImagePickerField"
@@ -111,7 +113,7 @@ function Card({ title, children, onRemove }: { title: string; children: React.Re
 
 export default function MobileAdminPage() {
   const [settings, setSettings] = useState<MobileSettings | null>(null)
-  const [tab, setTab] = useState("general")
+  const [tab, setTab] = useUrlState<string>("general", "tab", ["general", "slides", "shortcuts", "navigation", "sections", "pages"])
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState("")
 

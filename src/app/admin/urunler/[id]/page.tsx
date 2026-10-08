@@ -1,5 +1,7 @@
 "use client"
 
+import { useUrlState } from "@lib/hooks/use-url-state"
+
 import ProductMediaEditor from "../../components/ProductMediaEditor"
 import { productHandleFromTitle } from "@lib/util/product-handle"
 
@@ -63,7 +65,7 @@ export default function EditProductPage() {
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [saved, setSaved] = useState(false)
-  const [activeTab, setActiveTab] = useState("general")
+  const [activeTab, setActiveTab] = useUrlState<string>("general", "tab", ["general", "metadata", "stock", "shipping"])
 
   // Form fields
   const [title, setTitle] = useState("")

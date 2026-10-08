@@ -1,5 +1,7 @@
 "use client"
 
+import { useUrlState } from "@lib/hooks/use-url-state"
+
 import ProductMediaEditor from "../../components/ProductMediaEditor"
 import { productHandleFromTitle } from "@lib/util/product-handle"
 
@@ -52,7 +54,7 @@ interface Tag {
 export default function NewProductPage() {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
-  const [activeTab, setActiveTab] = useState("general")
+  const [activeTab, setActiveTab] = useUrlState<string>("general", "tab", ["general", "metadata", "stock", "shipping"])
 
   // Form state
   const [title, setTitle] = useState("")

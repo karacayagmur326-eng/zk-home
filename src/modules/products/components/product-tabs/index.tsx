@@ -1,5 +1,7 @@
 "use client"
 
+import { useUrlState } from "@lib/hooks/use-url-state"
+
 import { HttpTypes } from "@medusajs/types"
 import { useState, useEffect } from "react"
 import clx from "clsx"
@@ -14,33 +16,36 @@ type ProductTabsProps = {
 }
 
 const ProductTabs = ({ product, price }: ProductTabsProps) => {
-  const [activeTab, setActiveTab] = useState("aciklama")
+  const [activeTab, setActiveTab] = useUrlState<string>("aciklama", "product_tab", ["aciklama", "ozellikler", "taksit", "yorumlar"])
   const md = (product.metadata as Record<string, any>) || {}
   const { cheapestPrice } = getProductPrice({ product })
   const finalPrice = price || cheapestPrice?.calculated_price_number || 0
 
   useEffect(() => {
-    const handleHashChange = () => {
+    const handleHashChange = (event?: Event) => {
+      const reload = (performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined)?.type === "reload"
+      if (reload && !event) return
+      const scroll = () => { if (event || !reload) document.getElementById("product-tabs")?.scrollIntoView({ behavior: "smooth" }) }
       const hash = window.location.hash
       if (hash === "#aciklama") {
         setActiveTab("aciklama")
         setTimeout(() => {
-          document.getElementById("product-tabs")?.scrollIntoView({ behavior: "smooth" })
+          scroll()
         }, 50)
       } else if (hash === "#yorumlar" || hash === "#degerlendir" || hash === "#sorular") {
         setActiveTab("yorumlar")
         setTimeout(() => {
-          document.getElementById("product-tabs")?.scrollIntoView({ behavior: "smooth" })
+          scroll()
         }, 50)
       } else if (hash === "#ozellikler" || hash === "#teknik") {
         setActiveTab("ozellikler")
         setTimeout(() => {
-          document.getElementById("product-tabs")?.scrollIntoView({ behavior: "smooth" })
+          scroll()
         }, 50)
       } else if (hash === "#taksit") {
         setActiveTab("taksit")
         setTimeout(() => {
-          document.getElementById("product-tabs")?.scrollIntoView({ behavior: "smooth" })
+          scroll()
         }, 50)
       }
     }
@@ -54,7 +59,7 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
     setActiveTab(tabKey)
     if (typeof window !== "undefined") {
       window.history.replaceState(
-        null,
+        window.history.state,
         "",
         window.location.pathname + window.location.search + `#${tabKey}`
       )

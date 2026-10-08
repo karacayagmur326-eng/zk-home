@@ -1,5 +1,7 @@
 "use client"
 
+import { useUrlState } from "@lib/hooks/use-url-state"
+
 import { useAdminAutoRefresh } from "@lib/hooks/use-admin-auto-refresh"
 import ProductQuestions from "./ProductQuestions"
 
@@ -81,7 +83,7 @@ function Toggle({
 }
 
 export default function AdminContactPage() {
-  const [activeTab, setActiveTab] = useState<"messages" | "questions" | "info_settings" | "smtp_settings">("messages")
+  const [activeTab, setActiveTab] = useUrlState<"messages" | "questions" | "info_settings" | "smtp_settings">("messages", "tab", ["messages", "questions", "info_settings", "smtp_settings"])
   const [messages, setMessages] = useState<ContactMessage[]>([])
   const [statusFilter, setStatusFilter] = useState("")
   const [dateFilter, setDateFilter] = useState("")

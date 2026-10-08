@@ -5,6 +5,7 @@ import Script from "next/script"
 import "styles/globals.css"
 import { ThemeProvider } from "@modules/layout/components/theme-provider"
 import { ToastProvider } from "@modules/common/components/feedback"
+import PageRefreshPosition from "@components/common/PageRefreshPosition"
 import CookieConsent from "@modules/layout/components/cookie-consent"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { getThemeSettings } from "@lib/content/theme-settings"
@@ -265,6 +266,7 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           <ToastProvider>
+            <PageRefreshPosition />
             <SellerQuestionProvider
               settings={{
                 formTitle: contact.form_title,

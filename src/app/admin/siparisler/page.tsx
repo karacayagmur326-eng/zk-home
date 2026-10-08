@@ -1,4 +1,5 @@
 "use client"
+import { useUrlState } from "@lib/hooks/use-url-state"
 
 import CustomerMessageButton from "../components/CustomerMessageButton"
 
@@ -138,11 +139,11 @@ export default function OrdersPage() {
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(10)
-  const [status, setStatus] = useState("")
-  const [dateFilter, setDateFilter] = useState("")
+  const [status, setStatus] = useUrlState<string>("", "status", ["", "awaiting_payment", "processing", "completed", "cancelled"])
+  const [dateFilter, setDateFilter] = useUrlState<string>("", "date", ["", "today"])
   const [searchQuery, setSearchQuery] = useState("")
-  const [paymentFilter, setPaymentFilter] = useState("")
-  const [fulfillmentFilter, setFulfillmentFilter] = useState("")
+  const [paymentFilter, setPaymentFilter] = useUrlState<string>("", "payment_status", ["", "pending", "paid", "refunded"])
+  const [fulfillmentFilter, setFulfillmentFilter] = useUrlState<string>("", "fulfillment_status", ["", "not_fulfilled", "preparing", "delivery_scheduled", "shipped", "delivered"])
   const [loading, setLoading] = useState(true)
   const [detail, setDetail] = useState<OrderDetail | null>(null)
   const [saving, setSaving] = useState(false)
@@ -161,11 +162,15 @@ export default function OrdersPage() {
   })
 
   useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search)
-    const statusParam = searchParams.get("status")
-    const filterParam = searchParams.get("filter") || searchParams.get("date")
-    if (statusParam) setStatus(statusParam)
-    if (filterParam) setDateFilter(filterParam)
+    const url = new URL(window.location.href)
+    if (!url.searchParams.has("date") && url.searchParams.get("filter") === "today") {
+      setDateFilter("today")
+    }
+    if (url.searchParams.has("filter")) {
+      const updated = new URL(window.location.href)
+      updated.searchParams.delete("filter")
+      window.history.replaceState(window.history.state, "", updated)
+    }
   }, [])
 
   const loadOrders = useCallback(async (silent = false, signal?: AbortSignal) => {

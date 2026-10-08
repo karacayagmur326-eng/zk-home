@@ -1,4 +1,5 @@
 "use client"
+import { useUrlState } from "@lib/hooks/use-url-state"
 
 import { useState, useEffect, useRef } from "react"
 import { HttpTypes } from "@medusajs/types"
@@ -130,7 +131,7 @@ export default function FeaturedTabs({
   const [sectionSubtitle, setSectionSubtitle] = useState("Atölyeniz için en güçlü seçimler.")
   
   const [configTabs, setConfigTabs] = useState<ConfigTab[]>(DEFAULT_TABS)
-  const [activeTagId, setActiveTagId] = useState<string>(DEFAULT_TABS[0].tag_id)
+  const [activeTagId, setActiveTagId] = useUrlState<string>(DEFAULT_TABS[0].tag_id, "featured_tab", configTabs.map(tab => tab.tag_id))
   const [productsMap, setProductsMap] = useState<Record<string, HttpTypes.StoreProduct[]>>({})
   const [loadingMap, setLoadingMap] = useState<Record<string, boolean>>({})
 
@@ -166,9 +167,8 @@ export default function FeaturedTabs({
 
         if (tabs.length > 0) {
           setConfigTabs(tabs)
-          if (!tabs.some(t => t.tag_id === activeTagId)) {
-            setActiveTagId(tabs[0].tag_id)
-          }
+          const requested = new URL(window.location.href).searchParams.get("featured_tab")
+          if (!tabs.some(t => t.tag_id === requested)) setActiveTagId(tabs[0].tag_id)
         }
       })
       .catch(() => {})

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { MessageSquare, Search, Send, X, ExternalLink } from "lucide-react"
 import { useAdminAutoRefresh } from "@lib/hooks/use-admin-auto-refresh"
+import { useUrlState } from "@lib/hooks/use-url-state"
 
 type Question = {
   id: string
@@ -20,7 +21,7 @@ export default function ProductQuestions() {
   const [questions, setQuestions] = useState<Question[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
-  const [filter, setFilter] = useState("all")
+  const [filter, setFilter] = useUrlState<string>("all", "question_status", ["all", "pending", "answered"])
   const [selected, setSelected] = useState<Question | null>(null)
   const [answer, setAnswer] = useState("")
   const [saving, setSaving] = useState(false)
@@ -33,6 +34,7 @@ export default function ProductQuestions() {
   }, [selected])
 
   async function refresh(signal?: AbortSignal) {
+    try {
     const response = await fetch("/api/admin/product-questions", {
       cache: "no-store",
       signal,
@@ -44,7 +46,13 @@ export default function ProductQuestions() {
       return
     }
     setQuestions(data.questions || [])
+    setError("")
     setLoading(false)
+    } catch (error) {
+      if (signal?.aborted) return
+      setError("Sorular yüklenemedi. Bağlantınızı kontrol edin.")
+      setLoading(false)
+    }
   }
   useAdminAutoRefresh(refresh, { immediate: true })
   async function save() {

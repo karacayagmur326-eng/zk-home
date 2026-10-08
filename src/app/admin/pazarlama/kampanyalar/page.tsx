@@ -1,5 +1,7 @@
 "use client"
 
+import { useUrlState } from "@lib/hooks/use-url-state"
+
 import React, { useState, useEffect } from "react"
 import Link from "next/link"
 import {
@@ -113,7 +115,7 @@ export default function KampanyalarPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [typeFilter, setTypeFilter] = useState("all")
-  const [activeTab, setActiveTab] = useState("all")
+  const [activeTab, setActiveTab] = useUrlState<string>("all", "tab", ["all", "active", "planned", "completed", "draft"])
 
   // Pagination
   const [pageSize, setPageSize] = useState(10)

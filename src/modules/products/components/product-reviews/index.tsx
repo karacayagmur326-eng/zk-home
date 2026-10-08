@@ -1,5 +1,7 @@
 "use client"
 
+import { useUrlState } from "@lib/hooks/use-url-state"
+
 import { MessageSquare, Star, CheckCircle, ShieldCheck, Image as ImageIcon, X, Send, HelpCircle, Loader2 } from "@lib/icons"
 import { FormEvent, useEffect, useMemo, useState, useRef } from "react"
 
@@ -23,7 +25,7 @@ export default function ProductReviews({
 }) {
   const [reviews, setReviews] = useState<ReviewItem[]>([])
   const [questions, setQuestions] = useState<ReviewItem[]>([])
-  const [activeTab, setActiveTab] = useState<"reviews" | "questions">("reviews")
+  const [activeTab, setActiveTab] = useUrlState<"reviews" | "questions">("reviews", "reviews_tab", ["reviews", "questions"])
   
   // Form State
   const [formType, setFormType] = useState<"review" | "question">("review")
@@ -42,10 +44,15 @@ export default function ProductReviews({
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  useEffect(() => { setFormType(activeTab === "questions" ? "question" : "review") }, [activeTab])
+
   // 2-Way Synchronization Helper
   const selectMode = (mode: "review" | "question") => {
     setFormType(mode)
     setActiveTab(mode === "question" ? "questions" : "reviews")
+    const url = new URL(window.location.href)
+    url.hash = mode === "question" ? "sorular" : "degerlendir"
+    window.history.replaceState(window.history.state, "", url)
     setErrorMessage("")
     setSuccessMessage("")
   }
@@ -152,7 +159,6 @@ export default function ProductReviews({
 
       if (res.ok && data.item) {
         if (formType === "question") {
-          setQuestions((prev) => [data.item, ...prev])
           selectMode("question")
         } else {
           setReviews((prev) => [data.item, ...prev])

@@ -1,4 +1,5 @@
 "use client"
+import { useUrlState } from "@lib/hooks/use-url-state"
 import React, { useEffect, useState } from "react"
 import MediaSelectorModal from "../components/MediaSelectorModal"
 import IconPickerModal from "../components/IconPickerModal"
@@ -56,19 +57,10 @@ export default function ThemeSettingsPage(props: any = {}) {
     initialTab?: "logos" | "typography" | "menu" | "seo" | "icons" | "footer"
     mode?: "theme" | "seo" | "contact" | "all"
   }
-  const [activeTab, setActiveTab] = useState<
+  const [activeTab, setActiveTab] = useUrlState<
     "logos" | "typography" | "menu" | "seo" | "icons" | "footer"
-  >(mode === "seo" ? "seo" : mode === "contact" ? "footer" : initialTab)
+  >(mode === "seo" ? "seo" : mode === "contact" ? "footer" : initialTab, "theme_tab", mode === "seo" ? ["seo"] : mode === "contact" ? ["footer"] : ["logos", "typography", "menu", "seo", "icons", "footer"])
 
-  useEffect(() => {
-    if (mode === "seo") {
-      setActiveTab("seo")
-    } else if (mode === "contact") {
-      setActiveTab("footer")
-    } else if (initialTab) {
-      setActiveTab(initialTab)
-    }
-  }, [initialTab, mode])
   const [iconCategory, setIconCategory] = useState<
     "all" | "hirdavat" | "magaza" | "kurumsal" | "custom"
   >("all")

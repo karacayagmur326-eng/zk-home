@@ -1,5 +1,7 @@
 "use client"
 
+import { useUrlState } from "@lib/hooks/use-url-state"
+
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { 
@@ -79,7 +81,7 @@ export default function MenusPage() {
   const [saved, setSaved] = useState(false)
   const [locationSaving, setLocationSaving] = useState(false)
   const [locationSaved, setLocationSaved] = useState(false)
-  const [activeTab, setActiveTab] = useState<"edit" | "locations">("edit")
+  const [activeTab, setActiveTab] = useUrlState<"edit" | "locations">("edit", "tab", ["edit", "locations"])
   const [categories, setCategories] = useState<Category[]>([])
   const [pages, setPages] = useState<PageItem[]>([])
   const [newMenuName, setNewMenuName] = useState("")

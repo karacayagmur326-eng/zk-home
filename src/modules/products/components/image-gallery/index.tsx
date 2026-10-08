@@ -1,4 +1,5 @@
 "use client"
+import { useUrlState } from "@lib/hooks/use-url-state"
 
 import { HttpTypes } from "@medusajs/types"
 import Image from "@components/common/SmartImage"
@@ -23,7 +24,9 @@ const safeUrl = (url: string) => {
 }
 
 const ImageGallery = ({ images, productTitle, discountBadge, product }: ImageGalleryProps) => {
-  const [activeIndex, setActiveIndex] = useState(0)
+  const [imageIndex, setImageIndex] = useUrlState<string>("0", "image", (images || []).map((_, index) => String(index)))
+  const activeIndex = Number(imageIndex)
+  const setActiveIndex = (index: React.SetStateAction<number>) => setImageIndex(previous => String(typeof index === "function" ? index(Number(previous)) : index))
   const [isLightboxOpen, setIsLightboxOpen] = useState(false)
   const touchStartX = useRef<number | null>(null)
   const touchEndX = useRef<number | null>(null)

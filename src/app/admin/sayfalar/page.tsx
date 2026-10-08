@@ -1,5 +1,7 @@
 "use client"
 
+import { useUrlState } from "@lib/hooks/use-url-state"
+
 import Link from "next/link"
 import { Suspense, useEffect, useState } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
@@ -103,7 +105,7 @@ function AdminPagesContent() {
 
   // Table & List State
   const [searchQuery, setSearchQuery] = useState("")
-  const [activeTab, setActiveTab] = useState<"all" | "published" | "draft" | "deleted">("all")
+  const [activeTab, setActiveTab] = useUrlState<"all" | "published" | "draft" | "deleted">("all", "tab", ["all", "published", "draft", "deleted"])
   const [selectedHandles, setSelectedHandles] = useState<string[]>([])
   const [bulkAction, setBulkAction] = useState("bulk")
 

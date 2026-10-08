@@ -1,4 +1,6 @@
 "use client"
+
+import { useUrlState } from "@lib/hooks/use-url-state"
 import React, { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { uploadMediaFiles } from "@lib/admin/upload-media"
@@ -51,7 +53,7 @@ export default function MediaLibraryPage() {
   const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null)
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
   const [confirmBulkDelete, setConfirmBulkDelete] = useState(false)
-  const [mediaTab, setMediaTab] = useState<"active" | "trash">("active")
+  const [mediaTab, setMediaTab] = useUrlState<"active" | "trash">("active", "tab", ["active", "trash"])
   const [mediaCounts, setMediaCounts] = useState({ active_count: 0, deleted_count: 0 })
 
   const [sortBy, setSortBy] = useState<string>(() => {

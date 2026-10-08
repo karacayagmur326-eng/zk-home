@@ -32,7 +32,7 @@ export async function GET(
        WHERE product_id = $1 AND (type = 'review' OR type IS NULL) AND status = 'approved'
        ORDER BY created_at DESC`,
       [productId],
-    ).catch(() => [])
+    )
 
     const questions = await query<{
       id: string
@@ -44,10 +44,10 @@ export async function GET(
       `SELECT id, author, comment, answer,
               TO_CHAR(created_at AT TIME ZONE 'Europe/Istanbul', 'DD.MM.YYYY') AS date
        FROM product_reviews
-       WHERE product_id = $1 AND type = 'question' AND status = 'approved'
+       WHERE product_id = $1 AND type = 'question' AND status = 'approved' AND NULLIF(BTRIM(answer), '') IS NOT NULL
        ORDER BY created_at DESC`,
       [productId],
-    ).catch(() => [])
+    )
 
     return NextResponse.json({
       reviews,
@@ -57,7 +57,7 @@ export async function GET(
     })
   } catch (err) {
     console.error("[reviews:GET] Error:", err)
-    return NextResponse.json({ reviews: [], questions: [], questions_count: 0, reviews_count: 0 })
+    return NextResponse.json({ error: "Değerlendirmeler yüklenemedi." }, { status: 500 })
   }
 }
 
@@ -127,10 +127,10 @@ export async function POST(
     const item = await withTransaction(async db => {
       const result = await db.query(`INSERT INTO product_reviews
          (product_id, author, email, rating, comment, type, image_url, status, customer_id)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, 'approved', $8)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $9, $8)
        RETURNING id, author, rating, comment, image_url, type,
          TO_CHAR(created_at AT TIME ZONE 'Europe/Istanbul', 'DD.MM.YYYY') AS date`,
-        [productId, author, email, rating, comment, type, imageUrl, customerId])
+        [productId, author, email, rating, comment, type, imageUrl, customerId, type === "question" ? "pending" : "approved"])
       const row = result.rows[0]
       if (type === "question") {
         await db.query(`INSERT INTO notification_outbox (id,type,recipient,subject,payload) VALUES ($1,'product_question_received',$2,$3,$4) ON CONFLICT (id) DO NOTHING`, [`notif_product_question_${row.id}`,email,"ZK Home — Ürün sorunuzu aldık",{ name: author, product_title: product.title, product_handle: product.handle, message: comment }])
@@ -142,7 +142,7 @@ export async function POST(
     return NextResponse.json(
       {
         item,
-        message: type === "question" ? "Sorunuz başarıyla iletildi!" : "Değerlendirmeniz başarıyla yayınlandı!",
+        message: type === "question" ? "Sorunuz alındı. En kısa sürede yanıtlayacağız. Sorunuz yanıtlandığında yayınlanacaktır." : "Değerlendirmeniz başarıyla yayınlandı!",
       },
       { status: 201 }
     )
