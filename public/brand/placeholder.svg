@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
-  <title id="title">ZK Home görsel alanı</title>
+  <title id="title">Görsel alanı</title>
   <desc id="desc">İçerik yönetim panelinden eklenecek nötr görsel alanı.</desc>
   <defs>
     <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">

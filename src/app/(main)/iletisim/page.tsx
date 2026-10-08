@@ -5,7 +5,7 @@ import { getBaseURL } from "@lib/util/env"
 
 export const metadata: Metadata = {
   title: "İletişim ve Müşteri Hizmetleri",
-  description: "ZK Home sipariş, teslimat, iade ve kurumsal hediye talepleri için iletişim sayfası.",
+  description: "Mağaza sipariş, teslimat, iade ve kurumsal hediye talepleri için iletişim sayfası.",
   alternates: { canonical: `${getBaseURL()}/iletisim` },
 }
 export const dynamic = "force-dynamic"
@@ -21,7 +21,7 @@ export default async function ContactPage(_props: { searchParams?: Promise<{ ren
         <div className="content-container max-w-5xl">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#bd8585]">İletişim</p>
           <h1 className="mt-4 text-4xl font-bold text-slate-900 sm:text-5xl">Size yardımcı olalım</h1>
-          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slate-600">Ürün, sipariş, teslimat ve iade konularında bize yazabilirsiniz. ZK Home çevrimiçi satış yapar; ziyaret edilebilen bir mağazamız bulunmaz.</p>
+          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slate-600">Ürün, sipariş, teslimat ve iade konularında bize yazabilirsiniz. Mağaza çevrimiçi satış yapar; ziyaret edilebilen bir mağazamız bulunmaz.</p>
         </div>
       </section>
       <div className="content-container max-w-6xl space-y-10 py-12">

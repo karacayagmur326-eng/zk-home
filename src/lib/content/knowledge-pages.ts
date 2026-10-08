@@ -60,7 +60,7 @@ export const defaultBlogPageContent = {
   articles: defaultArticles,
   featured_title: "Öne Çıkan İçerikler",
   popular_title: "Popüler Konular",
-  banner_title: "ZK Home",
+  banner_title: "Mağaza",
   banner_description: "İçerikler hazırlanıyor.",
   banner_image: "",
   newsletter_title: "Yeni İçeriklerden Haberdar Olun",

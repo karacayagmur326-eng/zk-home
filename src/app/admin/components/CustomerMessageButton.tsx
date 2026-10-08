@@ -15,7 +15,7 @@ export default function CustomerMessageButton({ customerId, orderId, label, orde
   const [result, setResult] = useState<string | null>(null)
   const open = () => {
     requestKey.current = crypto.randomUUID()
-    setSubject(orderNumber ? `#${orderNumber} numaralı siparişiniz hakkında` : "ZK Home müşteri desteği")
+    setSubject(orderNumber ? `#${orderNumber} numaralı siparişiniz hakkında` : "Mağaza müşteri desteği")
     setMessage(""); setError(""); setResult(null)
     dialog.current?.showModal()
   }

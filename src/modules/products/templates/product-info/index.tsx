@@ -21,7 +21,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
   })
 
   const md = (product.metadata as Record<string, any>) || {}
-  const brandName = (md.brand_name as string) || product.collection?.title || "ZK HOME"
+  const brandName = (md.brand_name as string) || product.collection?.title || (md.brand as string) || ""
   const sku = String(product.variants?.[0]?.sku || md.sku || "").trim()
 
   useEffect(() => {

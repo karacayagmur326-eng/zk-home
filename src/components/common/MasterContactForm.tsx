@@ -97,7 +97,7 @@ export default function MasterContactForm({
       })
     } catch (err: any) {
       setErrorMessage("Form şu anda iletilemedi. Mesajınızı e-posta uygulamanızla gönderebilirsiniz.")
-      const recipient = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@zk-home.com"
+      const recipient = process.env.NEXT_PUBLIC_CONTACT_EMAIL || ""
       const body = `Ad: ${formData.name}\nE-posta: ${formData.email}\nTelefon: ${formData.phone}\nSipariş: ${formData.order_no}\n\n${formData.message}`
       setEmailDraft(`mailto:${recipient}?subject=${encodeURIComponent(formData.subject)}&body=${encodeURIComponent(body)}`)
     } finally {

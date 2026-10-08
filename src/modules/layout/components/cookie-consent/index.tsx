@@ -239,9 +239,9 @@ export default function CookieConsent({ ga4Id }: { ga4Id?: string }) {
                           <tbody className="divide-y divide-slate-100 text-slate-600">
                             <tr>
                               <td className="py-2 px-2.5 font-semibold text-slate-800">
-                                ZK Home_Member_Data
+                                Mağaza_Member_Data
                               </td>
-                              <td className="py-2 px-2.5">ZK Home</td>
+                              <td className="py-2 px-2.5">Mağaza</td>
                               <td className="py-2 px-2.5">
                                 Üyelik verilerinizin saklanması için kullanılan çerezler.
                               </td>
@@ -253,7 +253,7 @@ export default function CookieConsent({ ga4Id }: { ga4Id?: string }) {
                               <td className="py-2 px-2.5 font-semibold text-slate-800">
                                 SERVERID
                               </td>
-                              <td className="py-2 px-2.5">ZK Home</td>
+                              <td className="py-2 px-2.5">Mağaza</td>
                               <td className="py-2 px-2.5">
                                 Sunucu oturum kimliği için kullanılan çerezler.
                               </td>
@@ -265,7 +265,7 @@ export default function CookieConsent({ ga4Id }: { ga4Id?: string }) {
                               <td className="py-2 px-2.5 font-semibold text-slate-800">
                                 _zkhome_cart_id
                               </td>
-                              <td className="py-2 px-2.5">ZK Home</td>
+                              <td className="py-2 px-2.5">Mağaza</td>
                               <td className="py-2 px-2.5">
                                 Sepetin korunması, üyelik oturumunun sürdürülmesi, güvenli ödeme
                                 işlemlerinin yapılması.
@@ -510,9 +510,9 @@ export default function CookieConsent({ ga4Id }: { ga4Id?: string }) {
                           <tbody className="divide-y divide-slate-100 text-slate-600">
                             <tr>
                               <td className="py-2 px-2.5 font-semibold text-slate-800">
-                                ZK Home_SID
+                                Mağaza_SID
                               </td>
-                              <td className="py-2 px-2.5">ZK Home</td>
+                              <td className="py-2 px-2.5">Mağaza</td>
                               <td className="py-2 px-2.5">
                                 Kullanıcı oturum verisini saklayan çerez.
                               </td>
@@ -524,7 +524,7 @@ export default function CookieConsent({ ga4Id }: { ga4Id?: string }) {
                               <td className="py-2 px-2.5 font-semibold text-slate-800">
                                 CultureSettings
                               </td>
-                              <td className="py-2 px-2.5">ZK Home</td>
+                              <td className="py-2 px-2.5">Mağaza</td>
                               <td className="py-2 px-2.5">
                                 Kültür ve dil ayarlarını hatırlamak için kullanılan çerez.
                               </td>
@@ -534,9 +534,9 @@ export default function CookieConsent({ ga4Id }: { ga4Id?: string }) {
                             </tr>
                             <tr>
                               <td className="py-2 px-2.5 font-semibold text-slate-800">
-                                ZK Home_Cart_SessionID
+                                Mağaza_Cart_SessionID
                               </td>
-                              <td className="py-2 px-2.5">ZK Home</td>
+                              <td className="py-2 px-2.5">Mağaza</td>
                               <td className="py-2 px-2.5">
                                 Sepet oturum verilerinin saklanması için çerez.
                               </td>
@@ -548,7 +548,7 @@ export default function CookieConsent({ ga4Id }: { ga4Id?: string }) {
                               <td className="py-2 px-2.5 font-semibold text-slate-800">
                                 __RequestVerificationToken
                               </td>
-                              <td className="py-2 px-2.5">ZK Home</td>
+                              <td className="py-2 px-2.5">Mağaza</td>
                               <td className="py-2 px-2.5">
                                 Güvenlik amacıyla doğrulama jetonunu içeren çerez.
                               </td>
@@ -558,9 +558,9 @@ export default function CookieConsent({ ga4Id }: { ga4Id?: string }) {
                             </tr>
                             <tr>
                               <td className="py-2 px-2.5 font-semibold text-slate-800">
-                                ZK HomeReferer
+                                MağazaReferer
                               </td>
-                              <td className="py-2 px-2.5">ZK Home</td>
+                              <td className="py-2 px-2.5">Mağaza</td>
                               <td className="py-2 px-2.5">CookieRefererAciklama</td>
                               <td className="py-2 px-2.5 whitespace-nowrap">7 gün</td>
                             </tr>

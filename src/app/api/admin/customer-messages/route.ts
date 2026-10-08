@@ -34,7 +34,7 @@ export async function POST(request: Request) {
         if (!old || old.email !== recipient.email || old.customer_id !== recipient.customer_id || old.order_no !== recipient.order_no || old.subject !== subject || old.message !== message) throw new Error("Gönderim anahtarı farklı bir mesaj için kullanılmış. Mesaj penceresini yeniden açın.")
         contactId = old.id
       }
-      await db.query(`INSERT INTO notification_outbox (id,type,recipient,subject,payload) VALUES ($1,'contact_reply_customer',$2,$3,$4) ON CONFLICT (id) DO NOTHING`, [notificationId,recipient.email,`ZK HOME #${contactId} Talep — ${subject}`, { message_id: contactId, name: recipient.name, email: recipient.email, contact_subject: subject, order_no: recipient.order_no, reply: message, initiated_by_admin: true }])
+      await db.query(`INSERT INTO notification_outbox (id,type,recipient,subject,payload) VALUES ($1,'contact_reply_customer',$2,$3,$4) ON CONFLICT (id) DO NOTHING`, [notificationId,recipient.email,`Mağaza #${contactId} Talep — ${subject}`, { message_id: contactId, name: recipient.name, email: recipient.email, contact_subject: subject, order_no: recipient.order_no, reply: message, initiated_by_admin: true }])
       return contactId
     }, { invalidateCatalog: false })
     await processNotificationOutbox(1,[notificationId]).catch(() => null)

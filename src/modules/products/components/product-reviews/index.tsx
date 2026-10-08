@@ -1,4 +1,5 @@
 "use client"
+import { useSiteContact } from "@components/common/SellerQuestion"
 
 import { useUrlState } from "@lib/hooks/use-url-state"
 
@@ -23,6 +24,7 @@ export default function ProductReviews({
   productId: string
   layout?: "full" | "column"
 }) {
+  const siteContact = useSiteContact()
   const [reviews, setReviews] = useState<ReviewItem[]>([])
   const [questions, setQuestions] = useState<ReviewItem[]>([])
   const [activeTab, setActiveTab] = useUrlState<"reviews" | "questions">("reviews", "reviews_tab", ["reviews", "questions"])
@@ -520,7 +522,7 @@ export default function ProductReviews({
                     <div className="p-3 bg-rose-50/60 border border-rose-200/70 rounded-xl space-y-1 mt-2">
                       <div className="flex items-center gap-1.5 text-xs font-black text-[#C98484]">
                         <ShieldCheck className="w-4 h-4" />
-                        <span>ZK HOME Mağaza Cevabı</span>
+                        <span>{siteContact.brandName} Mağaza Cevabı</span>
                       </div>
                       <p className="text-xs text-slate-700 font-medium leading-relaxed">
                         {q.answer}

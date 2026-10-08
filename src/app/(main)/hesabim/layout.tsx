@@ -31,7 +31,7 @@ export default async function AccountPageLayout({
   ])
 
   return (
-    <AccountLayout customer={customer} logoUrl={themeSettings?.footer_logo_url || "/brand/zkhome-logo.svg"}>
+    <AccountLayout customer={customer} logoUrl={themeSettings?.footer_logo_url || "/brand/placeholder.svg"}>
       {customer ? dashboard : login}
       {/* TODO: Re-add Toaster component when needed */}
     </AccountLayout>

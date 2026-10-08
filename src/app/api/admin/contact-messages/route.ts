@@ -118,7 +118,7 @@ export async function PATCH(request: Request) {
           customerId,
           "contact_reply_customer",
           message.email,
-          `ZK HOME #${message.id} Talep — ${message.subject || "İletişim Talebi"}`,
+          `Mağaza #${message.id} Talep — ${message.subject || "İletişim Talebi"}`,
           payload,
         ],
       ]

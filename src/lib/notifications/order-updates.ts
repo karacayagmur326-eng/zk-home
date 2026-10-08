@@ -25,7 +25,7 @@ export async function queueOrderUpdate(client: PoolClient, before: OrderState, a
   const shipped = after.fulfillment_status === "shipped" && before.fulfillment_status !== "shipped"
   const paymentChanged = before.payment_status !== after.payment_status
   const type = cancelled ? "order_cancelled" : paymentChanged ? "order_status_updated" : delivered ? "order_delivered" : local ? "order_local_delivery" : shipped ? "order_shipped" : "order_status_updated"
-  const subject = cancelled ? "Siparişiniz iptal edildi" : paymentChanged ? "Siparişinizin ödeme bilgileri güncellendi" : delivered ? "Siparişiniz teslim edildi" : local ? "ZK Home teslimat bilgileriniz güncellendi" : shipped ? "Siparişiniz kargoya verildi" : "Sipariş ve teslimat bilgileriniz güncellendi"
+  const subject = cancelled ? "Siparişiniz iptal edildi" : paymentChanged ? "Siparişinizin ödeme bilgileri güncellendi" : delivered ? "Siparişiniz teslim edildi" : local ? "Mağaza teslimat bilgileriniz güncellendi" : shipped ? "Siparişiniz kargoya verildi" : "Sipariş ve teslimat bilgileriniz güncellendi"
   const revision = createHash("sha256").update(`${before.updated_at}:${snapshot(after)}`).digest("hex").slice(0, 24)
   const id = cancelled ? `notif_order_cancelled_${after.id}` : `notif_order_update_${after.id}_${revision}`
   await client.query(`UPDATE notification_outbox SET status='superseded',updated_at=NOW()

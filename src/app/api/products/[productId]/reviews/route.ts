@@ -136,7 +136,7 @@ export async function POST(
       const row = result.rows[0]
       if (type === "question") {
         const thread = await db.query(`INSERT INTO contact_messages (product_question_id,name,email,subject,message,customer_id) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id`,[row.id,author,email,product.title,comment,customerId])
-        await db.query(`INSERT INTO notification_outbox (id,type,recipient,subject,payload) VALUES ($1,'contact_message_received',$2,$3,$4) ON CONFLICT (id) DO NOTHING`, [`notif_product_question_${row.id}`,email,`ZK HOME #${thread.rows[0].id} Talep — Ürün sorunuzu aldık`,{ product_question_id: String(row.id), contact_subject: product.title, message_id: String(thread.rows[0].id), name: author, product_title: product.title, product_handle: product.handle, message: comment }])
+        await db.query(`INSERT INTO notification_outbox (id,type,recipient,subject,payload) VALUES ($1,'contact_message_received',$2,$3,$4) ON CONFLICT (id) DO NOTHING`, [`notif_product_question_${row.id}`,email,`Mağaza #${thread.rows[0].id} Talep — Ürün sorunuzu aldık`,{ product_question_id: String(row.id), contact_subject: product.title, message_id: String(thread.rows[0].id), name: author, product_title: product.title, product_handle: product.handle, message: comment }])
       }
       return row
     })

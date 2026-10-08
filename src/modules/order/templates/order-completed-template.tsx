@@ -135,7 +135,7 @@ export default function OrderCompletedTemplate({
                   {currentStep === 4
                     ? "Siparişiniz Teslim Edildi!"
                     : currentStep === 3
-                    ? localDelivery ? "ZK Home Teslimatınız Planlandı" : "Siparişiniz Kargoya Verildi!"
+                    ? localDelivery ? "Mağaza Teslimatıınız Planlandı" : "Siparişiniz Kargoya Verildi!"
                     : "Siparişiniz Başarıyla Alındı!"}
                 </h1>
                 <p className="text-xs text-slate-500 mt-0.5">
@@ -256,7 +256,7 @@ export default function OrderCompletedTemplate({
                       currentStep >= 3 ? "font-extrabold text-slate-900" : "font-bold text-slate-400"
                     }`}
                   >
-                    {localDelivery ? "ZK Home Teslimat" : currentStep >= 3 ? "Kargoya Verildi" : "Kargoya Verilecek"}
+                    {localDelivery ? "Mağaza Teslimatı" : currentStep >= 3 ? "Kargoya Verildi" : "Kargoya Verilecek"}
                   </span>
                   <span
                     className={`text-[10px] hidden sm:block ${

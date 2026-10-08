@@ -1,4 +1,5 @@
 "use client"
+import { useSiteContact } from "@components/common/SellerQuestion"
 
 import { useParams, usePathname } from "next/navigation"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -22,6 +23,7 @@ const AccountNav = ({
   customer: HttpTypes.StoreCustomer | null
   logoUrl: string
 }) => {
+  const siteContact = useSiteContact()
   const pathname = usePathname()
   const { countryCode } = useParams() as { countryCode: string }
 
@@ -86,8 +88,8 @@ const AccountNav = ({
     <aside className="w-full rounded-3xl border border-slate-100 bg-white p-6 shadow-soft">
       {/* Storefront brand mark */}
       <div className="mb-6 pb-6 border-b border-slate-100">
-        <LocalizedClientLink href="/" aria-label="ZK Home ana sayfa" className="flex h-12 items-center justify-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C98484]">
-          <img src={logoUrl} alt="ZK Home" width={220} height={44} className="max-h-11 max-w-[205px] object-contain" />
+        <LocalizedClientLink href="/" aria-label={`${siteContact.brandName} ana sayfa`} className="flex h-12 items-center justify-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C98484]">
+          <img src={logoUrl} alt={siteContact.brandName} width={220} height={44} className="max-h-11 max-w-[205px] object-contain" />
         </LocalizedClientLink>
       </div>
 

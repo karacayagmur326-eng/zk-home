@@ -87,7 +87,7 @@ export default function ChatbotAdminPage() {
       const contactData = await contactResponse.json()
       if (!botResponse.ok || !contactResponse.ok) throw new Error(botData.error || contactData.error || "Ayarlar kaydedilemedi.")
       setSettings(botData.settings || settings)
-      ;(window as any).showAdminAlert?.("ZK Home Asistan ve WhatsApp ayarları canlı site için kaydedildi.", "Kaydedildi", "success")
+      ;(window as any).showAdminAlert?.("Yapay Zeka Asistan ve WhatsApp ayarları canlı site için kaydedildi.", "Kaydedildi", "success")
     } catch (error) {
       ;(window as any).showAdminAlert?.(error instanceof Error ? error.message : "Ayarlar kaydedilemedi.", "Hata", "error")
     } finally {
@@ -155,15 +155,11 @@ export default function ChatbotAdminPage() {
     } finally { setProviderBusy("") }
   }
 
-  if (loading) return <div className="admin-card p-8 text-sm font-bold text-slate-500">ZK Home Asistan ayarları yükleniyor…</div>
+  if (loading) return <div className="admin-card p-8 text-sm font-bold text-slate-500">Yapay Zeka Asistan ayarları yükleniyor…</div>
 
   return (
-    <div className="mx-auto max-w-6xl space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-xl font-black text-slate-900">ZK Home Asistan & Canlı İletişim</h2>
-          <p className="mt-1 text-xs font-medium text-slate-500">Hazır yanıtları, ZK Home Asistanı ve WhatsApp kanalını tek merkezden yönetin.</p>
-        </div>
+    <div className="space-y-5">
+      <div className="flex flex-wrap items-center justify-end gap-3">
         <button onClick={save} disabled={saving} className="inline-flex items-center gap-2 rounded-xl bg-[#C98484] px-5 py-3 text-xs font-extrabold text-white shadow-lg shadow-rose-100 transition hover:bg-[#A95E5E] disabled:opacity-50">
           <Save className="h-4 w-4" /> {saving ? "Kaydediliyor…" : "Ayarları Kaydet"}
         </button>
@@ -172,7 +168,7 @@ export default function ChatbotAdminPage() {
       <div className="grid gap-5 lg:grid-cols-2">
         <section className="admin-card p-5">
           <div className="mb-5 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-50 text-[#C98484]"><Bot className="h-5 w-5" /></span><div><h3 className="text-sm font-black text-slate-900">ZK Home Asistan</h3><p className="text-[11px] text-slate-500">Müşterilere otomatik ve bağlama uygun yanıt verir.</p></div></div>
+            <div className="flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-50 text-[#C98484]"><Bot className="h-5 w-5" /></span><div><h3 className="text-sm font-black text-slate-900">Asistan Ayarları</h3><p className="text-[11px] text-slate-500">Müşterilere otomatik ve bağlama uygun yanıt verir.</p></div></div>
             <Toggle checked={settings.enabled} onChange={(enabled) => setSettings({ ...settings, enabled })} />
           </div>
           <div className="space-y-3">
@@ -189,7 +185,7 @@ export default function ChatbotAdminPage() {
 
         <section className="admin-card p-5">
           <div className="mb-5 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600"><MessageCircleQuestion className="h-5 w-5" /></span><div><h3 className="text-sm font-black text-slate-900">WhatsApp İletişimi</h3><p className="text-[11px] text-slate-500">ZK Home Asistandan bağımsız açılıp kapatılabilir.</p></div></div>
+            <div className="flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600"><MessageCircleQuestion className="h-5 w-5" /></span><div><h3 className="text-sm font-black text-slate-900">WhatsApp İletişimi</h3><p className="text-[11px] text-slate-500">Yapay Zeka Asistandan bağımsız açılıp kapatılabilir.</p></div></div>
             <Toggle checked={contact.whatsapp_enabled} onChange={(whatsapp_enabled) => setContact({ ...contact, whatsapp_enabled })} />
           </div>
           <div className="space-y-3">

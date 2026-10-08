@@ -1,4 +1,5 @@
 "use client"
+import { useSiteContact } from "@components/common/SellerQuestion"
 
 import { FormEvent, useState } from "react"
 
@@ -6,6 +7,7 @@ import { Mail, Send } from "@lib/icons"
 import { Button, Input } from "@modules/common/components/ui"
 
 export default function Newsletter() {
+  const siteContact = useSiteContact()
   const [email, setEmail] = useState("")
   const [message, setMessage] = useState("")
   const [isError, setIsError] = useState(false)
@@ -45,7 +47,7 @@ export default function Newsletter() {
             id="newsletter-title"
             className="mt-2 text-3xl font-black sm:text-4xl"
           >
-            ZK Home e-bültenine katılın
+            {siteContact.brandName} e-bültenine katılın
           </h2>
           <p className="mt-3 text-sm leading-relaxed opacity-75 sm:text-base">
             Yeni ürünler, kullanım rehberleri ve kampanya duyuruları için

@@ -121,7 +121,7 @@ export default function LegalContractsModal({
             <div>
               <h2 className="text-base font-extrabold text-slate-900">{title}</h2>
               <p className="text-xs text-slate-500 font-medium">
-                ZK Home Sipariş Kodu: <span className="font-bold text-slate-700">{cart?.id || "Taslak Sipariş"}</span>
+                Sipariş Kodu: <span className="font-bold text-slate-700">{cart?.id || "Taslak Sipariş"}</span>
               </p>
             </div>
           </div>
@@ -302,7 +302,7 @@ export default function LegalContractsModal({
           {/* Footer Approval */}
           <div className="mt-6 pt-4 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-500 font-medium">
             <p>İşbu belge elektronik ortamda Alıcı onayına sunulmuş ve onay tarihinde yürürlüğe girmiştir.</p>
-            <p className="font-bold text-slate-700">ZK Home © 2026 Tüm Hakları Saklıdır.</p>
+            <p className="font-bold text-slate-700">{siteContact.companyName} © {new Date().getFullYear()} Tüm Hakları Saklıdır.</p>
           </div>
 
         </div>

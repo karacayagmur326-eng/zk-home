@@ -12,7 +12,7 @@ export default async function MaintenanceScreen({ message }: { message?: string 
       <div aria-hidden="true" className="pointer-events-none absolute -bottom-48 -left-48 h-[520px] w-[520px] rounded-full bg-[#c98484]/10 blur-3xl" />
 
       <header className="relative mb-8 text-center sm:mb-11">
-        <Image src="/brand/zkhome-logo.svg" alt="ZK Home" width={200} height={40} priority className="mx-auto h-auto w-40 sm:w-48" />
+        <Image src="/brand/placeholder.svg" alt="Mağaza" width={200} height={40} priority className="mx-auto h-auto w-40 sm:w-48" />
         <p className="mt-4 text-[10px] font-medium uppercase tracking-[0.24em] text-[#8b756c] sm:text-xs">Evinize iyi gelen dokunuşlar</p>
       </header>
 
@@ -42,7 +42,7 @@ export default async function MaintenanceScreen({ message }: { message?: string 
       </section>
 
       <footer className="relative mt-7 flex w-full max-w-5xl flex-col items-center justify-between gap-4 text-[11px] text-[#8b756c] sm:flex-row sm:mt-9">
-        <p>© {new Date().getFullYear()} ZK Home. Tüm hakları saklıdır.</p>
+        <p>© {new Date().getFullYear()} Mağaza. Tüm hakları saklıdır.</p>
         <Link href="/admin" prefetch={false} className="inline-flex min-h-11 items-center gap-2 rounded-full px-3 transition-colors hover:text-[#a45d5d] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a45d5d]">Yönetici girişi <span aria-hidden="true">↗</span></Link>
       </footer>
     </main>

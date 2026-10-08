@@ -21,6 +21,8 @@ const StoreTemplate = async ({
   priceMax,
   searchQuery,
   viewMode,
+  title,
+  fixedCollectionId,
 }: {
   sortBy?: SortOptions
   page?: string
@@ -32,6 +34,8 @@ const StoreTemplate = async ({
   priceMax?: string
   searchQuery?: string
   viewMode?: string
+  title?: string
+  fixedCollectionId?: string
 }) => {
   const [sidebarMenu, navigationCategories, navigationCollections] = await Promise.all([
     getMenu("category-sidebar").catch(() => null).then(async (m) => m || await getMenu("ikincil-menu").catch(() => null)),
@@ -55,8 +59,9 @@ const StoreTemplate = async ({
           sidebarMenu={sidebarMenu}
           initialCategories={navigationGroups}
           initialCollections={navigationCollections}
+          fixedCollectionId={fixedCollectionId}
         />
-        <div className="w-full flex-1">
+        <div className="w-full min-w-0 flex-1">
           <Suspense fallback={<SkeletonProductGrid />}>
             <PaginatedProducts
               sortBy={sort}
@@ -69,6 +74,7 @@ const StoreTemplate = async ({
               priceMax={priceMax}
               searchQuery={searchQuery}
               viewMode={viewMode}
+              title={title}
             />
           </Suspense>
         </div>

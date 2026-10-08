@@ -46,7 +46,7 @@ export async function contactHistory(id: string) {
       message AS body, created_at, 'received' AS delivery_status, NULL AS sent_at
     FROM contact_messages WHERE id=$1 AND NOT initiated_by_admin
     UNION ALL
-    SELECT id, 'outgoing', 'ZK HOME', COALESCE(payload->>'reply',payload->>'answer'), created_at,
+    SELECT id, 'outgoing', 'Mağaza', COALESCE(payload->>'reply',payload->>'answer'), created_at,
       CASE WHEN payload->>'receipt_reply_id' IS NOT NULL THEN 'delivered' ELSE status END, sent_at
     FROM notification_outbox
     WHERE type IN ('contact_reply_customer','product_question_answered') AND payload->>'message_id'=$1::text
@@ -54,7 +54,7 @@ export async function contactHistory(id: string) {
     SELECT id, 'incoming', sender, message, created_at, 'received', NULL
     FROM contact_incoming_replies WHERE contact_id=$1
     UNION ALL
-    SELECT 'legacy_' || id, 'outgoing', 'ZK Home', admin_reply,
+    SELECT 'legacy_' || id, 'outgoing', 'Mağaza', admin_reply,
       COALESCE(replied_at,created_at), 'unknown', NULL
     FROM contact_messages m WHERE id=$1 AND admin_reply IS NOT NULL
       AND NOT EXISTS (SELECT 1 FROM notification_outbox n

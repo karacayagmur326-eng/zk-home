@@ -17,9 +17,9 @@ function redactSensitiveData(value: string) {
 }
 
 function systemPrompt(tone: string) {
-  return `Sen ZK Home web sitesinin ürün ve bilgi asistanısın. Türkçe yanıt ver.
+  return `Sen Mağaza web sitesinin ürün ve bilgi asistanısın. Türkçe yanıt ver.
 Üslup: ${tone}
-Kullanıcının yazım hatalarını sessizce anlamlandır ve önce gerçek niyetini çöz. Sadece VERİLEN MAĞAZA BİLGİSİ içindeki ZK Home kanıtlarını kullan. Kanıt dışında teknik özellik, fiyat, stok, performans veya garanti bilgisi uydurma. Bilgi yoksa açıkça söyle ve needs_human=true yap.
+Kullanıcının yazım hatalarını sessizce anlamlandır ve önce gerçek niyetini çöz. Sadece VERİLEN MAĞAZA BİLGİSİ içindeki Mağaza kanıtlarını kullan. Kanıt dışında teknik özellik, fiyat, stok, performans veya garanti bilgisi uydurma. Bilgi yoksa açıkça söyle ve needs_human=true yap.
 Teknik değerleri ve birimleri asla sessizce değiştirme veya uydurma. İstenen değer katalogda yoksa bunu açıkça söyle; yalnızca verilen mağaza bilgisindeki en yakın gerçek değeri alternatif sun.
 Arama sonucu dökmekle yetinme; kullanıcının asıl sorusunu açıklama, seçim gerekçesi, uygunluk veya karşılaştırma yönünden cevapla. Ürün kanıtı varsa ilgili ürünü soruyla açıkça ilişkilendir ve ilişkiyi hangi doğrulanmış özelliğin kurduğunu söyle. Kanıtta olmayan bir sonucu çıkarım olarak sunma; eksik bilgiyi açıkça belirt.
 Soruyu doğrudan cevapla; kısa soruya 1-4 cümleyle kısa cevap ver. Gereksiz SEO metni, kategori listesi veya blog özeti dökme. Her cevaba aynı kalıp sözle başlama. Bir insan olduğunu iddia etme. Yanıtı en fazla 110 kelime ve iki kısa paragraf tut.
@@ -138,7 +138,7 @@ export async function generateAiChatbotAnswer(args: GenerateArgs) {
 export async function testAiProvider(record: AiProviderSecret) {
   const settings = { ...({} as ChatbotSettings), ai_tone: "Kısa ve doğal konuş." }
   try {
-    const response = await callProvider({ message: "Kısa bir test yanıtı ver.", history: [], settings, grounding: "Mağaza adı: ZK Home." }, record)
+    const response = await callProvider({ message: "Kısa bir test yanıtı ver.", history: [], settings, grounding: "Mağaza adı: Mağaza." }, record)
     if (!response.result?.answer) throw new Error("Geçerli yanıt alınamadı.")
     if (response.usage.total > 0) await recordAiUsage(record.id, response.usage)
     await recordAiTestSuccess(record.id)
@@ -157,7 +157,7 @@ export async function testGeminiConnection(apiKey: string, model: string) {
   const temporary = { id: "temporary", provider: "gemini", model, api_key: apiKey } as AiProviderSecret
   const settings = { ...({} as ChatbotSettings), ai_tone: "Kısa ve doğal konuş." }
   try {
-    const response = await callGemini({ message: "Kısa bir test yanıtı ver.", history: [], settings, grounding: "Mağaza adı: ZK Home." }, temporary)
+    const response = await callGemini({ message: "Kısa bir test yanıtı ver.", history: [], settings, grounding: "Mağaza adı: Mağaza." }, temporary)
     return Boolean(response.result?.answer)
   } catch { return false }
 }

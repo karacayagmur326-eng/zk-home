@@ -20,8 +20,8 @@ const defaultWholesaleInfo = {
   feat5_title: "Fatura ve Ödeme", feat5_desc: "Kolay fatura yönetimi ve esnek ödeme seçenekleri.", feat5_icon: "receipt",
   feat6_title: "Hızlı Sevkiyat", feat6_desc: "Türkiye geneli aynı gün kargo ve güvenli teslimat.", feat6_icon: "truck",
 
-  // "Neden ZK Home?" & "Kimler İçin Uygun?"
-  why_title: "Neden ZK Home?",
+  // "Neden Mağaza?" & "Kimler İçin Uygun?"
+  why_title: "Neden Mağaza?",
   why_desc: "Yılların deneyimi ve geniş ürün yelpazemizle, farklı sektörlerdeki işletmelerin üretim gücünü artırıyoruz. Kaliteyi uygun fiyatla buluşturuyor, işinizi büyütmenize katkı sağlıyoruz.",
   stat1_value: "10.000+", stat1_label: "Ürün Çeşidi", stat1_icon: "tag",
   stat2_value: "500+", stat2_label: "Kurumsal Müşteri", stat2_icon: "users",
@@ -50,7 +50,7 @@ const defaultWholesaleInfo = {
   form_desc: "İhtiyacınızı belirtin, en kısa sürede size geri dönüş yapalım.",
   phone: "0850 303 00 47",
   phone_sub: "Hafta içi 09:00 - 18:00",
-  email: "info@zk-home.com",
+  email: "",
   email_sub: "Ortalama yanıt süresi: 2 saat",
   address: "İkitelli OSB Mah. İkbal Cad. No: 45/1 Başakşehir / İstanbul",
 }

@@ -91,7 +91,7 @@ const PAYMENT_LABELS: Record<string, string> = {
 }
 
 const FULFILLMENT_LABELS: Record<string, string> = {
-  delivery_scheduled: "ZK Home Teslimat",
+  delivery_scheduled: "Mağaza Teslimatı",
   not_fulfilled: "Bekliyor",
   preparing: "Hazırlanıyor",
   shipped: "Kargoda",
@@ -443,7 +443,7 @@ export default function OrdersPage() {
           <option value="">Kargo Durumu</option>
           <option value="not_fulfilled">Bekliyor</option>
           <option value="preparing">Hazırlanıyor</option>
-          <option value="delivery_scheduled">ZK Home Teslimat Planlandı</option>
+          <option value="delivery_scheduled">Mağaza Teslimatı Planlandı</option>
           <option value="shipped">Kargoda</option>
           <option value="delivered">Teslim Edildi</option>
         </select>

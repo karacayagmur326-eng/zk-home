@@ -1,10 +1,13 @@
+import { getThemeSettings } from "@lib/content/theme-settings"
+import { getSiteSeoMetadata } from "@lib/seo/templates"
 import { ImageResponse } from "next/og"
 
-export const alt = "ZK Home — Yaşam alanlarınıza zarafet"
+export const alt = "Mağaza — Yaşam alanlarınıza zarafet"
 export const size = { width: 1200, height: 630 }
 export const contentType = "image/png"
 
-export default function OpenGraphImage() {
+export default async function OpenGraphImage() {
+  const site = getSiteSeoMetadata(await getThemeSettings())
   return new ImageResponse(
     (
       <div
@@ -44,7 +47,7 @@ export default function OpenGraphImage() {
               ))}
             </div>
             <div style={{ fontFamily: "Georgia, serif", fontSize: 64 }}>
-              ZK HOME
+              {site.siteName}
             </div>
           </div>
           <div
@@ -55,10 +58,10 @@ export default function OpenGraphImage() {
               lineHeight: 1.05,
             }}
           >
-            Yaşam alanlarınıza zarafet
+            {site.title}
           </div>
           <div style={{ fontSize: 28, color: "#6c5b5b" }}>
-            Seçkin ev ve yaşam ürünleri için yeni mağazamız hazırlanıyor.
+            {site.description}
           </div>
         </div>
       </div>

@@ -1,3 +1,5 @@
+import { getThemeSettings } from "@lib/content/theme-settings"
+import { getBaseURL } from "@lib/util/env"
 /**
  * Merkezi İletişim Bilgileri Sistemi
  *
@@ -24,9 +26,9 @@ export const CONTACT_DEFAULTS = {
   email: "",
 
   // Şirket bilgileri
-  company_name: "ZK Home",
-  brand_name: "ZK Home",
-  website: "https://www.zk-home.com",
+  company_name: "",
+  brand_name: "",
+  website: "",
 
   // Adres
   street_address: "",
@@ -75,6 +77,8 @@ export async function getContactInfo(): Promise<ContactInfo> {
     return _cachedContactInfo
   }
 
+  const theme = await getThemeSettings()
+  const defaults = { ...CONTACT_DEFAULTS, brand_name: theme?.logo_text || "", company_name: theme?.logo_text || "", website: getBaseURL() }
   try {
     const rows = await query<{ value: Record<string, any> }>(
       `SELECT value FROM store_settings WHERE key = 'contact_info' LIMIT 1`
@@ -83,8 +87,11 @@ export async function getContactInfo(): Promise<ContactInfo> {
       const dbData = rows[0].value
       // DB verisini defaults ile birleştir (eksik alanlar default'tan gelir)
       const merged: ContactInfo = {
-        ...CONTACT_DEFAULTS,
+        ...defaults,
         ...dbData,
+        brand_name: dbData.brand_name || defaults.brand_name,
+        company_name: dbData.company_name || dbData.brand_name || defaults.company_name,
+        website: dbData.website || defaults.website,
         // phone_raw: telefon numarasından tüm harf-dışı karakterleri kaldır
         phone_raw: (dbData.phone || CONTACT_DEFAULTS.phone).replace(/\D/g, ""),
         // whatsapp: TR kodu ekli tam numara
@@ -111,9 +118,9 @@ export async function getContactInfo(): Promise<ContactInfo> {
     // DB hatası → defaults ile devam et
   }
 
-  _cachedContactInfo = CONTACT_DEFAULTS
+  _cachedContactInfo = defaults
   _cacheTime = now
-  return CONTACT_DEFAULTS
+  return defaults
 }
 
 /** Cache'i temizle (ayar kaydedildikten sonra çağrılır) */

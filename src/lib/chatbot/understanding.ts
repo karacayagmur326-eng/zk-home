@@ -203,7 +203,7 @@ function extractEntities(value: string): QueryEntities {
   }
   const category = explicitCategory || (useCase ? inferredCategory[useCase] : null) || null
   return {
-    brand: /\bzkhome(?: pro)?\b/.test(value) ? "ZK Home" : null,
+    brand: null,
     product: category,
     productCategory: category,
     productModel: modelMatch?.[0] || null,
@@ -330,7 +330,7 @@ function chooseAnswerType(intent: ChatbotIntent, entities: QueryEntities, needsC
 }
 
 function canonicalTerms(intent: ChatbotIntent, entities: QueryEntities) {
-  const terms = ["zkhome", "pro"]
+  const terms: string[] = []
   if (entities.productCategory) terms.push(...normalizeQuery(entities.productCategory).split(" "))
   if (entities.voltage != null) terms.push(String(entities.voltage), "v")
   if (entities.batteryCapacity != null) terms.push(String(entities.batteryCapacity), "ah")

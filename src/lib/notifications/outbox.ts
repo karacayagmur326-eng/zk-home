@@ -82,12 +82,12 @@ function emailHtml(row: OutboxRow, brand: EmailBrandSettings) {
     `
   } else if (row.type === "order_local_delivery") {
     innerHtml = `
-      <h2 style="color:#172033;margin-bottom:20px;">ZK Home teslimatınız planlandı</h2>
+      <h2 style="color:#172033;margin-bottom:20px;">${escapeHtml(brand.brandName)} teslimatınız planlandı</h2>
       <p style="color:#475467;line-height:1.7;">Değerli Müşterimiz,</p>
-      <p style="color:#475467;line-height:1.7;"><strong>${escapeHtml(row.payload.order_id)}</strong> numaralı siparişiniz, <strong>${escapeHtml(row.payload.delivery_window)}</strong> ZK Home teslimat ekibi tarafından teslimat adresinize bizzat ulaştırılacaktır.</p>
-      <p style="color:#475467;line-height:1.7;">Teslimatınız ZK Home ekibi tarafından gerçekleştirileceği için bir kargo takip numarası bulunmamaktadır. Belirtilen zaman aralığında adresinizde bulunmanızı rica ederiz.</p>
+      <p style="color:#475467;line-height:1.7;"><strong>${escapeHtml(row.payload.order_id)}</strong> numaralı siparişiniz, <strong>${escapeHtml(row.payload.delivery_window)}</strong> ${escapeHtml(brand.brandName)} teslimat ekibi tarafından teslimat adresinize bizzat ulaştırılacaktır.</p>
+      <p style="color:#475467;line-height:1.7;">Teslimatınız ${escapeHtml(brand.brandName)} ekibi tarafından gerçekleştirileceği için bir kargo takip numarası bulunmamaktadır. Belirtilen zaman aralığında adresinizde bulunmanızı rica ederiz.</p>
       <p style="color:#475467;line-height:1.7;">Adres bilgilerinizde değişiklik veya teslimatla ilgili bir talebiniz varsa bu e-postayı yanıtlayarak ya da hesabınızdaki Mesajlarım bölümünden bizimle iletişime geçebilirsiniz.</p>
-      <p style="color:#475467;line-height:1.7;">Saygılarımızla,<br><strong>ZK Home Müşteri Deneyimi Ekibi</strong></p>`
+      <p style="color:#475467;line-height:1.7;">Saygılarımızla,<br><strong>${escapeHtml(brand.brandName)} Müşteri Deneyimi Ekibi</strong></p>`
   } else if (row.type === "order_shipped") {
     const orderId = escapeHtml(row.payload.order_id)
     const trackingUrl = String(row.payload.tracking_url || "")
@@ -131,7 +131,7 @@ function emailHtml(row: OutboxRow, brand: EmailBrandSettings) {
       <p style="color:#475467;line-height:1.7;">${answered ? "Ekibimizin ürününüz hakkındaki yanıtını aşağıda bulabilirsiniz." : "Ürün hakkındaki sorunuz ekibimize ulaşmıştır. En kısa sürede inceleyerek sizi bilgilendireceğiz."}</p>
       <p style="color:#172033;line-height:1.7;"><strong>Ürün:</strong> ${escapeHtml(row.payload.product_title)}</p>
       <div style="padding:18px;border:1px solid #e5e7eb;border-radius:10px;white-space:pre-wrap;color:#475467;line-height:1.7;"><strong>Sorunuz</strong><br>${escapeHtml(row.payload.message)}</div>
-      ${answered ? `<div style="margin-top:16px;padding:18px;border-left:4px solid ${escapeHtml(brand.primaryColor)};background:#f8fafc;border-radius:10px;white-space:pre-wrap;color:#172033;line-height:1.7;"><strong>ZK Home yanıtı</strong><br>${escapeHtml(row.payload.answer)}</div>` : ""}
+      ${answered ? `<div style="margin-top:16px;padding:18px;border-left:4px solid ${escapeHtml(brand.primaryColor)};background:#f8fafc;border-radius:10px;white-space:pre-wrap;color:#172033;line-height:1.7;"><strong>${escapeHtml(brand.brandName)} yanıtı</strong><br>${escapeHtml(row.payload.answer)}</div>` : ""}
       ${row.payload.product_handle ? `<p style="margin-top:24px;"><a href="${escapeHtml(productUrl)}" style="color:${escapeHtml(brand.primaryColor)};font-weight:bold;">Ürünü ve soruları görüntüleyin</a></p>` : ""}
       <p style="color:#475467;line-height:1.7;">Saygılarımızla,<br><strong>${escapeHtml(brand.brandName)} Müşteri Deneyimi Ekibi</strong></p>`
   } else if (row.type === "contact_message_admin") {
@@ -178,7 +178,7 @@ function emailHtml(row: OutboxRow, brand: EmailBrandSettings) {
   } else if (row.type === "contact_reply_customer" || row.type === "contact_reply_admin") {
     innerHtml = `
       <p style="margin:0 0 8px;color:${escapeHtml(brand.primaryColor)};font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;">Müşteri destek ekibi</p>
-      <h2 style="color:#172033;margin:0 0 18px;font-size:26px;line-height:1.25;">${row.payload.initiated_by_admin ? "ZK Home’dan yeni mesajınız var" : "Talebiniz yanıtlandı"}</h2>
+      <h2 style="color:#172033;margin:0 0 18px;font-size:26px;line-height:1.25;">${row.payload.initiated_by_admin ? `${escapeHtml(brand.brandName)}: Yeni mesajınız var` : "Talebiniz yanıtlandı"}</h2>
       <p style="color:#475467;line-height:1.7;margin:0 0 12px;">Merhaba ${escapeHtml(row.payload.name || "Değerli Müşterimiz")},</p>
       <p style="color:#475467;line-height:1.7;margin:0;">${row.payload.initiated_by_admin ? "Ekibimizin sizin için ilettiği mesajı aşağıda bulabilirsiniz." : "Bizimle iletişime geçtiğiniz için teşekkür ederiz. Ekibimizin yanıtını aşağıda bulabilirsiniz."}</p>
       <div style="margin-top:22px;padding:15px 18px;border-radius:10px;background:#f8fafc;border:1px solid #e5e7eb;color:#344054;font-size:14px;line-height:1.65;">
@@ -198,11 +198,11 @@ function emailHtml(row: OutboxRow, brand: EmailBrandSettings) {
     innerHtml = `
       <h2 style="color:#172033;margin:0 0 20px;">Siparişiniz alındı</h2>
       <p style="color:#475467;line-height:1.7;">Değerli Müşterimiz,</p>
-      <p style="color:#475467;line-height:1.7;">ZK Home’u tercih ettiğiniz için teşekkür ederiz. <strong>${orderId}</strong> numaralı siparişiniz başarıyla oluşturulmuştur.</p>
+      <p style="color:#475467;line-height:1.7;">${escapeHtml(brand.brandName)}’u tercih ettiğiniz için teşekkür ederiz. <strong>${orderId}</strong> numaralı siparişiniz başarıyla oluşturulmuştur.</p>
       <div style="padding:18px;border:1px solid #e5e7eb;border-radius:10px;background:#f8fafc;color:#172033;line-height:1.7;"><strong>Sipariş tutarı:</strong> ${escapeHtml(total)}${paid ? "<br><strong>Ödeme durumu:</strong> Ödemeniz başarıyla alınmıştır." : ""}</div>
       <p style="color:#475467;line-height:1.7;">${paid ? "Siparişiniz ekibimiz tarafından özenle hazırlanacaktır. Teslimat sürecindeki gelişmeleri e-posta ile paylaşacağız." : "Siparişinizin güncel durumunu hesabınızdaki Siparişlerim bölümünden takip edebilirsiniz. Hazırlık ve teslimat sürecindeki gelişmeleri e-posta ile paylaşacağız."}</p>
       <p style="color:#475467;line-height:1.7;">Sorularınız veya siparişinizle ilgili talepleriniz için hesabınızdaki Mesajlarım bölümünden destek ekibimize ulaşabilirsiniz.</p>
-      <p style="color:#475467;line-height:1.7;">Saygılarımızla,<br><strong>ZK Home Müşteri Deneyimi Ekibi</strong></p>
+      <p style="color:#475467;line-height:1.7;">Saygılarımızla,<br><strong>${escapeHtml(brand.brandName)} Müşteri Deneyimi Ekibi</strong></p>
     `
   } else if (row.type === "order_cancelled" || row.type === "order_status_updated") {
     const cancelled = row.type === "order_cancelled"
@@ -217,7 +217,7 @@ function emailHtml(row: OutboxRow, brand: EmailBrandSettings) {
       ${cancelled ? "" : `<div style="padding:18px;border:1px solid #e5e7eb;border-radius:10px;background:#f8fafc;color:#172033;line-height:1.7;"><strong>Sipariş:</strong> ${escapeHtml(states[String(row.payload.status)] || "Güncellendi")}<br><strong>Teslimat:</strong> ${escapeHtml(states[String(row.payload.fulfillment_status)] || "Güncellendi")}${row.payload.carrier ? `<br><strong>Teslimat firması:</strong> ${escapeHtml(row.payload.carrier)}` : ""}${row.payload.tracking_number ? `<br><strong>Takip numarası:</strong> ${escapeHtml(row.payload.tracking_number)}` : ""}</div>`}
       ${/^https:\/\//i.test(trackingUrl) && !cancelled ? `<p><a href="${escapeHtml(trackingUrl)}" style="color:${escapeHtml(brand.primaryColor)};font-weight:bold;">Teslimatı takip edin</a></p>` : ""}
       <p style="color:#475467;line-height:1.7;">Siparişinizle ilgili sorularınız için Mesajlarım bölümünden ekibimize ulaşabilirsiniz.</p>
-      <p style="color:#475467;line-height:1.7;">Saygılarımızla,<br><strong>ZK Home Müşteri Deneyimi Ekibi</strong></p>`
+      <p style="color:#475467;line-height:1.7;">Saygılarımızla,<br><strong>${escapeHtml(brand.brandName)} Müşteri Deneyimi Ekibi</strong></p>`
   } else {
     innerHtml = `<h2 style="color:#172033;">${escapeHtml(row.subject)}</h2><p style="color:#475467;line-height:1.7;">Hesabınızdaki güncel bilgileri kontrol edebilirsiniz.</p>`
   }
@@ -279,7 +279,7 @@ export async function processNotificationOutbox(
     )
     if (!claimed[0]) continue
     try {
-      const brandedSubject = row.subject.replaceAll("ZK Home", brand.brandName)
+      const brandedSubject = row.subject.replace(/^(?:ZK HOME|ZK Home|Mağaza)(?=\s|$)/i, brand.brandName)
       const adminCopy =
         ADMIN_COPY_TYPES.has(row.type)
           ? brand.adminEmails.filter((email) => email !== row.recipient.toLowerCase())

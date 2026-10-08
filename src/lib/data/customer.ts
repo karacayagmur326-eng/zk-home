@@ -113,7 +113,7 @@ export async function changeCustomerPassword(
     const notificationId = createId("notif")
     await query(
       `INSERT INTO notification_outbox (id,type,recipient,subject,payload)
-       VALUES ($1,'password_changed',$2,'ZK Home şifre değişikliği bildirimi',$3)`,
+       VALUES ($1,'password_changed',$2,'Mağaza şifre değişikliği bildirimi',$3)`,
       [notificationId, updated[0].email, {}],
     )
     await processNotificationOutbox(1, [notificationId]).catch((error) =>
@@ -144,7 +144,7 @@ async function queueEmailVerification(customerId: string, email: string) {
   await query(
     `INSERT INTO notification_outbox
      (id,type,recipient,subject,payload)
-     VALUES ($1,'email_verification',$2,'ZK Home e-posta doğrulama',$3)`,
+     VALUES ($1,'email_verification',$2,'Mağaza e-posta doğrulama',$3)`,
     [
       notificationId,
       email,
@@ -190,7 +190,7 @@ export async function requestPasswordReset(
     await query(
       `INSERT INTO notification_outbox
        (id,type,recipient,subject,payload)
-       VALUES ($1,'password_reset',$2,'ZK Home şifre sıfırlama',$3)`,
+       VALUES ($1,'password_reset',$2,'Mağaza şifre sıfırlama',$3)`,
       [
         notificationId,
         email,
@@ -240,7 +240,7 @@ export async function resetCustomerPassword(
     )
     await client.query(
       `INSERT INTO notification_outbox (id,type,recipient,subject,payload)
-       VALUES ($1,'password_changed',$2,'ZK Home şifre değişikliği bildirimi',$3)`,
+       VALUES ($1,'password_changed',$2,'Mağaza şifre değişikliği bildirimi',$3)`,
       [notificationId, rows[0].email, {}],
     )
   })
@@ -481,7 +481,7 @@ export async function confirmEmailVerification(token: string) {
     )
     await client.query(
       `INSERT INTO notification_outbox (id,type,recipient,subject,payload)
-       VALUES ($1,'account_welcome',$2,'ZK Home hesabınız hazır',$3)`,
+       VALUES ($1,'account_welcome',$2,'Mağaza hesabınız hazır',$3)`,
       [notificationId, rows[0].email, { first_name: rows[0].first_name || "" }],
     )
   })

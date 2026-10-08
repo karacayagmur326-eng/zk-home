@@ -29,7 +29,7 @@ export default function ProductPreview({
   const { cheapestPrice } = getProductPrice({ product })
   const metadata = (product.metadata || {}) as Record<string, unknown>
   const summary = productSummaryForCard(product)
-  const brandName = product.collection?.title || textValue(metadata.brand_name) || "ZK HOME"
+  const brandName = product.collection?.title || textValue(metadata.brand_name) || textValue(metadata.brand) || ""
   const tagValues = (product.tags || []).map((tag) => tag.value.toLowerCase())
   const badges = [
     tagValues.includes("yeni") ? "YENİ" : null,

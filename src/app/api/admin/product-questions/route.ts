@@ -8,7 +8,7 @@ export const maxDuration = 60
 
 // Compatibility for older open admin tabs; all replies use the contact workflow.
 export async function GET() {
-  const response = await getMessages(new Request("https://zk-home.com/api/admin/contact-messages?kind=questions"))
+  const response = await getMessages(new Request("http://localhost/api/admin/contact-messages?kind=questions"))
   if (!response.ok) return response
   const data = await response.json()
   return NextResponse.json({questions:data.messages.map((m: Record<string, unknown>)=>({...m,id:String(m.product_question_id),author:m.name,comment:m.message,answer:m.admin_reply}))},{headers:{"Cache-Control":"private, no-store"}})

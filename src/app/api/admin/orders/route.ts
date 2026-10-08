@@ -243,7 +243,7 @@ export async function PATCH(req: NextRequest) {
   let deliveryPlan: DeliveryPlan | null = null
   if (localDelivery && fulfillmentStatus === "shipped") fulfillmentStatus = "delivery_scheduled"
   if (fulfillmentStatus === "delivery_scheduled") {
-    if (!localDelivery) return NextResponse.json({ error: "Planlı teslimat için ZK Home Teslimat seçin." }, { status: 400 })
+    if (!localDelivery) return NextResponse.json({ error: "Planlı teslimat için Mağaza Teslimatı seçin." }, { status: 400 })
     try { deliveryPlan = validateDeliveryPlan(body?.delivery_plan) }
     catch (error) { return NextResponse.json({ error: error instanceof Error ? error.message : "Geçersiz teslimat planı." }, { status: 400 }) }
     status = "processing"

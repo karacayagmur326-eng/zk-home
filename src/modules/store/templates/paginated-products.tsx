@@ -122,7 +122,7 @@ export default async function PaginatedProducts({
       ? "Aradığınız ürün bulunamadı"
       : "Bu kategoride henüz ürün yok"
   const emptyDescription = !isStoreReady()
-    ? "ZK Home seçkisi hazırlanıyor. Yeni ürünler eklendiğinde burada görebilirsiniz."
+    ? "Mağaza seçkisi hazırlanıyor. Yeni ürünler eklendiğinde burada görebilirsiniz."
     : hasActiveFilters
       ? "Seçtiğiniz ölçütlere uygun ürün yok. Filtreleri değiştirerek yeniden deneyin."
       : "Yeni ürünler eklendiğinde burada görebilirsiniz."

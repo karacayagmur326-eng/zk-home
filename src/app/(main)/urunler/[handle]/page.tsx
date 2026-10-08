@@ -100,12 +100,12 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   }
 
   const categoryName = (product.categories?.[0] as any)?.name || ""
-  const brandName = (product as any).brand || "ZK Home"
+  const brandName = (product.metadata as any)?.brand || product.collection?.title || ""
   const priceVal = (product.variants?.[0] as any)?.calculated_price?.calculated_amount
     ? `${(product.variants?.[0] as any).calculated_price.calculated_amount} TL`
     : ""
   const skuVal = (product.variants?.[0] as any)?.sku || ""
-  const siteName = settings?.logo_text || "ZK Home"
+  const siteName = settings?.logo_text || "Mağaza"
   const separator = settings?.seo_title_separator || "|"
 
   const tokens = {
@@ -273,7 +273,7 @@ export default async function ProductPage(props: Props) {
         price: schemaPrice,
         itemCondition: "https://schema.org/NewCondition",
         availability: inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-        seller: { "@type": "Organization", name: "ZK Home", url: getBaseURL() },
+        seller: { "@type": "Organization", name: (await getThemeSettings())?.logo_text || "", url: getBaseURL() },
       },
     } : {}),
   }

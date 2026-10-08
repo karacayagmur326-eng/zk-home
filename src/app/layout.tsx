@@ -1,3 +1,4 @@
+import { getSiteSeoMetadata } from "@lib/seo/templates"
 import { getBaseURL, getCanonicalURL } from "@lib/util/env"
 import { Metadata, Viewport } from "next"
 import { Barlow_Condensed, Inter, Playfair_Display, Plus_Jakarta_Sans } from "next/font/google"
@@ -56,17 +57,11 @@ export const viewport: Viewport = {
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getThemeSettings()
 
-  const title =
-    settings?.seo_meta_title ||
-    "ZK Home | Online Mağaza"
-  const description =
-    settings?.seo_meta_description ||
-    "ZK Home online mağazası. Ürünler ve içerikler hazırlanıyor."
+  const { title, description, siteName } = getSiteSeoMetadata(settings)
   const keywords =
     settings?.seo_meta_keywords ||
-    "zk home, online mağaza, e-ticaret"
+    ""
   const ogImage = settings?.seo_og_image_url || "/opengraph-image"
-  const siteName = settings?.logo_text || "ZK Home"
   const separator = settings?.seo_title_separator || "|"
   const rawPageTemplate =
     settings?.seo_page_title_template || "%sayfa_adi% %ayirici% %site_adi%"
@@ -117,7 +112,7 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title,
       description,
-      siteName: "ZK Home",
+      siteName,
       images: [
         {
           url: ogImage,
@@ -141,7 +136,7 @@ export default async function RootLayout({
   children: React.ReactNode
 }) {
   const settings = (await getThemeSettings()) || {
-    logo_text: "ZK HOME",
+    logo_text: "Mağaza",
     font_family: "Plus Jakarta Sans",
     font_size_base: "16px",
     h1_size: "2.5rem",
@@ -151,14 +146,14 @@ export default async function RootLayout({
     slider_font_title: "Plus Jakarta Sans",
     slider_font_desc: "Inter",
     seo_meta_title:
-      "ZK Home | Online Mağaza",
+      "Mağaza | Online Mağaza",
     seo_meta_description:
-      "ZK Home online mağazası. Ürünler ve içerikler hazırlanıyor.",
+      "",
     seo_meta_keywords:
-      "zk home, online mağaza, e-ticaret",
+      "",
     seo_google_verification: "",
     seo_ga4_id: "",
-    favicon_url: "/brand/zkhome-favicon.svg",
+    favicon_url: "/brand/placeholder.svg",
   }
 
   const ga4Id = /^G-[A-Z0-9]+$/i.test(settings.seo_ga4_id || "")
@@ -178,14 +173,16 @@ export default async function RootLayout({
     `Merhaba, ${contact.brand_name} ürünleri hakkında bilgi almak istiyorum.`
   )
 
+  const configuredLogo = String(settings.header_logo_url || settings.logo_url || "")
+  const organizationLogo = configuredLogo ? (/^https?:\/\//.test(configuredLogo) ? configuredLogo : `${getBaseURL()}${configuredLogo}`) : undefined
   const organizationJsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: contact.company_name,
     alternateName: contact.brand_name,
     url: getCanonicalURL(),
-    logo: `${getBaseURL()}/brand/zkhome-logo.svg`,
-    image: `${getBaseURL()}/brand/zkhome-logo.svg`,
+    logo: organizationLogo,
+    image: organizationLogo,
   }
 
   return (
@@ -197,7 +194,7 @@ export default async function RootLayout({
       <head>
         <link
           rel="icon"
-          href={settings.favicon_url || "/brand/zkhome-favicon.svg"}
+          href={settings.favicon_url || "/brand/placeholder.svg"}
         />
         <link rel="manifest" href="/manifest.webmanifest" />
         <meta name="screen-orientation" content="portrait" />

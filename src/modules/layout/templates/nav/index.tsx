@@ -50,7 +50,7 @@ export default async function Nav() {
     retrieveCustomer().catch(() => null),
   ])
   const publicThemeSettings = sanitizePublicSettings(themeSettings)
-  const brandLogoUrl = themeSettings?.footer_logo_url || "/brand/zkhome-logo.svg"
+  const brandLogoUrl = themeSettings?.footer_logo_url || "/brand/placeholder.svg"
   const isAdminCustomer = (customer as { role?: string } | null)?.role === "Admin"
   const accountLabel = isAdminCustomer ? "Admin" : customer?.first_name || "Hesabım"
   const accountTitle = isAdminCustomer
@@ -246,7 +246,7 @@ export default async function Nav() {
             >
               <img
                 src={brandLogoUrl}
-                alt={themeSettings?.footer_logo_alt || themeSettings?.logo_text || "ZK Home"}
+                alt={themeSettings?.footer_logo_alt || themeSettings?.logo_text || "Mağaza"}
                 width={220}
                 height={50}
                 className="h-9 w-auto max-w-[190px] object-contain sm:h-10 xl:max-w-[220px]"

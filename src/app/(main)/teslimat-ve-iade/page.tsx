@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic"
 
 export const metadata: Metadata = {
   title: "Teslimat, İptal ve İade Koşulları",
-  description: "ZK Home kargo ücretleri, teslimat, iptal ve iade süreçleri.",
+  description: "Mağaza kargo ücretleri, teslimat, iptal ve iade süreçleri.",
   alternates: { canonical: `${getBaseURL()}/teslimat-ve-iade` },
 }
 

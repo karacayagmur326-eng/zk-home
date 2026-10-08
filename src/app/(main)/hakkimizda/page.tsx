@@ -1,3 +1,4 @@
+import { getThemeSettings } from "@lib/content/theme-settings"
 import { query } from "@lib/admin/db"
 import { Metadata } from "next"
 import { redirect } from "next/navigation"
@@ -21,7 +22,7 @@ export const dynamic = "force-dynamic"
 const defaultAboutData = {
   title: "Hakkımızda",
   subtitle: "Evinize özenle seçilmiş parçalar.",
-  heroP1: "ZK Home'da yaşam alanlarınızı tamamlayan dekorasyon ve ev ürünlerini özenle bir araya getiriyoruz.",
+  heroP1: "Ürünlerimizi ve hizmetlerimizi burada tanıyabilirsiniz.",
   heroP2: "Amacımız; doğru ürünü güvenilir hizmetle sizlere sunmaktır.",
   heroCtaText: "Kurumsal Hediyeler",
   heroCtaHref: "/toptan-ve-kurumsal-satis",
@@ -49,7 +50,7 @@ const defaultAboutData = {
   ],
 
   aboutDetailImage: "/brand/placeholder.svg",
-  aboutDetailTitle: "ZK Home Hakkında",
+  aboutDetailTitle: "Hakkımızda",
   aboutDetailP1: "Evde kendinizi iyi hissettiren ayrıntıların önemli olduğuna inanıyoruz.",
   aboutDetailP2: "Dekorasyon ve yaşam ürünlerini farklı zevklere hitap eden bir seçkide buluşturuyoruz.",
   aboutDetailP3: "Siparişinizle ilgili sorularınız için bize her zaman yazabilirsiniz.",
@@ -93,36 +94,29 @@ export default async function AboutPage({ searchParams }: AboutPageProps) {
       contentData = {
         ...defaultAboutData,
         ...parsed,
-        subtitle: defaultAboutData.subtitle,
-        heroP1: defaultAboutData.heroP1,
-        heroP2: defaultAboutData.heroP2,
-        heroCtaText: defaultAboutData.heroCtaText,
-        heroCtaHref: defaultAboutData.heroCtaHref,
-        whyItems: defaultAboutData.whyItems,
-        visionDesc: defaultAboutData.visionDesc,
-        stats: defaultAboutData.stats,
-        aboutDetailTitle: defaultAboutData.aboutDetailTitle,
-        aboutDetailP1: defaultAboutData.aboutDetailP1,
-        aboutDetailP2: defaultAboutData.aboutDetailP2,
-        aboutDetailP3: defaultAboutData.aboutDetailP3,
+
       }
     }
   }
 
   const heroParagraphs = [contentData.heroP1, contentData.heroP2]
 
+  const theme = await getThemeSettings()
+  const siteName = theme?.logo_text || "Mağaza"
+  const configuredLogo = String(theme?.header_logo_url || "")
+  const organizationLogo = configuredLogo ? (/^https?:\/\//.test(configuredLogo) ? configuredLogo : `${getBaseURL()}${configuredLogo}`) : undefined
   const baseUrl = getBaseURL()
   const aboutJsonLd = {
     "@context": "https://schema.org",
     "@type": "AboutPage",
-    name: "Hakkımızda | ZK Home",
+    name: `${contentData.title} | ${siteName}`,
     url: `${baseUrl}/hakkimizda`,
-    description: "ZK Home kurumsal profili, misyonu, vizyonu ve kalite standartları.",
+    description: contentData.subtitle,
     mainEntity: {
       "@type": "Organization",
-      name: "ZK Home",
+      name: siteName,
       url: baseUrl,
-      logo: `${baseUrl}/brand/zkhome-logo.svg`,
+      logo: organizationLogo,
     },
   }
 
@@ -220,7 +214,7 @@ export default async function AboutPage({ searchParams }: AboutPageProps) {
         </div>
       </section>
 
-      {/* 5. "ZK Home Hakkında" Section */}
+      {/* 5. "Mağaza Hakkında" Section */}
       <section className="py-16 bg-white">
         <div className="content-container">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">

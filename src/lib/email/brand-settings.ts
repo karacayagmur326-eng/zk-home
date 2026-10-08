@@ -19,7 +19,7 @@ function absoluteAssetUrl(value: unknown, baseUrl: string) {
   const candidate = String(value || "").trim()
   if (/^https:\/\//i.test(candidate)) return candidate
   if (candidate.startsWith("/")) return `${baseUrl}${candidate}`
-  return `${baseUrl}/brand/zkhome-logo.svg`
+  return `${baseUrl}/brand/placeholder.svg`
 }
 
 export async function getEmailBrandSettings(): Promise<EmailBrandSettings> {
@@ -35,7 +35,7 @@ export async function getEmailBrandSettings(): Promise<EmailBrandSettings> {
   const contact = storeRows.find((row) => row.key === "contact_info")?.value || {}
   const smtp = storeRows.find((row) => row.key === "smtp_settings")?.value || {}
   const theme = themeRows[0] || {}
-  const contactEmail = String(contact.email || "info@zk-home.com").trim()
+  const contactEmail = String(contact.email || "").trim()
   const adminEmail = String(contactEmail || smtp.recipient_email || "").trim()
   const additionalAdminEmails = (Array.isArray(contact.additional_notification_emails)
     ? contact.additional_notification_emails
@@ -47,8 +47,8 @@ export async function getEmailBrandSettings(): Promise<EmailBrandSettings> {
   )
 
   return {
-    brandName: String(contact.brand_name || theme.logo_text || "ZK Home"),
-    companyName: String(contact.company_name || contact.brand_name || "ZK Home"),
+    brandName: String(contact.brand_name || theme.logo_text || "Mağaza"),
+    companyName: String(contact.company_name || contact.brand_name || theme.logo_text || ""),
     logoUrl: absoluteAssetUrl(
       theme.header_logo_url || theme.admin_logo_url,
       baseUrl

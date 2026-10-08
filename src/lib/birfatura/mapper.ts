@@ -1,3 +1,4 @@
+import { getBaseURL } from "@lib/util/env"
 import { BirFaturaOrder, BirFaturaOrderDetail } from "./types"
 import { mapSystemPaymentToBirFatura } from "./constants"
 import { formatBirFaturaDate } from "./schemas"
@@ -95,7 +96,7 @@ function parseJsonField<T>(value: unknown, fallback: T): T {
 export function mapOrderToBirFatura(
   order: RawOrder,
   defaultVatRate = 20,
-  websiteUrl = "https://www.zk-home.com"
+  websiteUrl = getBaseURL()
 ): BirFaturaOrder {
   const shippingAddr = parseJsonField<RawAddress>(order.shipping_address, {})
   const billingAddr = parseJsonField<RawAddress>(order.billing_address, {})
@@ -215,7 +216,7 @@ export function mapOrderToBirFatura(
       ? `${websiteUrl.replace(/\/$/, "")}${rawImage.startsWith("/") ? "" : "/"}${rawImage}`
       : ""
 
-    const brand = item.product?.brand || productMeta.brand || "ZK Home"
+    const brand = item.product?.brand || productMeta.brand || ""
 
     return {
       ProductId: item.birfatura_product_id!,

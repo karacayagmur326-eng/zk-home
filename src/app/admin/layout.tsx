@@ -1,10 +1,13 @@
+import { getThemeSettings } from "@lib/content/theme-settings"
 import { Metadata } from "next"
 import AdminLayoutClient from "./AdminLayoutClient"
 import AdminLoginForm from "./components/AdminLoginForm"
 import { getAdminSession } from "@lib/admin/auth"
 
-export const metadata: Metadata = {
-  title: { absolute: "Yönetim Paneli | ZK Home" },
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getThemeSettings()
+  return {
+  title: { absolute: `Yönetim Paneli | ${settings?.logo_text || "Mağaza"}` },
   robots: {
     index: false,
     follow: false,
@@ -15,6 +18,7 @@ export const metadata: Metadata = {
       noimageindex: true,
     },
   },
+  }
 }
 
 export default async function AdminLayout({

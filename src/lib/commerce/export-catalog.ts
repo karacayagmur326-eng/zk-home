@@ -14,7 +14,7 @@ export function catalogPlainText(value: unknown) {
 
 export async function createCatalogWorkbook(products: any[]) {
   const workbook = new ExcelJS.Workbook()
-  workbook.creator = "ZK HOME"
+  workbook.creator = "Mağaza"
   const sheet = workbook.addWorksheet("Ürünler", { views: [{ state: "frozen", ySplit: 1 }] })
   const discounted = products.some(p => p.variants?.some((v: any) => Number(p.metadata?.original_price) > Number(v.prices?.[0]?.amount)))
   sheet.columns = [

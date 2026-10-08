@@ -2011,7 +2011,7 @@ export default function CategoriesPage() {
               <label className="block text-xs font-bold text-slate-700">
                 SEO Başlığı
                 <input value={seoTitle} onChange={(event) => setSeoTitle(event.target.value)}
-                  placeholder={`${name || "Kategori"} | ZK Home`}
+                  placeholder={`${name || "Kategori"} | Mağaza`}
                   className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-medium outline-none focus:border-[#C98484]" />
               </label>
               <label className="block text-xs font-bold text-slate-700">

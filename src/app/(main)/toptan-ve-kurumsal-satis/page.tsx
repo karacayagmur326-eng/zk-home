@@ -5,7 +5,7 @@ import { getBaseURL } from "@lib/util/env"
 
 export const metadata: Metadata = {
   title: "Kurumsal ve Özel Gün Hediyeleri",
-  description: "Çalışanlarınız ve müşterileriniz için özel gün hediye paketi taleplerinizi ZK Home'a iletin.",
+  description: "Çalışanlarınız ve müşterileriniz için özel gün hediye paketi taleplerinizi Mağaza'a iletin.",
   alternates: { canonical: `${getBaseURL()}/toptan-ve-kurumsal-satis` },
 }
 
@@ -20,7 +20,7 @@ export default function CorporateGiftsPage() {
     <main className="min-h-screen bg-[#fbf8f7] pb-20">
       <section className="bg-white border-b border-rose-100 py-16 sm:py-24">
         <div className="content-container max-w-5xl">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#b97e7e]">ZK Home · Kurumsal hediyeler</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#b97e7e]">Mağaza · Kurumsal hediyeler</p>
           <h1 className="mt-4 max-w-3xl text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">Özel günler için özenli hediye fikirleri</h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-600">Çalışanlarınıza ve müşterilerinize yönelik yılbaşı, bayram ve kutlama hediyeleri için tercihlerinizi bize iletin. Ürün, sunum ve adet seçeneklerini birlikte değerlendirip size dönüş yapalım.</p>
           <a href="#hediye-talebi" className="mt-8 inline-flex rounded-full bg-[#bd8585] px-7 py-3 font-semibold text-white hover:bg-[#a96d6d]">Hediye talebi gönder</a>

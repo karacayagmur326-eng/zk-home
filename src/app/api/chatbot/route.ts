@@ -76,7 +76,7 @@ export async function POST(request: Request) {
     } : null) || (!understanding.needsRetrieval && !unresolvedWithoutRetrieval ? {
         answer: understanding.intent === "GIBBERISH"
           ? "Mesajınızı tam anlayamadım. Ürün, sipariş, kargo veya garantiyle ilgili sorunuzu biraz daha açık yazabilir misiniz?"
-          : "ZK Home ürünleriyle ilgili nasıl yardımcı olabilirim?",
+          : "Mağaza ürünleriyle ilgili nasıl yardımcı olabilirim?",
         link_url: "",
         link_text: "",
         source: "retrieval_abstention" as const,

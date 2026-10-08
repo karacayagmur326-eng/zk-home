@@ -18,7 +18,7 @@ export default async function CheckoutLayout({
       <div className="hidden md:block">
         <Nav />
       </div>
-      <MobileSiteChrome settings={mobileSettings} logoUrl={themeSettings?.footer_logo_url || "/brand/zkhome-logo.svg"} />
+      <MobileSiteChrome settings={mobileSettings} logoUrl={themeSettings?.footer_logo_url || "/brand/placeholder.svg"} />
       <div className="relative" data-testid="checkout-container">
         {children}
       </div>

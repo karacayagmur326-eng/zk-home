@@ -78,7 +78,7 @@ const mainNavItems = [
   },
   {
     "href": "/admin/chatbot",
-    "label": "ZK Home Asistan"
+    "label": "Yapay Zeka Asistan"
   },
   {
     "href": "/admin/ayarlar",
@@ -296,7 +296,7 @@ export default function AdminLayout({
     "/admin/sayfalar": "Kurumsal sayfaları (Gizlilik, KVKK, vb.) düzenleyin ve yönetin.",
     "/admin/medya": "Yüklenen tüm görsel ve medya dosyalarını yönetin.",
     "/admin/iletisim": "Gelen form mesajlarını yönetin, sayfa metinlerini düzenleyin ve SMTP bildirim izinlerini ayarlayın.",
-    "/admin/chatbot": "ZK Home Asistan yanıtlarını ve WhatsApp iletişim kanalını tek merkezden yönetin.",
+    "/admin/chatbot": "Yapay Zeka Asistan yanıtlarını ve WhatsApp iletişim kanalını tek merkezden yönetin.",
     "/admin/ayarlar": "Mağaza kuralları, tema tasarımı, entegrasyonlar (İyzico, BirFatura) ve SEO ayarlarını tek merkezden yönetin.",
     "/admin/magaza-ayarlari": "Kargo, ödeme, vergi, fatura ve sipariş kurallarını yönetin.",
     "/admin/entegrasyonlar": "Ödeme, kargo ve pazaryeri entegrasyonlarını yönetin.",
@@ -428,7 +428,7 @@ export default function AdminLayout({
           ) : (
             <img
               src={
-                themeSettings?.admin_logo_url || themeSettings?.header_logo_url || "/brand/zkhome-logo-dark.svg"
+                themeSettings?.admin_logo_url || themeSettings?.header_logo_url || "/brand/placeholder.svg"
               }
               alt={themeSettings?.logo_text ? `${themeSettings.logo_text} Admin Logo` : "Admin Logo"}
               style={{

@@ -1,4 +1,5 @@
 "use client"
+import { useSiteContact } from "@components/common/SellerQuestion"
 
 import { useState } from "react"
 import { HttpTypes } from "@medusajs/types"
@@ -20,6 +21,7 @@ type SideMenuProps = {
 }
 
 const SideMenu = ({ headerMenu }: SideMenuProps) => {
+  const siteContact = useSiteContact()
   const [isOpen, setIsOpen] = useState(false)
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({})
   const menuItems = headerMenu?.items ?? []
@@ -126,7 +128,7 @@ const SideMenu = ({ headerMenu }: SideMenuProps) => {
         </LocalizedClientLink>
       </div>
       <div className="flex items-center justify-between text-xs text-muted">
-        <span>© {new Date().getFullYear()} zk-home.com</span>
+        <span>© {new Date().getFullYear()} {siteContact.brandName}</span>
         <ThemeToggle />
       </div>
     </div>

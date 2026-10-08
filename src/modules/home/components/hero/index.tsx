@@ -17,7 +17,7 @@ const Hero = () => {
             level="h2"
             className="text-lg md:text-2xl leading-8 text-gray-300 font-medium max-w-2xl mx-auto"
           >
-            Yeni ürünler ve içerikler hazırlanıyor. ZK Home çok yakında hizmetinizde.
+            Yeni ürünler ve içerikler hazırlanıyor. Mağaza çok yakında hizmetinizde.
           </Heading>
         </span>
         <a href="/store" className="mt-4">

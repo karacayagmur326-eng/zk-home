@@ -190,7 +190,7 @@ export default function OrdersTemplate({ orders = [] }: OrdersTemplateProps) {
                       Tarih: {formattedDate}
                     </span>
                     <span className={`px-3 py-1 rounded-full border text-[11px] font-bold ${statusColor}`}>
-                      {(order as any).fulfillment_status === "delivery_scheduled" ? "ZK Home Teslimat" : statusText}
+                      {(order as any).fulfillment_status === "delivery_scheduled" ? "Mağaza Teslimatı" : statusText}
                     </span>
                   </div>
 

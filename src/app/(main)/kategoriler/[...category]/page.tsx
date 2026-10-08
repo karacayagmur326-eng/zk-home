@@ -42,7 +42,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       notFound()
     }
 
-    const siteName = settings?.logo_text || "ZK Home"
+    const siteName = settings?.logo_text || "Mağaza"
     const separator = settings?.seo_title_separator || "|"
 
     const tokens = {

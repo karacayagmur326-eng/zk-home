@@ -1,4 +1,5 @@
 "use client"
+import { useSiteContact } from "@components/common/SellerQuestion"
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useUrlState } from "@lib/hooks/use-url-state"
@@ -11,6 +12,7 @@ const statusLabels: Record<string, string> = { new: "Yanıt bekleniyor", read: "
 const formatDate = (value: string) => new Intl.DateTimeFormat("tr-TR", { dateStyle: "short", timeStyle: "short", timeZone: "Europe/Istanbul" }).format(new Date(value))
 
 export default function CustomerMessages({ initialId = "", kind = "messages" }: { initialId?: string; kind?: "messages" | "questions" }) {
+  const siteContact = useSiteContact()
   const [messages, setMessages] = useState<MessageSummary[]>([])
   const [selectedId, setSelectedId] = useUrlState(initialId, "talep")
   const [conversation, setConversation] = useState<Conversation | null>(null)
@@ -121,7 +123,7 @@ export default function CustomerMessages({ initialId = "", kind = "messages" }: 
             <header className="border-b border-slate-100 pb-4"><p className="text-xs font-bold text-[#C98484]">Talep #{thread.id}</p><h2 className="mt-1 text-lg font-bold break-words">{thread.subject || "İletişim talebi"}</h2>{thread.product_handle && <Link href={`/urunler/${thread.product_handle}`} className="mt-2 inline-block text-xs font-semibold text-[#C98484] hover:underline">Ürünü görüntüle</Link>}{thread.order_no && <p className="mt-1 text-xs text-slate-500">Sipariş: {thread.order_no}</p>}</header>
             <ol aria-label="Yazışma geçmişi" className="my-5 space-y-4">{thread.history.map((entry) => <li key={entry.id}
               className={`rounded-2xl border p-4 ${entry.direction === "incoming" ? "ml-4 border-rose-100 bg-rose-50/50" : "mr-4 border-slate-200 bg-slate-50"}`}>
-              <div className="mb-2 flex flex-wrap items-center justify-between gap-2"><strong className="text-xs text-slate-700">{entry.direction === "incoming" ? "Siz" : "ZK Home Destek"}</strong><time dateTime={entry.created_at} className="text-[10px] text-slate-400">{formatDate(entry.created_at)}</time></div>
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2"><strong className="text-xs text-slate-700">{entry.direction === "incoming" ? "Siz" : `${siteContact.brandName} Destek`}</strong><time dateTime={entry.created_at} className="text-[10px] text-slate-400">{formatDate(entry.created_at)}</time></div>
               <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-slate-700">{entry.body}</p>
             </li>)}</ol>
             <form onSubmit={send} className="border-t border-slate-100 pt-4">

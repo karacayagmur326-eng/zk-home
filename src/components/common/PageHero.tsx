@@ -32,7 +32,7 @@ export default function PageHero({
   secondaryCtaText,
   secondaryCtaHref,
   heroImage,
-  heroImageAlt = "ZK Home Hero",
+  heroImageAlt = "Mağaza Hero",
 }: PageHeroProps) {
   // If paragraphs or htmlContent contains HTML tags, render rich HTML
   const hasRawHtml = htmlContent || (paragraphs.length > 0 && /<[a-z][\s\S]*>/i.test(paragraphs.join("")))

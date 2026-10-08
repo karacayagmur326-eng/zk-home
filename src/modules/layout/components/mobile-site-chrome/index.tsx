@@ -4,7 +4,7 @@ import FavoriteCounter from "../favorite-counter"
 
 import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
-import { SellerQuestionButton } from "@components/common/SellerQuestion"
+import { SellerQuestionButton, useSiteContact } from "@components/common/SellerQuestion"
 import Image from "@components/common/SmartImage"
 import { usePathname, useRouter } from "next/navigation"
 import { AppIcon, ChevronDown, ChevronRight, Building2, Headphones, FileText } from "@lib/icons"
@@ -32,6 +32,7 @@ interface MenuSection {
 }
 
 export default function MobileSiteChrome({ settings, logoUrl, initialCart }: { settings: MobileSettings; logoUrl: string; initialCart?: HttpTypes.StoreCart | null }) {
+  const siteContact = useSiteContact()
   const pathname = usePathname()
   const router = useRouter()
   const [searchOpen, setSearchOpen] = useState(false)
@@ -223,7 +224,7 @@ export default function MobileSiteChrome({ settings, logoUrl, initialCart }: { s
           <Link href="/" className="relative flex h-10 w-[min(176px,calc(100vw_-_192px))] items-center justify-center">
             <Image
               src={logoUrl}
-              alt="ZK Home"
+              alt={siteContact.brandName}
               width={176}
               height={40}
               priority
@@ -303,7 +304,7 @@ export default function MobileSiteChrome({ settings, logoUrl, initialCart }: { s
               <Link href="/" onClick={() => setMenuOpen(false)} className="relative h-7 w-28 flex items-center justify-center">
                 <Image
                   src={logoUrl}
-                  alt="ZK Home"
+                  alt={siteContact.brandName}
                   width={112}
                   height={28}
                   className="h-full w-full object-contain"
@@ -326,7 +327,7 @@ export default function MobileSiteChrome({ settings, logoUrl, initialCart }: { s
                   <AppIcon name="User" className="h-4 w-4" />
                 </div>
                 <div>
-                  <h3 className="text-xs font-black">ZK Home'ya Hoş Geldiniz</h3>
+                  <h3 className="text-xs font-black">Hoş Geldiniz</h3>
                 </div>
               </div>
               <div className="mt-2.5 grid grid-cols-2 gap-2">

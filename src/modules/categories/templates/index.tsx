@@ -191,7 +191,7 @@ export default async function CategoryTemplate({
     heroImageUrl,
   )
   const displayTitle = textValue(metadata, "display_title", category.name)
-  const eyebrow = textValue(metadata, "eyebrow", "").trim() || parents[0]?.name || "ZK Home Seçkisi"
+  const eyebrow = textValue(metadata, "eyebrow", "").trim() || parents[0]?.name || "Mağaza Seçkisi"
   const heroHeight = numberValue(metadata, "hero_height", 300, 240, 620)
   const heroMobileHeight = numberValue(
     metadata,

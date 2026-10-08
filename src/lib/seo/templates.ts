@@ -30,7 +30,7 @@ export interface SeoTokens {
 
 export const DEFAULT_SEO_TEMPLATES = {
   separator: "|",
-  siteName: "ZK Home",
+  siteName: "Mağaza",
   productTitle: "%urun_adi% %ayirici% %site_adi%",
   productDesc: "%urun_adi% ürününü %site_adi% üzerinde inceleyin.",
   categoryTitle: "%kategori% %ayirici% %site_adi%",
@@ -56,8 +56,8 @@ export function renderSeoTemplate(template: string, tokens: SeoTokens): string {
     postname: tokens.urun_adi || tokens.title || tokens.postname || "",
     kategori: tokens.kategori || tokens.category || "",
     category: tokens.kategori || tokens.category || "",
-    marka: tokens.marka || tokens.brand || "ZK Home",
-    brand: tokens.marka || tokens.brand || "ZK Home",
+    marka: tokens.marka || tokens.brand || "",
+    brand: tokens.marka || tokens.brand || "",
     fiyat: tokens.fiyat || tokens.price || "",
     price: tokens.fiyat || tokens.price || "",
     sku: tokens.sku || tokens.stok_kodu || "",
@@ -89,4 +89,13 @@ export function renderSeoTemplate(template: string, tokens: SeoTokens): string {
     .replace(/^\s*[-|•—»]\s*/, "")
     .replace(/\s*[-|•—»]\s*$/, "")
     .trim()
+}
+
+// Shared by the storefront metadata and the admin preview.
+export function getSiteSeoMetadata(settings: Record<string, any> | null | undefined) {
+  return {
+    siteName: settings?.logo_text || "Mağaza",
+    title: settings?.seo_meta_title || settings?.logo_text || "Online Mağaza",
+    description: settings?.seo_meta_description || settings?.footer_description || "",
+  }
 }

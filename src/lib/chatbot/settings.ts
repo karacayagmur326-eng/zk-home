@@ -89,7 +89,7 @@ export function getConversationalReply(message: string) {
     return "Benim tarafımda bir sorun yok 🙂 Size yanlış veya ilgisiz bir yanıt verdiysem sorunuzu yeniden yazabilirsiniz; ürün, sipariş ya da site kullanımı konusunda hemen yardımcı olayım."
   }
   if (/^(naber|napiyon)$/.test(normalized)) {
-    return "İyidir 🙂 ZK Home ürünleriyle ilgili neye bakıyoruz?"
+    return "İyidir 🙂 Mağaza ürünleriyle ilgili neye bakıyoruz?"
   }
   if (/^(tamam|ok|okay|anladim|olur)$/.test(normalized)) {
     return "Tamamdır. İsterseniz başka bir ürün veya sipariş konusunda da yardımcı olabilirim."

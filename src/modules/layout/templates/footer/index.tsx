@@ -1,4 +1,5 @@
 import { getMenu } from "@lib/data/menus"
+import { getContactInfo } from "@lib/content/contact-info"
 import { getThemeSettings } from "@lib/content/theme-settings"
 import {
   AppIcon,
@@ -50,12 +51,14 @@ export default async function Footer() {
     musteriMenu,
     yasalMenu,
     footerMenu,
+    contactInfo,
   ] = await Promise.all([
     getThemeSettings(),
     getMenu("footer-kurumsal").catch(() => null),
     getMenu("footer-musteri-hizmetleri").catch(() => null),
     getMenu("footer-yasal").catch(() => null),
     getMenu("footer-menu").catch(() => null),
+    getContactInfo(),
   ])
 
   const footerFeaturesActive = themeSettings?.footer_features_active !== false
@@ -101,18 +104,18 @@ export default async function Footer() {
   )
 
   // 1. Column Titles & Content
-  const logoText = (themeSettings?.logo_text as string | undefined) || "ZK HOME"
+  const logoText = (themeSettings?.logo_text as string | undefined) || "Mağaza"
   const footerLogoUrl = themeSettings?.footer_logo_url as string | undefined
   const footerLogoDarkUrl = themeSettings?.footer_logo_dark_url as string | undefined
 
-  const isValidFooterLogo = Boolean(footerLogoUrl && footerLogoUrl !== "/brand/zkhome-logo.svg")
-  const isValidFooterDarkLogo = Boolean(footerLogoDarkUrl && footerLogoDarkUrl !== "/brand/zkhome-logo-dark.svg")
+  const isValidFooterLogo = Boolean(footerLogoUrl && footerLogoUrl !== "/brand/placeholder.svg")
+  const isValidFooterDarkLogo = Boolean(footerLogoDarkUrl && footerLogoDarkUrl !== "/brand/placeholder.svg")
 
   const lightLogo =
     (isValidFooterLogo ? footerLogoUrl : null) ||
     footerLogoUrl ||
     (themeSettings?.header_logo_url as string | undefined) ||
-    "/brand/zkhome-logo.svg"
+    "/brand/placeholder.svg"
 
   const logoAlt =
     (themeSettings?.footer_logo_alt as string | undefined) ||
@@ -126,10 +129,10 @@ export default async function Footer() {
 
   const footerDescription =
     (themeSettings?.footer_description as string | undefined) ||
-    "ZK Home, yaşam alanlarına zarif dokunuşlar katan dekorasyon, sofra ve ev tekstili seçkilerini bir araya getirir."
-  const phone = process.env.NEXT_PUBLIC_CONTACT_PHONE || ""
-  const email = storeReady ? (themeSettings?.contact_email as string | undefined) || "" : ""
-  const address = process.env.NEXT_PUBLIC_CONTACT_ADDRESS || ""
+    ""
+  const phone = themeSettings?.contact_phone || contactInfo.phone || ""
+  const email = storeReady ? (themeSettings?.contact_email as string | undefined) || contactInfo.email || "" : ""
+  const address = themeSettings?.contact_address || contactInfo.full_address || ""
 
   const col2Title = turkishTitleCase((themeSettings?.footer_col2_title as string | undefined) || "Kurumsal")
   const col3Title = turkishTitleCase((themeSettings?.footer_col3_title as string | undefined) || "Müşteri Hizmetleri")
@@ -146,7 +149,7 @@ export default async function Footer() {
 
   const copyrightText =
     (themeSettings?.footer_copyright_text as string | undefined) ||
-    `© ${new Date().getFullYear()} ZK Home. Tüm hakları saklıdır.`
+    `© ${new Date().getFullYear()} ${logoText}. Tüm hakları saklıdır.`
   const brandSubtext = (themeSettings?.footer_brand_subtext as string | undefined) || ""
   const mersisNo = storeReady ? (themeSettings?.footer_mersis_no as string | undefined) || "" : ""
   const kepAddress = storeReady ? (themeSettings?.footer_kep_address as string | undefined) || "" : ""
@@ -216,7 +219,7 @@ export default async function Footer() {
                   />
                 ) : (
                   <span className="text-lg font-black tracking-wider text-white">
-                    ZK HOME
+                    {logoText}
                   </span>
                 )}
               </LocalizedClientLink>
@@ -335,7 +338,7 @@ export default async function Footer() {
                   />
                 ) : (
                   <span className="text-xl font-black tracking-wider text-white">
-                    ZK HOME
+                    {logoText}
                   </span>
                 )}
               </LocalizedClientLink>

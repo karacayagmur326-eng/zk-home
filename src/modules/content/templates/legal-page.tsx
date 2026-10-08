@@ -49,8 +49,8 @@ const configs: Record<string, LegalConfig> = {
     intro: "İşbu Ön Bilgilendirme Formu'nun konusu, Alıcı ve Satıcı arasındaki Sözleşme'ye ilişkin 6502 sayılı Tüketicinin Korunması Hakkında Kanun ve Mesafeli Sözleşmeler Yönetmeliği hükümleri uyarınca bilgilendirilmesidir.",
     sections: [
       { title: "1. Taraflar ve Konu", body: "İşbu Ön Bilgilendirme Formu'nun konusu, Alıcı ve Satıcı arasındaki Sözleşme'ye ilişkin Kanun ve Yönetmelik hükümleri uyarınca bilgilendirilmesidir. Alıcı, Ön Bilgilendirme Formu ve Sözleşme'ye ilişkin bilgileri üyeliğinin bağlı olduğu 'Hesabım' sayfasından takip edebilecek olup değişen bilgilerini bu sayfa üstünden güncelleyebilecektir." },
-      { title: "2. Tanımlar", body: "ALICI: Bir Mal veya Hizmet'i ticari veya mesleki olmayan amaçlarla edinen gerçek kişiyi,\nSATICI: ZK Home,\nPLATFORM: www.zk-home.com internet sitesi ve mobil uygulamalarını,\nKANUN: 6502 sayılı Tüketicinin Korunması Hakkında Kanun'u,\nYÖNETMELİK: Mesafeli Sözleşmeler Yönetmeliği'ni ifade eder." },
-      { title: "3. Satıcı ve İletişim Bilgileri", body: "Satıcı Unvanı: ZK Home\nAdres: [Şirket adresi yönetim panelinden eklenecektir]\nTelefon: [Telefon yönetim panelinden eklenecektir]\nE-posta: info@zk-home.com\nVergi Dairesi & No: [Vergi bilgileri yönetim panelinden eklenecektir]\nTicaret Sicil No: \nMersis No: \nKEP: " },
+      { title: "2. Tanımlar", body: "ALICI: Bir Mal veya Hizmet'i ticari veya mesleki olmayan amaçlarla edinen gerçek kişiyi,\nSATICI: %marka%,\nPLATFORM: %website% internet sitesi ve mobil uygulamalarını,\nKANUN: 6502 sayılı Tüketicinin Korunması Hakkında Kanun'u,\nYÖNETMELİK: Mesafeli Sözleşmeler Yönetmeliği'ni ifade eder." },
+      { title: "3. Satıcı ve İletişim Bilgileri", body: "Satıcı Unvanı: %marka%\nAdres: [Şirket adresi yönetim panelinden eklenecektir]\nTelefon: [Telefon yönetim panelinden eklenecektir]\nE-posta: %email%\nVergi Dairesi & No: [Vergi bilgileri yönetim panelinden eklenecektir]\nTicaret Sicil No: \nMersis No: \nKEP: " },
       { title: "4. Ürün / Hizmet Bilgileri ve Fiyatlandırma", body: "Ürün/Hizmet’in temel özellikleri (türü, miktarı, marka/modeli, rengi, adedi, fiyatı) Platform’da yer almakta olup sipariş özeti ekranında detaylı şekilde incelenebilecektir. Tüm vergiler dâhil satış fiyatı, kargo bedeli ve toplam ödeme tutarı sipariş aşamasında açıkça gösterilir." },
       { title: "5. Genel Hükümler", body: "Satıcı, Ürün/Hizmet’i eksiksiz, siparişte belirtilen niteliklere uygun ve varsa garanti belgeleri, kullanım kılavuzları ile birlikte teslim etmeyi kabul eder. Ürün, yasal 30 günlük süreyi aşmamak koşulu ile Alıcı’nın belirttiği teslimat adresine kargo şirketi ile teslim edilir." },
       { title: "6. Özel Şartlar", body: "Alıcı’nın vereceği siparişlerde kurumsal fatura seçeneğini seçmesi durumunda Satıcı, Alıcı tarafından bildirilecek vergi kimlik numarası ve vergi dairesi bilgilerini kullanarak kurumsal fatura düzenleyecektir. Dijital ürünler fiziki gönderime uygun olmayıp elektronik ortamda teslim edilir." },
@@ -66,11 +66,11 @@ const configs: Record<string, LegalConfig> = {
     heroImage: "/brand/placeholder.svg",
     intro: "İşbu Mesafeli Satış Sözleşmesi ('Sözleşme'), Alıcı ve Satıcı arasında aşağıda belirtilen hüküm ve şartlar çerçevesinde elektronik ortamda kurulmuştur.",
     sections: [
-      { title: "1. Taraflar", body: "İşbu Sözleşme; Alıcı (Müşteri) ile Satıcı (ZK Home) arasında, www.zk-home.com internet sitesi üzerinden siparişe konu mal ve hizmetlerin satışı ve teslimi amacıyla akdedilmiştir." },
-      { title: "2. Tanımlar", body: "ALICI: Mal veya Hizmet'i ticari/mesleki olmayan amaçlarla edinen gerçek kişi,\nSATICI: ZK Home,\nPLATFORM: www.zk-home.com internet sitesi,\nSÖZLEŞME: İşbu Mesafeli Satış Sözleşmesi'ni ifade eder." },
+      { title: "1. Taraflar", body: "İşbu Sözleşme; Alıcı (Müşteri) ile Satıcı (%marka%) arasında, %website% internet sitesi üzerinden siparişe konu mal ve hizmetlerin satışı ve teslimi amacıyla akdedilmiştir." },
+      { title: "2. Tanımlar", body: "ALICI: Mal veya Hizmet'i ticari/mesleki olmayan amaçlarla edinen gerçek kişi,\nSATICI: %marka%,\nPLATFORM: %website% internet sitesi,\nSÖZLEŞME: İşbu Mesafeli Satış Sözleşmesi'ni ifade eder." },
       { title: "3. Sözleşmenin Konusu ve Kapsamı", body: "Sözleşme’nin konusu Alıcı'nın, Platform’da satın alınmasına yönelik elektronik olarak sipariş verdiği Ürün/Hizmet’in satışı ve teslimi ile ilgili olarak 6502 sayılı Kanun ve Yönetmelik hükümleri gereğince Taraflar’ın hak ve yükümlülüklerinin belirlenmesidir." },
       { title: "4. Alıcı'nın Önceden Bilgilendirildiği Hususlar", body: "Alıcı, siparişi onaylamadan önce Ürün'ün temel nitelikleri, Satıcı bilgileri, vergiler dahil toplam satış fiyatı, kargo ve teslimat masrafları ile cayma hakkı şartları hakkında eksiksiz bilgilendirildiğini kabul eder." },
-      { title: "5. Alıcı, Satıcı ve Fatura Bilgileri", body: "Satıcı: ZK Home\nAdres: [Şirket adresi yönetim panelinden eklenecektir]\nTelefon: [Telefon yönetim panelinden eklenecektir] | E-Posta: info@zk-home.com\nVergi Dairesi / No: [Vergi bilgileri yönetim panelinden eklenecektir] | Ticaret Sicil:  | MERSİS: \nAlıcı ve Fatura bilgileri sipariş anında Alıcı tarafından girilen güncel veri ve adreslerdir." },
+      { title: "5. Alıcı, Satıcı ve Fatura Bilgileri", body: "Satıcı: %marka%\nAdres: [Şirket adresi yönetim panelinden eklenecektir]\nTelefon: [Telefon yönetim panelinden eklenecektir] | E-Posta: %email%\nVergi Dairesi / No: [Vergi bilgileri yönetim panelinden eklenecektir] | Ticaret Sicil:  | MERSİS: \nAlıcı ve Fatura bilgileri sipariş anında Alıcı tarafından girilen güncel veri ve adreslerdir." },
       { title: "6. Ürün/Hizmet Bilgileri", body: "Siparişe konu ürün veya hizmetlerin türü, miktarı, rengi, satış bedeli, KDV tutarı ve kargo bedeli sipariş özetinde gösterildiği gibidir." },
       { title: "7. Genel Hükümler", body: "Satıcı, Ürün/Hizmet’i eksiksiz ve siparişte belirtilen niteliklere uygun teslim etmekle yükümlüdür. Ürün, yasal 30 (otuz) günlük süreyi aşmamak koşulu ile Alıcı’nın adresine teslim edilir." },
       { title: "8. Özel Şartlar", body: "Kurumsal fatura taleplerinde faturada yer alması gereken bilgilerin doğru girilmesi Alıcı sorumluluğundadır. Kredi kartı taksit kampanyaları bankaların inisiyatifindedir." },
@@ -88,15 +88,15 @@ const configs: Record<string, LegalConfig> = {
   },
   "kvkk-aydinlatma-metni": {
     heroImage: "/brand/placeholder.svg",
-    intro: "ZK Home olarak kişisel verilerinizin 6698 sayılı Kişisel Verilerin Korunması Kanunu kapsamında işlenmesine büyük önem veriyoruz.",
+    intro: "%marka% olarak kişisel verilerinizin 6698 sayılı Kişisel Verilerin Korunması Kanunu kapsamında işlenmesine büyük önem veriyoruz.",
     sections: [
-      { title: "Veri Sorumlusu", body: "İşbu aydınlatma metninde belirtilen amaçlar doğrultusunda kişisel verilerinizi işleyen veri sorumlusu ZK Home'dir." },
+      { title: "Veri Sorumlusu", body: "İşbu aydınlatma metninde belirtilen amaçlar doğrultusunda kişisel verilerinizi işleyen veri sorumlusu %marka%'dir." },
       { title: "Kişisel Verilerin İşlenme Amaçları", body: "Kişisel veriler; siparişlerin yürütülmesi, ürün ve hizmetlerin sunulması, müşteri ilişkilerinin yönetilmesi ve yasal yükümlülüklerin yerine getirilmesi amacıyla işlenmektedir." },
       { title: "İşlenen Kişisel Veriler", body: "Kimlik, iletişim, adres, ödeme ve fatura, işlem güvenliği, müşteri işlem ve şikâyet verileri işlenebilmektedir." },
       { title: "Kişisel Verilerin Aktarılması", body: "Kişisel veriler; kanunen yetkili kurumlara, hizmet sağlayıcılara, iş ortaklarına ve gerektiğinde ödeme kuruluşlarına aktarılabilir." },
       { title: "Veri Toplama Yöntemleri ve Hukuki Sebepler", body: "Veriler internet sitesi, mobil uygulamalar, çağrı merkezi, e-posta ve diğer elektronik ortamlar üzerinden toplanabilir." },
       { title: "Kişisel Veri Sahiplerinin Hakları", body: "KVKK'nın 11. maddesi kapsamındaki bilgi talep etme, düzeltme, silme, yok etme ve işleme itiraz haklarınızı kullanabilirsiniz." },
-      { title: "Başvuru Yöntemi", body: "Taleplerinizi kimliğinizi tespit edici belgelerle birlikte yazılı olarak ([Şirket adresi yönetim panelinden eklenecektir]) veya info@zk-home.com e-posta adresi üzerinden iletebilirsiniz." },
+      { title: "Başvuru Yöntemi", body: "Taleplerinizi kimliğinizi tespit edici belgelerle birlikte yazılı olarak ([Şirket adresi yönetim panelinden eklenecektir]) veya %email% e-posta adresi üzerinden iletebilirsiniz." },
     ],
     note: "İşbu Aydınlatma Metni güncel mevzuata uygun olarak hazırlanmış olup gerekli görüldüğünde güncellenebilir.",
     aside: "contact",
@@ -105,9 +105,9 @@ const configs: Record<string, LegalConfig> = {
   },
   "gizlilik-politikasi": {
     heroImage: "/brand/placeholder.svg",
-    intro: "ZK Home olarak kişisel verilerinizin güvenliğini önemsiyoruz. Bu politika, verilerinizin nasıl toplandığını, kullanıldığını ve korunduğunu açıklar.",
+    intro: "%marka% olarak kişisel verilerinizin güvenliğini önemsiyoruz. Bu politika, verilerinizin nasıl toplandığını, kullanıldığını ve korunduğunu açıklar.",
     sections: [
-      { title: "Genel Bilgiler", body: "İşbu Gizlilik Politikası, ZK Home tarafından işletilen internet sitesi ve diğer dijital kanallar aracılığıyla kişisel verilerin işlenmesine ilişkin usul ve esasları belirler." },
+      { title: "Genel Bilgiler", body: "İşbu Gizlilik Politikası, %marka% tarafından işletilen internet sitesi ve diğer dijital kanallar aracılığıyla kişisel verilerin işlenmesine ilişkin usul ve esasları belirler." },
       { title: "Toplanan Veriler", body: "Kimlik, iletişim, adres, ödeme ve fatura, işlem güvenliği, cihaz ve kullanım bilgileri işlenebilir." },
       { title: "Verilerin Kullanım Amaçları", body: "Veriler siparişlerin yürütülmesi, müşteri hizmetleri, ödeme güvenliği, yasal yükümlülükler ve iletişim faaliyetleri için kullanılabilir." },
       { title: "Verilerin Aktarılması", body: "Kişisel veriler yasal yükümlülüklerin yerine getirilmesi amacıyla hizmet sağlayıcıları ve yetkili kurumlarla paylaşılabilir." },
@@ -116,7 +116,7 @@ const configs: Record<string, LegalConfig> = {
       { title: "Veri Güvenliği", body: "Kişisel verilerin güvenliği için teknik ve idari tedbirler alınmakta, yetkisiz erişim ve kayıplara karşı korunmaktadır." },
       { title: "Çerez Politikası", body: "Web sitemiz kullanıcı deneyimini geliştirmek ve site trafiğini analiz etmek amacıyla çerezler kullanabilir." },
       { title: "Politika Değişiklikleri", body: "Bu politika gerektiğinde güncellenebilir. Güncellemeler web sitemizde yayımlandığı tarihte yürürlüğe girer." },
-      { title: "İletişim", body: "Sorularınız için info@zk-home.com adresinden veya [Telefon yönetim panelinden eklenecektir] numaralı telefondan bize ulaşabilirsiniz." },
+      { title: "İletişim", body: "Sorularınız için %email% adresinden veya [Telefon yönetim panelinden eklenecektir] numaralı telefondan bize ulaşabilirsiniz." },
     ],
     note: "Bu politika, 6698 sayılı Kişisel Verilerin Korunması Kanunu'na uygun olarak hazırlanmıştır.",
     aside: "contact",
@@ -134,7 +134,7 @@ const configs: Record<string, LegalConfig> = {
       { title: "Üçüncü Taraf Çerezler", body: "Analiz ve reklam hizmetleri sunan üçüncü taraf sağlayıcıların çerezleri, açık tercihleriniz doğrultusunda kullanılabilir." },
       { title: "Veri Saklama Süreleri", body: "Çerezlerin saklama süreleri çerezin türüne göre oturum süresince veya belirli bir süre boyunca olabilir." },
       { title: "Politika Değişiklikleri", body: "Çerez Politikası gerektiğinde güncellenebilir ve yayımlandığı tarihte yürürlüğe girer." },
-      { title: "İletişim", body: "Çerez politikamız ile ilgili sorularınız için info@zk-home.com adresinden bize ulaşabilirsiniz." },
+      { title: "İletişim", body: "Çerez politikamız ile ilgili sorularınız için %email% adresinden bize ulaşabilirsiniz." },
     ],
     note: "Çerez tercihlerinizi dilediğiniz zaman tarayıcınızdan veya sitedeki tercih panelinden değiştirebilirsiniz.",
     aside: "cookie",
@@ -185,8 +185,11 @@ export default async function LegalPage({ handle, fallbackTitle, fallbackDescrip
   function sanitizeDynamicText(text: string): string {
     if (!text) return ""
     return text
+      .replace(/%marka%/gi, brandName)
+      .replace(/%website%/gi, website)
+      .replace(/%email%/gi, email)
       .replace(/ZK Home/gi, brandName)
-      .replace(/www\.zk-home\.com/gi, website ? website.replace(/^https?:\/\//, "") : "zk-home.com")
+      .replace(/www\.zk-home\.com/gi, website ? website.replace(/^https?:\/\//, "") : "")
       .replace(/info@zk-home\.com/gi, email || "[E-posta yönetim panelinden eklenecektir]")
       .replace(/\[Telefon yönetim panelinden eklenecektir\]/g, phone || "[Telefon yönetim panelinden eklenecektir]")
       .replace(/\[Şirket adresi yönetim panelinden eklenecektir\]/g, address || "[Şirket adresi yönetim panelinden eklenecektir]")

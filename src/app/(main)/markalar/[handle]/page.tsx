@@ -39,7 +39,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   }
   if ((collection.metadata as Record<string, unknown> | undefined)?.active === false) notFound()
 
-  const siteName = settings?.logo_text || "ZK Home"
+  const siteName = settings?.logo_text || "Mağaza"
   const separator = settings?.seo_title_separator || "|"
 
   const tokens = {
@@ -94,6 +94,11 @@ export default async function CollectionPage(props: Props) {
       sortBy={sortBy}
       countryCode="tr"
       optionValueIds={optionValueIds}
+      hideOutOfStock={typeof searchParams.hide_out_of_stock === "string" ? searchParams.hide_out_of_stock : undefined}
+      priceMin={typeof searchParams.price_min === "string" ? searchParams.price_min : undefined}
+      priceMax={typeof searchParams.price_max === "string" ? searchParams.price_max : undefined}
+      searchQuery={typeof searchParams.q === "string" ? searchParams.q : undefined}
+      viewMode={typeof searchParams.viewMode === "string" ? searchParams.viewMode : undefined}
     />
   )
 }

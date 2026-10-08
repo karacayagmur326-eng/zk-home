@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer"
+import { getEmailBrandSettings } from "./brand-settings"
 import { query } from "@lib/admin/db"
 import { decryptSettings } from "@lib/security/encrypted-settings"
 
@@ -61,11 +62,12 @@ export async function sendSmtpEmail(input: {
   if (!configured) {
     return { sent: false, configured: false }
   }
+  const brand = await getEmailBrandSettings()
   const receipt = await configured.transporter.sendMail({
-    from: { name: "ZK HOME", address:
+    from: { name: brand.brandName, address:
       configured.settings.from_email ||
       configured.settings.user ||
-      "no-reply@zk-home.com" },
+      "" },
     to: input.to,
     subject: input.subject,
     html: input.html,
@@ -95,6 +97,7 @@ export async function sendContactNotificationEmail(data: {
       return { sent: false, reason: "SMTP bildirimleri kapalı veya eksik alıcı e-postası." }
     }
     const { transporter, settings } = configured
+    const brand = await getEmailBrandSettings()
 
     const safeName = escapeHtml(data.name)
     const safeEmail = escapeHtml(data.email)
@@ -113,12 +116,12 @@ export async function sendContactNotificationEmail(data: {
         <p><strong>Mesaj:</strong></p>
         <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; white-space: pre-wrap;">${safeMessage}</div>
         <br />
-        <small style="color: #888;">Bu e-posta ZK HOME İletişim Formu üzerinden otomatik gönderilmiştir.</small>
+        <small style="color: #888;">Bu e-posta ${escapeHtml(brand.brandName)} İletişim Formu üzerinden otomatik gönderilmiştir.</small>
       </div>
     `
 
     await transporter.sendMail({
-      from: { name: "ZK HOME", address: settings.from_email || settings.user || "no-reply@zk-home.com" },
+      from: { name: brand.brandName, address: settings.from_email || settings.user || "" },
       to: settings.recipient_email,
       subject: `[İletişim Formu] ${data.subject || 'Yeni Mesaj'} - ${data.name}`,
       html: htmlContent,

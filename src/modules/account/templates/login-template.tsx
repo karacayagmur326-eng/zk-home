@@ -5,7 +5,7 @@ import Link from "next/link"
 import { X } from "lucide-react"
 import Register from "@modules/account/components/register"
 import Login from "@modules/account/components/login"
-import { SellerQuestionButton } from "@components/common/SellerQuestion"
+import { SellerQuestionButton, useSiteContact } from "@components/common/SellerQuestion"
 import { ShieldCheck, Zap, Package, Headphones, ArrowRight, Truck, RefreshCw, Award, Lock } from "@lib/icons"
 
 export enum LOGIN_VIEW {
@@ -14,6 +14,7 @@ export enum LOGIN_VIEW {
 }
 
 const LoginTemplate = () => {
+  const siteContact = useSiteContact()
   const [currentView, setCurrentView] = useState<LOGIN_VIEW>(LOGIN_VIEW.SIGN_IN)
 
   return (
@@ -31,7 +32,7 @@ const LoginTemplate = () => {
           <div className="relative z-10 space-y-4">
             <div className="inline-flex items-center gap-2 rounded-full border border-[#C98484]/40 bg-[#C98484]/15 px-3 py-1 text-[11px] font-bold text-[#C98484] backdrop-blur-xs">
               <Zap className="h-3.5 w-3.5 fill-[#C98484]" />
-              <span>ZK Home Üye Paneli</span>
+              <span>{siteContact.brandName} Üye Paneli</span>
             </div>
 
             <h2 className="text-2xl font-black text-white leading-tight tracking-tight">
@@ -39,7 +40,7 @@ const LoginTemplate = () => {
             </h2>
 
             <p className="text-xs text-slate-300 font-medium leading-relaxed">
-              ZK Home hesabınızla siparişlerinizi, favorilerinizi ve adreslerinizi tek yerden yönetin.
+              Hesabınızla siparişlerinizi, favorilerinizi ve adreslerinizi tek yerden yönetin.
             </p>
           </div>
 

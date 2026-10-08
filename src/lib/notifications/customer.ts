@@ -27,7 +27,7 @@ const feed = `WITH owned_contacts AS (
     OR (customer_id IS NULL AND $3::boolean AND LOWER(email)=$2)
 ), events AS (
   SELECT 'reply:' || n.id AS id, 'message' AS kind,
-    CASE WHEN m.product_question_id IS NOT NULL THEN 'Ürün sorunuz yanıtlandı' WHEN m.initiated_by_admin THEN 'ZK Home’dan yeni mesaj' ELSE 'Mesajınıza cevap verildi' END AS title,
+    CASE WHEN m.product_question_id IS NOT NULL THEN 'Ürün sorunuz yanıtlandı' WHEN m.initiated_by_admin THEN 'Mağaza’dan yeni mesaj' ELSE 'Mesajınıza cevap verildi' END AS title,
     LEFT(COALESCE(n.payload->>'reply',n.payload->>'answer',''),240) AS body,
     '/hesabim/mesajlarim?' || CASE WHEN m.product_question_id IS NOT NULL THEN 'tab=questions&' ELSE '' END || 'talep=' || m.id AS href, n.created_at
   FROM notification_outbox n JOIN owned_contacts m ON n.payload->>'message_id'=m.id::text

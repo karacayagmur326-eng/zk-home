@@ -486,7 +486,7 @@ async function createSchema() {
 
     CREATE TABLE IF NOT EXISTS theme_settings (
       id INTEGER PRIMARY KEY,
-      logo_text TEXT DEFAULT 'ZK HOME',
+      logo_text TEXT DEFAULT 'Mağaza',
       logo_url TEXT,
       font_family TEXT DEFAULT 'Inter',
       font_size_base TEXT DEFAULT '16px',

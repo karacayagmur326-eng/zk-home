@@ -1,7 +1,7 @@
 import type { HttpTypes } from "@medusajs/types"
 import rows from "./category-fallback.json"
 
-// Public category content from the local ZK Home catalog. This keeps the
+// Public category content from the local Mağaza catalog. This keeps the
 // storefront browsable until its managed database is connected in production.
 export function getFallbackCategories(): HttpTypes.StoreProductCategory[] {
   const categories = rows

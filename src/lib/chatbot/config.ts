@@ -36,7 +36,7 @@ export const CHATBOT_DEFAULTS: ChatbotSettings = {
   catalog_search_enabled: true,
   page_search_enabled: false,
   max_product_results: 4,
-  bot_name: "ZK Home Asistan",
+  bot_name: "Yapay Zeka Asistan",
   welcome_message: "Merhaba! Size nasıl yardımcı olabilirim?",
   input_placeholder: "Sorunuzu yazın...",
   fallback_message: "Bu konuda doğrulanmış bir bilgi bulamadım.",

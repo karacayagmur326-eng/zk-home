@@ -390,7 +390,7 @@ export async function analyzeCatalogQuestion(
       }
     }
     const features = verifiedFeatures(rows).slice(0, 3)
-    const subject = understanding.productCategory ? `${understanding.productCategory} grubunda` : "ZK Home ürünlerinde"
+    const subject = understanding.productCategory ? `${understanding.productCategory} grubunda` : "Mağaza ürünlerinde"
     const evidence = [
       features.length ? `${features.join(", ")} gibi doğrulanabilir özelliklere sahip modeller bulunuyor` : "özellikler modele göre değişiyor",
       "varsa ürüne özel garanti bilgileri ürün açıklamasında belirtilir; yasal tüketici hakları saklıdır",
@@ -400,7 +400,7 @@ export async function analyzeCatalogQuestion(
       : understanding.intent === "PRODUCT_DURABILITY"
         ? `Dayanıklılık modelin gerçek donanımına göre değişir; ${subject} bütün modeller aynı değildir.`
         : understanding.intent === "GENERAL_PRODUCT_QUALITY"
-          ? "ZK Home ürünlerinde kaliteyi yalnızca bir iddia olarak değil; modelin gerçek teknik donanımı, kullanım amacına uygunluğu ve satış sonrası desteğiyle değerlendiriyoruz."
+          ? "Mağaza ürünlerinde kaliteyi yalnızca bir iddia olarak değil; modelin gerçek teknik donanımı, kullanım amacına uygunluğu ve satış sonrası desteğiyle değerlendiriyoruz."
         : `${subject} kalite ve donanım modelden modele değişir.`
     return {
       answer: `${prefix} Katalogda ${evidence.join(" ve ")}. Ne işte kullanacağınızı söylerseniz uygun modelleri teknik verileriyle karşılaştırabilirim.`,

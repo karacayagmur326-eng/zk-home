@@ -17,7 +17,7 @@ export default function MobilePersonalizationPage({ mode, settings }: { mode: "h
   useEffect(() => { try { const h = JSON.parse(localStorage.getItem(PRODUCT_HISTORY_KEY) || "[]"); setHistory(Array.isArray(h) ? h : []); const c = JSON.parse(localStorage.getItem(COLLECTION_KEY) || "[]"); setCollections(Array.isArray(c) ? c : []) } catch {} }, [])
   const clearHistory = () => { localStorage.removeItem(PRODUCT_HISTORY_KEY); setHistory([]) }
   const saveCollections = (next: Collection[]) => { setCollections(next); localStorage.setItem(COLLECTION_KEY, JSON.stringify(next)) }
-  const createCollection = () => { if (!title.trim()) return; saveCollections([...collections, { id: `${Date.now()}`, title: title.trim(), description: "ZK Home ürün koleksiyonu", icon: "FolderHeart", productIds: [] }]); setTitle(""); setCreating(false) }
+  const createCollection = () => { if (!title.trim()) return; saveCollections([...collections, { id: `${Date.now()}`, title: title.trim(), description: "Mağaza ürün koleksiyonu", icon: "FolderHeart", productIds: [] }]); setTitle(""); setCreating(false) }
 
   if (mode === "history") return <main className="min-h-screen bg-[#f5f6f7] pb-24 md:mx-auto md:max-w-5xl md:py-10">
     <div className="bg-white px-4 py-5 md:rounded-t-2xl"><div className="flex items-start justify-between"><div><h1 className="text-xl font-black">{settings.history.title}</h1><p className="mt-1 text-[11px] text-slate-500">{settings.history.description}</p></div>{history.length > 0 && <button onClick={clearHistory} className="text-[10px] font-extrabold text-rose-600">Temizle</button>}</div></div>

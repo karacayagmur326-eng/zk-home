@@ -30,6 +30,7 @@ type RefinementListProps = {
   sidebarMenu?: any
   secondaryMenu?: any
   initialCategories?: any[]
+  fixedCollectionId?: string
   initialCollections?: any[]
   "data-testid"?: string
 }
@@ -47,6 +48,7 @@ const RefinementList = ({
   secondaryMenu,
   initialCategories = [],
   initialCollections = [],
+  fixedCollectionId,
   "data-testid": dataTestId,
 }: RefinementListProps) => {
   const router = useRouter()
@@ -366,10 +368,18 @@ const RefinementList = ({
       )
     })
 
-  const selectedCollectionIds = searchParams.getAll("collection_id")
+  const selectedCollectionIds = fixedCollectionId ? [fixedCollectionId] : searchParams.getAll("collection_id")
   const hideOutOfStock = searchParams.get("hide_out_of_stock") === "true"
 
   const toggleCollection = (id: string) => {
+    if (fixedCollectionId) {
+      const params = new URLSearchParams(searchParams.toString())
+      params.delete("page")
+      params.delete("collection_id")
+      if (id !== fixedCollectionId) params.set("collection_id", id)
+      router.push(`/magaza${params.size ? `?${params}` : ""}`)
+      return
+    }
     updateQueryParams((params) => {
       const nextIds = new Set(params.getAll("collection_id"))
       if (nextIds.has(id)) nextIds.delete(id)

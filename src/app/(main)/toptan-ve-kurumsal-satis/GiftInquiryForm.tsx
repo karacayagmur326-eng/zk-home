@@ -22,7 +22,7 @@ export default function GiftInquiryForm() {
       `Bütçe aralığı: ${data.get("budget") || "Belirtilmedi"}`,
       `Tercihler: ${data.get("preferences") || "Belirtilmedi"}`,
     ].join("\n")
-    const recipient = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@zk-home.com"
+    const recipient = process.env.NEXT_PUBLIC_CONTACT_EMAIL || ""
     setEmailDraft(`mailto:${recipient}?subject=${encodeURIComponent("Kurumsal hediye talebi")}&body=${encodeURIComponent(`Ad: ${data.get("name")}\nE-posta: ${data.get("email")}\nTelefon: ${data.get("phone") || ""}\n\n${message}`)}`)
     try {
       const response = await fetch("/api/contact", {

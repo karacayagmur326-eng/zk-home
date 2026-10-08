@@ -27,7 +27,7 @@ function StepIcon({ icon, completed }: { icon: string; completed: boolean }) {
 }
 
 export default function OrderJourney({ stage, compact = false, localDelivery = false }: OrderJourneyProps) {
-  const journeySteps = steps.map(step => step.key === "shipped" && localDelivery ? { ...step, title: "ZK Home Teslimat", detail: "Teslimat Planlandı" } : step)
+  const journeySteps = steps.map(step => step.key === "shipped" && localDelivery ? { ...step, title: "Mağaza Teslimatı", detail: "Teslimat Planlandı" } : step)
   const current = stageIndex[stage]
   const progress = current === 3 ? 100 : current === 2 ? 67 : current === 1 ? 34 : 0
 

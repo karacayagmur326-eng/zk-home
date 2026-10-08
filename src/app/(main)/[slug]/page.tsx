@@ -60,7 +60,7 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
   }
 
   const pageTitle = page.title || slug
-  const siteName = settings?.logo_text || "ZK Home"
+  const siteName = settings?.logo_text || "Mağaza"
   const separator = settings?.seo_title_separator || "|"
 
   const tokens = {

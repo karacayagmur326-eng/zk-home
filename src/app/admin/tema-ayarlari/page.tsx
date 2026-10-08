@@ -1,4 +1,5 @@
 "use client"
+import { DEFAULT_SEO_TEMPLATES, getSiteSeoMetadata, renderSeoTemplate, type SeoTokens } from "@lib/seo/templates"
 import { AdminSectionHeading } from "@components/admin/AdminContent"
 import AdminTabs from "@components/admin/AdminTabs"
 import { useUrlState } from "@lib/hooks/use-url-state"
@@ -98,23 +99,23 @@ export default function ThemeSettingsPage(props: any = {}) {
   const [headerMenuTextTransform, setHeaderMenuTextTransform] = useState("none")
 
   // Logo States
-  const [headerLogoUrl, setHeaderLogoUrl] = useState("/brand/zkhome-logo.svg")
-  const [headerLogoDarkUrl, setHeaderLogoDarkUrl] = useState("/brand/zkhome-logo-dark.svg")
+  const [headerLogoUrl, setHeaderLogoUrl] = useState("/brand/placeholder.svg")
+  const [headerLogoDarkUrl, setHeaderLogoDarkUrl] = useState("/brand/placeholder.svg")
   const [headerLogoHeight, setHeaderLogoHeight] = useState(40)
   const [headerLogoAlt, setHeaderLogoAlt] = useState("")
 
-  const [footerLogoUrl, setFooterLogoUrl] = useState("/brand/zkhome-logo.svg")
-  const [footerLogoDarkUrl, setFooterLogoDarkUrl] = useState("/brand/zkhome-logo-dark.svg")
+  const [footerLogoUrl, setFooterLogoUrl] = useState("/brand/placeholder.svg")
+  const [footerLogoDarkUrl, setFooterLogoDarkUrl] = useState("/brand/placeholder.svg")
   const [footerLogoHeight, setFooterLogoHeight] = useState(40)
   const [footerLogoAlt, setFooterLogoAlt] = useState("")
 
-  const [faviconUrl, setFaviconUrl] = useState("/brand/zkhome-favicon.svg")
+  const [faviconUrl, setFaviconUrl] = useState("/brand/placeholder.svg")
 
-  const [adminLogoUrl, setAdminLogoUrl] = useState("/brand/zkhome-logo.svg")
+  const [adminLogoUrl, setAdminLogoUrl] = useState("/brand/placeholder.svg")
   const [adminLogoHeight, setAdminLogoHeight] = useState(40)
   const [adminLogoAlt, setAdminLogoAlt] = useState("")
 
-  const [miniLogoUrl, setMiniLogoUrl] = useState("/brand/zkhome-favicon.svg")
+  const [miniLogoUrl, setMiniLogoUrl] = useState("/brand/placeholder.svg")
   const [miniLogoHeight, setMiniLogoHeight] = useState(36)
   const [miniLogoAlt, setMiniLogoAlt] = useState("")
 
@@ -171,15 +172,38 @@ export default function ThemeSettingsPage(props: any = {}) {
   const [seoIndexingEnabled, setSeoIndexingEnabled] = useState(true)
   const [seoTitleSeparator, setSeoTitleSeparator] = useState("|")
   const [seoProductTitleTemplate, setSeoProductTitleTemplate] = useState("%urun_adi% %ayirici% %site_adi%")
-  const [seoProductDescTemplate, setSeoProductDescTemplate] = useState("%urun_adi% en uygun fiyatı, %marka% kalitesi ve 2 yıl resmi garanti avantajıyla %site_adi% üzerinde. Hemen inceleyin!")
+  const [seoProductDescTemplate, setSeoProductDescTemplate] = useState(DEFAULT_SEO_TEMPLATES.productDesc)
   const [seoCategoryTitleTemplate, setSeoCategoryTitleTemplate] = useState("%kategori% Modelleri ve Fiyatları %ayirici% %site_adi%")
-  const [seoCategoryDescTemplate, setSeoCategoryDescTemplate] = useState("En kaliteli %kategori% çeşitleri uygun fiyatlar, taksit seçenekleri ve hızlı kargo avantajıyla %site_adi% üzerinde!")
+  const [seoCategoryDescTemplate, setSeoCategoryDescTemplate] = useState(DEFAULT_SEO_TEMPLATES.categoryDesc)
   const [seoBrandTitleTemplate, setSeoBrandTitleTemplate] = useState("%marka% Ürünleri ve Fiyatları %ayirici% %site_adi%")
-  const [seoBrandDescTemplate, setSeoBrandDescTemplate] = useState("Orijinal %marka% el aletleri ve hırdavat ürünleri en iyi fiyat garantisiyle %site_adi% üzerinde.")
+  const [seoBrandDescTemplate, setSeoBrandDescTemplate] = useState(DEFAULT_SEO_TEMPLATES.brandDesc)
   const [seoBlogTitleTemplate, setSeoBlogTitleTemplate] = useState("%yazi_basligi% %ayirici% %site_adi%")
   const [seoBlogDescTemplate, setSeoBlogDescTemplate] = useState("%yazi_ozeti%")
   const [seoPageTitleTemplate, setSeoPageTitleTemplate] = useState("%sayfa_adi% %ayirici% %site_adi%")
   const [activeSeoTemplateTab, setActiveSeoTemplateTab] = useUrlState<"products" | "categories" | "brands" | "pages">("products", "seo_template", ["products", "categories", "brands", "pages"])
+
+  const [seoPreview, setSeoPreview] = useState<{ site: { siteName: string; title: string; description: string; url: string }; samples: Record<string, { label: string; tokens: SeoTokens } | null> } | null>(null)
+  const [seoPreviewError, setSeoPreviewError] = useState("")
+  useEffect(() => {
+    if (activeTab !== "seo") return
+    const controller = new AbortController()
+    setSeoPreviewError("")
+    fetch("/api/admin/seo-preview", { cache: "no-store", signal: controller.signal })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("Site verileri yüklenemedi.")
+        setSeoPreview(await response.json())
+      })
+      .catch((err) => { if (err.name !== "AbortError") setSeoPreviewError("Site verileri yüklenemedi. Sayfayı yenileyerek tekrar deneyin.") })
+    return () => controller.abort()
+  }, [activeTab])
+  const sitePreview = seoPreview ? getSiteSeoMetadata({ logo_text: logoText || seoPreview.site.siteName, seo_meta_title: seoMetaTitle, seo_meta_description: seoMetaDescription, footer_description: footerDescription }) : null
+  function templatePreview(kind: string, template: string) {
+    if (seoPreviewError) return seoPreviewError
+    if (!seoPreview) return "Site verileri yükleniyor…"
+    const sample = seoPreview.samples[kind]
+    if (!sample) return "Önizleme için yayında bir kayıt bulunamadı."
+    return renderSeoTemplate(template, { ...sample.tokens, site_adi: logoText || seoPreview.site.siteName, ayirici: seoTitleSeparator })
+  }
 
   const [modalTarget, setModalTarget] = useState<string | null>(null)
 
@@ -207,27 +231,27 @@ export default function ThemeSettingsPage(props: any = {}) {
           setHeaderMenuFontWeight(s.header_menu_font_weight || "600")
           setHeaderMenuTextTransform(s.header_menu_text_transform || "none")
 
-          setHeaderLogoUrl(s.header_logo_url || "/brand/zkhome-logo.svg")
+          setHeaderLogoUrl(s.header_logo_url || "/brand/placeholder.svg")
           setHeaderLogoDarkUrl(
-            s.header_logo_dark_url || "/brand/zkhome-logo-dark.svg"
+            s.header_logo_dark_url || "/brand/placeholder.svg"
           )
           setHeaderLogoHeight(s.header_logo_height || 40)
           setHeaderLogoAlt(s.header_logo_alt || "")
 
-          setFooterLogoUrl(s.footer_logo_url || "/brand/zkhome-logo.svg")
+          setFooterLogoUrl(s.footer_logo_url || "/brand/placeholder.svg")
           setFooterLogoDarkUrl(
-            s.footer_logo_dark_url || "/brand/zkhome-logo-dark.svg"
+            s.footer_logo_dark_url || "/brand/placeholder.svg"
           )
           setFooterLogoHeight(s.footer_logo_height || 40)
           setFooterLogoAlt(s.footer_logo_alt || "")
 
-          setFaviconUrl(s.favicon_url || "/brand/zkhome-favicon.svg")
+          setFaviconUrl(s.favicon_url || "/brand/placeholder.svg")
 
-          setAdminLogoUrl(s.admin_logo_url || "/brand/zkhome-logo.svg")
+          setAdminLogoUrl(s.admin_logo_url || "/brand/placeholder.svg")
           setAdminLogoHeight(s.admin_logo_height || 40)
           setAdminLogoAlt(s.admin_logo_alt || "")
 
-          setMiniLogoUrl(s.mini_logo_url || "/brand/zkhome-favicon.svg")
+          setMiniLogoUrl(s.mini_logo_url || "/brand/placeholder.svg")
           setMiniLogoHeight(s.mini_logo_height || 36)
           setMiniLogoAlt(s.mini_logo_alt || "")
 
@@ -268,6 +292,16 @@ export default function ThemeSettingsPage(props: any = {}) {
           if (s.payment_logo_amex) setPaymentLogoAmex(s.payment_logo_amex)
           if (s.payment_logo_troy) setPaymentLogoTroy(s.payment_logo_troy)
 
+          setSeoTitleSeparator(s.seo_title_separator || DEFAULT_SEO_TEMPLATES.separator)
+          setSeoProductTitleTemplate(s.seo_product_title_template || DEFAULT_SEO_TEMPLATES.productTitle)
+          setSeoProductDescTemplate(s.seo_product_desc_template || DEFAULT_SEO_TEMPLATES.productDesc)
+          setSeoCategoryTitleTemplate(s.seo_category_title_template || DEFAULT_SEO_TEMPLATES.categoryTitle)
+          setSeoCategoryDescTemplate(s.seo_category_desc_template || DEFAULT_SEO_TEMPLATES.categoryDesc)
+          setSeoBrandTitleTemplate(s.seo_brand_title_template || DEFAULT_SEO_TEMPLATES.brandTitle)
+          setSeoBrandDescTemplate(s.seo_brand_desc_template || DEFAULT_SEO_TEMPLATES.brandDesc)
+          setSeoBlogTitleTemplate(s.seo_blog_title_template || DEFAULT_SEO_TEMPLATES.blogTitle)
+          setSeoBlogDescTemplate(s.seo_blog_desc_template || DEFAULT_SEO_TEMPLATES.blogDesc)
+          setSeoPageTitleTemplate(s.seo_page_title_template || DEFAULT_SEO_TEMPLATES.pageTitle)
           if (s.seo_meta_title) setSeoMetaTitle(s.seo_meta_title)
           if (s.seo_meta_description)
             setSeoMetaDescription(s.seo_meta_description)
@@ -1801,11 +1835,11 @@ export default function ThemeSettingsPage(props: any = {}) {
                   <Globe style={{ width: 16, height: 16 }} />
                 </div>
                 <span style={{ fontSize: 13, fontWeight: 800, color: "#1e293b", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                  Canlı Google Arama Sonucu Önizlemesi (SERP Snippet)
+                  Site Verileriyle Arama Sonucu Önizlemesi
                 </span>
               </div>
               <span style={{ fontSize: 11, fontWeight: 700, color: "#0284c7", background: "#f0f9ff", padding: "4px 10px", borderRadius: 20 }}>
-                Google Aramalarında Böyle Görünecek
+                Google başlık ve açıklamayı değiştirebilir
               </span>
             </div>
 
@@ -1813,18 +1847,18 @@ export default function ThemeSettingsPage(props: any = {}) {
             <div style={{ background: "#f8fafc", borderRadius: 12, padding: "18px 20px", border: "1px solid #e2e8f0", width: "100%", boxSizing: "border-box" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
                 <div style={{ width: 22, height: 22, borderRadius: "50%", background: "#1e293b", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "#fff", fontWeight: 800 }}>
-                  {(logoText || "M").charAt(0).toUpperCase()}
+                  {(sitePreview?.siteName || "").charAt(0).toUpperCase()}
                 </div>
                 <div style={{ fontSize: 12, color: "#475569" }}>
-                  <span style={{ fontWeight: 600, color: "#1e293b" }}>{logoText || "Mağaza Adı"}</span>
-                  <span style={{ color: "#94a3b8", marginLeft: 6 }}>{seoCanonicalUrl || "https://www.magazaniz.com"}</span>
+                  <span style={{ fontWeight: 600, color: "#1e293b" }}>{sitePreview?.siteName || ""}</span>
+                  <span style={{ color: "#94a3b8", marginLeft: 6 }}>{seoPreview?.site.url || ""}</span>
                 </div>
               </div>
               <div style={{ fontSize: 18, fontWeight: 500, color: "#1a0dab", textDecoration: "none", cursor: "pointer", lineHeight: 1.3, marginBottom: 6 }}>
-                {seoMetaTitle || "Mağaza Başlığı | Slogan veya Kısa Tanıtım"}
+                {sitePreview?.title || seoPreviewError || "Site verileri yükleniyor…"}
               </div>
               <div style={{ fontSize: 13, color: "#4d5156", lineHeight: 1.5 }}>
-                {seoMetaDescription || "Mağazamızın kaliteli ürünleri, hızlı teslimat ve güvenli ödeme seçenekleri ile hemen alışverişe başlayın."}
+                {sitePreview?.description || ""}
               </div>
             </div>
           </div>
@@ -1949,15 +1983,11 @@ export default function ThemeSettingsPage(props: any = {}) {
                 {/* Example SERP Preview */}
                 <div style={{ background: "#f8fafc", padding: "14px 16px", borderRadius: 10, border: "1px solid #e2e8f0" }}>
                   <div style={{ fontSize: 11, fontWeight: 800, color: "#64748b", textTransform: "uppercase", marginBottom: 4 }}>
-                    🔍 Google & Tarayıcı Sekmesi Canlı Önizlemesi:
+                    Kayıt verileriyle başlık önizlemesi:
                   </div>
                   <div style={{ fontSize: 16, fontWeight: 600, color: "#1a0dab" }}>
-                    {seoProductTitleTemplate
-                      .replace(/%urun_adi%/gi, "2000W Bakır Sargılı Metal Kesme Makinesi")
-                      .replace(/%ayirici%/gi, seoTitleSeparator)
-                      .replace(/%site_adi%/gi, logoText || "ZK Home")
-                      .replace(/%marka%/gi, "ZK Home")
-                      .replace(/%kategori%/gi, "Kesme & Testere")}
+                    {templatePreview("products", seoProductTitleTemplate)}
+                    {seoPreview?.samples.products && <div style={{ fontSize: 11, color: "#64748b", marginTop: 6 }}>Kaynak: {seoPreview.samples.products?.label}</div>}
                   </div>
                 </div>
               </div>
@@ -2016,13 +2046,11 @@ export default function ThemeSettingsPage(props: any = {}) {
                 {/* Example Preview */}
                 <div style={{ background: "#f8fafc", padding: "14px 16px", borderRadius: 10, border: "1px solid #e2e8f0" }}>
                   <div style={{ fontSize: 11, fontWeight: 800, color: "#64748b", textTransform: "uppercase", marginBottom: 4 }}>
-                    🔍 Google & Tarayıcı Sekmesi Canlı Önizlemesi:
+                    Kayıt verileriyle başlık önizlemesi:
                   </div>
                   <div style={{ fontSize: 16, fontWeight: 600, color: "#1a0dab" }}>
-                    {seoCategoryTitleTemplate
-                      .replace(/%kategori%/gi, "Ahşap & Metal Kesme")
-                      .replace(/%ayirici%/gi, seoTitleSeparator)
-                      .replace(/%site_adi%/gi, logoText || "ZK Home")}
+                    {templatePreview("categories", seoCategoryTitleTemplate)}
+                    {seoPreview?.samples.categories && <div style={{ fontSize: 11, color: "#64748b", marginTop: 6 }}>Kaynak: {seoPreview.samples.categories?.label}</div>}
                   </div>
                 </div>
               </div>
@@ -2081,13 +2109,11 @@ export default function ThemeSettingsPage(props: any = {}) {
                 {/* Example Preview */}
                 <div style={{ background: "#f8fafc", padding: "14px 16px", borderRadius: 10, border: "1px solid #e2e8f0" }}>
                   <div style={{ fontSize: 11, fontWeight: 800, color: "#64748b", textTransform: "uppercase", marginBottom: 4 }}>
-                    🔍 Google & Tarayıcı Sekmesi Canlı Önizlemesi:
+                    Kayıt verileriyle başlık önizlemesi:
                   </div>
                   <div style={{ fontSize: 16, fontWeight: 600, color: "#1a0dab" }}>
-                    {seoBrandTitleTemplate
-                      .replace(/%marka%/gi, "ZK Home")
-                      .replace(/%ayirici%/gi, seoTitleSeparator)
-                      .replace(/%site_adi%/gi, logoText || "ZK Home")}
+                    {templatePreview("brands", seoBrandTitleTemplate)}
+                    {seoPreview?.samples.brands && <div style={{ fontSize: 11, color: "#64748b", marginTop: 6 }}>Kaynak: {seoPreview.samples.brands?.label}</div>}
                   </div>
                 </div>
               </div>
@@ -2146,13 +2172,11 @@ export default function ThemeSettingsPage(props: any = {}) {
                 {/* Example Preview */}
                 <div style={{ background: "#f8fafc", padding: "14px 16px", borderRadius: 10, border: "1px solid #e2e8f0" }}>
                   <div style={{ fontSize: 11, fontWeight: 800, color: "#64748b", textTransform: "uppercase", marginBottom: 4 }}>
-                    🔍 Google & Tarayıcı Sekmesi Canlı Önizlemesi:
+                    Kayıt verileriyle başlık önizlemesi:
                   </div>
                   <div style={{ fontSize: 16, fontWeight: 600, color: "#1a0dab" }}>
-                    {seoPageTitleTemplate
-                      .replace(/%sayfa_adi%/gi, "Hakkımızda")
-                      .replace(/%ayirici%/gi, seoTitleSeparator)
-                      .replace(/%site_adi%/gi, logoText || "ZK Home")}
+                    {templatePreview("pages", seoPageTitleTemplate)}
+                    {seoPreview?.samples.pages && <div style={{ fontSize: 11, color: "#64748b", marginTop: 6 }}>Kaynak: {seoPreview.samples.pages?.label}</div>}
                   </div>
                 </div>
               </div>
@@ -2418,7 +2442,7 @@ export default function ThemeSettingsPage(props: any = {}) {
                 rows={7}
                 value={customHeadScripts}
                 onChange={(e) => setCustomHeadScripts(e.target.value)}
-                placeholder="Yeni ZK Home analiz kodlarını buraya ekleyin."
+                placeholder="Yeni Mağaza analiz kodlarını buraya ekleyin."
                 style={{
                   width: "100%",
                   boxSizing: "border-box",

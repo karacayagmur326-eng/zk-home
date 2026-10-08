@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const post = rows[0]
-  const siteName = settings?.logo_text || "ZK Home"
+  const siteName = settings?.logo_text || "Mağaza"
   const separator = settings?.seo_title_separator || "|"
 
   const tokens = {
@@ -102,6 +102,9 @@ export default async function ArticlePage({ params }: Props) {
     notFound()
   }
 
+  const theme = await getThemeSettings()
+  const configuredLogo = String(theme?.header_logo_url || "")
+  const publisherLogo = configuredLogo ? (/^https?:\/\//.test(configuredLogo) ? configuredLogo : `${getBaseURL()}${configuredLogo}`) : undefined
   const article = rows[0]
 
   // Increment view count asynchronously
@@ -153,10 +156,10 @@ export default async function ArticlePage({ params }: Props) {
     },
     "publisher": {
       "@type": "Organization",
-      "name": "E-Ticaret Mağazası",
+      "name": theme?.logo_text || "Mağaza",
       "logo": {
         "@type": "ImageObject",
-        "url": `${getBaseURL()}/brand/zkhome-logo.svg`
+        "url": publisherLogo
       }
     },
     "datePublished": article.published_at,

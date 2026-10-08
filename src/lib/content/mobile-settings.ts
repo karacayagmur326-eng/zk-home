@@ -100,23 +100,11 @@ const item = (id: string, label: string, icon: string, href: string, subtitle = 
 
 export const defaultMobileSettings: MobileSettings = {
   enabled: true,
-  logoUrl: "/brand/zkhome-logo.svg",
+  logoUrl: "/brand/placeholder.svg",
   searchPlaceholder: "Ürün, kategori veya model ara",
-  announcementText: "ZK Home yakında hizmetinizde",
+  announcementText: "",
   announcementHref: "/magaza",
-  slides: [
-    {
-      id: "mobile-slide-1",
-      badge: "ZK HOME",
-      title: "Evinize İyi Gelen Dokunuşlar",
-      description: "Dekorasyon, sofra ve ev tekstili için ilham veren kategorileri keşfedin.",
-      buttonLabel: "Dekorasyonu Keşfet",
-      buttonHref: "/dekorasyon",
-      image: "/hero/zkhome-editorial-home-v2.png",
-      active: true,
-      sortOrder: 1,
-    },
-  ],
+  slides: [],
   shortcuts: [
     item("shortcut-1", "Yeni Ürünler", "Sparkles", "/magaza"),
     item("shortcut-2", "Kategoriler", "LayoutGrid", "/magaza"),
@@ -219,12 +207,7 @@ const merge = (stored: Partial<MobileSettings>): MobileSettings => ({
   cart: { ...defaultMobileSettings.cart, ...(stored.cart || {}) },
   slides: (Array.isArray(stored.slides) ? stored.slides : defaultMobileSettings.slides).map((slide) => ({
     ...slide,
-    image: normalizePublicImageUrl(
-      slide.image,
-      slide.title?.toLocaleLowerCase("tr-TR").includes("jet")
-        ? "/uploads/slider-temiz-acik-1920x700.png"
-        : defaultMobileSettings.slides[0].image
-    ),
+    image: normalizePublicImageUrl(slide.image, "/brand/placeholder.svg"),
   })),
   shortcuts: Array.isArray(stored.shortcuts) ? stored.shortcuts : defaultMobileSettings.shortcuts,
   homeSections: mergeHomeSections(stored.homeSections),

@@ -1,3 +1,4 @@
+import { getSiteSeoMetadata } from "@lib/seo/templates"
 import { HeroSlider, CategoryStrip } from "@modules/home/components/desktop-home-components"
 import { getRegion } from "@lib/data/regions"
 import { listCategories } from "@lib/data/categories"
@@ -18,23 +19,23 @@ import HomeEditorial, { type HomeArticle } from "@modules/home/components/home-e
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getThemeSettings()
-  const title = "ZK Home | Online Mağaza"
-  const description = "ZK Home'da ev dekorasyonu, sofra ve ev tekstili için ilham veren kategorileri keşfedin. Yaşam alanınıza iyi gelen dokunuşları bulun."
+  const { title, description, siteName } = getSiteSeoMetadata(settings)
   return {
     title: { absolute: title }, description,
     alternates: { canonical: getBaseURL() },
     openGraph: {
-      title, description, url: getBaseURL(), siteName: "ZK Home", locale: "tr_TR", type: "website",
-      images: [{ url: settings?.seo_og_image_url || "/opengraph-image", alt: "ZK Home" }],
+      title, description, url: getBaseURL(), siteName, locale: "tr_TR", type: "website",
+      images: [{ url: settings?.seo_og_image_url || "/opengraph-image", alt: siteName }],
     },
   }
 }
 
-function HomeStructuredData() {
+async function HomeStructuredData() {
+  const { siteName } = getSiteSeoMetadata(await getThemeSettings())
   return <>
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd({
       "@context": "https://schema.org", "@type": "WebSite", "@id": `${getBaseURL()}/#website`,
-      name: "ZK Home", alternateName: ["ZKHome", "ZK HOME"], url: getBaseURL(), inLanguage: "tr-TR",
+      name: siteName, url: getBaseURL(), inLanguage: "tr-TR",
     }) }} />
   </>
 }

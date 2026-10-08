@@ -513,7 +513,7 @@ export default function AdminOrderDetailPage({
               }`}>
                 {fulfillmentStatus === "delivered"
                   ? "Teslim Edildi"
-                  : fulfillmentStatus === "delivery_scheduled" ? "ZK Home Teslimat Planlandı"
+                  : fulfillmentStatus === "delivery_scheduled" ? "Mağaza Teslimatı Planlandı"
                   : fulfillmentStatus === "shipped"
                   ? "Kargolandı"
                   : fulfillmentStatus === "cancelled"
@@ -676,7 +676,7 @@ export default function AdminOrderDetailPage({
                         className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-bold text-slate-800 focus:outline-none focus:border-[#C98484]"
                       >
                         <option value="preparing">📦 Hazırlanıyor / İşleniyor</option>
-                        <option value="delivery_scheduled">ZK Home Teslimat Planlandı</option>
+                        <option value="delivery_scheduled">Mağaza Teslimatı Planlandı</option>
                         <option value="shipped">🚚 Kargoya Verildi / Yolda</option>
                         <option value="delivered">✅ Teslim Edildi</option>
                       </select>
@@ -802,7 +802,7 @@ export default function AdminOrderDetailPage({
                     onChange={(e) => { setShippingCarrier(e.target.value); if (e.target.value === ZK_HOME_DELIVERY) { setFulfillmentStatus("delivery_scheduled"); setOrderStatus("processing"); setTrackingNumber(""); setTrackingUrl("") } else if (fulfillmentStatus === "delivery_scheduled") setFulfillmentStatus("preparing") }}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-bold text-slate-800 focus:outline-none focus:border-[#C98484]"
                   >
-                    <option value={ZK_HOME_DELIVERY}>ZK Home Teslimat</option>
+                    <option value={ZK_HOME_DELIVERY}>Mağaza Teslimatı</option>
                     <option value="Yurtiçi Kargo">Yurtiçi Kargo</option>
                     <option value="Aras Kargo">Aras Kargo</option>
                     <option value="MNG Kargo">MNG Kargo</option>

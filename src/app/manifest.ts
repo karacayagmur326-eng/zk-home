@@ -1,21 +1,14 @@
 import { MetadataRoute } from "next"
+import { getThemeSettings } from "@lib/content/theme-settings"
+import { getSiteSeoMetadata } from "@lib/seo/templates"
 
-export default function manifest(): MetadataRoute.Manifest {
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+  const settings = await getThemeSettings()
+  const site = getSiteSeoMetadata(settings)
   return {
-    name: "ZK Home",
-    short_name: "ZKHome",
-    description: "ZK Home Mobil Alışveriş Uygulaması",
-    start_url: "/",
-    display: "standalone",
-    orientation: "portrait",
-    background_color: "#ffffff",
-    theme_color: "#C98484",
-    icons: [
-      {
-        src: "/brand/zkhome-favicon.svg",
-        sizes: "any",
-        type: "image/svg+xml",
-      },
-    ],
+    name: site.siteName, short_name: site.siteName, description: site.description,
+    start_url: "/", display: "standalone", orientation: "portrait",
+    background_color: "#ffffff", theme_color: settings?.primary_color || "#C98484",
+    icons: settings?.favicon_url ? [{ src: settings.favicon_url, sizes: "any" }] : [],
   }
 }
