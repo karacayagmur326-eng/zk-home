@@ -330,6 +330,11 @@ export default function CategoriesPage() {
       ])
       const nextCategories: Category[] = catData.categories || []
       setCategories(nextCategories)
+      if (!silent) {
+        const editing = new URLSearchParams(window.location.search).get("duzenle")
+        const category = nextCategories.find((item) => item.id === editing || item.handle === editing)
+        if (category) performStartEdit(category)
+      }
       const numIcon = parseInt(settingData.icon_size, 10)
       if (!isNaN(numIcon) && numIcon >= 10) setIconSizePx(numIcon)
       const numFont = parseInt(settingData.font_size, 10)
