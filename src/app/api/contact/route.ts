@@ -4,6 +4,8 @@ import { checkRateLimit, requestIp } from "@lib/security/rate-limit"
 import { ensureCommerceSchema } from "@lib/commerce/schema"
 import { getEmailBrandSettings } from "@lib/email/brand-settings"
 import { processNotificationOutbox } from "@lib/notifications/outbox"
+import { ensureContactHistory } from "@lib/email/contact-history"
+import { getContactCustomer } from "@lib/contact/customer-messages"
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -46,30 +48,13 @@ export async function POST(request: Request) {
       )
     }
 
-    await query(`
-      CREATE TABLE IF NOT EXISTS contact_messages (
-        id BIGSERIAL PRIMARY KEY,
-        name TEXT NOT NULL,
-        email TEXT NOT NULL,
-        phone TEXT,
-        subject TEXT,
-        order_no TEXT,
-        message TEXT NOT NULL,
-        status TEXT NOT NULL DEFAULT 'new',
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      );
-      ALTER TABLE contact_messages
-      ADD COLUMN IF NOT EXISTS subject TEXT,
-      ADD COLUMN IF NOT EXISTS order_no TEXT,
-      ADD COLUMN IF NOT EXISTS phone TEXT,
-      ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'new';
-    `)
-
+    await ensureContactHistory()
+    const customer = await getContactCustomer()
     const rows = await query<{ id: string }>(
-      `INSERT INTO contact_messages (name, email, phone, subject, order_no, message)
-       VALUES ($1, $2, $3, $4, $5, $6)
+      `INSERT INTO contact_messages (name, email, phone, subject, order_no, message, customer_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING id`,
-      [name, email, phone || null, subject, orderNo || null, message],
+      [name, email, phone || null, subject, orderNo || null, message, customer?.id || null],
     )
 
     const messageId = String(rows[0]?.id || "")

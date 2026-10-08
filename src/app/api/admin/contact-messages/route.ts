@@ -4,7 +4,7 @@ import { NextResponse } from "next/server"
 import { ensureCommerceSchema } from "@lib/commerce/schema"
 import { getEmailBrandSettings } from "@lib/email/brand-settings"
 import { processNotificationOutbox } from "@lib/notifications/outbox"
-import { contactHistory } from "@lib/email/contact-history"
+import { contactHistory, ensureContactHistory } from "@lib/email/contact-history"
 import { syncContactInbox } from "@lib/email/contact-inbox"
 import { randomUUID } from "crypto"
 
@@ -16,28 +16,12 @@ export async function GET(request: Request) {
 
   try {
     await ensureCommerceSchema()
-    await query(`
-      CREATE TABLE IF NOT EXISTS contact_messages (
-        id BIGSERIAL PRIMARY KEY,
-        name TEXT NOT NULL,
-        email TEXT NOT NULL,
-        phone TEXT,
-        subject TEXT,
-        order_no TEXT,
-        message TEXT NOT NULL,
-        status TEXT NOT NULL DEFAULT 'new',
-        admin_reply TEXT,
-        replied_at TIMESTAMPTZ,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      );
-      ALTER TABLE contact_messages
-      ADD COLUMN IF NOT EXISTS admin_reply TEXT,
-      ADD COLUMN IF NOT EXISTS replied_at TIMESTAMPTZ;
-    `)
+
 
     const { searchParams } = new URL(request.url)
     const status = searchParams.get("status")
 
+    await ensureContactHistory()
     let sql = `SELECT * FROM contact_messages`
     const params: any[] = []
 
@@ -46,7 +30,7 @@ export async function GET(request: Request) {
       params.push(status)
     }
 
-    sql += ` ORDER BY created_at DESC`
+    sql += ` ORDER BY GREATEST(created_at,replied_at,(SELECT MAX(created_at) FROM contact_incoming_replies r WHERE r.contact_id=contact_messages.id)) DESC`
 
     const messages = await query<any>(sql, params)
     for (const message of messages) message.history = await contactHistory(String(message.id))
@@ -158,17 +142,15 @@ export async function PATCH(request: Request) {
           row
         )
         }
-        await db.query("UPDATE contact_messages SET admin_reply=$1,replied_at=NOW() WHERE id=$2", [cleanReply,id])
+        await db.query("UPDATE contact_messages SET admin_reply=$1,replied_at=NOW(),status='replied' WHERE id=$2", [cleanReply,id])
       })
       const delivery = await processNotificationOutbox(
         notificationRows.length,
         notificationRows.map((row) => row[0])
       ).catch(() => null)
       const [customerDelivery] = await query<{ status: string }>("SELECT status FROM notification_outbox WHERE id=$1", [customerId])
-      if (customerDelivery?.status === "sent") {
-        await query("UPDATE contact_messages SET status='replied' WHERE id=$1", [id])
-        message.status = "replied"
-      }
+      const [current] = await query<{ status: string }>("SELECT status FROM contact_messages WHERE id=$1", [id])
+      message.status = current?.status || "replied"
       message.admin_reply = cleanReply
       message.history = await contactHistory(String(id))
       return NextResponse.json({

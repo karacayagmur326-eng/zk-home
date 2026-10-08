@@ -160,17 +160,20 @@ export default function AdminContactPage() {
     }
   }
 
-  const fetchMessages = async (status = "") => {
-    setLoading(true)
+  const fetchMessages = async (status = "", silent = false, signal?: AbortSignal) => {
+    if (!silent) setLoading(true)
     try {
       const url = status ? `/api/admin/contact-messages?status=${status}` : `/api/admin/contact-messages`
-      const res = await fetch(url)
+      const res = await fetch(url, { cache: "no-store", signal })
       const data = await res.json()
-      if (res.ok) setMessages(data.messages || [])
+      if (res.ok && !signal?.aborted) {
+        setMessages(data.messages || [])
+        setSelectedMessage((current) => current ? data.messages?.find((item: ContactMessage) => String(item.id) === String(current.id)) || current : null)
+      }
     } catch {
-      showToast("error", "Mesajlar yüklenirken bir hata oluştu.")
+      if (!silent && !signal?.aborted) showToast("error", "Mesajlar yüklenirken bir hata oluştu.")
     } finally {
-      setLoading(false)
+      if (!silent && !signal?.aborted) setLoading(false)
     }
   }
 
@@ -186,9 +189,17 @@ export default function AdminContactPage() {
   }
 
   useEffect(() => {
-    fetchMessages()
     fetchSettings()
   }, [])
+
+  useEffect(() => {
+    const controller = new AbortController()
+    fetchMessages(statusFilter, false, controller.signal)
+    const refresh = () => { if (!document.hidden) fetchMessages(statusFilter, true, controller.signal) }
+    const timer = window.setInterval(refresh, 30000)
+    window.addEventListener("focus", refresh)
+    return () => { controller.abort(); clearInterval(timer); window.removeEventListener("focus", refresh) }
+  }, [statusFilter])
 
   const handleUpdateStatus = async (id: string, newStatus: string) => {
     try {
@@ -490,7 +501,6 @@ export default function AdminContactPage() {
                     value={statusFilter}
                     onChange={(e) => {
                       setStatusFilter(e.target.value)
-                      fetchMessages(e.target.value)
                     }}
                     className="w-full appearance-none border border-slate-200/80 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:border-[#C98484] cursor-pointer pr-7"
                   >

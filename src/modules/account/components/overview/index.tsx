@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   AppIcon,
   PackageCheck,
+  MessageSquare,
 } from "@lib/icons"
 import type { MobileSettings } from "@lib/content/mobile-settings"
 import {
@@ -72,9 +73,11 @@ const Overview = ({ customer, orders, mobileSettings }: OverviewProps) => {
       )}
       <section className="m-3 flex items-center gap-3 rounded-2xl border border-rose-100 bg-rose-50 p-4"><PackageCheck className="h-6 w-6 text-[#C98484]" /><div><h2 className="text-xs font-black">{mobileSettings.account.noticeTitle}</h2><p className="mt-1 text-[10px] leading-relaxed text-slate-500">{mobileSettings.account.noticeDescription}</p></div></section>
       <div className="px-3 pb-2 pt-3"><h2 className="text-sm font-black">Hızlı İşlemler</h2></div><section className="grid grid-cols-2 gap-2.5 px-3">{mobileSettings.account.menuItems.filter((item) => item.active).map((item) => <LocalizedClientLink key={item.id} href={item.href} className="flex min-h-20 items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 text-[11px] font-extrabold shadow-sm"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-rose-50 text-[#C98484]"><AppIcon name={item.icon} className="h-5 w-5" /></span><span>{item.label}</span></LocalizedClientLink>)}</section>
+      <LocalizedClientLink href="/hesabim/mesajlarim" className="m-3 flex items-center gap-3 rounded-2xl border border-rose-100 bg-white p-4 text-sm font-bold"><MessageSquare className="h-5 w-5 text-[#C98484]" /> Mesajlarım <ChevronRight className="ml-auto h-4 w-4 text-slate-400" /></LocalizedClientLink>
       <div className="m-3 mt-5 rounded-2xl border border-slate-200 bg-white p-4"><div className="flex items-center justify-between text-xs"><span className="font-bold text-slate-500">Profil tamamlanma</span><b className="text-[#C98484]">%{profilePercent}</b></div><div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-[#C98484]" style={{ width: `${profilePercent}%` }} /></div></div>
     </div>}
     <div data-testid="overview-page-wrapper" className={`${mobileSettings?.enabled ? "hidden md:block" : "block"} space-y-6 text-slate-900 font-sans`}>
+      <LocalizedClientLink href="/hesabim/mesajlarim" className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-bold text-[#C98484] shadow-sm md:hidden"><MessageSquare className="h-5 w-5" /> Mesajlarım</LocalizedClientLink>
       {/* Top Welcome & User Login Bar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2">
         <div className="flex flex-wrap items-center gap-3">

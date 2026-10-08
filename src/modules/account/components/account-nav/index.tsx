@@ -12,6 +12,7 @@ import {
   ShoppingBag,
   Heart,
   LogOut,
+  MessageSquare,
 } from "@lib/icons"
 
 const AccountNav = ({
@@ -63,6 +64,12 @@ const AccountNav = ({
       label: "Favorilerim",
       href: "/hesabim/favorilerim",
       icon: Heart,
+      exact: false,
+    },
+    {
+      label: "Mesajlarım",
+      href: "/hesabim/mesajlarim",
+      icon: MessageSquare,
       exact: false,
     },
   ]

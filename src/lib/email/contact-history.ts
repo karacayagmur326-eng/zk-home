@@ -1,7 +1,28 @@
 import "server-only"
 import { query } from "@lib/admin/db"
 
+let schemaReady: Promise<void> | null = null
 export async function ensureContactHistory() {
+  if (!schemaReady) schemaReady = initializeContactHistory().catch((error) => { schemaReady = null; throw error })
+  return schemaReady
+}
+
+async function initializeContactHistory() {
+  await query(`CREATE TABLE IF NOT EXISTS contact_messages (
+    id BIGSERIAL PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL,
+    phone TEXT, subject TEXT, order_no TEXT, message TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'new', created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  );
+  ALTER TABLE contact_messages
+    ADD COLUMN IF NOT EXISTS phone TEXT,
+    ADD COLUMN IF NOT EXISTS subject TEXT,
+    ADD COLUMN IF NOT EXISTS order_no TEXT,
+    ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'new',
+    ADD COLUMN IF NOT EXISTS customer_id TEXT,
+    ADD COLUMN IF NOT EXISTS admin_reply TEXT,
+    ADD COLUMN IF NOT EXISTS replied_at TIMESTAMPTZ;
+  CREATE INDEX IF NOT EXISTS contact_messages_customer_idx ON contact_messages(customer_id);
+  CREATE INDEX IF NOT EXISTS contact_messages_email_idx ON contact_messages(LOWER(email));`)
   await query(`CREATE TABLE IF NOT EXISTS contact_incoming_replies (
     id TEXT PRIMARY KEY,
     contact_id BIGINT NOT NULL REFERENCES contact_messages(id) ON DELETE CASCADE,
@@ -9,7 +30,8 @@ export async function ensureContactHistory() {
     message TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL,
     imported_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-  )`)
+  );
+  CREATE INDEX IF NOT EXISTS contact_incoming_replies_contact_idx ON contact_incoming_replies(contact_id,created_at)`)
 }
 
 export async function contactHistory(id: string) {
