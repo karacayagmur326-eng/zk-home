@@ -9,9 +9,9 @@ type Conversation = MessageSummary & { history: Array<{ id: string; direction: s
 const statusLabels: Record<string, string> = { new: "Yanıt bekleniyor", read: "İnceleniyor", replied: "Yanıtlandı", archived: "Arşivlendi" }
 const formatDate = (value: string) => new Intl.DateTimeFormat("tr-TR", { dateStyle: "short", timeStyle: "short", timeZone: "Europe/Istanbul" }).format(new Date(value))
 
-export default function CustomerMessages() {
+export default function CustomerMessages({ initialId = "" }: { initialId?: string }) {
   const [messages, setMessages] = useState<MessageSummary[]>([])
-  const [selectedId, setSelectedId] = useState("")
+  const [selectedId, setSelectedId] = useState(initialId)
   const [conversation, setConversation] = useState<Conversation | null>(null)
   const [drafts, setDrafts] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
@@ -20,6 +20,8 @@ export default function CustomerMessages() {
   const [notice, setNotice] = useState("")
   const [reload, setReload] = useState(0)
   const detailRequest = useRef(0)
+
+  useEffect(() => { if (initialId) setSelectedId(initialId) }, [initialId])
 
   const loadList = useCallback(async (signal?: AbortSignal) => {
     try {

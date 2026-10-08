@@ -74,6 +74,7 @@ export async function POST(req: NextRequest) {
       discount_type: body.discount_type || null,
       discount_value: body.discount_value != null ? Number(body.discount_value) : null,
       min_subtotal: body.min_subtotal != null ? Number(body.min_subtotal) : 0,
+      customer_notification: body.customer_notification === true,
     })
     return NextResponse.json({ campaign })
   } catch (err: any) {
@@ -101,6 +102,7 @@ export async function PUT(req: NextRequest) {
       discount_type: body.discount_type,
       discount_value: body.discount_value,
       min_subtotal: body.min_subtotal,
+      customer_notification: typeof body.customer_notification === "boolean" ? body.customer_notification : undefined,
     })
     if (!campaign) {
       return NextResponse.json({ error: "Kampanya bulunamadı." }, { status: 404 })

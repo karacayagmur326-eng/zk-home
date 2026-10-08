@@ -5,6 +5,7 @@ import { listRegions } from "@lib/data/regions"
 import { StoreProductCategory, StoreRegion } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import CartButton from "@modules/layout/components/cart-button"
+import CustomerNotifications from "@modules/layout/components/customer-notifications"
 import { SideMenu, DesktopMenu, HeaderSearch } from "@modules/layout/components/desktop-header-components"
 import ThemeToggle from "@modules/layout/components/theme-toggle"
 import { getMenu } from "@lib/data/menus"
@@ -319,6 +320,7 @@ export default async function Nav() {
               <ThemeToggle />
             </div>
 
+            {customer && <CustomerNotifications key={customer.id} customerId={customer.id} />}
             <Suspense
               fallback={
                 <LocalizedClientLink

@@ -917,13 +917,14 @@ export async function createStoreCampaign(data: {
   discount_type?: string | null
   discount_value?: number | null
   min_subtotal?: number | null
+  customer_notification?: boolean
 }) {
   await ensureCommerceSchema()
   const id = createId("cmpn")
   const rows = await query<any>(
     `INSERT INTO store_campaign
-     (id, name, description, type, status, starts_at, ends_at, discount_type, discount_value, min_subtotal)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+     (id, name, description, type, status, starts_at, ends_at, discount_type, discount_value, min_subtotal, metadata)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, jsonb_build_object('customer_notification',$11::boolean))
      RETURNING *`,
     [
       id,
@@ -936,6 +937,7 @@ export async function createStoreCampaign(data: {
       data.discount_type || null,
       data.discount_value !== undefined ? Number(data.discount_value) : null,
       data.min_subtotal !== undefined ? Number(data.min_subtotal) : 0,
+      data.customer_notification === true,
     ]
   )
   return rows[0]
@@ -951,6 +953,7 @@ export async function updateStoreCampaign(id: string, data: {
   discount_type?: string | null
   discount_value?: number | null
   min_subtotal?: number | null
+  customer_notification?: boolean
 }) {
   await ensureCommerceSchema()
   const rows = await query<any>(
@@ -964,6 +967,7 @@ export async function updateStoreCampaign(id: string, data: {
        discount_type = $8,
        discount_value = COALESCE($9, discount_value),
        min_subtotal = COALESCE($10, min_subtotal),
+       metadata = CASE WHEN $11::boolean IS NULL THEN metadata ELSE COALESCE(metadata,'{}'::jsonb) || jsonb_build_object('customer_notification',$11::boolean) END,
        updated_at = NOW()
      WHERE id = $1 RETURNING *`,
     [
@@ -977,6 +981,7 @@ export async function updateStoreCampaign(id: string, data: {
       data.discount_type !== undefined ? data.discount_type : undefined,
       data.discount_value !== undefined ? Number(data.discount_value) : null,
       data.min_subtotal !== undefined ? Number(data.min_subtotal) : null,
+      data.customer_notification ?? null,
     ]
   )
   return rows[0] || null

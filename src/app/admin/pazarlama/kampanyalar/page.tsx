@@ -45,6 +45,7 @@ type Campaign = {
   min_subtotal: number | null
   usage_count: number
   created_at: string
+  metadata?: { customer_notification?: boolean }
 }
 
 type Stats = {
@@ -127,6 +128,7 @@ export default function KampanyalarPage() {
   // Form
   const [formName, setFormName] = useState("")
   const [formDescription, setFormDescription] = useState("")
+  const [formNotifyMembers, setFormNotifyMembers] = useState(false)
   const [formType, setFormType] = useState<Campaign["type"]>("discount")
   const [formStatus, setFormStatus] = useState<Campaign["status"]>("draft")
   const [formStartsAt, setFormStartsAt] = useState("")
@@ -160,6 +162,7 @@ export default function KampanyalarPage() {
       setEditingCampaign(campaign)
       setFormName(campaign.name)
       setFormDescription(campaign.description || "")
+      setFormNotifyMembers(campaign.metadata?.customer_notification === true)
       setFormType(campaign.type)
       setFormStatus(campaign.status)
       setFormStartsAt(campaign.starts_at ? new Date(campaign.starts_at).toISOString().slice(0, 16) : "")
@@ -179,6 +182,7 @@ export default function KampanyalarPage() {
       setEditingCampaign(null)
       setFormName("")
       setFormDescription("")
+      setFormNotifyMembers(false)
       setFormType("discount")
       setFormStatus("draft")
       setFormStartsAt(new Date().toISOString().slice(0, 16))
@@ -206,6 +210,7 @@ export default function KampanyalarPage() {
         id: editingCampaign?.id,
         name: formName.trim(),
         description: formDescription.trim() || null,
+        customer_notification: formNotifyMembers,
         type: formType,
         status: formStatus,
         starts_at: formStartsAt ? new Date(formStartsAt).toISOString() : null,
@@ -694,6 +699,10 @@ export default function KampanyalarPage() {
             </div>
 
             <form onSubmit={handleSave} className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+              <label className="flex items-start gap-3 rounded-xl border border-[#EEDDDD] bg-[#FDF7F5] p-4 text-sm">
+                <input type="checkbox" checked={formNotifyMembers} onChange={(e) => setFormNotifyMembers(e.target.checked)} className="mt-0.5 h-4 w-4 accent-[#C98484]" />
+                <span><span className="block font-semibold">Üyelere bildirim göster</span><span className="mt-1 block text-xs leading-relaxed text-slate-500">Kampanya aktifken ve tarih aralığı içindeyken adı ve açıklaması üyelerin bildirim zilinde görünür.</span></span>
+              </label>
               {/* Kampanya Adı */}
               <div>
                 <label className="block text-[11px] font-bold text-slate-700 mb-1">
