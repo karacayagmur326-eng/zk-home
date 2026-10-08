@@ -677,6 +677,27 @@ async function createSchema() {
 
 import { hashPassword } from "./customer-auth"
 
+let couponSchemaReady: Promise<void> | undefined
+
+export function ensureCouponSchema(): Promise<void> {
+  if (!couponSchemaReady) {
+    couponSchemaReady = (async () => {
+      await ensureCommerceSchema()
+      try {
+        await query("SELECT free_shipping FROM store_coupon LIMIT 0")
+      } catch (error) {
+        if ((error as { code?: string }).code !== "42703") throw error
+        // Upgrade the coupon field without replaying the full production bootstrap.
+        await query("ALTER TABLE store_coupon ADD COLUMN IF NOT EXISTS free_shipping BOOLEAN NOT NULL DEFAULT FALSE")
+      }
+    })().catch(error => {
+      couponSchemaReady = undefined
+      throw error
+    })
+  }
+  return couponSchemaReady
+}
+
 export function ensureCommerceSchema() {
   // Production schema changes belong to deployment migrations. Replaying the
   // full DDL/bootstrap script in every serverless cold start adds seconds to

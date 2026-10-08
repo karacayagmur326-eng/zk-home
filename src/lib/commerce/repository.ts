@@ -2,7 +2,7 @@ import { randomUUID } from "crypto"
 import { query, withTransaction } from "@lib/admin/db"
 import { getCached, clearMemoryCache } from "@lib/cache"
 import { revalidatePath } from "next/cache"
-import { ensureCommerceSchema } from "./schema"
+import { ensureCommerceSchema, ensureCouponSchema } from "./schema"
 
 export function createId(prefix: string) {
   return `${prefix}_${randomUUID().replace(/-/g, "")}`
@@ -762,7 +762,7 @@ export async function deleteStoreCategory(id: string) {
 // COUPON MANAGEMENT REPOSITORY
 // ----------------------------------------------------
 export async function getStoreCoupons() {
-  await ensureCommerceSchema()
+  await ensureCouponSchema()
   const rows = await query<any>(
     `SELECT * FROM store_coupon ORDER BY created_at DESC`
   )
@@ -770,7 +770,7 @@ export async function getStoreCoupons() {
 }
 
 export async function getStoreCouponByCode(code: string) {
-  await ensureCommerceSchema()
+  await ensureCouponSchema()
   const rows = await query<any>(
     `SELECT * FROM store_coupon WHERE UPPER(code) = UPPER($1) AND is_active = TRUE LIMIT 1`,
     [code.trim()]
@@ -790,7 +790,7 @@ export async function createStoreCoupon(data: {
   description?: string | null
   free_shipping?: boolean
 }) {
-  await ensureCommerceSchema()
+  await ensureCouponSchema()
   const id = createId("cpn")
   const formattedCode = data.code.trim().toUpperCase()
   const rows = await query<any>(
@@ -826,7 +826,7 @@ export async function updateStoreCoupon(id: string, data: {
   description?: string | null
   free_shipping?: boolean
 }) {
-  await ensureCommerceSchema()
+  await ensureCouponSchema()
   const rows = await query<any>(
     `UPDATE store_coupon SET
        code = COALESCE($2, code),

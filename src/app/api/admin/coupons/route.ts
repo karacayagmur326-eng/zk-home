@@ -16,7 +16,7 @@ export async function GET() {
     return NextResponse.json({ coupons })
   } catch (error: any) {
     return NextResponse.json(
-      { error: error.message || "Kuponlar getirilirken hata oluştu." },
+      { error: "Kuponlar yüklenemedi. Lütfen tekrar deneyin." },
       { status: 500 }
     )
   }
@@ -46,7 +46,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ coupon })
   } catch (error: any) {
     return NextResponse.json(
-      { error: error.message || "Kupon oluşturulurken hata oluştu." },
+      { error: error.code === "23505" ? "Bu kupon kodu zaten kullanılıyor." : "Kupon oluşturulamadı. Lütfen tekrar deneyin." },
       { status: 500 }
     )
   }
@@ -76,7 +76,7 @@ export async function PUT(req: Request) {
     return NextResponse.json({ coupon })
   } catch (error: any) {
     return NextResponse.json(
-      { error: error.message || "Kupon güncellenirken hata oluştu." },
+      { error: error.code === "23505" ? "Bu kupon kodu zaten kullanılıyor." : "Kupon güncellenemedi. Lütfen tekrar deneyin." },
       { status: 500 }
     )
   }
@@ -96,7 +96,7 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ success: true })
   } catch (error: any) {
     return NextResponse.json(
-      { error: error.message || "Kupon silinirken hata oluştu." },
+      { error: "Kupon silinemedi. Lütfen tekrar deneyin." },
       { status: 500 }
     )
   }
