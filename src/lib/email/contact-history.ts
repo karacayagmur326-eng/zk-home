@@ -22,7 +22,9 @@ async function initializeContactHistory() {
     ADD COLUMN IF NOT EXISTS admin_reply TEXT,
     ADD COLUMN IF NOT EXISTS replied_at TIMESTAMPTZ,
     ADD COLUMN IF NOT EXISTS initiated_by_admin BOOLEAN NOT NULL DEFAULT FALSE,
-    ADD COLUMN IF NOT EXISTS admin_message_key TEXT;
+    ADD COLUMN IF NOT EXISTS admin_message_key TEXT,
+    ADD COLUMN IF NOT EXISTS product_question_id BIGINT;
+  CREATE UNIQUE INDEX IF NOT EXISTS contact_messages_question_idx ON contact_messages(product_question_id) WHERE product_question_id IS NOT NULL;
   CREATE UNIQUE INDEX IF NOT EXISTS contact_messages_admin_key_idx ON contact_messages(admin_message_key) WHERE admin_message_key IS NOT NULL;
   CREATE INDEX IF NOT EXISTS contact_messages_customer_idx ON contact_messages(customer_id);
   CREATE INDEX IF NOT EXISTS contact_messages_email_idx ON contact_messages(LOWER(email));`)
@@ -44,10 +46,10 @@ export async function contactHistory(id: string) {
       message AS body, created_at, 'received' AS delivery_status, NULL AS sent_at
     FROM contact_messages WHERE id=$1 AND NOT initiated_by_admin
     UNION ALL
-    SELECT id, 'outgoing', 'ZK HOME', payload->>'reply', created_at,
+    SELECT id, 'outgoing', 'ZK HOME', COALESCE(payload->>'reply',payload->>'answer'), created_at,
       CASE WHEN payload->>'receipt_reply_id' IS NOT NULL THEN 'delivered' ELSE status END, sent_at
     FROM notification_outbox
-    WHERE type='contact_reply_customer' AND payload->>'message_id'=$1::text
+    WHERE type IN ('contact_reply_customer','product_question_answered') AND payload->>'message_id'=$1::text
     UNION ALL
     SELECT id, 'incoming', sender, message, created_at, 'received', NULL
     FROM contact_incoming_replies WHERE contact_id=$1
@@ -56,6 +58,6 @@ export async function contactHistory(id: string) {
       COALESCE(replied_at,created_at), 'unknown', NULL
     FROM contact_messages m WHERE id=$1 AND admin_reply IS NOT NULL
       AND NOT EXISTS (SELECT 1 FROM notification_outbox n
-        WHERE n.type='contact_reply_customer' AND n.payload->>'message_id'=m.id::text)
+        WHERE n.type IN ('contact_reply_customer','product_question_answered') AND n.payload->>'message_id'=m.id::text)
     ORDER BY created_at, id`, [String(id)])
 }

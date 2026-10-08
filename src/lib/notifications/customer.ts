@@ -1,7 +1,7 @@
 import "server-only"
 import { query } from "@lib/admin/db"
 import { ensureCommerceSchema } from "@lib/commerce/schema"
-import { ensureContactHistory } from "@lib/email/contact-history"
+import { ensureQuestionConversations } from "@lib/contact/question-conversations"
 import type { ContactCustomer } from "@lib/contact/customer-messages"
 import { ensureProductQuestions } from "@lib/commerce/product-questions"
 
@@ -10,7 +10,7 @@ async function ensureNotifications() {
   if (!ready) ready = (async () => {
     await ensureCommerceSchema()
     await ensureProductQuestions()
-    await ensureContactHistory()
+    await ensureQuestionConversations()
     await query(`CREATE TABLE IF NOT EXISTS customer_notification_read (
       customer_id TEXT NOT NULL REFERENCES store_customer(id) ON DELETE CASCADE,
       notification_id TEXT NOT NULL,
@@ -27,23 +27,17 @@ const feed = `WITH owned_contacts AS (
     OR (customer_id IS NULL AND $3::boolean AND LOWER(email)=$2)
 ), events AS (
   SELECT 'reply:' || n.id AS id, 'message' AS kind,
-    CASE WHEN m.initiated_by_admin THEN 'ZK Home’dan yeni mesaj' ELSE 'Mesajınıza cevap verildi' END AS title,
-    LEFT(COALESCE(n.payload->>'reply',''),240) AS body,
-    '/hesabim/mesajlarim?talep=' || m.id AS href, n.created_at
+    CASE WHEN m.product_question_id IS NOT NULL THEN 'Ürün sorunuz yanıtlandı' WHEN m.initiated_by_admin THEN 'ZK Home’dan yeni mesaj' ELSE 'Mesajınıza cevap verildi' END AS title,
+    LEFT(COALESCE(n.payload->>'reply',n.payload->>'answer',''),240) AS body,
+    '/hesabim/mesajlarim?' || CASE WHEN m.product_question_id IS NOT NULL THEN 'tab=questions&' ELSE '' END || 'talep=' || m.id AS href, n.created_at
   FROM notification_outbox n JOIN owned_contacts m ON n.payload->>'message_id'=m.id::text
-  WHERE n.type='contact_reply_customer' AND n.payload->>'reply' IS NOT NULL
+  WHERE n.type IN ('contact_reply_customer','product_question_answered') AND n.payload->>'reply' IS NOT NULL
   UNION ALL
   SELECT 'reply:legacy:' || m.id, 'message', 'Mesajınıza cevap verildi',
-    LEFT(m.admin_reply,240), '/hesabim/mesajlarim?talep=' || m.id, COALESCE(m.replied_at,m.created_at)
+    LEFT(m.admin_reply,240), '/hesabim/mesajlarim?' || CASE WHEN m.product_question_id IS NOT NULL THEN 'tab=questions&' ELSE '' END || 'talep=' || m.id, COALESCE(m.replied_at,m.created_at)
   FROM owned_contacts m WHERE m.admin_reply IS NOT NULL AND NOT EXISTS (
-    SELECT 1 FROM notification_outbox n WHERE n.type='contact_reply_customer' AND n.payload->>'message_id'=m.id::text
+    SELECT 1 FROM notification_outbox n WHERE n.type IN ('contact_reply_customer','product_question_answered') AND n.payload->>'message_id'=m.id::text
   )
-  UNION ALL
-  SELECT 'question:' || r.id || ':' || r.answer_version, 'message', 'Ürün sorunuz yanıtlandı',
-    LEFT(r.answer,240), '/hesabim/mesajlarim?tab=questions&soru=' || r.id,
-    COALESCE(r.answered_at,r.created_at)
-  FROM product_reviews r WHERE r.type='question' AND NULLIF(BTRIM(r.answer),'') IS NOT NULL
-    AND (r.customer_id=$1 OR (r.customer_id IS NULL AND $3::boolean AND LOWER(r.email)=$2))
   UNION ALL
   SELECT 'campaign:' || id, 'campaign', name, LEFT(COALESCE(description,'Yeni kampanyamızı keşfedin.'),240),
     '/magaza', COALESCE(starts_at,created_at)

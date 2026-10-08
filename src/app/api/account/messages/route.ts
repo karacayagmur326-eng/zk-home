@@ -17,7 +17,7 @@ export async function GET(request: Request) {
       const message = await getCustomerMessage(customer,id)
       return message ? NextResponse.json({ message }, { headers }) : NextResponse.json({ error: "Mesaj bulunamadı." }, { status: 404, headers })
     }
-    return NextResponse.json({ messages: await listCustomerMessages(customer) }, { headers })
+    return NextResponse.json({ messages: await listCustomerMessages(customer,new URL(request.url).searchParams.get("kind") === "questions" ? "questions" : "messages") }, { headers })
   } catch {
     return NextResponse.json({ error: "Mesajlar yüklenemedi. Lütfen tekrar deneyin." }, { status: 500, headers })
   }

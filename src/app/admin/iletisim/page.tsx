@@ -3,9 +3,8 @@
 import { useUrlState } from "@lib/hooks/use-url-state"
 
 import { useAdminAutoRefresh } from "@lib/hooks/use-admin-auto-refresh"
-import ProductQuestions from "./ProductQuestions"
 
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import {
   MessageSquare,
@@ -39,6 +38,9 @@ import {
 
 interface ContactMessage {
   id: string
+  product_question_id?: string
+  product_title?: string
+  product_handle?: string
   name: string
   email: string
   phone?: string
@@ -84,6 +86,11 @@ function Toggle({
 
 export default function AdminContactPage() {
   const [activeTab, setActiveTab] = useUrlState<"messages" | "questions" | "info_settings" | "smtp_settings">("messages", "tab", ["messages", "questions", "info_settings", "smtp_settings"])
+  const channel = activeTab === "questions" ? "questions" : "messages"
+  const requestVersion = useRef(0)
+  const [totals, setTotals] = useState({ messages: 0, questions: 0 })
+  const [messageCounts, setMessageCounts] = useState({total:0,new:0,replied:0,archived:0})
+  const [publishAnswer, setPublishAnswer] = useState(false)
   const [messages, setMessages] = useState<ContactMessage[]>([])
   const [statusFilter, setStatusFilter] = useState("")
   const [dateFilter, setDateFilter] = useState("")
@@ -166,19 +173,23 @@ export default function AdminContactPage() {
   }
 
   const fetchMessages = async (status = "", silent = false, signal?: AbortSignal) => {
+    const version = ++requestVersion.current
     if (!silent) setLoading(true)
     try {
-      const url = status ? `/api/admin/contact-messages?status=${status}` : `/api/admin/contact-messages`
+      const url = `/api/admin/contact-messages?kind=${channel}&status=${encodeURIComponent(status)}`
       const res = await fetch(url, { cache: "no-store", signal })
       const data = await res.json()
-      if (res.ok && !signal?.aborted) {
+      if (!res.ok) throw new Error(data.error || "Mesajlar yüklenemedi.")
+      if (version === requestVersion.current && !signal?.aborted) {
+        setTotals({messages:Number(data.totals?.messages || 0),questions:Number(data.totals?.questions || 0)})
+        setMessageCounts(data.counts)
         setMessages(data.messages || [])
         setSelectedMessage((current) => current ? data.messages?.find((item: ContactMessage) => String(item.id) === String(current.id)) || current : null)
       }
     } catch {
-      if (!silent && !signal?.aborted) showToast("error", "Mesajlar yüklenirken bir hata oluştu.")
+      if (version === requestVersion.current && !silent && !signal?.aborted) showToast("error", "Mesajlar yüklenirken bir hata oluştu.")
     } finally {
-      if (!silent && !signal?.aborted) setLoading(false)
+      if (version === requestVersion.current && !silent && !signal?.aborted) setLoading(false)
     }
   }
 
@@ -201,9 +212,11 @@ export default function AdminContactPage() {
     const controller = new AbortController()
     fetchMessages(statusFilter, false, controller.signal)
     return () => controller.abort()
-  }, [statusFilter])
+  }, [statusFilter, channel])
 
-  useAdminAutoRefresh((signal) => fetchMessages(statusFilter, true, signal), { refreshKey: statusFilter })
+  useAdminAutoRefresh((signal) => fetchMessages(statusFilter, true, signal), { refreshKey: `${channel}:${statusFilter}`, enabled: activeTab === "messages" || activeTab === "questions" })
+
+  useEffect(() => { setSelectedMessage(null); setReplyText(""); setPublishAnswer(false) }, [channel])
 
   const handleUpdateStatus = async (id: string, newStatus: string) => {
     try {
@@ -233,12 +246,13 @@ export default function AdminContactPage() {
       const res = await fetch("/api/admin/contact-messages", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: selectedMessage.id, reply: replyText }),
+        body: JSON.stringify({ id: selectedMessage.id, reply: replyText, publish_answer: publishAnswer }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || "Yanıt gönderilemedi.")
       setSelectedMessage(data.message)
       setReplyText("")
+      setPublishAnswer(false)
       showToast(
         "success",
         data.notifications?.customer_sent
@@ -343,12 +357,7 @@ export default function AdminContactPage() {
     })
   )
 
-  const counts = {
-    all: messages.length,
-    new: messages.filter((m) => m.status === "new").length,
-    replied: messages.filter((m) => m.status === "replied").length,
-    archived: messages.filter((m) => m.status === "archived").length,
-  }
+  const counts = { all: messageCounts.total, new: messageCounts.new, replied: messageCounts.replied, archived: messageCounts.archived }
 
   const statusBadge = (status: string) => {
     if (status === "new") return <span className="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-blue-50 text-blue-600 border border-blue-100">Yeni</span>
@@ -408,10 +417,10 @@ export default function AdminContactPage() {
           }`}
         >
           <Mail className={`w-4 h-4 ${activeTab === "messages" ? "text-[#C98484]" : "text-slate-400"}`} />
-          Gelen Mesajlar ({counts.all})
+          Gelen Mesajlar ({totals.messages})
         </button>
 
-        <button type="button" onClick={() => setActiveTab("questions")} className={`flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-xs font-bold border transition-colors ${activeTab === "questions" ? "bg-[#B98787] border-[#B98787] text-white" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"}`}><MessageSquare className="h-4 w-4" />Soru & Cevap</button>
+        <button type="button" onClick={() => setActiveTab("questions")} className={`flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-xs font-bold border transition-colors ${activeTab === "questions" ? "bg-white border-[#C98484] text-[#C98484] shadow-2xs ring-1 ring-[#C98484]/20" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"}`}><MessageSquare className="h-4 w-4" />Soru & Cevap ({totals.questions})</button>
 
         <button
           type="button"
@@ -441,8 +450,7 @@ export default function AdminContactPage() {
       </div>
 
       {/* ── TAB 1: MESSAGES ─────────────────────────────────────────── */}
-      {activeTab === "questions" && <ProductQuestions />}
-      {activeTab === "messages" && (
+      {(activeTab === "messages" || activeTab === "questions") && (
         <div className="space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-[#FFF8F5] border border-rose-100/80 rounded-2xl p-4 flex items-center gap-3.5 shadow-2xs">
@@ -451,7 +459,7 @@ export default function AdminContactPage() {
               </div>
               <div className="flex flex-col">
                 <span className="text-2xl font-black text-slate-900 leading-none">{counts.all}</span>
-                <span className="text-[11px] font-bold text-slate-400 mt-1">Toplam Mesaj</span>
+                <span className="text-[11px] font-bold text-slate-400 mt-1">{channel === "questions" ? "Toplam Soru" : "Toplam Mesaj"}</span>
               </div>
             </div>
 
@@ -495,7 +503,7 @@ export default function AdminContactPage() {
                     type="text"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Mesajlarda ara..."
+                    placeholder={channel === "questions" ? "Müşteri, ürün veya soruda ara..." : "Mesajlarda ara..."}
                     className="w-full pl-8 pr-3 py-2 rounded-xl border border-slate-200/80 text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[#C98484] transition"
                   />
                 </div>
@@ -552,7 +560,7 @@ export default function AdminContactPage() {
                 </button>
               </div>
 
-              <div className="border border-slate-100 rounded-xl overflow-hidden">
+              <div className="border border-slate-100 rounded-xl overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead className="bg-slate-50/70 border-b border-slate-100 text-slate-700 font-extrabold">
                     <tr>
@@ -621,7 +629,7 @@ export default function AdminContactPage() {
                           </td>
                           <td className="py-3 px-3">
                             <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600">
-                              {m.order_no ? `#${m.order_no}` : "İletişim"}
+                              {m.product_handle ? <Link href={`/urunler/${m.product_handle}`} target="_blank" className="inline-flex items-center gap-1 hover:text-[#C98484]"><ExternalLink className="h-3 w-3" />Ürün</Link> : m.order_no ? `#${m.order_no}` : "İletişim"}
                             </span>
                           </td>
                           <td className="py-3 px-3">{statusBadge(m.status)}</td>
@@ -638,6 +646,7 @@ export default function AdminContactPage() {
                                 onClick={() => {
                                   setSelectedMessage(m)
                                   setReplyText("")
+                                  setPublishAnswer(Boolean(m.product_question_id && !m.admin_reply))
                                   if (m.status === "new") handleUpdateStatus(m.id, "read")
                                 }}
                                 className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2 py-1.5 text-[10px] font-bold text-slate-600 hover:bg-slate-50 cursor-pointer"
@@ -651,6 +660,7 @@ export default function AdminContactPage() {
                                 onClick={() => {
                                   setSelectedMessage(m)
                                   setReplyText("")
+                                  setPublishAnswer(Boolean(m.product_question_id && !m.admin_reply))
                                   if (m.status === "new") handleUpdateStatus(m.id, "read")
                                 }}
                                 className="inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50 px-2 py-1.5 text-[10px] font-bold text-[#C98484] hover:bg-rose-100 cursor-pointer"
@@ -1334,7 +1344,7 @@ export default function AdminContactPage() {
           <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[92vh] overflow-y-auto p-6 space-y-5 shadow-2xl animate-in zoom-in duration-150">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div>
-                <h3 className="text-base font-black text-slate-900">İletişim Mesaj Detayı</h3>
+                <h3 className="text-base font-black text-slate-900">{selectedMessage.product_question_id ? "Ürün Sorusu Detayı" : "İletişim Mesaj Detayı"}</h3>
                 <p className="text-xs text-slate-400 font-medium mt-0.5">
                   {new Date(selectedMessage.created_at).toLocaleString("tr-TR")}
                 </p>
@@ -1373,6 +1383,7 @@ export default function AdminContactPage() {
                 <span className="inline-block px-3 py-1 bg-slate-100 text-slate-800 font-extrabold rounded-lg">
                   {selectedMessage.subject || "Genel İletişim"}
                 </span>
+                {selectedMessage.product_handle && <Link href={`/urunler/${selectedMessage.product_handle}`} target="_blank" className="ml-3 inline-flex items-center gap-1 font-bold text-[#C98484]"><ExternalLink className="h-3.5 w-3.5" />Ürünü Gör</Link>}
               </div>
 
               <section aria-label="Yazışma geçmişi" className="space-y-3">
@@ -1385,7 +1396,7 @@ export default function AdminContactPage() {
                         const response = await fetch("/api/admin/contact-messages", { method: "POST" })
                         const result = await response.json()
                         if (!response.ok) throw new Error(result.error)
-                        const refreshed = await fetch("/api/admin/contact-messages").then(r=>r.json())
+                        const refreshed = await fetch(`/api/admin/contact-messages?kind=${channel}`).then(r=>r.json())
                         const current = refreshed.messages?.find((m: ContactMessage)=>String(m.id)===String(selectedMessage.id))
                         if (current) setSelectedMessage(current)
                         fetchMessages(statusFilter)
@@ -1427,6 +1438,7 @@ export default function AdminContactPage() {
                   placeholder="Kurumsal ve açıklayıcı yanıtınızı yazın…"
                   className="w-full resize-y rounded-2xl border border-slate-200 bg-white p-4 text-xs font-medium leading-relaxed text-slate-800 outline-none transition focus:border-[#C98484] focus:ring-2 focus:ring-rose-100"
                 />
+                {selectedMessage.product_question_id && <label className="mt-3 flex items-start gap-2 rounded-xl border border-rose-100 bg-rose-50/40 p-3 text-xs text-slate-600"><input type="checkbox" checked={publishAnswer} onChange={event => setPublishAnswer(event.target.checked)} className="mt-0.5 accent-[#C98484]" /><span>Bu yanıtı ürünün Soru & Cevap bölümünde yayınla.<small className="mt-1 block text-slate-400">Yazışmanın devamı müşteriye özeldir. İşaretlerseniz ürünün yayınlanan yanıtı güncellenir.</small></span></label>}
                 <div className="mt-2 flex items-center justify-between gap-3">
                   <p className="text-[10px] leading-4 text-slate-400">
                     Gönderildiğinde müşteriye yanıt, merkezi admin adresine de bilgi kopyası gider.

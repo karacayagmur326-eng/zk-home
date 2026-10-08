@@ -1,4 +1,5 @@
 import { query, withTransaction } from "@lib/admin/db"
+import { ensureContactHistory } from "@lib/email/contact-history"
 import { ensureProductQuestions } from "@lib/commerce/product-questions"
 import { processNotificationOutbox } from "@lib/notifications/outbox"
 import { NextResponse } from "next/server"
@@ -124,6 +125,7 @@ export async function POST(
     const [product] = await query<{ title: string; handle: string }>("SELECT title,handle FROM store_product WHERE id=$1", [productId])
     if (!product) return NextResponse.json({ error: "Ürün bulunamadı." }, { status: 404 })
     if (author.length > 180 || email.length > 254 || comment.length > 10000) return NextResponse.json({ error: "Gönderdiğiniz bilgiler izin verilen uzunluğu aşıyor." }, { status: 400 })
+    if (type === "question") await ensureContactHistory()
     const item = await withTransaction(async db => {
       const result = await db.query(`INSERT INTO product_reviews
          (product_id, author, email, rating, comment, type, image_url, status, customer_id)
@@ -133,7 +135,8 @@ export async function POST(
         [productId, author, email, rating, comment, type, imageUrl, customerId, type === "question" ? "pending" : "approved"])
       const row = result.rows[0]
       if (type === "question") {
-        await db.query(`INSERT INTO notification_outbox (id,type,recipient,subject,payload) VALUES ($1,'product_question_received',$2,$3,$4) ON CONFLICT (id) DO NOTHING`, [`notif_product_question_${row.id}`,email,"ZK Home — Ürün sorunuzu aldık",{ name: author, product_title: product.title, product_handle: product.handle, message: comment }])
+        const thread = await db.query(`INSERT INTO contact_messages (product_question_id,name,email,subject,message,customer_id) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id`,[row.id,author,email,product.title,comment,customerId])
+        await db.query(`INSERT INTO notification_outbox (id,type,recipient,subject,payload) VALUES ($1,'contact_message_received',$2,$3,$4) ON CONFLICT (id) DO NOTHING`, [`notif_product_question_${row.id}`,email,`ZK HOME #${thread.rows[0].id} Talep — Ürün sorunuzu aldık`,{ product_question_id: String(row.id), contact_subject: product.title, message_id: String(thread.rows[0].id), name: author, product_title: product.title, product_handle: product.handle, message: comment }])
       }
       return row
     })

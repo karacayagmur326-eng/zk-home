@@ -4,8 +4,9 @@ import { NextResponse } from "next/server"
 import { ensureCommerceSchema } from "@lib/commerce/schema"
 import { getEmailBrandSettings } from "@lib/email/brand-settings"
 import { processNotificationOutbox } from "@lib/notifications/outbox"
-import { contactHistory, ensureContactHistory } from "@lib/email/contact-history"
+import { contactHistory } from "@lib/email/contact-history"
 import { syncContactInbox } from "@lib/email/contact-inbox"
+import { ensureQuestionConversations } from "@lib/contact/question-conversations"
 import { randomUUID } from "crypto"
 
 export const maxDuration = 60
@@ -21,23 +22,26 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const status = searchParams.get("status")
 
-    await ensureContactHistory()
-    let sql = `SELECT * FROM contact_messages`
+    await ensureQuestionConversations()
+    const kind = searchParams.get("kind") === "questions" ? "questions" : "messages"
+    if (kind === "questions" && session.role === "Editör") return NextResponse.json({error:"Yetkisiz işlem."},{status:403})
+    const channel = kind === "questions" ? "m.product_question_id IS NOT NULL" : "m.product_question_id IS NULL"
+    let sql = `SELECT m.*,m.id::text,p.title AS product_title,p.handle AS product_handle FROM contact_messages m LEFT JOIN product_reviews q ON q.id=m.product_question_id LEFT JOIN store_product p ON p.id=q.product_id WHERE ${channel}`
     const params: any[] = []
 
     if (status) {
-      sql += ` WHERE status = $1`
+      sql += ` AND m.status = $1`
       params.push(status)
     }
 
-    sql += ` ORDER BY GREATEST(created_at,replied_at,(SELECT MAX(created_at) FROM contact_incoming_replies r WHERE r.contact_id=contact_messages.id)) DESC`
+    sql += ` ORDER BY GREATEST(m.created_at,m.replied_at,(SELECT MAX(created_at) FROM contact_incoming_replies r WHERE r.contact_id=m.id)) DESC`
 
     const messages = await query<any>(sql, params)
     for (const message of messages) message.history = await contactHistory(String(message.id))
     
     // Counts
     const counts = await query<{ status: string; count: string }>(
-      `SELECT status, COUNT(*) as count FROM contact_messages GROUP BY status`
+      `SELECT status, COUNT(*) as count FROM contact_messages m WHERE ${channel} GROUP BY status`
     )
     
     const countMap: Record<string, number> = {
@@ -56,7 +60,8 @@ export async function GET(request: Request) {
     }
     countMap.total = totalCount
 
-    return NextResponse.json({ messages, counts: countMap })
+    const totals = await query<{ messages: string; questions: string }>(`SELECT COUNT(*) FILTER (WHERE product_question_id IS NULL) AS messages,COUNT(*) FILTER (WHERE product_question_id IS NOT NULL) AS questions FROM contact_messages`)
+    return NextResponse.json({ messages, counts: countMap, totals: totals[0] }, {headers:{"Cache-Control":"private, no-store"}})
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
@@ -69,8 +74,11 @@ export async function PATCH(request: Request) {
   try {
     const body = await request.json()
     const { id, status, reply } = body
+    await ensureQuestionConversations()
+    const [target] = await query<{product_question_id:string}>("SELECT product_question_id FROM contact_messages WHERE id=$1",[/^\d{1,18}$/.test(String(id || "")) ? id : null])
+    if (target?.product_question_id && session.role === "Editör") return NextResponse.json({error:"Yetkisiz işlem."},{status:403})
 
-    if (!id || (!status && !reply)) {
+    if (!/^\d{1,18}$/.test(String(id || "")) || (!status && !reply) || (status && !["new","read","replied","archived"].includes(status))) {
       return NextResponse.json({ error: "Eksik parametre" }, { status: 400 })
     }
 
@@ -83,13 +91,8 @@ export async function PATCH(request: Request) {
         )
       }
       await ensureCommerceSchema()
-      await query(`
-        ALTER TABLE contact_messages
-        ADD COLUMN IF NOT EXISTS admin_reply TEXT,
-        ADD COLUMN IF NOT EXISTS replied_at TIMESTAMPTZ
-      `)
       const messages = await query<any>(
-        `SELECT * FROM contact_messages WHERE id=$1`,
+        `SELECT m.*,m.id::text,p.title AS product_title,p.handle AS product_handle FROM contact_messages m LEFT JOIN product_reviews q ON q.id=m.product_question_id LEFT JOIN store_product p ON p.id=q.product_id WHERE m.id=$1`,
         [id]
       )
       const message = messages[0]
@@ -100,6 +103,7 @@ export async function PATCH(request: Request) {
       const brand = await getEmailBrandSettings()
       const payload = {
         message_id: String(message.id),
+        product_question_id: message.product_question_id ? String(message.product_question_id) : undefined,
         name: message.name,
         email: message.email,
         contact_subject: message.subject,
@@ -128,12 +132,16 @@ export async function PATCH(request: Request) {
         ])
       }
       await withTransaction(async db => {
-        await db.query("SELECT id FROM contact_messages WHERE id=$1 FOR UPDATE", [id])
+        const locked = await db.query("SELECT * FROM contact_messages WHERE id=$1 FOR UPDATE", [id])
+        if (!locked.rows[0]) throw new Error("Mesaj bulunamadı.")
+        if (locked.rows[0].product_question_id && body.publish_answer === true) {
+          await db.query("UPDATE product_reviews SET answer=$2,answered_at=NOW(),answer_version=COALESCE(answer_version,0)+1,status='approved' WHERE id=$1 AND type='question'",[locked.rows[0].product_question_id,cleanReply])
+        }
         await db.query(`INSERT INTO notification_outbox (id,type,recipient,subject,payload,status,created_at)
           SELECT 'legacy_contact_reply_' || m.id, 'contact_reply_customer',m.email,m.subject,
             jsonb_build_object('message_id',m.id::text,'reply',m.admin_reply), 'unknown',COALESCE(m.replied_at,m.created_at)
           FROM contact_messages m WHERE m.id=$1 AND m.admin_reply IS NOT NULL
-          AND NOT EXISTS (SELECT 1 FROM notification_outbox n WHERE n.type='contact_reply_customer' AND n.payload->>'message_id'=m.id::text)
+          AND NOT EXISTS (SELECT 1 FROM notification_outbox n WHERE n.type IN ('contact_reply_customer','product_question_answered') AND n.payload->>'message_id'=m.id::text)
           ON CONFLICT (id) DO NOTHING`, [id])
         for (const row of notificationRows) {
         await db.query(
@@ -193,7 +201,13 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Eksik ID" }, { status: 400 })
     }
 
-    await query(`DELETE FROM contact_messages WHERE id = $1`, [id])
+    await ensureQuestionConversations()
+    await withTransaction(async db => {
+      const locked = await db.query("SELECT product_question_id FROM contact_messages WHERE id=$1 FOR UPDATE",[id])
+      if (locked.rows[0]?.product_question_id && session.role === "Editör") throw new Error("Yetkisiz işlem.")
+      if (locked.rows[0]?.product_question_id) await db.query("DELETE FROM product_reviews WHERE id=$1 AND type='question'",[locked.rows[0].product_question_id])
+      await db.query("DELETE FROM contact_messages WHERE id=$1",[id])
+    })
 
     return NextResponse.json({ ok: true })
   } catch (error: any) {
