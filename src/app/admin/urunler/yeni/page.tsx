@@ -1,4 +1,5 @@
 "use client"
+import { productHandleFromTitle } from "@lib/util/product-handle"
 
 import { useEffect, useState, useRef } from "react"
 import { useRouter } from "next/navigation"
@@ -264,7 +265,7 @@ export default function NewProductPage() {
     if (selectedTagIds.length) body.tags = selectedTagIds.map((id) => ({ id }))
     if (thumbnail) body.thumbnail = thumbnail
     if (images.length || thumbnail) {
-      body.images = [thumbnail, ...images].filter(Boolean).map((url) => ({ url }))
+      body.images = Array.from(new Set([thumbnail, ...images].filter(Boolean))).map((url) => ({ url }))
     }
     if (weight) body.weight = parseFloat(weight)
     if (length) body.length = parseFloat(length)
@@ -324,30 +325,9 @@ export default function NewProductPage() {
                   if (errorField === "title") setError("")
                   const val = e.target.value
                   setTitle(val)
-                  const trMap: Record<string, string> = {
-                    ç: "c",
-                    ğ: "g",
-                    ı: "i",
-                    ö: "o",
-                    ş: "s",
-                    ü: "u",
-                    Ç: "c",
-                    Ğ: "g",
-                    İ: "i",
-                    Ö: "o",
-                    Ş: "s",
-                    Ü: "u",
-                  }
-                  let slug = val.trim()
-                  for (const [k, v] of Object.entries(trMap)) {
-                    slug = slug.replace(new RegExp(k, "g"), v)
-                  }
-                  const cleanSlug = slug
-                    .toLowerCase()
-                    .replace(/[^a-z0-9\s-]/g, "")
-                    .replace(/\s+/g, "-")
-                    .replace(/-+/g, "-")
-                  setHandle(cleanSlug)
+                  const nextHandle = productHandleFromTitle(val)
+                  setHandle(nextHandle)
+                  setTempHandle(nextHandle)
                 }}
                 placeholder="Ürün adı"
                 className="w-full h-11 px-4 rounded-xl border border-slate-200/90 bg-slate-50/40 text-sm font-semibold text-slate-900 outline-none focus:bg-white focus:border-[#C98484] transition-all placeholder:text-slate-300"
@@ -709,16 +689,16 @@ export default function NewProductPage() {
             </button>
           </div>
 
-          {/* Card 2: Ürün Görseli */}
+          {/* Card 2: Kapak Görseli */}
           <div className="rounded-3xl bg-white border border-slate-200/80 p-5 shadow-xs space-y-3">
             <h3 className="text-sm font-extrabold text-slate-900 border-b border-slate-100 pb-3">
-              Ürün Görseli
+              Kapak Görseli
             </h3>
             <div className="flex flex-col items-center justify-center p-4 border border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
               {thumbnail ? (
                 <div className="space-y-3 w-full text-center group">
                   <div className="h-56 w-full rounded-xl border border-slate-200 overflow-hidden bg-white flex items-center justify-center p-2 relative">
-                    <img src={thumbnail} alt="featured" className="max-w-full max-h-full object-contain" />
+                    <img src={thumbnail} alt="Ürün kapak görseli" className="max-w-full max-h-full object-contain" />
                     {/* Hover Overlay for change */}
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-xl">
                       <button
@@ -744,7 +724,7 @@ export default function NewProductPage() {
                   onClick={() => setIsThumbModalOpen(true)}
                   className="py-4 text-xs font-extrabold text-[#C98484] hover:underline cursor-pointer"
                 >
-                  + Ürün Görseli Ayarla
+                  + Kapak Görseli Ayarla
                 </button>
               )}
             </div>
@@ -757,13 +737,23 @@ export default function NewProductPage() {
             </h3>
             <div className="p-4 border border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
               {images.length > 0 && (
-                <div className="grid grid-cols-3 gap-2 mb-3">
+                <div className="grid grid-cols-2 gap-2 mb-3">
                   {images.map((img, i) => (
                     <div
                       key={i}
-                      className="relative h-20 bg-white flex items-center justify-center p-1 rounded-lg border border-slate-200 overflow-hidden group"
+                      className={`relative flex flex-col rounded-xl border overflow-hidden bg-white group ${thumbnail === img ? "border-[#C98484] ring-1 ring-[#C98484]/30" : "border-slate-200"}`}
                     >
-                      <img src={img} alt="gallery" className="max-w-full max-h-full object-contain" />
+                      <div className="h-24 p-1 flex items-center justify-center">
+                        <img src={img} alt={`Ürün galeri görseli ${i + 1}`} className="max-w-full max-h-full object-contain" />
+                      </div>
+                      <button
+                        type="button"
+                        aria-pressed={thumbnail === img}
+                        onClick={() => setThumbnail(img)}
+                        className={`w-full border-t px-2 py-2 text-[10px] font-bold cursor-pointer transition-colors ${thumbnail === img ? "border-[#C98484]/20 bg-[#C98484]/10 text-[#A95E5E]" : "border-slate-100 text-slate-600 hover:bg-rose-50 hover:text-[#A95E5E]"}`}
+                      >
+                        {thumbnail === img ? "✓ Kapak görseli" : "Kapak görseli yap"}
+                      </button>
                       <button
                         type="button"
                         onClick={() => setImages((s) => s.filter((_, idx) => idx !== i))}
