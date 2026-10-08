@@ -1,6 +1,7 @@
 "use client"
 
 import { useAdminAutoRefresh } from "@lib/hooks/use-admin-auto-refresh"
+import ProductQuestions from "./ProductQuestions"
 
 import React, { useEffect, useState } from "react"
 import Link from "next/link"
@@ -80,7 +81,7 @@ function Toggle({
 }
 
 export default function AdminContactPage() {
-  const [activeTab, setActiveTab] = useState<"messages" | "info_settings" | "smtp_settings">("messages")
+  const [activeTab, setActiveTab] = useState<"messages" | "questions" | "info_settings" | "smtp_settings">("messages")
   const [messages, setMessages] = useState<ContactMessage[]>([])
   const [statusFilter, setStatusFilter] = useState("")
   const [dateFilter, setDateFilter] = useState("")
@@ -394,7 +395,7 @@ export default function AdminContactPage() {
       </div>
 
       {/* Tab Buttons Row */}
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
           onClick={() => setActiveTab("messages")}
@@ -407,6 +408,8 @@ export default function AdminContactPage() {
           <Mail className={`w-4 h-4 ${activeTab === "messages" ? "text-[#C98484]" : "text-slate-400"}`} />
           Gelen Mesajlar ({counts.all})
         </button>
+
+        <button type="button" onClick={() => setActiveTab("questions")} className={`flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-xs font-bold border transition-colors ${activeTab === "questions" ? "bg-[#B98787] border-[#B98787] text-white" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"}`}><MessageSquare className="h-4 w-4" />Soru & Cevap</button>
 
         <button
           type="button"
@@ -436,6 +439,7 @@ export default function AdminContactPage() {
       </div>
 
       {/* ── TAB 1: MESSAGES ─────────────────────────────────────────── */}
+      {activeTab === "questions" && <ProductQuestions />}
       {activeTab === "messages" && (
         <div className="space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

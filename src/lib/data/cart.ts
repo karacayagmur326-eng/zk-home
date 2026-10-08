@@ -6,7 +6,7 @@ import { query, withTransaction } from "@lib/admin/db"
 import { ensureCommerceSchema } from "@lib/commerce/schema"
 import { createId } from "@lib/commerce/repository"
 import { getCommerceSettings } from "@lib/commerce/settings"
-import { buildShippingOptions, selectedShippingOption } from "@lib/commerce/shipping"
+import { buildShippingOptions, selectedShippingOption, couponShippingOption } from "@lib/commerce/shipping"
 import { revalidateTag } from "next/cache"
 import { headers } from "next/headers"
 import { redirect } from "next/navigation"
@@ -291,8 +291,7 @@ async function shapeCart(id: string) {
   })
   const subtotal = shapedItems.reduce((sum, item) => sum + item.total, 0)
   const shippingSettings = await getCommerceSettings()
-  const selectedShipping = shapedItems.length ? selectedShippingOption(subtotal, shippingSettings.shipping_methods, cart.shipping_method, shippingSettings.shipping_ranges) : undefined
-  const shippingTotal = selectedShipping?.amount || 0
+  let couponFreeShipping = false
   const paymentProviderId = cart.metadata?.payment_provider_id
   const paymentData = cart.metadata?.payment_data || {}
 
@@ -325,11 +324,13 @@ async function shapeCart(id: string) {
           } else {
             discountTotal = Math.min(subtotal, Number(coupon.value))
           }
+          couponFreeShipping = coupon.free_shipping === true
           promotions = [
             {
               id: coupon.id,
               code: coupon.code,
               is_automatic: false,
+              metadata: { free_shipping: couponFreeShipping, min_subtotal: minSub },
               application_method: {
                 type: coupon.type,
                 value: Number(coupon.value),
@@ -343,6 +344,10 @@ async function shapeCart(id: string) {
       console.error("Coupon query error:", err)
     }
   }
+
+  const shippingOption = shapedItems.length ? selectedShippingOption(subtotal, shippingSettings.shipping_methods, cart.shipping_method, shippingSettings.shipping_ranges) : undefined
+  const selectedShipping = shippingOption ? couponShippingOption(shippingOption, couponFreeShipping) : undefined
+  const shippingTotal = selectedShipping?.amount || 0
 
   const commerceSettings = shippingSettings
   const codFee =
@@ -985,8 +990,9 @@ export async function placeOrder(cartId?: string) {
         type: string
         value: string
         min_subtotal: string
+        free_shipping: boolean
       }>(
-        `SELECT type,value,min_subtotal FROM store_coupon
+        `SELECT type,value,min_subtotal,free_shipping FROM store_coupon
          WHERE UPPER(code)=UPPER($1)
            AND is_active=TRUE
            AND (starts_at IS NULL OR starts_at<=NOW())
@@ -1007,6 +1013,9 @@ export async function placeOrder(cartId?: string) {
                 100
             )
           : Math.min(Number(cart.subtotal), Number(coupon.value))
+      if (coupon.free_shipping !== Boolean((cart.promotions?.[0] as { metadata?: { free_shipping?: boolean } } | undefined)?.metadata?.free_shipping)) {
+        throw new Error("Kuponun kargo koşulları değişti. Sepetinizi yenileyin.")
+      }
       if (expectedDiscount !== Number(cart.discount_total || 0)) {
         throw new Error("İndirim tutarı değişti. Sepetinizi yenileyin.")
       }
@@ -1230,16 +1239,10 @@ export async function updateRegion(_countryCode: string, currentPath: string) {
 
 async function shippingOptions(cartId?: string) {
   const settings = await getCommerceSettings()
-  let subtotal = 0
-  if (cartId) {
-    const rows = await query<{ subtotal: string }>(
-      `SELECT COALESCE(SUM(quantity * unit_price),0)::text AS subtotal
-       FROM store_cart_item WHERE cart_id=$1`,
-      [cartId]
-    )
-    subtotal = Number(rows[0]?.subtotal || 0)
-  }
-  return buildShippingOptions(subtotal, settings.shipping_methods, settings.shipping_ranges)
+  const cart = cartId ? await shapeCart(cartId) : null
+  const subtotal = Number(cart?.subtotal || 0)
+  const freeShipping = Boolean((cart?.promotions?.[0] as { metadata?: { free_shipping?: boolean } } | undefined)?.metadata?.free_shipping)
+  return buildShippingOptions(subtotal, settings.shipping_methods, settings.shipping_ranges).map(option => couponShippingOption(option, freeShipping))
 }
 
 export async function listCartOptions(cartId?: string) {

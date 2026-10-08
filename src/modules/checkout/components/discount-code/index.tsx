@@ -102,9 +102,10 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
               >
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex flex-wrap items-center gap-1.5">
                     <span className="font-extrabold uppercase tracking-wide bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md text-[11px]">
                       {promotion.code}
+                      {(promotion as { metadata?: { free_shipping?: boolean } }).metadata?.free_shipping && " · Ücretsiz kargo"}
                     </span>
                     <span className="text-emerald-700 text-[11px] font-semibold">
                       ({isPercentage

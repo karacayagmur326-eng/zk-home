@@ -788,13 +788,14 @@ export async function createStoreCoupon(data: {
   starts_at?: string | null
   ends_at?: string | null
   description?: string | null
+  free_shipping?: boolean
 }) {
   await ensureCommerceSchema()
   const id = createId("cpn")
   const formattedCode = data.code.trim().toUpperCase()
   const rows = await query<any>(
-    `INSERT INTO store_coupon (id, code, type, value, min_subtotal, is_active, usage_limit, starts_at, ends_at, description)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+    `INSERT INTO store_coupon (id, code, type, value, min_subtotal, is_active, usage_limit, starts_at, ends_at, description, free_shipping)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
      RETURNING *`,
     [
       id,
@@ -807,6 +808,7 @@ export async function createStoreCoupon(data: {
       data.starts_at || new Date().toISOString(),
       data.ends_at || null,
       data.description || null,
+      data.free_shipping ?? false,
     ]
   )
   return rows[0]
@@ -822,6 +824,7 @@ export async function updateStoreCoupon(id: string, data: {
   starts_at?: string | null
   ends_at?: string | null
   description?: string | null
+  free_shipping?: boolean
 }) {
   await ensureCommerceSchema()
   const rows = await query<any>(
@@ -831,10 +834,11 @@ export async function updateStoreCoupon(id: string, data: {
        value = COALESCE($4, value),
        min_subtotal = COALESCE($5, min_subtotal),
        is_active = COALESCE($6, is_active),
-       usage_limit = $7,
+       usage_limit = CASE WHEN $12 THEN $7 ELSE usage_limit END,
        starts_at = COALESCE($8, starts_at),
-       ends_at = $9,
+       ends_at = CASE WHEN $13 THEN $9 ELSE ends_at END,
        description = COALESCE($10, description),
+       free_shipping = COALESCE($11, free_shipping),
        updated_at = NOW()
      WHERE id = $1 RETURNING *`,
     [
@@ -848,6 +852,9 @@ export async function updateStoreCoupon(id: string, data: {
       data.starts_at || null,
       data.ends_at || null,
       data.description || null,
+      data.free_shipping ?? null,
+      data.usage_limit !== undefined,
+      data.ends_at !== undefined,
     ]
   )
   return rows[0] || null

@@ -57,6 +57,10 @@ export function buildShippingOptions(subtotal: number, methods: ShippingMethodSe
   })
 }
 
+export function couponShippingOption<T extends { amount: number; metadata: object }>(option: T, freeShipping: boolean): T {
+  return freeShipping ? { ...option, amount: 0, metadata: { ...option.metadata, coupon_free_shipping: true } } : option
+}
+
 export function selectedShippingOption(subtotal: number, methods: ShippingMethodSetting[], selected: any, ranges?: ShippingPriceRange[]) {
   if (ranges) return buildShippingOptions(subtotal, methods, ranges)[0]
   if (!selected) return undefined

@@ -120,6 +120,18 @@ function emailHtml(row: OutboxRow, brand: EmailBrandSettings) {
       <p style="color: #555; line-height: 1.6;">Siparişinize ait e-fatura oluşturuldu.</p>
       ${invoiceLink}
     `
+  } else if (row.type === "product_question_received" || row.type === "product_question_answered") {
+    const answered = row.type === "product_question_answered"
+    const productUrl = `${brand.websiteUrl.replace(/\/$/, "")}/urunler/${encodeURIComponent(String(row.payload.product_handle || ""))}`
+    innerHtml = `
+      <h2 style="color:#172033;margin:0 0 20px;">${answered ? "Ürün sorunuz yanıtlandı" : "Sorunuzu aldık"}</h2>
+      <p style="color:#475467;line-height:1.7;">Merhaba ${escapeHtml(row.payload.name)},</p>
+      <p style="color:#475467;line-height:1.7;">${answered ? "Ekibimizin ürününüz hakkındaki yanıtını aşağıda bulabilirsiniz." : "Ürün hakkındaki sorunuz ekibimize ulaşmıştır. En kısa sürede inceleyerek sizi bilgilendireceğiz."}</p>
+      <p style="color:#172033;line-height:1.7;"><strong>Ürün:</strong> ${escapeHtml(row.payload.product_title)}</p>
+      <div style="padding:18px;border:1px solid #e5e7eb;border-radius:10px;white-space:pre-wrap;color:#475467;line-height:1.7;"><strong>Sorunuz</strong><br>${escapeHtml(row.payload.message)}</div>
+      ${answered ? `<div style="margin-top:16px;padding:18px;border-left:4px solid ${escapeHtml(brand.primaryColor)};background:#f8fafc;border-radius:10px;white-space:pre-wrap;color:#172033;line-height:1.7;"><strong>ZK Home yanıtı</strong><br>${escapeHtml(row.payload.answer)}</div>` : ""}
+      ${row.payload.product_handle ? `<p style="margin-top:24px;"><a href="${escapeHtml(productUrl)}" style="color:${escapeHtml(brand.primaryColor)};font-weight:bold;">Ürünü ve soruları görüntüleyin</a></p>` : ""}
+      <p style="color:#475467;line-height:1.7;">Saygılarımızla,<br><strong>${escapeHtml(brand.brandName)} Müşteri Deneyimi Ekibi</strong></p>`
   } else if (row.type === "contact_message_admin") {
     innerHtml = `
       <h2 style="color:#172033;margin:0 0 18px;">Yeni iletişim talebi</h2>

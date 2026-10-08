@@ -41,6 +41,7 @@ type Coupon = {
   type: "percentage" | "fixed"
   value: number
   min_subtotal: number
+  free_shipping: boolean
   is_active: boolean
   usage_count: number
   usage_limit: number | null
@@ -80,6 +81,7 @@ export default function DiscountsAndCouponsPage() {
   const [formEndsAt, setFormEndsAt] = useState("")
   const [formDescription, setFormDescription] = useState("")
   const [formIsActive, setFormIsActive] = useState(true)
+  const [formFreeShipping, setFormFreeShipping] = useState(false)
 
   async function fetchCoupons() {
     setLoading(true)
@@ -123,6 +125,7 @@ export default function DiscountsAndCouponsPage() {
       )
       setFormDescription(coupon.description || "")
       setFormIsActive(coupon.is_active)
+      setFormFreeShipping(Boolean(coupon.free_shipping))
     } else {
       setEditingCoupon(null)
       setFormCode("")
@@ -136,6 +139,7 @@ export default function DiscountsAndCouponsPage() {
       setFormEndsAt(future.toISOString().slice(0, 16))
       setFormDescription("")
       setFormIsActive(true)
+      setFormFreeShipping(false)
     }
     setMessage(null)
     setShowModal(true)
@@ -167,6 +171,7 @@ export default function DiscountsAndCouponsPage() {
         ends_at: formEndsAt ? new Date(formEndsAt).toISOString() : null,
         description: formDescription.trim() || null,
         is_active: formIsActive,
+        free_shipping: formFreeShipping,
       }
 
       const method = editingCoupon ? "PUT" : "POST"
@@ -963,6 +968,11 @@ export default function DiscountsAndCouponsPage() {
                   className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs font-medium outline-none focus:border-[#C98484]"
                 />
               </div>
+
+              <label className="flex items-start gap-3 rounded-xl border border-rose-100 bg-rose-50/40 p-4 cursor-pointer">
+                <input type="checkbox" checked={formFreeShipping} onChange={(e) => setFormFreeShipping(e.target.checked)} className="mt-0.5 h-4 w-4 accent-[#B98787]" />
+                <span><span className="block text-sm font-semibold text-slate-800">Kupon ile ücretsiz kargo</span><span className="mt-1 block text-xs leading-5 text-slate-500">Kupon koşulları sağlandığında indirime ek olarak kargo ücreti alınmaz.</span></span>
+              </label>
 
               {/* Toggle Active */}
               <div className="pt-2 flex items-center justify-between">

@@ -41,6 +41,7 @@ export async function POST(req: Request) {
       starts_at: body.starts_at || null,
       ends_at: body.ends_at || null,
       description: body.description || null,
+      free_shipping: body.free_shipping === true,
     })
     return NextResponse.json({ coupon })
   } catch (error: any) {
@@ -70,6 +71,7 @@ export async function PUT(req: Request) {
       starts_at: body.starts_at !== undefined ? body.starts_at : undefined,
       ends_at: body.ends_at !== undefined ? body.ends_at : undefined,
       description: body.description !== undefined ? body.description : undefined,
+      free_shipping: typeof body.free_shipping === "boolean" ? body.free_shipping : undefined,
     })
     return NextResponse.json({ coupon })
   } catch (error: any) {

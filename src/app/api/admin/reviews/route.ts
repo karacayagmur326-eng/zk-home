@@ -1,8 +1,10 @@
+import { ensureProductQuestions } from "@lib/commerce/product-questions"
 import { getAdminSession } from "@lib/admin/auth"
 import { query } from "@lib/admin/db"
 import { NextRequest, NextResponse } from "next/server"
 
 async function ensureTable() {
+  await ensureProductQuestions()
   await query(`
     CREATE TABLE IF NOT EXISTS product_reviews (
       id BIGSERIAL PRIMARY KEY,
@@ -36,7 +38,7 @@ export async function GET(request: NextRequest) {
   const rating = request.nextUrl.searchParams.get("rating")
   const productId = request.nextUrl.searchParams.get("productId")
 
-  const whereClauses: string[] = []
+  const whereClauses: string[] = ["COALESCE(r.type, 'review') = 'review'"]
   const params: unknown[] = []
 
   let idx = 1
@@ -89,7 +91,7 @@ export async function GET(request: NextRequest) {
       COUNT(*) FILTER (WHERE status = 'approved')::int AS approved,
       COUNT(*) FILTER (WHERE status = 'rejected')::int AS rejected,
       COALESCE(ROUND(AVG(rating), 1), 5.0)::float AS average
-    FROM product_reviews
+    FROM product_reviews WHERE COALESCE(type, 'review') = 'review'
   `)
 
   return NextResponse.json({

@@ -169,6 +169,7 @@ async function createSchema() {
     ALTER TABLE store_coupon ADD COLUMN IF NOT EXISTS starts_at TIMESTAMPTZ DEFAULT NOW();
     ALTER TABLE store_coupon ADD COLUMN IF NOT EXISTS ends_at TIMESTAMPTZ DEFAULT NULL;
     ALTER TABLE store_coupon ADD COLUMN IF NOT EXISTS description TEXT;
+    ALTER TABLE store_coupon ADD COLUMN IF NOT EXISTS free_shipping BOOLEAN NOT NULL DEFAULT FALSE;
 
     -- store_product soft delete destegi
     ALTER TABLE store_product ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ DEFAULT NULL;
@@ -446,6 +447,11 @@ async function createSchema() {
     );
     ALTER TABLE product_reviews ADD COLUMN IF NOT EXISTS customer_id TEXT;
     ALTER TABLE product_reviews ADD COLUMN IF NOT EXISTS order_id TEXT;
+    ALTER TABLE product_reviews ADD COLUMN IF NOT EXISTS type TEXT NOT NULL DEFAULT 'review';
+    ALTER TABLE product_reviews ADD COLUMN IF NOT EXISTS image_url TEXT;
+    ALTER TABLE product_reviews ADD COLUMN IF NOT EXISTS answer TEXT;
+    ALTER TABLE product_reviews ADD COLUMN IF NOT EXISTS answered_at TIMESTAMPTZ;
+    ALTER TABLE product_reviews ADD COLUMN IF NOT EXISTS answer_version INTEGER NOT NULL DEFAULT 0;
     ALTER TABLE product_reviews
       ADD COLUMN IF NOT EXISTS verified_purchase BOOLEAN NOT NULL DEFAULT FALSE;
     CREATE UNIQUE INDEX IF NOT EXISTS product_reviews_verified_order_unique

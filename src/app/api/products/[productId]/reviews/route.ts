@@ -1,38 +1,13 @@
-import { query } from "@lib/admin/db"
+import { query, withTransaction } from "@lib/admin/db"
+import { ensureProductQuestions } from "@lib/commerce/product-questions"
+import { processNotificationOutbox } from "@lib/notifications/outbox"
 import { NextResponse } from "next/server"
 import { checkRateLimit, requestIp } from "@lib/security/rate-limit"
 import { getCustomerSessionId } from "@lib/commerce/customer-auth"
 
-let tableInitialized = false
-const ensureTable = async () => {
-  if (tableInitialized) return
-  try {
-    await query(`
-      CREATE TABLE IF NOT EXISTS product_reviews (
-        id BIGSERIAL PRIMARY KEY,
-        product_id TEXT NOT NULL,
-        author TEXT NOT NULL,
-        email TEXT NOT NULL,
-        rating SMALLINT NOT NULL DEFAULT 5 CHECK (rating BETWEEN 1 AND 5),
-        comment TEXT NOT NULL,
-        type TEXT NOT NULL DEFAULT 'review',
-        image_url TEXT,
-        answer TEXT,
-        status TEXT NOT NULL DEFAULT 'approved',
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      );
-      ALTER TABLE product_reviews ADD COLUMN IF NOT EXISTS customer_id TEXT;
-      ALTER TABLE product_reviews ADD COLUMN IF NOT EXISTS order_id TEXT;
-      ALTER TABLE product_reviews ADD COLUMN IF NOT EXISTS type TEXT NOT NULL DEFAULT 'review';
-      ALTER TABLE product_reviews ADD COLUMN IF NOT EXISTS image_url TEXT;
-      ALTER TABLE product_reviews ADD COLUMN IF NOT EXISTS answer TEXT;
-      ALTER TABLE product_reviews ADD COLUMN IF NOT EXISTS verified_purchase BOOLEAN NOT NULL DEFAULT FALSE;
-    `)
-    tableInitialized = true
-  } catch (err) {
-    console.error("[reviews:ensureTable] Error:", err)
-  }
-}
+export const maxDuration = 60
+
+const ensureTable = ensureProductQuestions
 
 export async function GET(
   _request: Request,
@@ -146,26 +121,27 @@ export async function POST(
 
     const customerId = (await getCustomerSessionId().catch(() => null)) || null
 
-    const rows = await query<{
-      id: string
-      author: string
-      rating: number
-      comment: string
-      date: string
-      image_url?: string
-      type: string
-    }>(
-      `INSERT INTO product_reviews
+    const [product] = await query<{ title: string; handle: string }>("SELECT title,handle FROM store_product WHERE id=$1", [productId])
+    if (!product) return NextResponse.json({ error: "Ürün bulunamadı." }, { status: 404 })
+    if (author.length > 180 || email.length > 254 || comment.length > 10000) return NextResponse.json({ error: "Gönderdiğiniz bilgiler izin verilen uzunluğu aşıyor." }, { status: 400 })
+    const item = await withTransaction(async db => {
+      const result = await db.query(`INSERT INTO product_reviews
          (product_id, author, email, rating, comment, type, image_url, status, customer_id)
        VALUES ($1, $2, $3, $4, $5, $6, $7, 'approved', $8)
        RETURNING id, author, rating, comment, image_url, type,
          TO_CHAR(created_at AT TIME ZONE 'Europe/Istanbul', 'DD.MM.YYYY') AS date`,
-      [productId, author, email, rating, comment, type, imageUrl, customerId],
-    )
+        [productId, author, email, rating, comment, type, imageUrl, customerId])
+      const row = result.rows[0]
+      if (type === "question") {
+        await db.query(`INSERT INTO notification_outbox (id,type,recipient,subject,payload) VALUES ($1,'product_question_received',$2,$3,$4) ON CONFLICT (id) DO NOTHING`, [`notif_product_question_${row.id}`,email,"ZK Home — Ürün sorunuzu aldık",{ name: author, product_title: product.title, product_handle: product.handle, message: comment }])
+      }
+      return row
+    })
+    if (type === "question") await processNotificationOutbox(1,[`notif_product_question_${item.id}`]).catch(() => null)
 
     return NextResponse.json(
       {
-        item: rows[0],
+        item,
         message: type === "question" ? "Sorunuz başarıyla iletildi!" : "Değerlendirmeniz başarıyla yayınlandı!",
       },
       { status: 201 }

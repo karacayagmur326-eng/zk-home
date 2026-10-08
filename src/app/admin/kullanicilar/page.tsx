@@ -413,9 +413,9 @@ export default function AdminKullanicilarPage() {
 
       {/* Filter Bar with Clean Native Dropdowns */}
       <div className="rounded-3xl bg-white border border-slate-200/80 p-4 shadow-xs">
-        <form onSubmit={handleSearchSubmit} className="flex flex-wrap items-center gap-3">
+        <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 sm:grid-cols-3 items-center gap-3">
           {/* Search Box */}
-          <div className="flex-1 min-w-[240px]">
+          <div className="min-w-0 sm:col-span-3">
             <input
               type="text"
               value={search}
@@ -470,7 +470,7 @@ export default function AdminKullanicilarPage() {
           </select>
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-2 ml-auto">
+          <div className="flex flex-wrap items-center justify-end gap-2 sm:col-span-3">
             {(search || roleFilter !== "Tümü" || statusFilter !== "Tümü" || verifiedFilter !== "Tümü") && (
               <button
                 type="button"

@@ -26,6 +26,7 @@ import {
   Truck,
   X,
   FileText,
+  CalendarDays,
 } from "@lib/icons"
 
 type Order = {
@@ -374,7 +375,7 @@ export default function OrdersPage() {
       </div>
 
       {/* ── Status Nav Tabs Bar ── */}
-      <div className="flex items-center gap-2 border-b border-slate-200/80 pb-1 text-xs font-bold">
+      <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200/80 bg-white p-2 shadow-xs text-sm font-bold">
         {[
           { key: "", label: "Tümü" },
           { key: "awaiting_payment", label: "Ödeme bekleyen" },
@@ -392,9 +393,10 @@ export default function OrdersPage() {
                 setStatus(tab.key)
                 setPage(1)
               }}
-              className={`px-3 py-2 rounded-xl transition-all cursor-pointer ${
+              aria-pressed={isActive}
+              className={`px-4 py-3 rounded-xl transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-[#C98484] ${
                 isActive
-                  ? "bg-white text-[#C98484] shadow-xs border border-slate-200/80 font-extrabold"
+                  ? "bg-[#B98787] text-white shadow-sm font-extrabold"
                   : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/60"
               }`}
             >
@@ -405,9 +407,9 @@ export default function OrdersPage() {
       </div>
 
       {/* ── Filter Controls Card ── */}
-      <div className="p-3.5 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex flex-wrap items-center gap-3 text-xs">
+      <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs grid grid-cols-1 sm:grid-cols-2 items-center gap-3 text-xs">
         {/* Search */}
-        <div className="relative flex-1 min-w-[220px]">
+        <div className="relative min-w-0">
           <input
             type="text"
             value={searchQuery}
@@ -430,7 +432,8 @@ export default function OrdersPage() {
               : "bg-slate-50/80 border-slate-200 text-slate-700 hover:bg-slate-100"
           }`}
         >
-          <span>📅 {dateFilter === "today" ? "Bugün" : "Tüm Tarihler"}</span>
+          <CalendarDays className="h-4 w-4" />
+          <span>{dateFilter === "today" ? "Bugün" : "Tüm Tarihler"}</span>
         </button>
 
         {/* Ödeme Durumu Select */}
@@ -460,6 +463,7 @@ export default function OrdersPage() {
           <option value="">Kargo Durumu</option>
           <option value="not_fulfilled">Bekliyor</option>
           <option value="preparing">Hazırlanıyor</option>
+          <option value="delivery_scheduled">ZK Home Teslimat Planlandı</option>
           <option value="shipped">Kargoda</option>
           <option value="delivered">Teslim Edildi</option>
         </select>
@@ -474,8 +478,6 @@ export default function OrdersPage() {
             Filtreleri Temizle
           </button>
         )}
-
-        <div className="flex-1" />
 
         <button
           onClick={exportCSV}
