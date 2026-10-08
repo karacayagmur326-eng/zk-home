@@ -1,18 +1,13 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Link from "next/link"
 import { HttpTypes } from "@medusajs/types"
 import { Heading } from "@modules/common/components/ui"
 import {
-  ArrowLeftRight,
   Star,
   Check,
   X,
 } from "@lib/icons"
-import { addToCompare, isInCompare, formatComparePrice } from "@lib/util/compare-store"
-import { FavoriteButton } from "@modules/products/components/product-card-actions"
-import { getProductPrice } from "@lib/util/get-product-price"
 import { sanitizeRichTextHtml } from "@modules/common/components/rich-text-editor"
 
 type ProductInfoProps = {
@@ -25,21 +20,11 @@ export default function ProductInfo({ product }: ProductInfoProps) {
     avg: 0,
   })
 
-  const [compareNotice, setCompareNotice] = useState<{ open: boolean; message: string }>({
-    open: false,
-    message: "",
-  })
-
-  const [inCompare, setInCompare] = useState(false)
-
   const md = (product.metadata as Record<string, any>) || {}
   const brandName = (md.brand_name as string) || product.collection?.title || "ZK HOME"
   const sku = String(product.variants?.[0]?.sku || md.sku || "").trim()
-  const { cheapestPrice } = getProductPrice({ product })
 
   useEffect(() => {
-    setInCompare(isInCompare(product.id))
-
     // Fetch real reviews for this product
     fetch(`/api/products/${product.id}/reviews`)
       .then((r) => (r.ok ? r.json() : null))
@@ -58,30 +43,6 @@ export default function ProductInfo({ product }: ProductInfoProps) {
       })
       .catch(() => {})
   }, [product.id])
-
-  const handleToggleCompare = () => {
-    const mainImg = product.thumbnail || product.images?.[0]?.url || ""
-    const priceVal =
-      product.variants?.[0]?.calculated_price?.calculated_amount ??
-      (product.variants?.[0] as any)?.prices?.[0]?.amount
-
-    const formattedPrice = formatComparePrice(priceVal || 1699)
-
-    const res = addToCompare({
-      id: product.id,
-      title: product.title,
-      handle: product.handle,
-      thumbnail: mainImg,
-      price: formattedPrice,
-      category: product.categories?.[0]?.name || product.type?.value || "Alet & Donanım",
-      brand: brandName,
-      sku,
-      rating: reviewsData.avg || 5.0,
-    })
-
-    setInCompare(isInCompare(product.id))
-    setCompareNotice({ open: true, message: res.message })
-  }
 
   const scrollToReviews = (targetHash: string) => {
     if (typeof window !== "undefined") {
@@ -229,33 +190,6 @@ export default function ProductInfo({ product }: ProductInfoProps) {
           />
         ) : null}
 
-        {/* 4. Action Buttons (Hidden on Mobile, Visible on Desktop) */}
-        <div className="hidden sm:flex items-center gap-6 pt-1">
-          <FavoriteButton
-            product={{
-              id: product.id,
-              title: product.title,
-              handle: product.handle,
-              thumbnail: product.thumbnail,
-              variantId: product.variants?.[0]?.id,
-              price: cheapestPrice?.calculated_price,
-            }}
-            variant="text"
-            className="flex items-center gap-1.5 font-bold text-slate-700 hover:text-[#C98484] text-xs transition-colors cursor-pointer"
-          />
-
-          <span className="text-slate-300">|</span>
-
-          <button
-            type="button"
-            onClick={handleToggleCompare}
-            className="flex items-center gap-1.5 font-bold text-slate-700 hover:text-[#C98484] text-xs transition-colors cursor-pointer"
-          >
-            <ArrowLeftRight className="w-4 h-4 text-slate-600 stroke-[1.8]" />
-            <span>{inCompare ? "Karşılaştırıldı ✓" : "Karşılaştır"}</span>
-          </button>
-        </div>
-
         {/* 5. Stock Status + Stock Code Box (Side-by-Side on Mobile and Desktop) */}
         <div className="flex items-center gap-2 w-full">
           {/* Stock Status Badge */}
@@ -291,48 +225,6 @@ export default function ProductInfo({ product }: ProductInfoProps) {
         </div>
       </div>
 
-      {/* Custom Compare Notification Modal */}
-      {compareNotice.open && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in">
-          <div className="relative bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl border border-slate-100 text-center space-y-4 animate-in zoom-in-95">
-            {/* Top Right Close Button (X) */}
-            <button
-              type="button"
-              onClick={() => setCompareNotice({ open: false, message: "" })}
-              className="absolute top-3.5 right-3.5 w-8 h-8 rounded-full border border-slate-200/80 bg-slate-50 text-slate-400 hover:text-slate-700 hover:bg-slate-100 flex items-center justify-center transition-colors cursor-pointer"
-              aria-label="Kapat"
-              title="Kapat"
-            >
-              <X className="w-4 h-4" />
-            </button>
-
-            <div className="w-12 h-12 rounded-2xl bg-rose-50 text-[#C98484] grid place-items-center mx-auto">
-              <ArrowLeftRight className="w-6 h-6" />
-            </div>
-            <h3 className="text-base font-black text-slate-900 pr-6 pl-6">{compareNotice.message}</h3>
-            <p className="text-xs text-slate-500 font-medium">
-              Eklendiğiniz ürünleri yan yana kıyaslamak için karşılaştırma sayfasını ziyaret edebilirsiniz.
-            </p>
-
-            <div className="grid grid-cols-2 gap-2.5 pt-2">
-              <Link
-                href="/karsilastir"
-                onClick={() => setCompareNotice({ open: false, message: "" })}
-                className="flex items-center justify-center gap-1.5 rounded-xl bg-[#C98484] py-2.5 text-xs font-black text-white shadow-xs hover:bg-rose-600 transition-colors"
-              >
-                Karşılaştır Sayfasına Git
-              </Link>
-              <button
-                type="button"
-                onClick={() => setCompareNotice({ open: false, message: "" })}
-                className="rounded-xl border border-slate-200 bg-slate-50 py-2.5 text-xs font-extrabold text-slate-700 hover:bg-slate-100 transition-colors"
-              >
-                Alışverişe Devam Et
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

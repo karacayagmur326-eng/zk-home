@@ -1,7 +1,7 @@
 /** One policy for response headers, robots and sitemap eligibility. */
 export const PRIVATE_PATHS = [
   "/admin", "/api", "/checkout", "/hesabim", "/sepet", "/favorilerim",
-  "/karsilastir", "/son-gezdiklerim", "/koleksiyonlarim", "/sifremi-unuttum",
+  "/son-gezdiklerim", "/koleksiyonlarim", "/sifremi-unuttum",
   "/sifremi-yenile", "/verify-account", "/siparis", "/siparis-takibi",
 ] as const
 

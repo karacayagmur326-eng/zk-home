@@ -60,7 +60,7 @@ export default function FavoritesTemplate({ mobileSettings }: { mobileSettings?:
 
   return <section className="min-w-0 space-y-6 pb-8">
     <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
-      <div><h1 className="text-2xl font-semibold tracking-tight text-slate-950">{mobileSettings?.enabled ? mobileSettings.favorites.title : "Favorilerim"}</h1><p className="mt-1 max-w-lg text-sm text-slate-500">Beğendiğiniz ürünleri kaydedin, karşılaştırın ve dilediğiniz zaman sepete ekleyin.</p></div>
+      <div><h1 className="text-2xl font-semibold tracking-tight text-slate-950">{mobileSettings?.enabled ? mobileSettings.favorites.title : "Favorilerim"}</h1><p className="mt-1 max-w-lg text-sm text-slate-500">Beğendiğiniz ürünleri kaydedin ve dilediğiniz zaman sepete ekleyin.</p></div>
       <div className="grid grid-cols-3 gap-2 sm:gap-3">
         {[{ label: "Toplam favori", count: products.length, Icon: Heart }, { label: "İndirimde", count: products.filter(item => item.sale > 0).length, Icon: Tag }, { label: "Stokta olan", count: products.filter(item => item.inStock).length, Icon: Package }].map(({ label, count, Icon }) =>
           <div key={label} className="flex items-center gap-2 rounded-xl border border-slate-100 bg-white p-3 shadow-sm sm:px-4"><Icon className="h-5 w-5 shrink-0 text-[#B98787]"/><div><p className="text-[10px] text-slate-500">{label}</p><p className="text-base font-semibold">{count}</p></div></div>)}

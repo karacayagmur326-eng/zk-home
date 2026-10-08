@@ -270,7 +270,7 @@ function classifyIntent(value: string, entities: QueryEntities): { primary: Chat
   if (includesAny(value, [
     "siparis ver", "siparis olustur", "alisveris nasil", "satin alma nasil", "sepete nasil", "sepete ekle",
     "odeme adimi", "uye ol", "kayit ol", "hesap ac", "giris yap", "sifremi unuttum", "sifre yenile",
-    "favori", "nasil karsilastir", "karsilastirmaya ekle", "karsilastirma ozelligi", "indirim kodu", "kupon kullan", "siteyi nasil",
+    "favori", "indirim kodu", "kupon kullan", "siteyi nasil",
   ])) return { primary: "SITE_GUIDANCE", secondary: null, aspect: "site-guidance", confidence: 0.97 }
   if ((/\b(komurlu|karbon fircali)\b/.test(value) && /\b(komursuz|brushless)\b/.test(value))
     || (/\b(komurlu|komursuz|brushless|karbon fircali)\b/.test(value)
