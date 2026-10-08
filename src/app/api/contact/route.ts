@@ -40,6 +40,7 @@ export async function POST(request: Request) {
     const subject = typeof body?.subject === "string" ? body.subject.trim().slice(0, 160) : "Genel İletişim"
     const orderNo = typeof body?.order_no === "string" ? body.order_no.trim().slice(0, 80) : ""
     const message = typeof body?.message === "string" ? body.message.trim().slice(0, 5000) : ""
+    const source = body?.source === "gifts" ? "gifts" : "contact"
 
     if (name.length < 2 || !emailPattern.test(email) || message.length < 5) {
       return NextResponse.json(
@@ -51,10 +52,10 @@ export async function POST(request: Request) {
     await ensureContactHistory()
     const customer = await getContactCustomer()
     const rows = await query<{ id: string }>(
-      `INSERT INTO contact_messages (name, email, phone, subject, order_no, message, customer_id)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+      `INSERT INTO contact_messages (name, email, phone, subject, order_no, message, customer_id, source_kind)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING id`,
-      [name, email, phone || null, subject, orderNo || null, message, customer?.id || null],
+      [name, email, phone || null, subject, orderNo || null, message, customer?.id || null, source],
     )
 
     const messageId = String(rows[0]?.id || "")

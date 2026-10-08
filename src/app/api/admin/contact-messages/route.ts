@@ -7,6 +7,8 @@ import { processNotificationOutbox } from "@lib/notifications/outbox"
 import { contactHistory } from "@lib/email/contact-history"
 import { syncContactInbox } from "@lib/email/contact-inbox"
 import { ensureQuestionConversations } from "@lib/contact/question-conversations"
+import { ensureMessageSources, messageSourceSql } from "@lib/contact/message-sources"
+import { flushAllSiteCache } from "@lib/cache"
 import { randomUUID } from "crypto"
 
 export const maxDuration = 60
@@ -22,11 +24,13 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const status = searchParams.get("status")
 
-    await ensureQuestionConversations()
-    const kind = searchParams.get("kind") === "questions" ? "questions" : "messages"
+    await ensureMessageSources()
+    const requestedKind = searchParams.get("kind") || "messages"
+    const kind = ["contact", "gifts", "questions", "reviews"].includes(requestedKind) ? requestedKind : "messages"
     if (kind === "questions" && session.role === "Editör") return NextResponse.json({error:"Yetkisiz işlem."},{status:403})
-    const channel = kind === "questions" ? "m.product_question_id IS NOT NULL" : "m.product_question_id IS NULL"
-    let sql = `SELECT m.*,m.id::text,p.title AS product_title,p.handle AS product_handle FROM contact_messages m LEFT JOIN product_reviews q ON q.id=m.product_question_id LEFT JOIN store_product p ON p.id=q.product_id WHERE ${channel}`
+    const roleScope = session.role === "Editör" ? "m.product_question_id IS NULL" : "TRUE"
+    const channel = kind === "messages" ? roleScope : `${roleScope} AND (${messageSourceSql})='${kind}'`
+    let sql = `SELECT m.*,m.id::text,(${messageSourceSql}) AS source_kind,p.title AS product_title,p.handle AS product_handle,q.rating,q.status AS review_status,CASE WHEN m.product_review_id IS NOT NULL THEN q.comment ELSE m.message END AS message FROM contact_messages m LEFT JOIN product_reviews q ON q.id=COALESCE(m.product_question_id,m.product_review_id) LEFT JOIN store_product p ON p.id=q.product_id WHERE ${channel}`
     const params: any[] = []
 
     if (status) {
@@ -60,8 +64,16 @@ export async function GET(request: Request) {
     }
     countMap.total = totalCount
 
-    const totals = await query<{ messages: string; questions: string }>(`SELECT COUNT(*) FILTER (WHERE product_question_id IS NULL) AS messages,COUNT(*) FILTER (WHERE product_question_id IS NOT NULL) AS questions FROM contact_messages`)
-    return NextResponse.json({ messages, counts: countMap, totals: totals[0] }, {headers:{"Cache-Control":"private, no-store"}})
+    const sourceCounts = await query<{ source: string; total: string; unread: string }>(`SELECT (${messageSourceSql}) AS source,COUNT(*) AS total,COUNT(*) FILTER (WHERE m.status='new') AS unread FROM contact_messages m WHERE ${roleScope} GROUP BY 1`)
+    const totals: Record<string, number> = { messages: 0, contact: 0, gifts: 0, questions: 0, reviews: 0 }
+    const unread: Record<string, number> = { messages: 0, contact: 0, gifts: 0, questions: 0, reviews: 0 }
+    for (const source of sourceCounts) {
+      totals[source.source] = Number(source.total)
+      unread[source.source] = Number(source.unread)
+      totals.messages += Number(source.total)
+      unread.messages += Number(source.unread)
+    }
+    return NextResponse.json({ messages, counts: countMap, totals, unread }, {headers:{"Cache-Control":"private, no-store"}})
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
@@ -73,13 +85,22 @@ export async function PATCH(request: Request) {
 
   try {
     const body = await request.json()
-    const { id, status, reply } = body
+    const { id, status, reply, review_status: reviewStatus } = body
     await ensureQuestionConversations()
     const [target] = await query<{product_question_id:string}>("SELECT product_question_id FROM contact_messages WHERE id=$1",[/^\d{1,18}$/.test(String(id || "")) ? id : null])
     if (target?.product_question_id && session.role === "Editör") return NextResponse.json({error:"Yetkisiz işlem."},{status:403})
 
-    if (!/^\d{1,18}$/.test(String(id || "")) || (!status && !reply) || (status && !["new","read","replied","archived"].includes(status))) {
+    if (!/^\d{1,18}$/.test(String(id || "")) || (!status && !reply && !reviewStatus) || (status && !["new","read","replied","archived"].includes(status))) {
       return NextResponse.json({ error: "Eksik parametre" }, { status: 400 })
+    }
+
+    if (reviewStatus !== undefined) {
+      if (!["pending", "approved", "rejected"].includes(reviewStatus)) return NextResponse.json({error:"Geçersiz yayın durumu."},{status:400})
+      const [review] = await query(`UPDATE product_reviews r SET status=$2 FROM contact_messages m
+        WHERE m.id=$1 AND m.product_review_id=r.id AND COALESCE(r.type,'review')='review' RETURNING r.id`, [id,reviewStatus])
+      if (!review) return NextResponse.json({error:"Yorum bulunamadı."},{status:404})
+      await flushAllSiteCache()
+      return NextResponse.json({ok:true})
     }
 
     if (typeof reply === "string") {
@@ -92,7 +113,7 @@ export async function PATCH(request: Request) {
       }
       await ensureCommerceSchema()
       const messages = await query<any>(
-        `SELECT m.*,m.id::text,p.title AS product_title,p.handle AS product_handle FROM contact_messages m LEFT JOIN product_reviews q ON q.id=m.product_question_id LEFT JOIN store_product p ON p.id=q.product_id WHERE m.id=$1`,
+        `SELECT m.*,m.id::text,(${messageSourceSql}) AS source_kind,p.title AS product_title,p.handle AS product_handle,q.rating,q.status AS review_status FROM contact_messages m LEFT JOIN product_reviews q ON q.id=COALESCE(m.product_question_id,m.product_review_id) LEFT JOIN store_product p ON p.id=q.product_id WHERE m.id=$1`,
         [id]
       )
       const message = messages[0]
@@ -152,6 +173,7 @@ export async function PATCH(request: Request) {
         }
         await db.query("UPDATE contact_messages SET admin_reply=$1,replied_at=NOW(),status='replied' WHERE id=$2", [cleanReply,id])
       })
+      if (message.product_question_id && body.publish_answer === true) await flushAllSiteCache()
       const delivery = await processNotificationOutbox(
         notificationRows.length,
         notificationRows.map((row) => row[0])
@@ -203,11 +225,13 @@ export async function DELETE(request: Request) {
 
     await ensureQuestionConversations()
     await withTransaction(async db => {
-      const locked = await db.query("SELECT product_question_id FROM contact_messages WHERE id=$1 FOR UPDATE",[id])
+      const locked = await db.query("SELECT product_question_id,product_review_id FROM contact_messages WHERE id=$1 FOR UPDATE",[id])
       if (locked.rows[0]?.product_question_id && session.role === "Editör") throw new Error("Yetkisiz işlem.")
       if (locked.rows[0]?.product_question_id) await db.query("DELETE FROM product_reviews WHERE id=$1 AND type='question'",[locked.rows[0].product_question_id])
+      if (locked.rows[0]?.product_review_id) await db.query("DELETE FROM product_reviews WHERE id=$1 AND COALESCE(type,'review')='review'",[locked.rows[0].product_review_id])
       await db.query("DELETE FROM contact_messages WHERE id=$1",[id])
     })
+    await flushAllSiteCache()
 
     return NextResponse.json({ ok: true })
   } catch (error: any) {

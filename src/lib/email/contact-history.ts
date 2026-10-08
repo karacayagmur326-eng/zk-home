@@ -23,7 +23,10 @@ async function initializeContactHistory() {
     ADD COLUMN IF NOT EXISTS replied_at TIMESTAMPTZ,
     ADD COLUMN IF NOT EXISTS initiated_by_admin BOOLEAN NOT NULL DEFAULT FALSE,
     ADD COLUMN IF NOT EXISTS admin_message_key TEXT,
-    ADD COLUMN IF NOT EXISTS product_question_id BIGINT;
+    ADD COLUMN IF NOT EXISTS product_question_id BIGINT,
+    ADD COLUMN IF NOT EXISTS product_review_id BIGINT,
+    ADD COLUMN IF NOT EXISTS source_kind TEXT NOT NULL DEFAULT 'contact';
+  CREATE UNIQUE INDEX IF NOT EXISTS contact_messages_review_idx ON contact_messages(product_review_id) WHERE product_review_id IS NOT NULL;
   CREATE UNIQUE INDEX IF NOT EXISTS contact_messages_question_idx ON contact_messages(product_question_id) WHERE product_question_id IS NOT NULL;
   CREATE UNIQUE INDEX IF NOT EXISTS contact_messages_admin_key_idx ON contact_messages(admin_message_key) WHERE admin_message_key IS NOT NULL;
   CREATE INDEX IF NOT EXISTS contact_messages_customer_idx ON contact_messages(customer_id);

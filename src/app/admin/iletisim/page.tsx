@@ -1,5 +1,6 @@
 "use client"
 import AdminTabs from "@components/admin/AdminTabs"
+import { CONTACT_SOURCES, contactSource, type ContactSource } from "@lib/contact/sources"
 
 import { useUrlState } from "@lib/hooks/use-url-state"
 
@@ -34,12 +35,18 @@ import {
   Send,
   Building2,
   ExternalLink,
+  Gift,
+  Star,
 } from "lucide-react"
 
 
 interface ContactMessage {
   id: string
   product_question_id?: string
+  product_review_id?: string
+  source_kind?: ContactSource
+  rating?: number
+  review_status?: "pending" | "approved" | "rejected"
   product_title?: string
   product_handle?: string
   name: string
@@ -86,10 +93,14 @@ function Toggle({
 }
 
 export default function AdminContactPage() {
-  const [activeTab, setActiveTab] = useUrlState<"messages" | "questions" | "info_settings" | "smtp_settings">("messages", "tab", ["messages", "questions", "info_settings", "smtp_settings"])
-  const channel = activeTab === "questions" ? "questions" : "messages"
+  const [activeTab, setActiveTab] = useUrlState<"messages" | ContactSource | "info_settings" | "smtp_settings">("messages", "tab", ["messages", "contact", "gifts", "questions", "reviews", "info_settings", "smtp_settings"])
+  const isInboxTab = activeTab === "messages" || activeTab in CONTACT_SOURCES
+  const channel = isInboxTab ? activeTab : "messages"
   const requestVersion = useRef(0)
-  const [totals, setTotals] = useState({ messages: 0, questions: 0 })
+  const [totals, setTotals] = useState({ messages: 0, contact: 0, gifts: 0, questions: 0, reviews: 0 })
+  const [unread, setUnread] = useState({ messages: 0, contact: 0, gifts: 0, questions: 0, reviews: 0 })
+  const [sourceFilter, setSourceFilter] = useState("")
+  const [moderatingReview, setModeratingReview] = useState(false)
   const [messageCounts, setMessageCounts] = useState({total:0,new:0,replied:0,archived:0})
   const [publishAnswer, setPublishAnswer] = useState(false)
   const [messages, setMessages] = useState<ContactMessage[]>([])
@@ -182,7 +193,8 @@ export default function AdminContactPage() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || "Mesajlar yüklenemedi.")
       if (version === requestVersion.current && !signal?.aborted) {
-        setTotals({messages:Number(data.totals?.messages || 0),questions:Number(data.totals?.questions || 0)})
+        setTotals(data.totals || { messages: 0, contact: 0, gifts: 0, questions: 0, reviews: 0 })
+        setUnread(data.unread || { messages: 0, contact: 0, gifts: 0, questions: 0, reviews: 0 })
         setMessageCounts(data.counts)
         setMessages(data.messages || [])
         setSelectedMessage((current) => current ? data.messages?.find((item: ContactMessage) => String(item.id) === String(current.id)) || current : null)
@@ -215,9 +227,23 @@ export default function AdminContactPage() {
     return () => controller.abort()
   }, [statusFilter, channel])
 
-  useAdminAutoRefresh((signal) => fetchMessages(statusFilter, true, signal), { refreshKey: `${channel}:${statusFilter}`, enabled: activeTab === "messages" || activeTab === "questions" })
+  useAdminAutoRefresh((signal) => fetchMessages(statusFilter, true, signal), { refreshKey: `${channel}:${statusFilter}`, enabled: isInboxTab })
 
-  useEffect(() => { setSelectedMessage(null); setReplyText(""); setPublishAnswer(false) }, [channel])
+  useEffect(() => { setSelectedMessage(null); setReplyText(""); setPublishAnswer(false); setSourceFilter("") }, [channel])
+
+  const handleReviewStatus = async (reviewStatus: "pending" | "approved" | "rejected") => {
+    if (!selectedMessage?.product_review_id) return
+    setModeratingReview(true)
+    try {
+      const response = await fetch("/api/admin/contact-messages", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: selectedMessage.id, review_status: reviewStatus }) })
+      const result = await response.json()
+      if (!response.ok) throw new Error(result.error || "Yayın durumu güncellenemedi.")
+      setSelectedMessage(current => current ? { ...current, review_status: reviewStatus } : null)
+      showToast("success", "Yorumun yayın durumu güncellendi.")
+      fetchMessages(statusFilter, true)
+    } catch (error) { showToast("error", error instanceof Error ? error.message : "Yayın durumu güncellenemedi.") }
+    finally { setModeratingReview(false) }
+  }
 
   const handleUpdateStatus = async (id: string, newStatus: string) => {
     try {
@@ -346,6 +372,7 @@ export default function AdminContactPage() {
 
   const filteredMessages = filterByDate(
     messages.filter((m) => {
+      if (sourceFilter && contactSource(m) !== sourceFilter) return false
       if (!search) return true
       const s = search.toLowerCase()
       return (
@@ -353,6 +380,8 @@ export default function AdminContactPage() {
         m.email?.toLowerCase().includes(s) ||
         m.subject?.toLowerCase().includes(s) ||
         m.message?.toLowerCase().includes(s) ||
+        CONTACT_SOURCES[contactSource(m)].label.toLowerCase().includes(s) ||
+        m.product_title?.toLowerCase().includes(s) ||
         m.phone?.toLowerCase().includes(s)
       )
     })
@@ -361,7 +390,7 @@ export default function AdminContactPage() {
   const counts = { all: messageCounts.total, new: messageCounts.new, replied: messageCounts.replied, archived: messageCounts.archived }
 
   const statusBadge = (status: string) => {
-    if (status === "new") return <span className="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-blue-50 text-blue-600 border border-blue-100">Yeni</span>
+    if (status === "new") return <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-[#B98787] text-white shadow-sm"><span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-white" />Yeni · Okunmadı</span>
     if (status === "read") return <span className="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-slate-100 text-slate-600 border border-slate-200">İncelendi</span>
     if (status === "replied") return <span className="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-emerald-50 text-emerald-600 border border-emerald-100">Yanıtlandı</span>
     if (status === "archived") return <span className="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-purple-50 text-purple-600 border border-purple-100">Arşiv</span>
@@ -410,11 +439,23 @@ export default function AdminContactPage() {
       <AdminTabs label="İletişim bölümleri"
         value={activeTab}
         onChange={setActiveTab}
-        items={[{ value: "messages", label: "Gelen Mesajlar", count: totals.messages, icon: Mail }, { value: "questions", label: "Soru & Cevap", count: totals.questions, icon: MessageSquare }, { value: "info_settings", label: "İletişim & Sayfa Ayarları", icon: Settings }, { value: "smtp_settings", label: "SMTP / E-posta Gönderme İzinleri", icon: Mail }]}/>
+        items={[
+          { value: "messages", label: `Gelen Mesajlar${unread.messages ? ` · ${unread.messages} Yeni` : ""}`, count: totals.messages, icon: Inbox },
+          { value: "contact", label: `İletişim Formu${unread.contact ? ` · ${unread.contact} Yeni` : ""}`, count: totals.contact, icon: Mail },
+          { value: "gifts", label: `Hediye Talepleri${unread.gifts ? ` · ${unread.gifts} Yeni` : ""}`, count: totals.gifts, icon: Gift },
+          { value: "questions", label: `Soru & Cevap${unread.questions ? ` · ${unread.questions} Yeni` : ""}`, count: totals.questions, icon: MessageSquare },
+          { value: "reviews", label: `Yorumlar${unread.reviews ? ` · ${unread.reviews} Yeni` : ""}`, count: totals.reviews, icon: Star },
+          { value: "info_settings", label: "İletişim & Sayfa Ayarları", icon: Settings },
+          { value: "smtp_settings", label: "SMTP / E-posta Gönderme İzinleri", icon: Mail },
+        ]}/>
 
       {/* ── TAB 1: MESSAGES ─────────────────────────────────────────── */}
-      {(activeTab === "messages" || activeTab === "questions") && (
+      {isInboxTab && (
         <div className="space-y-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div><h2 className="text-lg font-extrabold text-slate-900">{channel === "messages" ? "Tüm Gelen Mesajlar" : CONTACT_SOURCES[channel as ContactSource].label}</h2><p className="mt-1 text-xs text-slate-500">{channel === "messages" ? "İletişim, hediye, soru ve yorum kayıtları tek gelen kutusunda." : "Bu bölümün kayıtlarını ortak yazışma ve yanıt ekranından yönetin."}</p></div>
+            {counts.new > 0 && <button type="button" onClick={() => setStatusFilter("new")} className="rounded-xl bg-[#B98787] px-4 py-2 text-xs font-bold text-white">{counts.new} Yeni · Okunmamış kaydı göster</button>}
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-[#FFF8F5] border border-rose-100/80 rounded-2xl p-4 flex items-center gap-3.5 shadow-2xs">
               <div className="w-10 h-10 rounded-xl bg-rose-100/60 border border-rose-200/60 flex items-center justify-center shrink-0">
@@ -432,7 +473,7 @@ export default function AdminContactPage() {
               </div>
               <div className="flex flex-col">
                 <span className="text-2xl font-black text-slate-900 leading-none">{counts.new}</span>
-                <span className="text-[11px] font-bold text-slate-400 mt-1">Yeni</span>
+                <span className="text-[11px] font-bold text-slate-600 mt-1">Yeni · Okunmadı</span>
               </div>
             </div>
 
@@ -466,11 +507,12 @@ export default function AdminContactPage() {
                     type="text"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder={channel === "questions" ? "Müşteri, ürün veya soruda ara..." : "Mesajlarda ara..."}
+                    placeholder="Müşteri, ürün, kaynak veya mesajda ara..."
                     className="w-full pl-8 pr-3 py-2 rounded-xl border border-slate-200/80 text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[#C98484] transition"
                   />
                 </div>
 
+                {channel === "messages" && <select aria-label="Mesaj kaynağı" value={sourceFilter} onChange={event => setSourceFilter(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700"><option value="">Tüm bölümler</option>{Object.entries(CONTACT_SOURCES).map(([value, source]) => <option key={value} value={value}>{source.label}</option>)}</select>}
                 <div className="relative w-36">
                   <span className="absolute -top-2 left-2.5 bg-white px-1 text-[9px] font-bold text-slate-400">
                     Durum
@@ -514,6 +556,7 @@ export default function AdminContactPage() {
                     setSearch("")
                     setStatusFilter("")
                     setDateFilter("")
+                    setSourceFilter("")
                     fetchMessages("")
                   }}
                   className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs font-bold transition cursor-pointer"
@@ -532,7 +575,7 @@ export default function AdminContactPage() {
                       </th>
                       <th className="py-3 px-3 text-left">Gönderen</th>
                       <th className="py-3 px-3 text-left">Konu</th>
-                      <th className="py-3 px-3 text-left">Sayfa</th>
+                      <th className="py-3 px-3 text-left">Kaynak / Bölüm</th>
                       <th className="py-3 px-3 text-left">Durum</th>
                       <th className="py-3 px-3 text-left">
                         <span className="flex items-center gap-1">Tarih <ChevronDown className="w-3 h-3 text-slate-400" /></span>
@@ -575,7 +618,7 @@ export default function AdminContactPage() {
                       filteredMessages.map((m) => (
                         <tr
                           key={m.id}
-                          className={`hover:bg-slate-50/60 transition-colors group ${m.status === "new" ? "bg-rose-50/20" : ""}`}
+                          className={`transition-colors group ${m.status === "new" ? "bg-rose-50/80 hover:bg-rose-100/70" : "hover:bg-slate-50/60"}`}
                         >
                           <td className="py-3 px-3">
                             <input type="checkbox" className="accent-[#C98484] rounded" />
@@ -586,14 +629,14 @@ export default function AdminContactPage() {
                               <p className="text-[11px] text-slate-400 font-medium">{m.email}</p>
                             </div>
                           </td>
-                          <td className="py-3 px-3 max-w-[180px]">
-                            <p className="font-bold text-slate-800 truncate">{m.subject || "Genel İletişim"}</p>
+                          <td className={`py-3 px-3 max-w-[240px] ${m.status === "new" ? "border-l-4 border-l-[#B98787]" : ""}`}>
+                            <div className="mb-1 flex flex-wrap items-center gap-2"><span className={`inline-flex rounded-lg border px-2 py-1 text-[10px] font-bold ${CONTACT_SOURCES[contactSource(m)].badge}`}>{CONTACT_SOURCES[contactSource(m)].label}</span>{m.status === "new" && <span className="text-[10px] font-black text-[#9A5555]">YENİ</span>}</div>
+                            <p className={`${m.status === "new" ? "font-black text-slate-950" : "font-bold text-slate-800"} truncate`}>{m.subject || "Genel İletişim"}</p>
                             <p className="text-[11px] text-slate-400 truncate mt-0.5">{m.message}</p>
                           </td>
                           <td className="py-3 px-3">
-                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600">
-                              {m.product_handle ? <Link href={`/urunler/${m.product_handle}`} target="_blank" className="inline-flex items-center gap-1 hover:text-[#C98484]"><ExternalLink className="h-3 w-3" />Ürün</Link> : m.order_no ? `#${m.order_no}` : "İletişim"}
-                            </span>
+                            <span className={`inline-flex whitespace-nowrap rounded-lg border px-2 py-1 text-[10px] font-bold ${CONTACT_SOURCES[contactSource(m)].badge}`}>{CONTACT_SOURCES[contactSource(m)].label}</span>
+                            <div className="mt-1 text-[10px] text-slate-500">{m.product_handle ? <Link href={`/urunler/${m.product_handle}`} target="_blank" className="inline-flex items-center gap-1 hover:text-[#C98484]"><ExternalLink className="h-3 w-3" />Ürün sayfası</Link> : m.order_no ? `Sipariş #${m.order_no}` : contactSource(m) === "gifts" ? "Toptan ve kurumsal satış" : "İletişim sayfası"}</div>
                           </td>
                           <td className="py-3 px-3">{statusBadge(m.status)}</td>
                           <td className="py-3 px-3 text-slate-400 font-medium whitespace-nowrap">
@@ -662,7 +705,7 @@ export default function AdminContactPage() {
               <div className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-2xs space-y-2">
                 <h3 className="text-xs font-black text-slate-900">Mesaj akışı hakkında</h3>
                 <p className="text-[11px] text-slate-400 leading-relaxed font-medium">
-                  Gelen mesajlar, web sitenizdeki iletişim formları üzerinden gönderilen tüm talepleri içerir. Mesajları yanıtlayabilir, arşivleyebilir veya durumlarını güncelleyebilirsiniz.
+                  İletişim formları, hediye talepleri, ürün soruları ve yorumlar burada birlikte listelenir. Kaynak etiketlerinden hangi bölümden geldiğini görebilirsiniz. Üst sekmeler aynı kayıtları bölümüne göre ayırır.
                 </p>
               </div>
 
@@ -1304,10 +1347,10 @@ export default function AdminContactPage() {
       {/* Message Detail Modal */}
       {selectedMessage && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[92vh] overflow-y-auto p-6 space-y-5 shadow-2xl animate-in zoom-in duration-150">
+          <div role="dialog" aria-label={`${CONTACT_SOURCES[contactSource(selectedMessage)].label} Detayı`} className="bg-white rounded-3xl max-w-2xl w-full max-h-[92vh] overflow-y-auto p-6 space-y-5 shadow-2xl animate-in zoom-in duration-150">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div>
-                <h3 className="text-base font-black text-slate-900">{selectedMessage.product_question_id ? "Ürün Sorusu Detayı" : "İletişim Mesaj Detayı"}</h3>
+                <h3 className="text-base font-black text-slate-900">{CONTACT_SOURCES[contactSource(selectedMessage)].label} Detayı</h3>
                 <p className="text-xs text-slate-400 font-medium mt-0.5">
                   {new Date(selectedMessage.created_at).toLocaleString("tr-TR")}
                 </p>
@@ -1315,6 +1358,7 @@ export default function AdminContactPage() {
 
               <button
                 type="button"
+                aria-label="Mesaj detayını kapat"
                 onClick={() => setSelectedMessage(null)}
                 className="p-2 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-700 cursor-pointer"
               >
@@ -1323,6 +1367,8 @@ export default function AdminContactPage() {
             </div>
 
             <div className="space-y-4 text-xs">
+              <span className={`inline-flex rounded-lg border px-3 py-1.5 font-bold ${CONTACT_SOURCES[contactSource(selectedMessage)].badge}`}>{CONTACT_SOURCES[contactSource(selectedMessage)].label}</span>
+              {selectedMessage.product_review_id && <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-100 bg-amber-50/50 p-3"><span className="font-bold text-slate-700">{selectedMessage.rating}/5 yıldız · {selectedMessage.review_status === "approved" ? "Yayında" : selectedMessage.review_status === "rejected" ? "Yayınlanmıyor" : "Onay bekliyor"}</span><select aria-label="Yorum yayın durumu" disabled={moderatingReview} value={selectedMessage.review_status || "pending"} onChange={event => handleReviewStatus(event.target.value as "pending" | "approved" | "rejected")} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs"><option value="pending">Onay bekliyor</option><option value="approved">Yayınla</option><option value="rejected">Yayından kaldır</option></select></div>}
               <div className="grid grid-cols-2 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-100">
                 {[
                   { label: "Ad Soyad", value: selectedMessage.name },

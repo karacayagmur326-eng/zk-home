@@ -1,6 +1,7 @@
 import { ensureProductQuestions } from "@lib/commerce/product-questions"
 import { getAdminSession } from "@lib/admin/auth"
-import { query } from "@lib/admin/db"
+import { query, withTransaction } from "@lib/admin/db"
+import { ensureContactHistory } from "@lib/email/contact-history"
 import { NextRequest, NextResponse } from "next/server"
 
 async function ensureTable() {
@@ -168,7 +169,7 @@ export async function PATCH(request: NextRequest) {
   }
 
   const rows = await query(
-    `UPDATE product_reviews SET ${updates.join(", ")} WHERE id = $1 RETURNING *`,
+    `UPDATE product_reviews SET ${updates.join(", ")} WHERE id = $1 AND COALESCE(type,'review')='review' RETURNING *`,
     params
   )
 
@@ -190,6 +191,10 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: "Yorum kimliği gerekli." }, { status: 400 })
   }
 
-  await query("DELETE FROM product_reviews WHERE id = $1", [id])
+  await ensureContactHistory()
+  await withTransaction(async db => {
+    await db.query("DELETE FROM contact_messages WHERE product_review_id=$1", [id])
+    await db.query("DELETE FROM product_reviews WHERE id=$1 AND COALESCE(type,'review')='review'", [id])
+  })
   return NextResponse.json({ success: true })
 }
