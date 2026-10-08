@@ -103,9 +103,11 @@ const CartDropdown = ({
         data-testid="nav-cart-link"
       >
         <ShoppingCart aria-hidden="true" className="h-5 w-5 text-primary" />
-        <span className="absolute -right-1 -top-1 flex h-4.5 min-w-[18px] items-center justify-center rounded-circle bg-[#C98484] px-1 text-[10px] font-extrabold text-white shadow-sm">
-          {totalItems}
-        </span>
+        {totalItems > 0 && (
+          <span className="absolute -right-1 -top-1 flex h-4.5 min-w-[18px] items-center justify-center rounded-circle bg-[#C98484] px-1 text-[10px] font-extrabold text-white shadow-sm">
+            {totalItems}
+          </span>
+        )}
       </LocalizedClientLink>
 
       <Transition
