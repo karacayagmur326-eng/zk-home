@@ -2,7 +2,7 @@ import { query, cachedQuery } from "@lib/admin/db"
 import { ensureCommerceSchema } from "./schema"
 import { legacyShippingRanges } from "./shipping"
 
-export type ShippingPriceRange = { id: string; min: number; max: number | null; price: number }
+export type ShippingPriceRange = { id: string; min: number; max: number | null; price: number; admin_name?: string }
 
 export type ShippingMethodSetting = {
   id: string

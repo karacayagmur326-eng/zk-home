@@ -40,7 +40,7 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: "Kargo ücreti ve ücretsiz kargo alt limiti geçerli, sıfır veya pozitif tutarlar olmalıdır." }, { status: 400 })
   }
   const current = await getCommerceSettings()
-  const ranges = Array.isArray(body.shipping_ranges) ? body.shipping_ranges.map((r: any, index: number) => ({ id: text(r.id, 60) || String(index), min: r.min, max: r.max, price: r.price })) : current.shipping_ranges
+  const ranges = Array.isArray(body.shipping_ranges) ? body.shipping_ranges.map((r: any, index: number) => ({ id: text(r.id, 60) || String(index), min: r.min, max: r.max, price: r.price, admin_name: text(r.admin_name, 100) })) : current.shipping_ranges
   const rangeError = ranges ? shippingRangesError(ranges) : null
   if (rangeError) return NextResponse.json({ error: rangeError }, { status: 400 })
   const shippingMethods = Array.isArray(body.shipping_methods)

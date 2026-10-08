@@ -32,7 +32,8 @@ export function shippingAmount(subtotal: number, method: ShippingMethodSetting) 
 export function buildShippingOptions(subtotal: number, methods: ShippingMethodSetting[], ranges?: ShippingPriceRange[]) {
   if (ranges) {
     const amount = rangeShippingAmount(subtotal, ranges)
-    return amount === undefined ? [] : [{ id: "shipping_auto", shipping_option_id: "shipping_auto", name: "Kargo", amount, price_type: "flat", metadata: { method_id: "auto", coverage: "Tüm Türkiye", estimated_days: "", free_threshold: null, base_price: amount, price_ranges: ranges }, service_zone: { fulfillment_set: { type: "shipping" } } }]
+    const publicRanges = ranges.map(({ id, min, max, price }) => ({ id, min, max, price }))
+    return amount === undefined ? [] : [{ id: "shipping_auto", shipping_option_id: "shipping_auto", name: "Kargo", amount, price_type: "flat", metadata: { method_id: "auto", coverage: "Tüm Türkiye", estimated_days: "", free_threshold: null, base_price: amount, price_ranges: publicRanges }, service_zone: { fulfillment_set: { type: "shipping" } } }]
   }
   // A separate "Ücretsiz Kargo" row defines a store-wide threshold, not
   // another delivery service that the customer must choose manually.

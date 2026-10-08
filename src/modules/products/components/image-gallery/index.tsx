@@ -119,7 +119,7 @@ const ImageGallery = ({ images, productTitle, discountBadge, product }: ImageGal
       {/* ── MAIN IMAGE STAGE (White Stage with Faint Contour Line) ── */}
       <div
         className="relative w-full min-w-0 overflow-hidden rounded-2xl bg-[#FBF7F4] ring-1 ring-[#EADBD4]/60 cursor-zoom-in"
-        style={{ aspectRatio: 4 / 5, maxWidth: "min(100%, 496px)" }}
+        style={{ aspectRatio: 4 / 5, maxWidth: "min(100%, 560px)" }}
         onClick={() => setIsLightboxOpen(true)}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}

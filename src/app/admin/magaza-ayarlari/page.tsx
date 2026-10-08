@@ -40,7 +40,7 @@ export default function MagazaAyarlariPage() {
           const max = range._maxDraft === undefined ? range.max : range._maxDraft.trim() === "" ? null : parseMoneyInput(range._maxDraft)
           const price = range._priceDraft === undefined ? range.price : parseMoneyInput(range._priceDraft)
           if (min === null || price === null || (range._maxDraft?.trim() && max === null)) throw new Error("Kargo aralıklarına geçerli tutarlar girin.")
-          return { id: range.id, min, max, price }
+          return { id: range.id, min, max, price, admin_name: (range.admin_name || "").trim() }
         }) }),      })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error)
@@ -87,6 +87,10 @@ export default function MagazaAyarlariPage() {
         <div className="space-y-3 p-4">
           <p className="text-sm text-slate-600">Kargo, ürünlerin KDV dahil ara toplamına göre otomatik hesaplanır. Alt sınır dahildir, üst sınır bir sonraki aralığa aittir. Son üst sınırı boş bırakın. Ücretsiz kargo için ücreti 0 TL girin.</p>
           {settings.shipping_ranges.map((range: any, index: number) => <div key={range.id} className="grid gap-3 rounded-xl border border-slate-200 p-3 sm:grid-cols-[1fr_1fr_1fr_auto]">
+            <label className="text-xs font-semibold text-slate-600 sm:col-span-4">
+              Aralık adı <span className="ml-1 font-normal text-slate-400">Yalnızca admin panelinde görünür</span>
+              <input type="text" maxLength={100} aria-label={`Kargo aralığı adı ${index + 1}`} placeholder={`Örn. ${index === 0 ? "Küçük siparişler" : "Standart teslimat"}`} value={range.admin_name || ""} onChange={event => { const rows = [...settings.shipping_ranges]; rows[index] = { ...range, admin_name: event.target.value }; setSettings({ ...settings, shipping_ranges: rows }) }} className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50/50 p-2 text-sm font-normal text-slate-800 focus:border-[#B98787] focus:outline-none focus:ring-2 focus:ring-[#B98787]/20" />
+            </label>
             {[["min", "Sepet alt sınırı", false], ["max", "Sepet üst sınırı", true], ["price", "Kargo ücreti", false]].map(([key, label, optional]) => <label key={String(key)} className="text-xs font-semibold text-slate-600">{String(label)} (TL)
               <div className="relative"><input className="mt-1 w-full rounded-lg border p-2 pr-9 text-sm" inputMode="decimal" aria-label={`${label} ${index + 1}`} placeholder={optional ? "Sınırsız" : "0,00"} value={range[`_${key}Draft`] ?? (range[String(key)] === null ? "" : money(range[String(key)]))} onChange={e => { const rows = [...settings.shipping_ranges]; rows[index] = { ...range, [`_${key}Draft`]: e.target.value }; setSettings({ ...settings, shipping_ranges: rows }) }} onBlur={() => { const draft = range[`_${key}Draft`]; if (draft === undefined) return; const value = optional && !draft.trim() ? null : parseMoneyInput(draft); if (value !== null || (optional && !draft.trim())) { const rows = [...settings.shipping_ranges]; rows[index] = { ...range, [String(key)]: value, [`_${key}Draft`]: value === null ? "" : money(value) }; setSettings({ ...settings, shipping_ranges: rows }) } }} /><span className="absolute right-3 top-3 text-slate-400">TL</span></div>
             </label>)}

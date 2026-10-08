@@ -101,19 +101,19 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
           </div>
 
           {/* DESKTOP: 3-Column Grid (hidden on mobile) */}
-          <div className="hidden lg:grid lg:grid-cols-12 lg:items-stretch lg:gap-0 lg:pb-6">
+          <div className="hidden lg:grid lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1.4fr)_minmax(240px,0.9fr)] lg:items-stretch lg:gap-0 lg:pb-6">
             {/* Left Column: Image Gallery (4 cols with vertical thumbnails on left) */}
-            <div className="col-span-4 pr-6">
+            <div className="min-w-0 pr-4">
               <ImageGallery images={images} productTitle={product.title} discountBadge={discountBadge} product={product} />
             </div>
 
             {/* Middle Column: Product Info (5 cols) */}
-            <div className="col-span-5 flex flex-col px-6">
+            <div className="min-w-0 flex flex-col px-4">
               <ProductInfo product={product} />
             </div>
 
             {/* Right Column: Buy Box Card (3 cols) */}
-            <div className="col-span-3 pl-6">
+            <div className="min-w-0 pl-5">
               <div className="sticky top-24">
                 <ProductOnboardingCta />
                 <Suspense
