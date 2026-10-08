@@ -3,11 +3,13 @@ import { query } from "@lib/admin/db"
 import { ensureCommerceSchema } from "@lib/commerce/schema"
 import { ensureContactHistory } from "@lib/email/contact-history"
 import type { ContactCustomer } from "@lib/contact/customer-messages"
+import { ensureProductQuestions } from "@lib/commerce/product-questions"
 
 let ready: Promise<void> | null = null
 async function ensureNotifications() {
   if (!ready) ready = (async () => {
     await ensureCommerceSchema()
+    await ensureProductQuestions()
     await ensureContactHistory()
     await query(`CREATE TABLE IF NOT EXISTS customer_notification_read (
       customer_id TEXT NOT NULL REFERENCES store_customer(id) ON DELETE CASCADE,
@@ -36,6 +38,12 @@ const feed = `WITH owned_contacts AS (
   FROM owned_contacts m WHERE m.admin_reply IS NOT NULL AND NOT EXISTS (
     SELECT 1 FROM notification_outbox n WHERE n.type='contact_reply_customer' AND n.payload->>'message_id'=m.id::text
   )
+  UNION ALL
+  SELECT 'question:' || r.id || ':' || r.answer_version, 'message', 'Ürün sorunuz yanıtlandı',
+    LEFT(r.answer,240), '/hesabim/mesajlarim?tab=questions&soru=' || r.id,
+    COALESCE(r.answered_at,r.created_at)
+  FROM product_reviews r WHERE r.type='question' AND NULLIF(BTRIM(r.answer),'') IS NOT NULL
+    AND (r.customer_id=$1 OR (r.customer_id IS NULL AND $3::boolean AND LOWER(r.email)=$2))
   UNION ALL
   SELECT 'campaign:' || id, 'campaign', name, LEFT(COALESCE(description,'Yeni kampanyamızı keşfedin.'),240),
     '/magaza', COALESCE(starts_at,created_at)
