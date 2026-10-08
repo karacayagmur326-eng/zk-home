@@ -119,7 +119,7 @@ export default function CartTemplate({
           return (
             <article key={item.id} className="p-4 bg-white space-y-3">
               <div className="flex gap-3">
-                <LocalizedClientLink href={`/urunler/${item.handle || item.product_handle}`} className="grid h-20 w-20 place-items-center rounded-xl bg-slate-50 border border-slate-100 p-1.5 shrink-0">
+                <LocalizedClientLink href={`/urunler/${item.handle || item.product_handle}`} className="grid aspect-[4/5] w-20 place-items-center rounded-xl bg-slate-50 border border-slate-100 p-1.5 shrink-0">
                   {item.thumbnail ? <img src={item.thumbnail} alt={item.title || item.product_title} className="h-full w-full object-contain" /> : <ShoppingBag className="h-8 w-8 text-slate-300" />}
                 </LocalizedClientLink>
                 <div className="min-w-0 flex-1">
@@ -255,7 +255,7 @@ export default function CartTemplate({
                     <div className="flex items-center gap-4 w-full">
                       <LocalizedClientLink
                         href={`/urunler/${item.handle || item.product_handle}`}
-                        className="w-20 h-20 bg-slate-50/70 border border-slate-100 rounded-2xl shrink-0 flex items-center justify-center p-2 overflow-hidden group"
+                        className="w-20 aspect-[4/5] bg-slate-50/70 border border-slate-100 rounded-2xl shrink-0 flex items-center justify-center p-2 overflow-hidden group"
                       >
                         {item.thumbnail ? (
                           <img

@@ -1,4 +1,6 @@
 "use client"
+
+import ProductMediaEditor from "../../components/ProductMediaEditor"
 import { productHandleFromTitle } from "@lib/util/product-handle"
 
 import { useEffect, useState, useRef } from "react"
@@ -645,7 +647,7 @@ export default function NewProductPage() {
         {/* RIGHT SIDEBAR (Mockup Birebir) */}
         <div className="w-full lg:w-[320px] xl:w-[360px] shrink-0 space-y-5">
           {/* Card 1: Yayınla */}
-          <div className="rounded-3xl bg-white border border-slate-200/80 p-5 shadow-xs space-y-4">
+          <div className="rounded-2xl bg-white border border-[#EADBD4]/70 p-4 shadow-sm space-y-4">
             <h3 className="text-sm font-extrabold text-slate-900 border-b border-slate-100 pb-3">
               Yayınla
             </h3>
@@ -683,100 +685,17 @@ export default function NewProductPage() {
               type="button"
               onClick={() => handleSave("published")}
               disabled={saving}
-              className="w-full h-11 rounded-xl bg-[#C98484] hover:bg-rose-600 text-white font-extrabold text-xs shadow-md shadow-rose-500/20 transition-all cursor-pointer disabled:opacity-50"
+              className="w-full h-11 rounded-xl bg-[#C98484] hover:bg-[#AF7272] text-white font-semibold text-xs shadow-sm transition-all cursor-pointer disabled:opacity-50"
             >
               {saving ? "Kaydediliyor..." : "Yayınla"}
             </button>
           </div>
 
-          {/* Card 2: Kapak Görseli */}
-          <div className="rounded-3xl bg-white border border-slate-200/80 p-5 shadow-xs space-y-3">
-            <h3 className="text-sm font-extrabold text-slate-900 border-b border-slate-100 pb-3">
-              Kapak Görseli
-            </h3>
-            <div className="flex flex-col items-center justify-center p-4 border border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
-              {thumbnail ? (
-                <div className="space-y-3 w-full text-center group">
-                  <div className="h-56 w-full rounded-xl border border-slate-200 overflow-hidden bg-white flex items-center justify-center p-2 relative">
-                    <img src={thumbnail} alt="Ürün kapak görseli" className="max-w-full max-h-full object-contain" />
-                    {/* Hover Overlay for change */}
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-xl">
-                      <button
-                        type="button"
-                        onClick={() => setIsThumbModalOpen(true)}
-                        className="bg-white text-slate-900 text-xs font-bold py-1.5 px-3 rounded-lg shadow-sm hover:bg-slate-50 cursor-pointer"
-                      >
-                        Değiştir
-                      </button>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setThumbnail("")}
-                    className="text-xs font-bold text-red-600 hover:underline cursor-pointer"
-                  >
-                    Görseli kaldır
-                  </button>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setIsThumbModalOpen(true)}
-                  className="py-4 text-xs font-extrabold text-[#C98484] hover:underline cursor-pointer"
-                >
-                  + Kapak Görseli Ayarla
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Card 3: Ürün Galerisi */}
-          <div className="rounded-3xl bg-white border border-slate-200/80 p-5 shadow-xs space-y-3">
-            <h3 className="text-sm font-extrabold text-slate-900 border-b border-slate-100 pb-3">
-              Ürün Galerisi
-            </h3>
-            <div className="p-4 border border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
-              {images.length > 0 && (
-                <div className="grid grid-cols-2 gap-2 mb-3">
-                  {images.map((img, i) => (
-                    <div
-                      key={i}
-                      className={`relative flex flex-col rounded-xl border overflow-hidden bg-white group ${thumbnail === img ? "border-[#C98484] ring-1 ring-[#C98484]/30" : "border-slate-200"}`}
-                    >
-                      <div className="h-24 p-1 flex items-center justify-center">
-                        <img src={img} alt={`Ürün galeri görseli ${i + 1}`} className="max-w-full max-h-full object-contain" />
-                      </div>
-                      <button
-                        type="button"
-                        aria-pressed={thumbnail === img}
-                        onClick={() => setThumbnail(img)}
-                        className={`w-full border-t px-2 py-2 text-[10px] font-bold cursor-pointer transition-colors ${thumbnail === img ? "border-[#C98484]/20 bg-[#C98484]/10 text-[#A95E5E]" : "border-slate-100 text-slate-600 hover:bg-rose-50 hover:text-[#A95E5E]"}`}
-                      >
-                        {thumbnail === img ? "✓ Kapak görseli" : "Kapak görseli yap"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setImages((s) => s.filter((_, idx) => idx !== i))}
-                        className="absolute top-1 right-1 h-5 w-5 bg-black/60 text-white rounded-full text-[10px] font-black flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-              <button
-                type="button"
-                onClick={() => setIsGalleryModalOpen(true)}
-                className="w-full text-center py-2 text-xs font-extrabold text-[#C98484] hover:underline cursor-pointer"
-              >
-                + Ürün Galeri Görsellerini Ekle
-              </button>
-            </div>
-          </div>
+          <ProductMediaEditor thumbnail={thumbnail} images={images} onCoverChange={setThumbnail} onImagesChange={setImages}
+            onUploadCover={() => setIsThumbModalOpen(true)} onUploadGallery={() => setIsGalleryModalOpen(true)} />
 
           {/* Card 4: Ürün Kategorileri */}
-          <div className="rounded-3xl bg-white border border-slate-200/80 p-5 shadow-xs space-y-3">
+          <div className="rounded-2xl bg-white border border-[#EADBD4]/70 p-4 shadow-sm space-y-3">
             <h3 className="text-sm font-extrabold text-slate-900 border-b border-slate-100 pb-3">
               Ürün Kategorileri
             </h3>
@@ -806,7 +725,7 @@ export default function NewProductPage() {
           </div>
 
           {/* Card 5: Ürün Etiketleri */}
-          <div className="rounded-3xl bg-white border border-slate-200/80 p-5 shadow-xs space-y-3">
+          <div className="rounded-2xl bg-white border border-[#EADBD4]/70 p-4 shadow-sm space-y-3">
             <h3 className="text-sm font-extrabold text-slate-900 border-b border-slate-100 pb-3">
               Ürün Etiketleri
             </h3>
@@ -882,7 +801,7 @@ export default function NewProductPage() {
           </div>
 
           {/* Card 6: Marka */}
-          <div className="rounded-3xl bg-white border border-slate-200/80 p-5 shadow-xs space-y-3">
+          <div className="rounded-2xl bg-white border border-[#EADBD4]/70 p-4 shadow-sm space-y-3">
             <h3 className="text-sm font-extrabold text-slate-900 border-b border-slate-100 pb-3">
               Marka
             </h3>

@@ -4,6 +4,7 @@ import { getLocale } from "@lib/data/locale-actions"
 import { listRegions } from "@lib/data/regions"
 import { StoreProductCategory, StoreRegion } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import FavoriteCounter from "@modules/layout/components/favorite-counter"
 import CartButton from "@modules/layout/components/cart-button"
 import CustomerNotifications from "@modules/layout/components/customer-notifications"
 import { SideMenu, DesktopMenu, HeaderSearch } from "@modules/layout/components/desktop-header-components"
@@ -308,18 +309,11 @@ export default async function Nav() {
                 </LocalizedClientLink>
               )}
 
-              <LocalizedClientLink
-                aria-label="Favorilerim"
-                title="Favorilerim"
-                className="flex h-9 w-9 xl:h-10 xl:w-10 items-center justify-center rounded-circle text-muted transition-colors hover:bg-subtle hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                href="/favorilerim"
-              >
-                <Heart aria-hidden="true" className="w-4 h-4 xl:w-[21px] xl:h-[21px]" />
-              </LocalizedClientLink>
 
               <ThemeToggle />
             </div>
 
+            <FavoriteCounter />
             {customer && <CustomerNotifications key={customer.id} customerId={customer.id} />}
             <Suspense
               fallback={

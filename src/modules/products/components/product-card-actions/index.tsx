@@ -1,5 +1,6 @@
 "use client"
 
+import type { HttpTypes } from "@medusajs/types"
 import type { CartPreview } from "@lib/util/cart-state"
 import { addToCart } from "@lib/util/cart-feedback"
 import { Heart, ShoppingCart, Check, Loader2 } from "@lib/icons"
@@ -12,6 +13,7 @@ export const FAVORITES_STORAGE_KEY = "zkhome:favorites"
 export const FAVORITES_CHANGED_EVENT = "zkhome:favorites-changed"
 
 export type FavoriteProduct = {
+  product?: HttpTypes.StoreProduct
   id: string
   title: string
   handle: string
@@ -33,7 +35,7 @@ export const readFavorites = (): FavoriteProduct[] => {
 export const writeFavorites = (favorites: FavoriteProduct[]) => {
   window.localStorage.setItem(
     FAVORITES_STORAGE_KEY,
-    JSON.stringify(favorites)
+    JSON.stringify(favorites.map(({ product: _product, ...snapshot }) => snapshot))
   )
   window.dispatchEvent(new CustomEvent(FAVORITES_CHANGED_EVENT))
 }
@@ -87,7 +89,14 @@ export function FavoriteButton({
   const { toast } = useToast()
 
   useEffect(() => {
-    setIsFavorite(readFavorites().some((item) => item.id === product.id))
+    const sync = () => setIsFavorite(readFavorites().some((item) => item.id === product.id))
+    sync()
+    window.addEventListener(FAVORITES_CHANGED_EVENT, sync)
+    window.addEventListener("storage", sync)
+    return () => {
+      window.removeEventListener(FAVORITES_CHANGED_EVENT, sync)
+      window.removeEventListener("storage", sync)
+    }
   }, [product.id])
 
   const toggleFavorite = () => {

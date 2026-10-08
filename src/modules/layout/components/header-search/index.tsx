@@ -194,7 +194,7 @@ export default function HeaderSearch() {
                         onClick={() => setOpen(false)}
                       >
                         {/* Product Thumbnail */}
-                        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg border border-slate-200/80 bg-white p-1 overflow-hidden shadow-2xs">
+                        <div className="flex aspect-[4/5] w-14 shrink-0 items-center justify-center rounded-lg border border-slate-200/80 bg-white p-1 overflow-hidden shadow-2xs">
                           <img
                             src={product.thumbnail}
                             alt={product.title}

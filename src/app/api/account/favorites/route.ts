@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { query, withTransaction } from "@lib/admin/db"
 import { getCustomerSessionId } from "@lib/commerce/customer-auth"
 import { ensureCommerceSchema } from "@lib/commerce/schema"
+import { listStoreProducts } from "@lib/commerce/repository"
 import { convertToLocale } from "@lib/util/money"
 
 type FavoriteInput = {
@@ -30,7 +31,7 @@ async function listFavorites(customerId: string) {
             selected_variant.id AS variant_id,
             selected_variant.price AS price_amount
      FROM store_customer_favorite f
-     JOIN store_product p ON p.id=f.product_id AND p.status='published'
+     JOIN store_product p ON p.id=f.product_id AND p.status='published' AND p.deleted_at IS NULL
      LEFT JOIN LATERAL (
        SELECT v.id,v.price
        FROM store_variant v
@@ -43,7 +44,10 @@ async function listFavorites(customerId: string) {
     [customerId]
   )
 
+  const { products } = rows.length ? await listStoreProducts({ ids: rows.map(row => row.id), status: "published", limit: rows.length }) : { products: [] }
+  const byId = new Map(products.map(product => [product.id, product]))
   return rows.map((row) => ({
+    product: byId.get(row.id),
     id: row.id,
     title: row.title,
     handle: row.handle,
@@ -107,7 +111,7 @@ export async function POST(request: NextRequest) {
                     ORDER BY v.created_at LIMIT 1
                   ) END
            FROM store_product p
-           WHERE p.id=$2 AND p.status='published'
+           WHERE p.id=$2 AND p.status='published' AND p.deleted_at IS NULL
            ON CONFLICT (customer_id,product_id) DO UPDATE SET
              variant_id=COALESCE(EXCLUDED.variant_id,store_customer_favorite.variant_id),
              updated_at=NOW()`,

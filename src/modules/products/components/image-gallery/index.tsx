@@ -25,7 +25,6 @@ const safeUrl = (url: string) => {
 const ImageGallery = ({ images, productTitle, discountBadge, product }: ImageGalleryProps) => {
   const [activeIndex, setActiveIndex] = useState(0)
   const [isLightboxOpen, setIsLightboxOpen] = useState(false)
-  const [imageSizes, setImageSizes] = useState<Record<string, { width: number; height: number }>>({})
   const touchStartX = useRef<number | null>(null)
   const touchEndX = useRef<number | null>(null)
 
@@ -46,22 +45,13 @@ const ImageGallery = ({ images, productTitle, discountBadge, product }: ImageGal
 
   if (!images || images.length === 0) {
     return (
-      <div className="w-full h-[300px] sm:h-[460px] bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-center text-slate-400 font-bold text-xs">
+      <div className="w-full aspect-[4/5] bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-center text-slate-400 font-bold text-xs">
         Görsel Yok
       </div>
     )
   }
 
   const mainImage = images[activeIndex] || images[0]
-  const mainSize = imageSizes[mainImage.url] || { width: 800, height: 1000 }
-  const imageRatio = mainSize.width / mainSize.height
-  const rememberSize = (url: string, image: HTMLImageElement) => {
-    if (!image.naturalWidth || !image.naturalHeight) return
-    setImageSizes((sizes) => sizes[url]?.width === image.naturalWidth && sizes[url]?.height === image.naturalHeight
-      ? sizes
-      : { ...sizes, [url]: { width: image.naturalWidth, height: image.naturalHeight } })
-  }
-
   const handlePrevImage = () => {
     setActiveIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
   }
@@ -104,7 +94,7 @@ const ImageGallery = ({ images, productTitle, discountBadge, product }: ImageGal
                 aria-label={`${index + 1}. ürün görselini göster`}
                 aria-pressed={isActive}
                 onClick={() => setActiveIndex(index)}
-                style={{ aspectRatio: imageSizes[image.url] ? imageSizes[image.url].width / imageSizes[image.url].height : 4 / 5 }}
+                style={{ aspectRatio: 4 / 5 }}
                 className={clx(
                   "relative w-14 md:w-full rounded-xl overflow-hidden border-2 transition-colors bg-[#FBF7F4] flex items-center justify-center shrink-0 cursor-pointer shadow-2xs",
                   isActive
@@ -118,7 +108,6 @@ const ImageGallery = ({ images, productTitle, discountBadge, product }: ImageGal
                   fill
                   unoptimized
                   className="object-contain"
-                  onLoad={(event) => rememberSize(image.url, event.currentTarget)}
                   sizes="100px"
                 />
               </button>
@@ -130,7 +119,7 @@ const ImageGallery = ({ images, productTitle, discountBadge, product }: ImageGal
       {/* ── MAIN IMAGE STAGE (White Stage with Faint Contour Line) ── */}
       <div
         className="relative w-full min-w-0 overflow-hidden rounded-2xl bg-[#FBF7F4] ring-1 ring-[#EADBD4]/60 cursor-zoom-in"
-        style={{ aspectRatio: imageRatio, maxWidth: `min(100%, ${620 * imageRatio}px)` }}
+        style={{ aspectRatio: 4 / 5, maxWidth: "min(100%, 496px)" }}
         onClick={() => setIsLightboxOpen(true)}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -171,7 +160,6 @@ const ImageGallery = ({ images, productTitle, discountBadge, product }: ImageGal
           unoptimized
           priority
           className="object-contain"
-          onLoad={(event) => rememberSize(mainImage.url, event.currentTarget)}
           sizes="(max-width: 768px) 100vw, 640px"
         />
 
@@ -281,17 +269,14 @@ const ImageGallery = ({ images, productTitle, discountBadge, product }: ImageGal
               )}
 
               {/* Main Enlarged Image */}
-              <div className="relative overflow-hidden rounded-xl sm:rounded-2xl">
+              <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-[#faf6f3] sm:rounded-2xl" style={{ width: "min(1120px, calc(100vw - 40px), calc(78dvh * 0.8))" }}>
                 <Image
                   src={safeUrl(mainImage.url)}
                   alt={`${productTitle} büyük görünüm`}
-                  width={mainSize.width}
-                  height={mainSize.height}
+                  fill
                   unoptimized
                   priority
-                  className="block h-auto w-auto object-contain select-none"
-                  style={{ maxWidth: "min(1120px, calc(100vw - 40px))", maxHeight: "78dvh", width: "auto", height: "auto" }}
-                  onLoad={(event) => rememberSize(mainImage.url, event.currentTarget)}
+                  className="object-contain select-none"
                 />
               </div>
 
@@ -323,7 +308,7 @@ const ImageGallery = ({ images, productTitle, discountBadge, product }: ImageGal
                         ? "border-[#C98484] scale-105 shadow-md"
                         : "border-transparent opacity-60 hover:opacity-100"
                     )}
-                    style={{ aspectRatio: imageSizes[img.url] ? imageSizes[img.url].width / imageSizes[img.url].height : 4 / 5 }}
+                    style={{ aspectRatio: 4 / 5 }}
                   >
                     <Image
                       src={safeUrl(img.url)}

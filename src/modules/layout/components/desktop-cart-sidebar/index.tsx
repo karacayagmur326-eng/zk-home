@@ -173,7 +173,7 @@ export default function DesktopCartSidebar({
                 {/* Thumbnail Image */}
                 <LocalizedClientLink
                   href={`/urunler/${item.product_handle}`}
-                  className="block h-16 w-16 shrink-0 relative overflow-hidden rounded-lg bg-slate-50 border border-slate-100"
+                  className="block aspect-[4/5] w-16 shrink-0 relative overflow-hidden rounded-lg bg-slate-50 border border-slate-100"
                 >
                   <img
                     src={item.thumbnail || "/images/placeholder.svg"}

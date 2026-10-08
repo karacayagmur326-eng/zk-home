@@ -25,7 +25,7 @@ const Item = ({ item, currencyCode, isLast }: ItemProps) => {
       data-testid="product-row"
     >
       {/* Thumbnail */}
-      <div className="w-16 h-16 flex-shrink-0 rounded-xl overflow-hidden border border-slate-100 bg-slate-50">
+      <div className="w-16 aspect-[4/5] flex-shrink-0 rounded-xl overflow-hidden border border-slate-100 bg-slate-50">
         <Thumbnail thumbnail={item.thumbnail} size="square" />
       </div>
 

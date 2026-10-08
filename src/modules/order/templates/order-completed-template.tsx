@@ -330,7 +330,7 @@ export default function OrderCompletedTemplate({
                   return (
                     <div key={item.id} className="py-4 first:pt-1 last:pb-1 flex items-center justify-between gap-4">
                       <div className="flex items-center gap-3.5 min-w-0">
-                        <div className="w-16 h-16 bg-slate-50 border border-slate-100 rounded-2xl p-1.5 shrink-0 flex items-center justify-center overflow-hidden">
+                        <div className="w-16 aspect-[4/5] bg-slate-50 border border-slate-100 rounded-2xl p-1.5 shrink-0 flex items-center justify-center overflow-hidden">
                           {item.thumbnail ? (
                             <img
                               src={item.thumbnail}

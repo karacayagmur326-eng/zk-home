@@ -126,7 +126,7 @@ export default function CheckoutSummary({
             return (
               <div key={item.id} className="flex items-start gap-3 rounded-2xl border border-slate-100 bg-slate-50/50 p-3 text-xs" aria-busy={pending}>
                 {/* Thumbnail */}
-                <LocalizedClientLink href={`/urunler/${item.product_handle || item.product?.handle}`} className="w-20 h-24 bg-white border border-slate-100 rounded-xl p-1 shrink-0 flex items-center justify-center overflow-hidden" aria-label={`${item.title || item.product_title} ürününü incele`}>
+                <LocalizedClientLink href={`/urunler/${item.product_handle || item.product?.handle}`} className="w-20 aspect-[4/5] bg-white border border-slate-100 rounded-xl p-1 shrink-0 flex items-center justify-center overflow-hidden" aria-label={`${item.title || item.product_title} ürününü incele`}>
                   {item.thumbnail ? (
                     <img
                       src={item.thumbnail}

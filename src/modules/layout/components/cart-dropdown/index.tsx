@@ -177,7 +177,7 @@ const CartDropdown = ({
                         {/* Product Image Thumbnail */}
                         <LocalizedClientLink
                           href={`/urunler/${item.product_handle}`}
-                          className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-100 bg-slate-50/50 p-1"
+                          className="flex aspect-[4/5] w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-100 bg-slate-50/50 p-1"
                         >
                           <img
                             src={item.thumbnail || "/images/placeholder.svg"}

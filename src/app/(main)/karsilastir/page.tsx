@@ -450,7 +450,7 @@ type CompareRowItem = {
                     className="bg-white rounded-[24px] border border-slate-200/80 p-4 shadow-2xs flex gap-4 relative group h-full"
                   >
                     {/* Left Product Image */}
-                    <div className="relative w-28 h-28 sm:w-32 sm:h-32 shrink-0 bg-slate-50 rounded-2xl overflow-hidden p-2 flex items-center justify-center border border-slate-100">
+                    <div className="relative aspect-[4/5] w-28 sm:w-32 shrink-0 bg-slate-50 rounded-2xl overflow-hidden p-2 flex items-center justify-center border border-slate-100">
                       <Image
                         src={product.thumbnail || "/brand/zkhome-logo.svg"}
                         alt={product.title}

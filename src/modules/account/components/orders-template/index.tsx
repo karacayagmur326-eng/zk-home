@@ -346,7 +346,7 @@ export default function OrdersTemplate({ orders = [] }: OrdersTemplateProps) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 py-2">
                   {order.items?.map((item) => (
                     <div key={item.id} className="flex items-center gap-3 bg-slate-50/70 border border-slate-100 rounded-2xl p-2.5">
-                      <div className="w-14 h-14 shrink-0 rounded-xl overflow-hidden bg-white border border-slate-200/80 flex items-center justify-center">
+                      <div className="w-14 aspect-[4/5] shrink-0 rounded-xl overflow-hidden bg-white border border-slate-200/80 flex items-center justify-center">
                         <Thumbnail thumbnail={item.thumbnail} images={[]} size="square" />
                       </div>
                       <div className="min-w-0 flex-1">

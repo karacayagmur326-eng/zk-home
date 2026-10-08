@@ -22,7 +22,7 @@ export default function ProductPreview({
 }: {
   product: HttpTypes.StoreProduct
   isFeatured?: boolean
-  region: HttpTypes.StoreRegion
+  region?: HttpTypes.StoreRegion
   viewMode?: string
   showSummary?: boolean
 }) {
@@ -96,7 +96,7 @@ export default function ProductPreview({
         />
         <LocalizedClientLink
           href={`/urunler/${product.handle}`}
-          className="relative block h-44 w-full flex-shrink-0 bg-white sm:row-span-2 sm:h-full sm:min-h-44"
+          className="relative block aspect-[4/5] w-full self-start flex-shrink-0 bg-white sm:row-span-2"
         >
           <Thumbnail
             thumbnail={product.thumbnail}

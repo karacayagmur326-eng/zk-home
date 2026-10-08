@@ -1,5 +1,7 @@
 "use client"
 
+import FavoriteCounter from "../favorite-counter"
+
 import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
 import { SellerQuestionButton } from "@components/common/SellerQuestion"
@@ -229,8 +231,9 @@ export default function MobileSiteChrome({ settings, logoUrl, initialCart }: { s
             />
           </Link>
 
-          {/* Top Right Actions: Search & Sepet */}
-          <div className="flex items-center justify-self-end gap-1">
+          {/* Top Right Actions */}
+          <div className="flex items-center justify-self-end gap-0">
+            <FavoriteCounter />
             <button
               type="button"
               onClick={() => setSearchOpen((prev) => !prev)}
