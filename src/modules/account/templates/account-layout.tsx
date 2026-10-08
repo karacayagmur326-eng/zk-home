@@ -3,6 +3,7 @@ import AccountNav from "../components/account-nav"
 import { HttpTypes } from "@medusajs/types"
 import { Headphones, ArrowRight } from "@lib/icons"
 import { SellerQuestionButton } from "@components/common/SellerQuestion"
+import AccountSupportVisibility from "../components/account-support-visibility"
 
 interface AccountLayoutProps {
   customer: HttpTypes.StoreCustomer | null
@@ -39,6 +40,7 @@ const AccountLayout: React.FC<AccountLayoutProps> = ({
             {children}
 
             {/* Sorunuz mu var? Banner */}
+            <AccountSupportVisibility>
             <div className="relative hidden overflow-hidden rounded-3xl border border-slate-100 bg-white p-6 shadow-soft md:flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-rose-50/50 blur-2xl" />
 
@@ -63,6 +65,7 @@ const AccountLayout: React.FC<AccountLayoutProps> = ({
                 <ArrowRight className="h-4 w-4 stroke-[2.5]" />
               </SellerQuestionButton>
             </div>
+            </AccountSupportVisibility>
           </div>
         </div>
       </div>

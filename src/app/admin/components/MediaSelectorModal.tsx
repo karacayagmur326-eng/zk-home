@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react"
 import { uploadMediaFiles } from "@lib/admin/upload-media"
 import {
   APP_ICON_OPTIONS as SELECTABLE_ICONS,
-  Wrench,
+  Images, Upload, LayoutGrid, ArrowUpDown, Check, X, LoaderCircle,
 } from "@lib/icons"
 
 interface MediaFile {
@@ -245,6 +245,26 @@ export default function MediaSelectorModal({
         }
         .media-modal-tab-btn {
           transition: all 0.15s ease-in-out;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          white-space: nowrap;
+        }
+        .media-modal-tab-btn:focus-visible, .media-modal-action:focus-visible {
+          outline: 2px solid #B98787;
+          outline-offset: 3px;
+        }
+        @keyframes media-upload-spin { to { transform: rotate(360deg); } }
+        .media-upload-spinner { animation: media-upload-spin 1s linear infinite; }
+        .media-modal-tabs { flex-wrap: wrap; }
+        .media-modal-footer { flex-wrap: wrap; }
+        @media (max-width: 600px) {
+          .media-modal-tabs { width: 100%; }
+          .media-modal-tab-btn { flex: 1; padding: 8px 10px !important; font-size: 12px !important; }
+          .media-modal-footer { padding: 14px 16px !important; }
+          .media-modal-footer > div { width: 100%; }
+          .media-modal-footer-actions { justify-content: flex-end; flex-wrap: wrap; }
         }
       `}</style>
       <div style={{
@@ -273,19 +293,19 @@ export default function MediaSelectorModal({
               <p style={{ margin: 0, fontSize: 12, color: "#64748b", fontWeight: 500 }}>Görsel veya ikon seçin ya da bilgisayarınızdan yükleyin</p>
             </div>
           </div>
-          <button onClick={onClose} style={{
+          <button type="button" aria-label="Medya seçiciyi kapat" onClick={onClose} style={{
             width: 32, height: 32, borderRadius: "50%", background: "#f1f5f9", border: "none",
             display: "flex", alignItems: "center", justifyContent: "center",
             fontSize: 18, cursor: "pointer", color: "#64748b", transition: "all 0.15s"
           }}
           onMouseEnter={(e) => { e.currentTarget.style.background = "#e2e8f0"; e.currentTarget.style.color = "#0f172a" }}
           onMouseLeave={(e) => { e.currentTarget.style.background = "#f1f5f9"; e.currentTarget.style.color = "#64748b" }}
-          >×</button>
+          ><X size={18} strokeWidth={1.75} aria-hidden="true" /></button>
         </div>
 
         {/* Modern Segmented Tab Bar + Sort Selector */}
         <div style={{ padding: "12px 24px 0 24px", background: "#ffffff", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-          <div style={{
+          <div className="media-modal-tabs" style={{
             display: "inline-flex", background: "#f1f5f9", padding: 4, borderRadius: 12, gap: 4
           }}>
             <button
@@ -300,7 +320,7 @@ export default function MediaSelectorModal({
                 boxShadow: activeTab === "library" ? "0 2px 8px rgba(0,0,0,0.06)" : "none"
               }}
             >
-              🖼️ Ortam Kütüphanesi
+              <Images size={17} strokeWidth={1.75} aria-hidden="true" /> Ortam Kütüphanesi
             </button>
             {allowIcons && (
               <button
@@ -316,7 +336,7 @@ export default function MediaSelectorModal({
                 }}
               >
                 <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                  <Wrench aria-hidden="true" size={14} />
+                  <LayoutGrid aria-hidden="true" size={17} strokeWidth={1.75} />
                   İkon Kütüphanesi
                 </span>
               </button>
@@ -333,15 +353,16 @@ export default function MediaSelectorModal({
                 boxShadow: activeTab === "upload" ? "0 2px 8px rgba(0,0,0,0.06)" : "none"
               }}
             >
-              📤 Yeni Dosya Yükle
+              <Upload size={17} strokeWidth={1.75} aria-hidden="true" /> Yeni Dosya Yükle
             </button>
           </div>
 
           {/* Sort Selector (Persisted in localStorage) */}
           {activeTab !== "upload" && (
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: "#64748b" }}>Sırala:</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, maxWidth: "100%" }}>
+              <label htmlFor="media-modal-sort" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 600, color: "#64748b" }}><ArrowUpDown size={15} strokeWidth={1.75} aria-hidden="true" /> Sırala</label>
               <select
+                id="media-modal-sort"
                 value={sortBy}
                 onChange={(e) => handleSortChange(e.target.value)}
                 style={{
@@ -354,15 +375,16 @@ export default function MediaSelectorModal({
                   color: "#0f172a",
                   outline: "none",
                   cursor: "pointer",
+                  minWidth: 0, maxWidth: 230,
                   boxShadow: "0 1px 3px rgba(0,0,0,0.05)"
                 }}
               >
-                <option value="date_desc">📅 En Yeni (Tarihe Göre)</option>
-                <option value="date_asc">⏳ En Eski (Tarihe Göre)</option>
-                <option value="name_asc">🔤 İsme Göre (A-Z)</option>
-                <option value="name_desc">🔤 İsme Göre (Z-A)</option>
-                <option value="size_desc">🐘 Boyuta Göre (Büyükten Küçüğe)</option>
-                <option value="size_asc">🔍 Boyuta Göre (Küçükten Büyüğe)</option>
+                <option value="date_desc">En yeni</option>
+                <option value="date_asc">En eski</option>
+                <option value="name_asc">Dosya adı: A–Z</option>
+                <option value="name_desc">Dosya adı: Z–A</option>
+                <option value="size_desc">Boyut: büyükten küçüğe</option>
+                <option value="size_asc">Boyut: küçükten büyüğe</option>
               </select>
             </div>
           )}
@@ -425,11 +447,14 @@ export default function MediaSelectorModal({
               <h4 style={{ margin: "0 0 6px 0", color: "#0f172a", fontSize: 16, fontWeight: 800 }}>Yüklemek için dosyaları buraya sürükleyin</h4>
               <p style={{ margin: "0 0 20px 0", color: "#64748b", fontSize: 13, fontWeight: 500 }}>PNG, JPEG, WebP ve AVIF desteklenir. Dosya başına en fazla 8 MB.</p>
               <label style={{
-                background: "linear-gradient(135deg, #C98484, #ff7a28)", border: "none", borderRadius: 12,
+                background: "#B98787", border: "none", borderRadius: 12,
                 padding: "11px 24px", fontSize: 13, fontWeight: 800, cursor: "pointer",
                 color: "#ffffff", boxShadow: "0 4px 14px rgba(201, 132, 132, 0.35)", transition: "all 0.15s"
               }}>
-                {uploading ? `⏳ Yükleniyor... ${uploadProgress}` : "💻 Bilgisayardan Dosya Seç"}
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+                  {uploading ? <LoaderCircle size={17} className="media-upload-spinner" aria-hidden="true" /> : <Upload size={17} strokeWidth={1.75} aria-hidden="true" />}
+                  {uploading ? `Yükleniyor… ${uploadProgress}` : "Bilgisayardan dosya seç"}
+                </span>
                 <input type="file" accept="image/*" multiple onChange={handleUpload} disabled={uploading} style={{ display: "none" }} />
               </label>
             </div>
@@ -498,13 +523,13 @@ export default function MediaSelectorModal({
                           {isSelected && !isAdded && (
                             <div style={{
                               position: "absolute", top: 6, right: 6,
-                              background: "linear-gradient(135deg, #C98484, #ff7a28)",
+                              background: "#B98787",
                               color: "#fff", width: 22, height: 22, borderRadius: "50%",
                               display: "flex", alignItems: "center", justifyContent: "center",
                               fontSize: 12, fontWeight: "bold", zIndex: 5,
                               boxShadow: "0 2px 6px rgba(201, 132, 132, 0.4)"
                             }}>
-                              ✓
+                              <Check size={14} strokeWidth={2} aria-hidden="true" />
                             </div>
                           )}
                         </div>
@@ -563,7 +588,7 @@ export default function MediaSelectorModal({
         </div>
 
         {/* Modal Footer */}
-        <div style={{
+        <div className="media-modal-footer" style={{
           display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
           padding: "16px 24px", borderTop: "1px solid #f1f5f9", background: "linear-gradient(to top, #ffffff, #f8fafc)"
         }}>
@@ -572,19 +597,15 @@ export default function MediaSelectorModal({
             <label style={{
               display: "inline-flex", alignItems: "center", gap: 8,
               padding: "10px 18px", borderRadius: 10,
-              background: uploading ? "#cbd5e1" : "linear-gradient(135deg, #1e293b, #0f172a)",
-              color: "#ffffff", fontSize: 13, fontWeight: 700,
+              background: uploading ? "#f1f5f9" : "#ffffff",
+              color: uploading ? "#94a3b8" : "#475569", fontSize: 13, fontWeight: 600,
               cursor: uploading ? "not-allowed" : "pointer",
-              boxShadow: "0 4px 12px rgba(15, 23, 42, 0.25)",
-              border: "1px solid #334155",
+              boxShadow: "0 1px 3px rgba(15, 23, 42, 0.04)",
+              border: "1px solid #e2e8f0",
               transition: "all 0.15s ease-in-out"
             }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="17 8 12 3 7 8"></polyline>
-                <line x1="12" y1="3" x2="12" y2="15"></line>
-              </svg>
-              <span>{uploading ? `Yükleniyor... ${uploadProgress}` : "Bilgisayardan Yükle & Seç"}</span>
+              {uploading ? <LoaderCircle size={17} className="media-upload-spinner" aria-hidden="true" /> : <Upload size={17} strokeWidth={1.75} aria-hidden="true" />}
+              <span role="status" aria-live="polite">{uploading ? `Yükleniyor… ${uploadProgress}` : "Görsel yükle"}</span>
               <input
                 type="file"
                 accept="image/*"
@@ -596,8 +617,10 @@ export default function MediaSelectorModal({
             </label>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div className="media-modal-footer-actions" style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <button
+              type="button"
+              className="media-modal-action"
               onClick={onClose}
               style={{
                 padding: "10px 18px", border: "1.5px solid #e2e8f0", background: "#ffffff",
@@ -610,6 +633,8 @@ export default function MediaSelectorModal({
               İptal
             </button>
             <button
+              type="button"
+              className="media-modal-action"
               onClick={() => {
                 if (selectedUrls.length > 0) {
                   onSelect(selectedUrls)
@@ -620,16 +645,16 @@ export default function MediaSelectorModal({
               style={{
                 padding: "10px 22px", border: "none",
                 background: selectedUrls.length > 0
-                  ? "linear-gradient(135deg, #C98484, #ff7a28)"
+                  ? "#B98787"
                   : "#e2e8f0",
                 color: selectedUrls.length > 0 ? "#ffffff" : "#94a3b8",
                 borderRadius: 10, fontSize: 13, fontWeight: 800,
                 cursor: selectedUrls.length > 0 ? "pointer" : "not-allowed",
                 boxShadow: selectedUrls.length > 0 ? "0 4px 14px rgba(201, 132, 132, 0.35)" : "none",
-                transition: "all 0.15s ease-in-out"
+                transition: "all 0.15s ease-in-out", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8
               }}
             >
-              Seçilen Elemanı Kullan ({selectedUrls.length})
+              <Check size={17} strokeWidth={1.75} aria-hidden="true" /> Seçimi kullan ({selectedUrls.length})
             </button>
           </div>
         </div>
