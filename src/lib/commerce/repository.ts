@@ -184,9 +184,20 @@ export async function listStoreProducts(filters: ProductFilters = {}) {
 
   if (filters.q) {
     const p = add(`%${filters.q}%`)
+    const tagQuery = slugify(filters.q)
+    // Tags are stored as slugs. Normalize Turkish letters and require every
+    // search word to match this product's tags, regardless of word order.
+    const tagMatch = tagQuery ? ` OR NOT EXISTS (
+      SELECT 1 FROM UNNEST(${add(tagQuery.split("-"))}::text[]) AS term(value)
+      WHERE NOT EXISTS (
+        SELECT 1 FROM store_product_tag pt
+        JOIN store_tag t ON t.id = pt.tag_id
+        WHERE pt.product_id = p.id AND t.value ~* ('(^|-)' || term.value)
+      )
+    )` : ""
     where.push(`(p.title ILIKE ${p} OR p.handle ILIKE ${p} OR EXISTS (
       SELECT 1 FROM store_variant sv WHERE sv.product_id = p.id AND sv.sku ILIKE ${p}
-    ))`)
+    )${tagMatch})`)
   }
 
   if (filters.priceMin !== undefined || filters.priceMax !== undefined) {
