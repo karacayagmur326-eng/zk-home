@@ -4,6 +4,8 @@ import { getCustomerSessionId } from "@lib/commerce/customer-auth"
 import { ensureCommerceSchema } from "@lib/commerce/schema"
 import { createId } from "@lib/commerce/repository"
 import { refundIyzicoPayment } from "@lib/payments/iyzico"
+import { queueOrderUpdate } from "@lib/notifications/order-updates"
+import { processNotificationOutbox } from "@lib/notifications/outbox"
 import { requestIp } from "@lib/security/rate-limit"
 
 export async function POST(req: NextRequest) {
@@ -47,11 +49,12 @@ export async function POST(req: NextRequest) {
   }
 
   let autoRefundDone = false
+  let notificationId: string | null = null
 
   try {
     await withTransaction(async (client) => {
       const locked = await client.query<any>(
-        `SELECT id,status,coupon_code,payment_status,fulfillment_status,total,email
+        `SELECT *
          FROM store_order
          WHERE id=$1 FOR UPDATE`,
         [orderId]
@@ -124,8 +127,8 @@ export async function POST(req: NextRequest) {
           }
 
           await client.query(
-            `INSERT INTO store_refund (id, payment_id, amount, reason, status, created_at, updated_at)
-             VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
+            `INSERT INTO store_refund (id, payment_id, amount, reason, status, provider_reference, created_at, updated_at)
+             VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
              ON CONFLICT (id) DO NOTHING`,
             [
               refundId,
@@ -135,8 +138,9 @@ export async function POST(req: NextRequest) {
                 ? "Müşteri panelinden iptal - iyzico kart iadesi otomatik tamamlandı."
                 : "Müşteri panelinden kargo öncesi sipariş iptal talebi.",
               autoRefundDone ? "completed" : "pending",
+              refundRefId,
             ]
-          ).catch(() => {})
+          )
 
           await client.query(
             `UPDATE store_payment
@@ -178,11 +182,13 @@ export async function POST(req: NextRequest) {
           orderId,
           wasPaid
             ? autoRefundDone
-              ? "Müşteri panelinden kargo öncesi iptal edildi. İyzico üzerinden tutar müşterinin kartına anında iade edildi."
+              ? "Müşteri panelinden kargo öncesi iptal edildi. İade ödeme kuruluşu tarafından onaylandı; karta yansıma süresi bankaya bağlıdır."
               : "Müşteri panelinden kargo öncesi iptal edildi. Ödeme iadesi kaydı oluşturuldu."
             : "Müşteri tarafından tahsilat yapılmadan iptal edildi.",
         ]
       )
+      const updated = await client.query<any>("SELECT * FROM store_order WHERE id=$1", [orderId])
+      notificationId = await queueOrderUpdate(client, current, updated.rows[0])
     })
   } catch (error) {
     return NextResponse.json(
@@ -196,8 +202,10 @@ export async function POST(req: NextRequest) {
     )
   }
 
+  const emailDelivery = notificationId ? await processNotificationOutbox(1, [notificationId]) : null
   return NextResponse.json({
     success: true,
-    message: "Siparişiniz başarıyla iptal edildi. Ödemeniz en kısa sürede kartınıza iade edilecektir.",
+    email_delivery: emailDelivery,
+    message: autoRefundDone ? "Siparişiniz iptal edildi. İade ödeme kuruluşu tarafından onaylandı; kartınıza yansıma süresi bankanıza bağlıdır." : "Siparişiniz iptal edildi. Varsa ödeme iadesi durumunu hesabınızdan takip edebilirsiniz.",
   })
 }

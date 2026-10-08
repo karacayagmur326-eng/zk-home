@@ -2,8 +2,10 @@ import { NextRequest, NextResponse } from "next/server"
 import { getAdminSession } from "@lib/admin/auth"
 import { query, withTransaction } from "@lib/admin/db"
 import { ensureCommerceSchema } from "@lib/commerce/schema"
-import { DeliveryPlan, validateDeliveryPlan, deliveryPlanText, ZK_HOME_DELIVERY } from "@lib/util/local-delivery"
+import { DeliveryPlan, validateDeliveryPlan, ZK_HOME_DELIVERY } from "@lib/util/local-delivery"
 import { createId } from "@lib/commerce/repository"
+import { queueOrderUpdate } from "@lib/notifications/order-updates"
+import { isBirFaturaReady } from "@lib/birfatura/readiness"
 import { processNotificationOutbox } from "@lib/notifications/outbox"
 
 // Legacy shipped orders were saved as processing. Present/filter them consistently
@@ -84,6 +86,7 @@ export async function GET(req: NextRequest) {
         payments,
         refunds,
         invoice: invoices[0] || null,
+        invoice_integration_enabled: await isBirFaturaReady(),
         customer_stats: customerStats,
       })
     }
@@ -286,74 +289,11 @@ export async function PATCH(req: NextRequest) {
   }
 
   let birFaturaSyncQueued = false
-  let localDeliveryNotificationId: string | null = null
-  let shippingNotificationId: string | null = null
-  let deliveryNotificationId: string | null = null
+  const invoiceIntegrationEnabled = await isBirFaturaReady()
+  let statusNotificationId: string | null = null
   await withTransaction(async (client) => {
-    const current = await client.query<{
-      status: string
-      display_id: number
-      email: string
-      payment_status: string
-      fulfillment_status: string
-      coupon_code: string | null
-    }>(
-      `SELECT status,display_id,email,payment_status,fulfillment_status,coupon_code
-       FROM store_order WHERE id=$1 FOR UPDATE`,
-      [id]
-    )
+    const current = await client.query<any>("SELECT * FROM store_order WHERE id=$1 FOR UPDATE", [id])
     if (!current.rows.length) throw new Error("Sipariş bulunamadı.")
-
-    const ensureStatusNotification = async (
-      type: "order_shipped" | "order_delivered" | "order_local_delivery",
-      subject: string,
-      payload: Record<string, unknown>,
-      eventKey = ""
-    ) => {
-      const existing = await client.query<{ id: string; status: string }>(
-        `SELECT id,status
-         FROM notification_outbox
-         WHERE type=$1
-           AND (payload->>'internal_order_id'=$2 OR payload->>'order_id'=$2)
-           AND ($3='' OR payload->>'delivery_key'=$3)
-         ORDER BY created_at ASC
-         FOR UPDATE`,
-        [type, id, eventKey]
-      )
-      if (existing.rows.some((row) => row.status === "sent")) return null
-
-      const reusable = existing.rows.find((row) =>
-        ["pending", "failed"].includes(row.status)
-      )
-      const notificationId = reusable?.id || `notif_${type}_${id}${eventKey ? `_${eventKey}` : ""}`
-
-      if (reusable) {
-        await client.query(
-          `UPDATE notification_outbox
-           SET recipient=$2,subject=$3,payload=$4,status='pending',last_error=NULL,updated_at=NOW()
-           WHERE id=$1`,
-          [notificationId, current.rows[0].email, subject, payload]
-        )
-      } else {
-        await client.query(
-          `INSERT INTO notification_outbox (id,type,recipient,subject,payload)
-           VALUES ($1,$2,$3,$4,$5)
-           ON CONFLICT (id) DO NOTHING`,
-          [notificationId, type, current.rows[0].email, subject, payload]
-        )
-      }
-
-      // Geçmiş sürümlerin oluşturduğu aynı olaya ait fazladan bekleyen kayıtları
-      // gönderme; müşteriye her aşama için yalnızca bir e-posta ulaşsın.
-      await client.query(
-        `UPDATE notification_outbox
-         SET status='superseded',updated_at=NOW()
-         WHERE type=$1 AND id<>$2 AND status IN ('pending','failed')
-           AND (payload->>'internal_order_id'=$3 OR payload->>'order_id'=$3)`,
-        [type, notificationId, id]
-      )
-      return notificationId
-    }
 
     const isAlreadyCancelledOrRefunded =
       current.rows[0].status === "cancelled" ||
@@ -500,7 +440,7 @@ export async function PATCH(req: NextRequest) {
       )
     }
     if (
-      fulfillmentStatus === "shipped" &&
+      invoiceIntegrationEnabled && fulfillmentStatus === "shipped" &&
       current.rows[0].fulfillment_status !== "shipped"
     ) {
       birFaturaSyncQueued = true
@@ -509,57 +449,15 @@ export async function PATCH(req: NextRequest) {
          VALUES ($1, $2, 'e_archive', 'pending', 'birfatura', NOW(), NOW())
          ON CONFLICT (order_id) DO NOTHING`,
         [createId("inv"), id]
-      ).catch(() => {})
-
-    }
-
-    if (deliveryPlan) {
-      const key = `${deliveryPlan.date}_${deliveryPlan.start.replace(":","")}_${deliveryPlan.end.replace(":","")}`
-      localDeliveryNotificationId = await ensureStatusNotification("order_local_delivery", "ZK Home teslimatınız planlandı", {
-        order_id: `#${current.rows[0].display_id}`, internal_order_id: id,
-        delivery_key: key, delivery_plan: deliveryPlan, delivery_window: deliveryPlanText(deliveryPlan),
-      }, key)
-      // Switching to hand delivery must not send a stale queued carrier email.
-      await client.query("UPDATE notification_outbox SET status='superseded',updated_at=NOW() WHERE type='order_shipped' AND status IN ('pending','failed') AND payload->>'internal_order_id'=$1",[id])
-    }
-
-    if ((body?.shipping_carrier && !localDelivery) || ["delivered","cancelled","canceled"].includes(fulfillmentStatus || "")) {
-      await client.query("UPDATE notification_outbox SET status='superseded',updated_at=NOW() WHERE type='order_local_delivery' AND status IN ('pending','failed') AND payload->>'internal_order_id'=$1",[id])
-    }
-    if (fulfillmentStatus === "shipped") {
-      shippingNotificationId = await ensureStatusNotification(
-        "order_shipped",
-        "Siparişiniz kargoya verildi",
-        {
-          order_id: `#${current.rows[0].display_id}`,
-          internal_order_id: id,
-          carrier: body?.shipping_carrier || null,
-          tracking_number: body?.tracking_number || null,
-          tracking_url: body?.tracking_url || null,
-        }
       )
+
     }
 
-    if (fulfillmentStatus === "delivered") {
-      deliveryNotificationId = await ensureStatusNotification(
-        "order_delivered",
-        "Siparişiniz teslim edildi",
-        {
-          order_id: `#${current.rows[0].display_id}`,
-          internal_order_id: id,
-        }
-      )
-    }
+    const updated = await client.query<any>("SELECT * FROM store_order WHERE id=$1", [id])
+    statusNotificationId = await queueOrderUpdate(client, current.rows[0], updated.rows[0])
   })
 
-  const pendingStatusNotificationIds: Array<string | null> = [
-    localDeliveryNotificationId as string | null,
-    shippingNotificationId as string | null,
-    deliveryNotificationId as string | null,
-  ]
-  const statusNotificationIds = pendingStatusNotificationIds.filter(
-    (value): value is string => typeof value === "string"
-  )
+  const statusNotificationIds: string[] = statusNotificationId ? [statusNotificationId] : []
   const emailDelivery = statusNotificationIds.length
     ? await processNotificationOutbox(
       statusNotificationIds.length,
@@ -595,6 +493,7 @@ export async function POST(req: NextRequest) {
   const order = orders[0]
 
   if (action === "create_invoice" || action === "sync_invoice") {
+    if (!(await isBirFaturaReady())) return NextResponse.json({ error: "Fatura entegrasyonu etkin ve yapılandırılmış olmalıdır." }, { status: 409 })
     if (!["shipped", "delivered"].includes(order.fulfillment_status)) {
       return NextResponse.json(
         { error: "Önce sipariş durumunu Kargoya Verildi olarak kaydedin." },

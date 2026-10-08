@@ -25,6 +25,8 @@ type OutboxProcessResult = {
 const EMAIL_PROVIDER_NOT_CONFIGURED = "E-posta sağlayıcısı yapılandırılmamış."
 const ADMIN_COPY_TYPES = new Set([
   "order_created",
+  "order_cancelled",
+  "order_status_updated",
   "order_shipped",
   "order_local_delivery",
   "order_delivered",
@@ -189,13 +191,35 @@ function emailHtml(row: OutboxRow, brand: EmailBrandSettings) {
       <p style="color:#475467;line-height:1.7;margin:22px 0 0;">Başka bir konuda desteğe ihtiyaç duyarsanız bize dilediğiniz zaman ulaşabilirsiniz.</p>
       <p style="color:#475467;line-height:1.7;margin:16px 0 0;">Saygılarımızla,<br><strong style="color:#172033;">${escapeHtml(brand.brandName)} Müşteri Deneyimi Ekibi</strong></p>
     `
-  } else {
+  } else if (row.type === "order_created") {
     const orderId = escapeHtml(row.payload.order_id)
+    const paid = row.payload.payment_status === "paid"
+    const total = new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY" }).format(Number(row.payload.total || 0) / 100)
     innerHtml = `
-      <h2 style="color: #333; margin-bottom: 20px;">Siparişiniz alındı</h2>
-      <p style="color: #555; line-height: 1.6;"><strong>Sipariş No:</strong> ${orderId}</p>
-      <p style="color: #555; line-height: 1.6;">Ödemeniz kontrol edildikten sonra hazırlık süreci başlayacaktır.</p>
+      <h2 style="color:#172033;margin:0 0 20px;">Siparişiniz alındı</h2>
+      <p style="color:#475467;line-height:1.7;">Değerli Müşterimiz,</p>
+      <p style="color:#475467;line-height:1.7;">ZK Home’u tercih ettiğiniz için teşekkür ederiz. <strong>${orderId}</strong> numaralı siparişiniz başarıyla oluşturulmuştur.</p>
+      <div style="padding:18px;border:1px solid #e5e7eb;border-radius:10px;background:#f8fafc;color:#172033;line-height:1.7;"><strong>Sipariş tutarı:</strong> ${escapeHtml(total)}${paid ? "<br><strong>Ödeme durumu:</strong> Ödemeniz başarıyla alınmıştır." : ""}</div>
+      <p style="color:#475467;line-height:1.7;">${paid ? "Siparişiniz ekibimiz tarafından özenle hazırlanacaktır. Teslimat sürecindeki gelişmeleri e-posta ile paylaşacağız." : "Siparişinizin güncel durumunu hesabınızdaki Siparişlerim bölümünden takip edebilirsiniz. Hazırlık ve teslimat sürecindeki gelişmeleri e-posta ile paylaşacağız."}</p>
+      <p style="color:#475467;line-height:1.7;">Sorularınız veya siparişinizle ilgili talepleriniz için hesabınızdaki Mesajlarım bölümünden destek ekibimize ulaşabilirsiniz.</p>
+      <p style="color:#475467;line-height:1.7;">Saygılarımızla,<br><strong>ZK Home Müşteri Deneyimi Ekibi</strong></p>
     `
+  } else if (row.type === "order_cancelled" || row.type === "order_status_updated") {
+    const cancelled = row.type === "order_cancelled"
+    const states: Record<string, string> = { awaiting_payment: "Ödeme bekleniyor", processing: "Sipariş hazırlanıyor", completed: "Sipariş tamamlandı", cancelled: "Sipariş iptal edildi", not_fulfilled: "Hazırlık bekleniyor", preparing: "Hazırlanıyor", delivery_scheduled: "Teslimat planlandı", shipped: "Kargoya verildi / Yolda", delivered: "Teslim edildi" }
+    const payments: Record<string, string> = { paid: "Ödeme alındı", partially_refunded: "Kısmi iade ödeme kuruluşu tarafından onaylandı", refunded: "İade ödeme kuruluşu tarafından onaylandı", refund_pending: "İade sonucu bekleniyor" }
+    const paymentText = payments[String(row.payload.payment_status)]
+    const trackingUrl = String(row.payload.tracking_url || "")
+    innerHtml = `<h2 style="color:#172033;margin:0 0 20px;">${cancelled ? "Siparişiniz iptal edildi" : "Siparişinizle ilgili yeni bir gelişme var"}</h2>
+      <p style="color:#475467;line-height:1.7;">Değerli Müşterimiz,</p>
+      <p style="color:#475467;line-height:1.7;"><strong>${escapeHtml(row.payload.order_id)}</strong> numaralı siparişiniz ${cancelled ? "iptal edilmiştir. Varsa ödeme iadenizin güncel durumunu hesabınızdan takip edebilirsiniz." : "için yeni bir güncelleme bulunmaktadır."}</p>
+      ${paymentText ? `<p style="color:#475467;line-height:1.7;"><strong>Ödeme durumu:</strong> ${escapeHtml(paymentText)}${["refunded", "partially_refunded"].includes(String(row.payload.payment_status)) ? ". Tutarın kartınıza yansıması bankanızın işlem süresine bağlıdır." : ""}</p>` : ""}
+      ${cancelled ? "" : `<div style="padding:18px;border:1px solid #e5e7eb;border-radius:10px;background:#f8fafc;color:#172033;line-height:1.7;"><strong>Sipariş:</strong> ${escapeHtml(states[String(row.payload.status)] || "Güncellendi")}<br><strong>Teslimat:</strong> ${escapeHtml(states[String(row.payload.fulfillment_status)] || "Güncellendi")}${row.payload.carrier ? `<br><strong>Teslimat firması:</strong> ${escapeHtml(row.payload.carrier)}` : ""}${row.payload.tracking_number ? `<br><strong>Takip numarası:</strong> ${escapeHtml(row.payload.tracking_number)}` : ""}</div>`}
+      ${/^https:\/\//i.test(trackingUrl) && !cancelled ? `<p><a href="${escapeHtml(trackingUrl)}" style="color:${escapeHtml(brand.primaryColor)};font-weight:bold;">Teslimatı takip edin</a></p>` : ""}
+      <p style="color:#475467;line-height:1.7;">Siparişinizle ilgili sorularınız için Mesajlarım bölümünden ekibimize ulaşabilirsiniz.</p>
+      <p style="color:#475467;line-height:1.7;">Saygılarımızla,<br><strong>ZK Home Müşteri Deneyimi Ekibi</strong></p>`
+  } else {
+    innerHtml = `<h2 style="color:#172033;">${escapeHtml(row.subject)}</h2><p style="color:#475467;line-height:1.7;">Hesabınızdaki güncel bilgileri kontrol edebilirsiniz.</p>`
   }
 
   return `

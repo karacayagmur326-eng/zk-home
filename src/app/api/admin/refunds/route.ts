@@ -6,6 +6,8 @@ import { ensureCommerceSchema } from "@lib/commerce/schema"
 import { createId } from "@lib/commerce/repository"
 import { refundStripePayment } from "@lib/payments/stripe"
 import { refundIyzicoPayment } from "@lib/payments/iyzico"
+import { queueOrderUpdate } from "@lib/notifications/order-updates"
+import { processNotificationOutbox } from "@lib/notifications/outbox"
 import { requestIp } from "@lib/security/rate-limit"
 import { convertToLocale } from "@lib/util/money"
 
@@ -42,43 +44,32 @@ export async function POST(req: NextRequest) {
          LIMIT 1 FOR UPDATE`,
         [orderId]
       )
-      let payment = paymentResult.rows[0]
-      if (!payment) {
-        const pId = createId("pay")
-        const orderRows = await client.query<{ total: string }>(`SELECT total FROM store_order WHERE id=$1`, [orderId])
-        const ordTotal = orderRows.rows[0]?.total || String(amount)
-        await client.query(
-          `INSERT INTO store_payment(id, order_id, provider_id, amount, status, created_at, updated_at)
-           VALUES ($1, $2, 'pp_iyzico_iyzico', $3, 'paid', NOW(), NOW())`,
-          [pId, orderId, ordTotal]
-        )
-        payment = { id: pId, provider_id: "pp_iyzico_iyzico", provider_reference: null, status: "paid", amount: String(ordTotal) }
-      } else if (!["paid", "partially_refunded"].includes(payment.status)) {
-        await client.query(`UPDATE store_payment SET status='paid' WHERE id=$1`, [payment.id])
-        await client.query(`UPDATE store_order SET payment_status='paid' WHERE id=$1`, [orderId])
-        payment.status = "paid"
+      const payment = paymentResult.rows[0]
+      if (!payment || !["paid", "partially_refunded"].includes(payment.status)) {
+        throw new Error("Doğrulanmış bir tahsilat bulunamadı. İade başlatılamaz.")
+      }
+      if (!payment.provider_reference || !["pp_stripe_stripe", "pp_iyzico_iyzico", "iyzico"].includes(payment.provider_id)) {
+        throw new Error("Ödeme kuruluşu işlem referansı bulunamadı. Para iadesi doğrulanamaz; ödeme kaydını sağlayıcı panelinden kontrol edin.")
       }
 
-      const refundedResult = await client.query<{ total: string }>(
-        `SELECT COALESCE(SUM(amount),0)::text AS total
+      const refundedResult = await client.query<{ total: string; pending: string }>(
+        `SELECT COALESCE(SUM(amount),0)::text AS total, COUNT(*) FILTER (WHERE status='pending')::text AS pending
          FROM store_refund
          WHERE payment_id=$1 AND status IN ('pending','completed')`,
         [payment.id]
       )
+      if (Number(refundedResult.rows[0]?.pending || 0) > 0) {
+        throw new Error("Sonucu beklenen bir iade işlemi var. Yeni iade başlatmadan önce bu işlemi sağlayıcı panelinden doğrulayın.")
+      }
       const refundable =
         Number(payment.amount) - Number(refundedResult.rows[0]?.total || 0)
-      if (amount > Math.max(refundable, Number(payment.amount))) {
+      if (amount > refundable) {
         throw new Error("İade tutarı kalan tahsilat tutarını aşamaz.")
       }
 
-      const hasLiveProvider = Boolean(
-        payment.provider_reference &&
-        ["pp_stripe_stripe", "pp_iyzico_iyzico", "iyzico"].includes(payment.provider_id)
-      )
-
       const refundId = createId("refund")
-      const refundStatus = hasLiveProvider ? "pending" : "completed"
-      const fullyRefunded = amount >= refundable || amount >= Number(payment.amount)
+      const refundStatus = "pending"
+      const fullyRefunded = amount >= refundable
       const paymentStatus = fullyRefunded ? "refunded" : "partially_refunded"
 
       await client.query(
@@ -87,25 +78,14 @@ export async function POST(req: NextRequest) {
         [refundId, payment.id, amount, reason || null, refundStatus]
       )
 
-      if (!hasLiveProvider) {
-        await client.query(
-          `UPDATE store_payment SET status=$2,updated_at=NOW() WHERE id=$1`,
-          [payment.id, paymentStatus]
-        )
-        await client.query(
-          `UPDATE store_order SET payment_status=$2,updated_at=NOW() WHERE id=$1`,
-          [orderId, paymentStatus]
-        )
-      }
-
       await client.query(
         `INSERT INTO store_order_status_history(id,order_id,status,note)
          VALUES ($1,$2,$3,$4)`,
         [
           createId("ordhist"),
           orderId,
-          paymentStatus,
-          `${convertToLocale({ amount, currency_code: "TRY" })} tutarında ${hasLiveProvider ? "sağlayıcı üzerinden " : ""}para iadesi işlendi.${reason ? ` Gerekçe: ${reason}` : ""}`,
+          "refund_pending",
+          `${convertToLocale({ amount, currency_code: "TRY" })} tutarında para iadesi talebi oluşturuldu; sağlayıcı sonucu bekleniyor.${reason ? ` Gerekçe: ${reason}` : ""}`,
         ]
       )
 
@@ -116,17 +96,8 @@ export async function POST(req: NextRequest) {
         providerId: payment.provider_id,
         providerReference: payment.provider_reference,
         paymentStatus,
-        hasLiveProvider,
       }
     })
-
-    if (!prepared.hasLiveProvider) {
-      return NextResponse.json({
-        success: true,
-        refund_id: prepared.refundId,
-        status: prepared.refundStatus,
-      })
-    }
 
     try {
       const providerRefund =
@@ -152,7 +123,8 @@ export async function POST(req: NextRequest) {
           ? providerRefund.failure_reason || null
           : null
 
-      await withTransaction(async (client) => {
+      const notificationId = await withTransaction(async (client) => {
+        const before = await client.query<any>("SELECT * FROM store_order WHERE id=$1 FOR UPDATE", [orderId])
         await client.query(
           `UPDATE store_refund
            SET status=$2,provider_reference=$3,error_message=$4,updated_at=NOW()
@@ -174,8 +146,14 @@ export async function POST(req: NextRequest) {
             [orderId, prepared.paymentStatus]
           )
         }
+        if (completed && before.rows[0]) {
+          const after = await client.query<any>("SELECT * FROM store_order WHERE id=$1", [orderId])
+          return queueOrderUpdate(client, before.rows[0], after.rows[0])
+        }
+        return null
       })
 
+      if (notificationId) await processNotificationOutbox(1, [notificationId]).catch(() => null)
       if (failed) {
         return NextResponse.json(
           {
@@ -190,6 +168,7 @@ export async function POST(req: NextRequest) {
         success: true,
         refund_id: prepared.refundId,
         status: localStatus,
+        message: completed ? "İade işlemi ödeme kuruluşu tarafından onaylandı. Tutarın kartınıza yansıması bankanızın işlem süresine bağlıdır." : "İade talebi ödeme kuruluşuna iletildi; işlem sonucu bekleniyor.",
       })
     } catch (error) {
       const message =
@@ -197,39 +176,12 @@ export async function POST(req: NextRequest) {
           ? error.message
           : "Kart iadesi ödeme kuruluşuna iletilemedi."
 
-      const isAlreadyRefunded =
-        message.includes("önceden iptal") ||
-        message.includes("already") ||
-        message.includes("daha önce")
-
-      if (isAlreadyRefunded) {
-        await query(
-          `UPDATE store_refund SET status='completed',error_message=NULL,updated_at=NOW() WHERE id=$1`,
-          [prepared.refundId]
-        ).catch(() => {})
-        await query(
-          `UPDATE store_payment SET status=$2,updated_at=NOW() WHERE id=$1`,
-          [prepared.paymentId, prepared.paymentStatus]
-        ).catch(() => {})
-        await query(
-          `UPDATE store_order SET payment_status=$2,updated_at=NOW() WHERE id=$1`,
-          [orderId, prepared.paymentStatus]
-        ).catch(() => {})
-
-        return NextResponse.json({
-          success: true,
-          refund_id: prepared.refundId,
-          status: "completed",
-          message: "Bu ödeme iyzico üzerinden daha önce iade edilmişti. Sipariş kaydı güncellendi.",
-        })
-      }
-
       await query(
         `UPDATE store_refund
-         SET status='failed',error_message=$2,updated_at=NOW() WHERE id=$1`,
+         SET status='pending',error_message=$2,updated_at=NOW() WHERE id=$1`,
         [prepared.refundId, message]
       ).catch(() => {})
-      return NextResponse.json({ error: message }, { status: 502 })
+      return NextResponse.json({ error: `${message} İade sonucu doğrulanamadı. Yeniden iade göndermeden önce sağlayıcı panelini kontrol edin.` }, { status: 502 })
     }
   } catch (error) {
     return NextResponse.json(

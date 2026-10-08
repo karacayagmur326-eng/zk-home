@@ -117,6 +117,7 @@ interface OrderDetail {
     avg_order_value: number
   }
   invoice?: InvoiceInfo | null
+  invoice_integration_enabled?: boolean
 }
 
 function money(amount: number, currency: string = "try") {
@@ -374,7 +375,8 @@ export default function AdminOrderDetailPage({
         }),
       })
       if (res.ok) {
-        setSuccessMsg("Para iadesi başarıyla işlendi.")
+        const result = await res.json()
+        setSuccessMsg(result.message || "İade talebi kaydedildi; sağlayıcı durumunu kontrol edin.")
         setShowRefundModal(false)
         fetchOrder()
       } else {
@@ -633,7 +635,7 @@ export default function AdminOrderDetailPage({
                           <span>Sipariş İade Edildi (Kilitli)</span>
                         </div>
                         <p className="text-[11px] text-rose-600 font-medium">
-                          Para iadesi İyzico üzerinden tamamlandığı için kargo ve hazırlık süreci kapatılmıştır.
+                          Sipariş iade kaydı nedeniyle kilitlidir. Ödeme kuruluşu onayı ile tutarın kartınıza yansıması farklı aşamalardır.
                         </p>
                       </div>
                     ) : isCancelled ? (
@@ -925,7 +927,7 @@ export default function AdminOrderDetailPage({
                     <div className="flex flex-col gap-1">
                       <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-black shadow-xs">
                         <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                        <span>İyzico İadesi Başarıyla Yapıldı</span>
+                        <span>{detail.refunds?.some((refund) => refund.status === "completed" && refund.provider_reference) ? "İade ödeme kuruluşu tarafından onaylandı; bankaya yansıması beklenebilir" : "İade kaydı var; sağlayıcı onayı doğrulanamadı"}</span>
                       </div>
                       {detail.refunds?.find((r: any) => r.status === "completed" || r.status === "succeeded")?.provider_reference && (
                         <span className="text-[10px] text-slate-400 font-mono pl-1">
@@ -999,7 +1001,7 @@ export default function AdminOrderDetailPage({
                   <Save className="w-4 h-4" />
                   {saving
                     ? "Kaydediliyor..."
-                    : fulfillmentStatus === "shipped" && detail.order.fulfillment_status !== "shipped"
+                    : detail.invoice_integration_enabled && fulfillmentStatus === "shipped" && detail.order.fulfillment_status !== "shipped"
                     ? "Kaydet ve BirFatura ile Eşitle"
                     : "Sipariş Değişikliklerini Kaydet"}
                 </button>
@@ -1021,7 +1023,7 @@ export default function AdminOrderDetailPage({
             </div>
 
             {/* Sidebar Card 2: BirFatura & E-Fatura */}
-            <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
+            {detail.invoice_integration_enabled && (<div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <h3 className="text-sm font-black text-slate-900 flex items-center gap-2">
                   <FileText className="w-4 h-4 text-[#C98484]" />
@@ -1089,7 +1091,7 @@ export default function AdminOrderDetailPage({
                   </div>
                 )}
               </div>
-            </div>
+            </div>)}
 
             {/* Sidebar Card 3: Sipariş Nitelik */}
             <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
