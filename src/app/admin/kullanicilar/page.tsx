@@ -1,5 +1,7 @@
 "use client"
 
+import { useAdminAutoRefresh } from "@lib/hooks/use-admin-auto-refresh"
+
 import React, { useEffect, useState } from "react"
 import {
   Users,
@@ -63,6 +65,7 @@ export default function AdminKullanicilarPage() {
 
   // Filters
   const [search, setSearch] = useState("")
+  const [appliedSearch, setAppliedSearch] = useState("")
   const [roleFilter, setRoleFilter] = useState("Tümü")
   const [statusFilter, setStatusFilter] = useState("Tümü")
   const [verifiedFilter, setVerifiedFilter] = useState("Tümü")
@@ -95,48 +98,56 @@ export default function AdminKullanicilarPage() {
     setTimeout(() => setToast(null), 4000)
   }
 
-  async function loadData() {
-    setLoading(true)
+  async function loadData(silent = false, signal?: AbortSignal) {
+    if (!silent) setLoading(true)
     try {
       const queryParams = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
-        search,
+        search: silent ? appliedSearch : search,
         role: roleFilter,
         status: statusFilter,
         verified: verifiedFilter,
       })
 
-      const res = await fetch(`/api/admin/customers?${queryParams}`)
+      const res = await fetch(`/api/admin/customers?${queryParams}`, { cache: "no-store", signal })
       if (res.status === 401) {
         window.location.assign("/admin")
         return
       }
+      if (!res.ok) return
       const data = await res.json()
+      if (signal?.aborted) return
       setCustomers(data.customers || [])
       setTotal(data.count || 0)
       if (data.stats) {
         setStats(data.stats)
       }
     } catch (err) {
-      showToast("Kullanıcı verileri yüklenirken bir hata oluştu.", "error")
+      if (!silent && !signal?.aborted) showToast("Kullanıcı verileri yüklenirken bir hata oluştu.", "error")
     } finally {
-      setLoading(false)
+      if (!silent && !signal?.aborted) setLoading(false)
     }
   }
 
   useEffect(() => {
-    loadData()
+    const controller = new AbortController()
+    void loadData(false, controller.signal)
+    return () => controller.abort()
   }, [page, limit, roleFilter, statusFilter, verifiedFilter])
+
+  useAdminAutoRefresh((signal) => loadData(true, signal), { enabled: !loading && !isSubmitting, refreshKey: JSON.stringify([page, limit, roleFilter, statusFilter, verifiedFilter, appliedSearch]) })
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    setAppliedSearch(search)
     setPage(1)
     loadData()
   }
 
   const handleClearFilters = () => {
     setSearch("")
+    setAppliedSearch("")
     setRoleFilter("Tümü")
     setStatusFilter("Tümü")
     setVerifiedFilter("Tümü")

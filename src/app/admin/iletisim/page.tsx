@@ -1,5 +1,7 @@
 "use client"
 
+import { useAdminAutoRefresh } from "@lib/hooks/use-admin-auto-refresh"
+
 import React, { useEffect, useState } from "react"
 import Link from "next/link"
 import {
@@ -195,11 +197,10 @@ export default function AdminContactPage() {
   useEffect(() => {
     const controller = new AbortController()
     fetchMessages(statusFilter, false, controller.signal)
-    const refresh = () => { if (!document.hidden) fetchMessages(statusFilter, true, controller.signal) }
-    const timer = window.setInterval(refresh, 30000)
-    window.addEventListener("focus", refresh)
-    return () => { controller.abort(); clearInterval(timer); window.removeEventListener("focus", refresh) }
+    return () => controller.abort()
   }, [statusFilter])
+
+  useAdminAutoRefresh((signal) => fetchMessages(statusFilter, true, signal), { refreshKey: statusFilter })
 
   const handleUpdateStatus = async (id: string, newStatus: string) => {
     try {

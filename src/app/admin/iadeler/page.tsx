@@ -1,5 +1,7 @@
 "use client"
 
+import { useAdminAutoRefresh } from "@lib/hooks/use-admin-auto-refresh"
+
 import { useEffect, useState } from "react"
 
 type ReturnRequest = {
@@ -24,18 +26,32 @@ const labels: Record<string, string> = {
 export default function ReturnsAdminPage() {
   const [requests, setRequests] = useState<ReturnRequest[]>([])
   const [message, setMessage] = useState("")
-  const load = () =>
-    fetch("/api/admin/returns").then((r) => r.json()).then((d) => setRequests(d.requests || []))
-  useEffect(() => { void load() }, [])
+  const [saving, setSaving] = useState(false)
+  const load = async (signal?: AbortSignal) => {
+    const response = await fetch("/api/admin/returns", { cache: "no-store", signal })
+    if (!response.ok) return
+    const data = await response.json()
+    if (!signal?.aborted) setRequests(data.requests || [])
+  }
+  useEffect(() => {
+    const controller = new AbortController()
+    void load(controller.signal).catch(() => {})
+    return () => controller.abort()
+  }, [])
+  useAdminAutoRefresh(load, { enabled: !saving })
 
   async function update(id: string, status: string) {
-    const response = await fetch("/api/admin/returns", {
-      method: "PATCH",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ id, status }),
-    })
-    setMessage(response.ok ? "İade talebi güncellendi." : "İşlem başarısız.")
-    if (response.ok) await load()
+    setSaving(true)
+    try {
+      const response = await fetch("/api/admin/returns", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ id, status }),
+      })
+      setMessage(response.ok ? "İade talebi güncellendi." : "İşlem başarısız.")
+      if (response.ok) await load()
+    } catch { setMessage("İşlem başarısız. Lütfen tekrar deneyin.") }
+    finally { setSaving(false) }
   }
 
   return (
@@ -53,7 +69,7 @@ export default function ReturnsAdminPage() {
                 <td>{labels[item.status] || item.status}</td>
                 <td>{new Date(item.created_at).toLocaleDateString("tr-TR")}</td>
                 <td>
-                  <select value={item.status} onChange={(e) => void update(item.id, e.target.value)}>
+                  <select disabled={saving} value={item.status} onChange={(e) => void update(item.id, e.target.value)}>
                     {Object.entries(labels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
                   </select>
                 </td>

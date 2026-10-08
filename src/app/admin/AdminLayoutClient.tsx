@@ -1,4 +1,6 @@
 "use client"
+
+import { useAdminAutoRefresh } from "@lib/hooks/use-admin-auto-refresh"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useState, useEffect, type CSSProperties } from "react"
@@ -373,26 +375,12 @@ export default function AdminLayout({
       .catch(() => {})
   }, [authenticated])
 
-  useEffect(() => {
-    if (!authenticated) return
-    let alive = true
-    const refresh = () => {
-      fetch("/api/admin/notifications/summary", { cache: "no-store" })
-        .then((r) => r.json())
-        .then((data) => {
-          if (alive && data.counts) setNotificationCounts(data.counts)
-        })
-        .catch(() => {})
-    }
-    refresh()
-    const timer = window.setInterval(refresh, 30000)
-    window.addEventListener("admin-notifications:refresh", refresh)
-    return () => {
-      alive = false
-      window.clearInterval(timer)
-      window.removeEventListener("admin-notifications:refresh", refresh)
-    }
-  }, [authenticated])
+  useAdminAutoRefresh(async (signal) => {
+    const response = await fetch("/api/admin/notifications/summary", { cache: "no-store", signal })
+    if (!response.ok) return
+    const data = await response.json()
+    if (!signal.aborted && data.counts) setNotificationCounts(data.counts)
+  }, { enabled: authenticated === true, immediate: true })
 
   useEffect(() => {
     if (!authenticated) return

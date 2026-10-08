@@ -1,4 +1,5 @@
 import Link from "next/link"
+import NewsletterAutoRefresh from "./auto-refresh"
 import { getAdminSession } from "@lib/admin/auth"
 import { query } from "@lib/admin/db"
 
@@ -16,6 +17,7 @@ export default async function NewsletterSubscribers({ searchParams }: { searchPa
   const count = Number(counts[0]?.count || 0)
   return <div className="space-y-6 p-5 sm:p-8">
     <div><h1 className="text-xl font-semibold text-slate-900">E-posta Bülteni</h1><p className="mt-1 text-sm text-slate-500">Bülten kayıtları ve abonelik kutusu ayarları.</p></div>
+    <NewsletterAutoRefresh />
     <div className="flex flex-wrap gap-3"><Link href="/admin/anasayfa-vitrini" className="admin-btn admin-btn-secondary">Bülten kutusunu aç / kapat</Link><Link href="/admin/tema-ayarlari" className="admin-btn admin-btn-secondary">Sosyal medya ve footer metinleri</Link></div>
     <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
       <h2 className="border-b border-slate-200 p-4 font-semibold">Aboneler ({count})</h2>

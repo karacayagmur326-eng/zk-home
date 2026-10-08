@@ -1,5 +1,7 @@
 "use client"
 
+import { useAdminAutoRefresh } from "@lib/hooks/use-admin-auto-refresh"
+
 import React, { useEffect, useState, useCallback } from "react"
 import Link from "next/link"
 import {
@@ -102,8 +104,8 @@ export default function AdminReviewsPage() {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
 
-  const fetchReviews = useCallback(async () => {
-    setLoading(true)
+  const fetchReviews = useCallback(async (silent = false, signal?: AbortSignal) => {
+    if (!silent) setLoading(true)
     try {
       const params = new URLSearchParams()
       if (statusFilter !== "all") params.set("status", statusFilter)
@@ -111,24 +113,29 @@ export default function AdminReviewsPage() {
       if (productFilter !== "all") params.set("productId", productFilter)
       if (searchQuery.trim()) params.set("q", searchQuery.trim())
 
-      const res = await fetch(`/api/admin/reviews?${params.toString()}`)
+      const res = await fetch(`/api/admin/reviews?${params.toString()}`, { cache: "no-store", signal })
       if (res.ok) {
         const data = await res.json()
+        if (signal?.aborted) return
         setReviews(data.reviews || [])
         if (data.stats) {
           setStats(data.stats)
         }
       }
     } catch (e) {
-      console.error(e)
+      if (!silent && !signal?.aborted) console.error(e)
     } finally {
-      setLoading(false)
+      if (!silent && !signal?.aborted) setLoading(false)
     }
   }, [statusFilter, ratingFilter, productFilter, searchQuery])
 
   useEffect(() => {
-    fetchReviews()
+    const controller = new AbortController()
+    void fetchReviews(false, controller.signal)
+    return () => controller.abort()
   }, [fetchReviews])
+
+  useAdminAutoRefresh((signal) => fetchReviews(true, signal), { enabled: !loading && !isSubmitting, refreshKey: JSON.stringify([statusFilter, ratingFilter, productFilter, searchQuery]) })
 
   useEffect(() => {
     fetch("/api/admin/products?limit=100")
@@ -506,7 +513,7 @@ export default function AdminReviewsPage() {
         <div className="flex items-center gap-2 ml-auto">
           <button
             type="button"
-            onClick={fetchReviews}
+            onClick={() => void fetchReviews()}
             className="px-3.5 py-2 rounded-xl bg-white border border-rose-200 text-[#C98484] font-extrabold hover:bg-rose-50 transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
           >
             <Filter className="w-3.5 h-3.5" />

@@ -1,5 +1,7 @@
 "use client"
 
+import { useAdminAutoRefresh } from "@lib/hooks/use-admin-auto-refresh"
+
 import { FormEvent, useCallback, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -162,32 +164,39 @@ export default function OrdersPage() {
     if (filterParam) setDateFilter(filterParam)
   }, [])
 
-  const loadOrders = useCallback(async () => {
-    setLoading(true)
-    const params = new URLSearchParams()
-    params.set("page", String(page))
-    params.set("limit", String(limit))
-    if (status) params.set("status", status)
-    if (dateFilter) params.set("date", dateFilter)
-    if (searchQuery.trim()) params.set("q", searchQuery.trim())
-    if (paymentFilter) params.set("payment_status", paymentFilter)
-    if (fulfillmentFilter) params.set("fulfillment_status", fulfillmentFilter)
+  const loadOrders = useCallback(async (silent = false, signal?: AbortSignal) => {
+    if (!silent) setLoading(true)
+    try {
+      const params = new URLSearchParams()
+      params.set("page", String(page))
+      params.set("limit", String(limit))
+      if (status) params.set("status", status)
+      if (dateFilter) params.set("date", dateFilter)
+      if (searchQuery.trim()) params.set("q", searchQuery.trim())
+      if (paymentFilter) params.set("payment_status", paymentFilter)
+      if (fulfillmentFilter) params.set("fulfillment_status", fulfillmentFilter)
 
-    const response = await fetch(`/api/admin/orders?${params}`)
-    if (response.status === 401) {
-      router.push("/admin")
-      return
-    }
-    const data = await response.json()
-    setOrders(data.orders || [])
-    setTotal(data.total || 0)
-    if (data.summary) setSummary(data.summary)
-    setLoading(false)
+      const response = await fetch(`/api/admin/orders?${params}`, { cache: "no-store", signal })
+      if (response.status === 401) {
+        router.push("/admin")
+        return
+      }
+      if (!response.ok) return
+      const data = await response.json()
+      if (signal?.aborted) return
+      setOrders(data.orders || [])
+      setTotal(data.total || 0)
+      if (data.summary) setSummary(data.summary)
+    } finally { if (!silent && !signal?.aborted) setLoading(false) }
   }, [dateFilter, fulfillmentFilter, limit, page, paymentFilter, router, searchQuery, status])
 
   useEffect(() => {
-    void loadOrders()
+    const controller = new AbortController()
+    void loadOrders(false, controller.signal).catch(() => {})
+    return () => controller.abort()
   }, [loadOrders])
+
+  useAdminAutoRefresh((signal) => loadOrders(true, signal), { enabled: !loading && !saving, refreshKey: JSON.stringify([dateFilter, fulfillmentFilter, limit, page, paymentFilter, searchQuery, status]) })
 
   function resetFilters() {
     setStatus("")

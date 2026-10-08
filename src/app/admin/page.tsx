@@ -1,5 +1,7 @@
 "use client"
 
+import { useAdminAutoRefresh } from "@lib/hooks/use-admin-auto-refresh"
+
 import React, { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -116,31 +118,37 @@ export default function AdminDashboard() {
     setIsEditingNote(false)
   }
 
-  function loadDashboard() {
-    setLoading(true)
-    fetch("/api/admin/stats")
+  function loadDashboard(silent = false, signal?: AbortSignal) {
+    if (!silent) setLoading(true)
+    return fetch("/api/admin/stats", { cache: "no-store", signal })
       .then((r) => {
         if (r.status === 401) {
           setAuthenticated(false)
           setLoading(false)
           return null
         }
+        if (!r.ok) return null
         return r.json()
       })
       .then((d) => {
-        if (!d) return
+        if (!d || signal?.aborted) return
         setStats(d.stats)
         setOrders(d.recentOrders || [])
         setLowStockItems(d.lowStockItems || [])
         setSalesHistory(d.salesHistory || [])
         setLoading(false)
       })
-      .catch(() => setLoading(false))
+      .catch(() => {})
+      .finally(() => { if (!silent && !signal?.aborted) setLoading(false) })
   }
 
   useEffect(() => {
-    loadDashboard()
+    const controller = new AbortController()
+    void loadDashboard(false, controller.signal)
+    return () => controller.abort()
   }, [])
+
+  useAdminAutoRefresh((signal) => loadDashboard(true, signal), { enabled: authenticated && !loading })
 
   if (!authenticated) {
     return (
