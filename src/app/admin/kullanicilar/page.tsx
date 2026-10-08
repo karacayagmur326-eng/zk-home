@@ -1,5 +1,7 @@
 "use client"
 
+import CustomerMessageButton from "../components/CustomerMessageButton"
+
 import { useAdminAutoRefresh } from "@lib/hooks/use-admin-auto-refresh"
 
 import React, { useEffect, useState } from "react"
@@ -698,6 +700,7 @@ export default function AdminKullanicilarPage() {
                         {/* İşlemler */}
                         <td className="p-4 text-right">
                           <div className="flex items-center justify-end gap-1">
+                            <CustomerMessageButton compact customerId={c.id} label={c.email}/>
                             <button
                               type="button"
                               onClick={() => setViewCustomerDetail(c)}

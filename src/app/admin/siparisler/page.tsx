@@ -1,5 +1,7 @@
 "use client"
 
+import CustomerMessageButton from "../components/CustomerMessageButton"
+
 import { useAdminAutoRefresh } from "@lib/hooks/use-admin-auto-refresh"
 
 import { FormEvent, useCallback, useEffect, useState } from "react"
@@ -86,6 +88,7 @@ const PAYMENT_LABELS: Record<string, string> = {
 }
 
 const FULFILLMENT_LABELS: Record<string, string> = {
+  delivery_scheduled: "ZK Home Teslimat",
   not_fulfilled: "Bekliyor",
   preparing: "Hazırlanıyor",
   shipped: "Kargoda",
@@ -599,6 +602,7 @@ export default function OrdersPage() {
                         </td>
                         <td className="p-3 text-right">
                           <div className="inline-flex items-center gap-1.5 text-slate-400">
+                            <CustomerMessageButton compact orderId={order.id} orderNumber={order.display_id} label={order.email}/>
                             <Link
                               href={`/admin/siparisler/${order.id}`}
                               className="p-1 hover:text-slate-700 transition-colors cursor-pointer"

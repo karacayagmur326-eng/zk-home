@@ -1,5 +1,6 @@
 "use client"
 
+import LocalDeliveryNotice from "@modules/order/components/local-delivery-notice"
 import React, { useState } from "react"
 import { convertToLocale } from "@lib/util/money"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -88,6 +89,7 @@ export default function OrderCompletedTemplate({
   const taxTotal = Number(order.tax_total || 0)
   const grandTotal = Number(order.total || 0)
 
+  const localDelivery = (order as any).shipping_carrier === "ZK Home Teslimat"
   // Dynamic Stepper Calculation based on order status and fulfillment
   let currentStep = 1
   const fStatus = String(order.fulfillment_status || "").toLowerCase()
@@ -95,7 +97,7 @@ export default function OrderCompletedTemplate({
 
   if (fStatus === "delivered" || oStatus === "completed") {
     currentStep = 4
-  } else if (fStatus === "shipped" || fStatus === "partially_shipped" || order.tracking_number) {
+  } else if (["shipped", "delivery_scheduled"].includes(fStatus) || fStatus === "partially_shipped" || order.tracking_number) {
     currentStep = 3
   } else if (fStatus === "preparing" || oStatus === "processing" || oStatus === "pending" || order.payment_status === "paid") {
     currentStep = 2
@@ -108,7 +110,8 @@ export default function OrderCompletedTemplate({
     <main className="min-h-screen bg-[#F8F9FA] py-8 sm:py-12 text-slate-900 font-sans">
       <div className="content-container mx-auto max-w-5xl px-4 sm:px-6 space-y-6">
 
-        {/* ─── 1. TOP CELEBRATION & TIMELINE CARD ────────────────────────── */}
+        <LocalDeliveryNotice order={order as any}/>
+      {/* ─── 1. TOP CELEBRATION & TIMELINE CARD ────────────────────────── */}
         <div className="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-soft space-y-8 relative overflow-hidden">
           {/* Subtle Top Accent */}
           <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-emerald-500 via-[#C98484] to-rose-500" />
@@ -132,7 +135,7 @@ export default function OrderCompletedTemplate({
                   {currentStep === 4
                     ? "Siparişiniz Teslim Edildi!"
                     : currentStep === 3
-                    ? "Siparişiniz Kargoya Verildi!"
+                    ? localDelivery ? "ZK Home Teslimatınız Planlandı" : "Siparişiniz Kargoya Verildi!"
                     : "Siparişiniz Başarıyla Alındı!"}
                 </h1>
                 <p className="text-xs text-slate-500 mt-0.5">
@@ -253,7 +256,7 @@ export default function OrderCompletedTemplate({
                       currentStep >= 3 ? "font-extrabold text-slate-900" : "font-bold text-slate-400"
                     }`}
                   >
-                    {currentStep >= 3 ? "Kargoya Verildi" : "Kargoya Verilecek"}
+                    {localDelivery ? "ZK Home Teslimat" : currentStep >= 3 ? "Kargoya Verildi" : "Kargoya Verilecek"}
                   </span>
                   <span
                     className={`text-[10px] hidden sm:block ${

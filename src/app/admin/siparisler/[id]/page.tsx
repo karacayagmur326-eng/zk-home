@@ -1,5 +1,9 @@
 "use client"
 
+import LocalDeliveryFields from "../../components/LocalDeliveryFields"
+import CustomerMessageButton from "../../components/CustomerMessageButton"
+import { DeliveryPlan, validateDeliveryPlan, ZK_HOME_DELIVERY } from "@lib/util/local-delivery"
+
 import { useEffect, useState, use } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -93,6 +97,7 @@ interface OrderDetail {
     tracking_number?: string | null
     tracking_url?: string | null
     metadata?: {
+      delivery_plan?: DeliveryPlan
       ip?: string
       device?: string
       payment_method?: string
@@ -161,6 +166,9 @@ export default function AdminOrderDetailPage({
   const [orderStatus, setOrderStatus] = useState("completed")
   const [fulfillmentStatus, setFulfillmentStatus] = useState("not_fulfilled")
   const [shippingCarrier, setShippingCarrier] = useState("Yurtiçi Kargo")
+  const [deliveryDate, setDeliveryDate] = useState("")
+  const [deliveryStart, setDeliveryStart] = useState("10:00")
+  const [deliveryEnd, setDeliveryEnd] = useState("18:00")
   const [trackingNumber, setTrackingNumber] = useState("")
   const [trackingUrl, setTrackingUrl] = useState("")
   const [customerType, setCustomerType] = useState<"member" | "guest">("guest")
@@ -200,6 +208,9 @@ export default function AdminOrderDetailPage({
         setOrderStatus(data.order.status || "processing")
         setFulfillmentStatus(data.order.fulfillment_status || "not_fulfilled")
         setShippingCarrier(data.order.shipping_carrier || "Yurtiçi Kargo")
+        setDeliveryDate(data.order.metadata?.delivery_plan?.date || "")
+        setDeliveryStart(data.order.metadata?.delivery_plan?.start || "10:00")
+        setDeliveryEnd(data.order.metadata?.delivery_plan?.end || "18:00")
         setTrackingNumber(data.order.tracking_number || "")
         setTrackingUrl(data.order.tracking_url || "")
         setCustomerType(data.order.customer_id ? "member" : "guest")
@@ -213,6 +224,10 @@ export default function AdminOrderDetailPage({
 
   async function handleSaveChanges() {
     if (!detail) return
+    if (shippingCarrier === ZK_HOME_DELIVERY && ["shipped", "delivery_scheduled"].includes(fulfillmentStatus)) {
+      try { validateDeliveryPlan({ date: deliveryDate, start: deliveryStart, end: deliveryEnd }) }
+      catch (error) { setErrorMsg(error instanceof Error ? error.message : "Teslimat planını kontrol edin."); document.getElementById("local-delivery-date")?.focus(); return }
+    }
     setSaving(true)
     setErrorMsg("")
     setSuccessMsg("")
@@ -225,6 +240,7 @@ export default function AdminOrderDetailPage({
         status: orderStatus,
         fulfillment_status: fulfillmentStatus,
         shipping_carrier: shippingCarrier,
+        delivery_plan: shippingCarrier === ZK_HOME_DELIVERY ? { date: deliveryDate, start: deliveryStart, end: deliveryEnd } : null,
         tracking_number: trackingNumber,
         tracking_url: trackingUrl,
         created_at: combinedDateTime.toISOString(),
@@ -495,6 +511,7 @@ export default function AdminOrderDetailPage({
               }`}>
                 {fulfillmentStatus === "delivered"
                   ? "Teslim Edildi"
+                  : fulfillmentStatus === "delivery_scheduled" ? "ZK Home Teslimat Planlandı"
                   : fulfillmentStatus === "shipped"
                   ? "Kargolandı"
                   : fulfillmentStatus === "cancelled"
@@ -634,6 +651,7 @@ export default function AdminOrderDetailPage({
                         value={
                           fulfillmentStatus === "delivered" || orderStatus === "completed"
                             ? "delivered"
+                            : fulfillmentStatus === "delivery_scheduled" ? "delivery_scheduled"
                             : fulfillmentStatus === "shipped"
                             ? "shipped"
                             : "preparing"
@@ -643,8 +661,10 @@ export default function AdminOrderDetailPage({
                           if (val === "delivered") {
                             setFulfillmentStatus("delivered")
                             setOrderStatus("completed")
+                          } else if (val === "delivery_scheduled") {
+                            setFulfillmentStatus("delivery_scheduled"); setShippingCarrier(ZK_HOME_DELIVERY); setOrderStatus("processing"); setTrackingNumber(""); setTrackingUrl("")
                           } else if (val === "shipped") {
-                            setFulfillmentStatus("shipped")
+                            setFulfillmentStatus(shippingCarrier === ZK_HOME_DELIVERY ? "delivery_scheduled" : "shipped")
                             setOrderStatus("shipped")
                           } else {
                             setFulfillmentStatus("preparing")
@@ -654,6 +674,7 @@ export default function AdminOrderDetailPage({
                         className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-bold text-slate-800 focus:outline-none focus:border-[#C98484]"
                       >
                         <option value="preparing">📦 Hazırlanıyor / İşleniyor</option>
+                        <option value="delivery_scheduled">ZK Home Teslimat Planlandı</option>
                         <option value="shipped">🚚 Kargoya Verildi / Yolda</option>
                         <option value="delivered">✅ Teslim Edildi</option>
                       </select>
@@ -776,9 +797,10 @@ export default function AdminOrderDetailPage({
                   <label className="block font-semibold text-slate-500 mb-1">Kargo Firması</label>
                   <select
                     value={shippingCarrier}
-                    onChange={(e) => setShippingCarrier(e.target.value)}
+                    onChange={(e) => { setShippingCarrier(e.target.value); if (e.target.value === ZK_HOME_DELIVERY) { setFulfillmentStatus("delivery_scheduled"); setOrderStatus("processing"); setTrackingNumber(""); setTrackingUrl("") } else if (fulfillmentStatus === "delivery_scheduled") setFulfillmentStatus("preparing") }}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-bold text-slate-800 focus:outline-none focus:border-[#C98484]"
                   >
+                    <option value={ZK_HOME_DELIVERY}>ZK Home Teslimat</option>
                     <option value="Yurtiçi Kargo">Yurtiçi Kargo</option>
                     <option value="Aras Kargo">Aras Kargo</option>
                     <option value="MNG Kargo">MNG Kargo</option>
@@ -789,6 +811,7 @@ export default function AdminOrderDetailPage({
                   </select>
                 </div>
 
+                {shippingCarrier !== ZK_HOME_DELIVERY && <>
                 <div>
                   <label className="block font-semibold text-slate-500 mb-1">Kargo Takip Numarası</label>
                   <input
@@ -810,7 +833,9 @@ export default function AdminOrderDetailPage({
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-semibold text-slate-800 focus:outline-none focus:border-[#C98484]"
                   />
                 </div>
+                </>}
               </div>
+              {shippingCarrier === ZK_HOME_DELIVERY && <LocalDeliveryFields date={deliveryDate} start={deliveryStart} end={deliveryEnd} onDate={setDeliveryDate} onStart={setDeliveryStart} onEnd={setDeliveryEnd}/> }
             </div>
 
             {/* Ürünler Tablosu ve Ödeme Özeti */}
@@ -964,6 +989,7 @@ export default function AdminOrderDetailPage({
               </div>
 
               <div className="space-y-3">
+                <CustomerMessageButton orderId={order.id} orderNumber={order.display_id} label={order.email}/>
                 <button
                   type="button"
                   onClick={handleSaveChanges}

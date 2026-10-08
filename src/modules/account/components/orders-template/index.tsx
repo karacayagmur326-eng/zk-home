@@ -7,6 +7,7 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import Thumbnail from "@modules/products/components/thumbnail"
 import { convertToLocale } from "@lib/util/money"
 import { createTransferRequest } from "@lib/data/orders"
+import LocalDeliveryNotice from "@modules/order/components/local-delivery-notice"
 import OrderJourney from "@modules/order/components/order-journey"
 import {
   ShoppingBag,
@@ -41,7 +42,7 @@ function getOrderStage(order: HttpTypes.StoreOrder): OrderStage {
     fulfillment === "delivered"
   ) return "delivered"
   if (
-    ["shipped", "partially_shipped"].includes(fulfillment) ||
+    ["shipped", "partially_shipped", "delivery_scheduled"].includes(fulfillment) ||
     status === "shipped"
   ) return "shipped"
   if (fulfillment === "preparing" || status === "processing") return "preparing"
@@ -156,6 +157,7 @@ export default function OrdersTemplate({ orders = [] }: OrdersTemplateProps) {
             const isCanceled = stage === "canceled"
             const isShipped = stage === "shipped"
 
+            const localDelivery = (order as any).shipping_carrier === "ZK Home Teslimat"
             const statusText = isCanceled
               ? "İptal Edildi"
               : isDelivered
@@ -188,7 +190,7 @@ export default function OrdersTemplate({ orders = [] }: OrdersTemplateProps) {
                       Tarih: {formattedDate}
                     </span>
                     <span className={`px-3 py-1 rounded-full border text-[11px] font-bold ${statusColor}`}>
-                      {statusText}
+                      {(order as any).fulfillment_status === "delivery_scheduled" ? "ZK Home Teslimat" : statusText}
                     </span>
                   </div>
 
@@ -206,7 +208,7 @@ export default function OrdersTemplate({ orders = [] }: OrdersTemplateProps) {
                 {/* 4-Step Progress Tracker Bar */}
                 {!isCanceled ? (
                   <div className="py-3 px-4 bg-slate-50/70 rounded-2xl border border-slate-100">
-                    <OrderJourney stage={stage} compact />
+                    <LocalDeliveryNotice order={order as any}/><OrderJourney stage={stage} compact localDelivery={(order as any).shipping_carrier === "ZK Home Teslimat"} />
                     <div className="hidden" aria-hidden="true">
                     {(() => {
                       let cardStep = 1

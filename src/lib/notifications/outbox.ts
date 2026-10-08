@@ -26,6 +26,7 @@ const EMAIL_PROVIDER_NOT_CONFIGURED = "E-posta sağlayıcısı yapılandırılma
 const ADMIN_COPY_TYPES = new Set([
   "order_created",
   "order_shipped",
+  "order_local_delivery",
   "order_delivered",
   "invoice_issued",
 ])
@@ -77,6 +78,14 @@ function emailHtml(row: OutboxRow, brand: EmailBrandSettings) {
       <p style="color: #555; line-height: 1.6;">${escapeHtml(brand.brandName)} hesabınızın şifresi başarıyla güncellendi.</p>
       <p style="color: #555; line-height: 1.6;">Bu işlemi siz yapmadıysanız lütfen hemen destek ekibimizle iletişime geçin.</p>
     `
+  } else if (row.type === "order_local_delivery") {
+    innerHtml = `
+      <h2 style="color:#172033;margin-bottom:20px;">ZK Home teslimatınız planlandı</h2>
+      <p style="color:#475467;line-height:1.7;">Değerli Müşterimiz,</p>
+      <p style="color:#475467;line-height:1.7;"><strong>${escapeHtml(row.payload.order_id)}</strong> numaralı siparişiniz, <strong>${escapeHtml(row.payload.delivery_window)}</strong> ZK Home teslimat ekibi tarafından teslimat adresinize bizzat ulaştırılacaktır.</p>
+      <p style="color:#475467;line-height:1.7;">Teslimatınız ZK Home ekibi tarafından gerçekleştirileceği için bir kargo takip numarası bulunmamaktadır. Belirtilen zaman aralığında adresinizde bulunmanızı rica ederiz.</p>
+      <p style="color:#475467;line-height:1.7;">Adres bilgilerinizde değişiklik veya teslimatla ilgili bir talebiniz varsa bu e-postayı yanıtlayarak ya da hesabınızdaki Mesajlarım bölümünden bizimle iletişime geçebilirsiniz.</p>
+      <p style="color:#475467;line-height:1.7;">Saygılarımızla,<br><strong>ZK Home Müşteri Deneyimi Ekibi</strong></p>`
   } else if (row.type === "order_shipped") {
     const orderId = escapeHtml(row.payload.order_id)
     const trackingUrl = String(row.payload.tracking_url || "")
@@ -155,15 +164,15 @@ function emailHtml(row: OutboxRow, brand: EmailBrandSettings) {
   } else if (row.type === "contact_reply_customer" || row.type === "contact_reply_admin") {
     innerHtml = `
       <p style="margin:0 0 8px;color:${escapeHtml(brand.primaryColor)};font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;">Müşteri destek ekibi</p>
-      <h2 style="color:#172033;margin:0 0 18px;font-size:26px;line-height:1.25;">Talebiniz yanıtlandı</h2>
+      <h2 style="color:#172033;margin:0 0 18px;font-size:26px;line-height:1.25;">${row.payload.initiated_by_admin ? "ZK Home’dan yeni mesajınız var" : "Talebiniz yanıtlandı"}</h2>
       <p style="color:#475467;line-height:1.7;margin:0 0 12px;">Merhaba ${escapeHtml(row.payload.name || "Değerli Müşterimiz")},</p>
-      <p style="color:#475467;line-height:1.7;margin:0;">Bizimle iletişime geçtiğiniz için teşekkür ederiz. Ekibimizin yanıtını aşağıda bulabilirsiniz.</p>
+      <p style="color:#475467;line-height:1.7;margin:0;">${row.payload.initiated_by_admin ? "Ekibimizin sizin için ilettiği mesajı aşağıda bulabilirsiniz." : "Bizimle iletişime geçtiğiniz için teşekkür ederiz. Ekibimizin yanıtını aşağıda bulabilirsiniz."}</p>
       <div style="margin-top:22px;padding:15px 18px;border-radius:10px;background:#f8fafc;border:1px solid #e5e7eb;color:#344054;font-size:14px;line-height:1.65;">
         <div><strong style="color:#172033;">Konu:</strong> ${escapeHtml(row.payload.contact_subject || "İletişim Talebi")}</div>
         ${row.payload.order_no ? `<div style="margin-top:7px;"><strong style="color:#172033;">Sipariş No:</strong> ${escapeHtml(row.payload.order_no)}</div>` : ""}
       </div>
       <div style="margin-top:14px;padding:20px 20px 20px 22px;border-radius:10px;background:#ffffff;border:1px solid #e5e7eb;border-left:4px solid ${escapeHtml(brand.primaryColor)};color:#172033;line-height:1.75;white-space:pre-wrap;"><strong style="display:block;margin-bottom:10px;color:${escapeHtml(brand.primaryColor)};font-size:13px;">${escapeHtml(brand.brandName)} yanıtı</strong>${escapeHtml(row.payload.reply)}</div>
-      <div style="margin-top:14px;padding:16px 18px;border-radius:10px;background:#f8fafc;border:1px solid #eef0f3;color:#667085;font-size:13px;line-height:1.65;white-space:pre-wrap;"><strong style="display:block;margin-bottom:7px;color:#475467;">Gönderdiğiniz mesaj</strong>${escapeHtml(row.payload.message)}</div>
+      ${row.payload.initiated_by_admin ? "" : `<div style="margin-top:14px;padding:16px 18px;border-radius:10px;background:#f8fafc;border:1px solid #eef0f3;color:#667085;font-size:13px;line-height:1.65;white-space:pre-wrap;"><strong style="display:block;margin-bottom:7px;color:#475467;">Gönderdiğiniz mesaj</strong>${escapeHtml(row.payload.message)}</div>`}
       <p style="color:#475467;line-height:1.7;margin:22px 0 0;">Başka bir konuda desteğe ihtiyaç duyarsanız bize dilediğiniz zaman ulaşabilirsiniz.</p>
       <p style="color:#475467;line-height:1.7;margin:16px 0 0;">Saygılarımızla,<br><strong style="color:#172033;">${escapeHtml(brand.brandName)} Müşteri Deneyimi Ekibi</strong></p>
     `

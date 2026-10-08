@@ -1,6 +1,7 @@
 type OrderJourneyProps = {
   stage: "pending" | "preparing" | "shipped" | "delivered"
   compact?: boolean
+  localDelivery?: boolean
 }
 
 const steps = [
@@ -25,17 +26,18 @@ function StepIcon({ icon, completed }: { icon: string; completed: boolean }) {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-7 9 7v9h-6v-6H9v6H3v-9Z" /></svg>
 }
 
-export default function OrderJourney({ stage, compact = false }: OrderJourneyProps) {
+export default function OrderJourney({ stage, compact = false, localDelivery = false }: OrderJourneyProps) {
+  const journeySteps = steps.map(step => step.key === "shipped" && localDelivery ? { ...step, title: "ZK Home Teslimat", detail: "Teslimat Planlandı" } : step)
   const current = stageIndex[stage]
   const progress = current === 3 ? 100 : current === 2 ? 67 : current === 1 ? 34 : 0
 
   return (
-    <div className={`order-journey ${compact ? "order-journey--compact" : ""}`} aria-label={`Sipariş durumu: ${steps[current].title}`}>
+    <div className={`order-journey ${compact ? "order-journey--compact" : ""}`} aria-label={`Sipariş durumu: ${journeySteps[current].title}`}>
       <div className="order-journey__rail" aria-hidden="true">
         <span className="order-journey__progress" style={{ width: `${progress}%` }} />
         {stage === "shipped" && <span className="order-journey__traveller"><StepIcon icon="truck" completed={false} /></span>}
       </div>
-      {steps.map((step, index) => {
+      {journeySteps.map((step, index) => {
         const reached = index <= current
         const completed = index < current || current === 3
         const active = index === current && current < 3

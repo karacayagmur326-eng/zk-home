@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getAdminSession } from "@lib/admin/auth"
 import { query, withTransaction } from "@lib/admin/db"
 import { ensureCommerceSchema } from "@lib/commerce/schema"
+import { DeliveryPlan, validateDeliveryPlan, deliveryPlanText, ZK_HOME_DELIVERY } from "@lib/util/local-delivery"
 import { createId } from "@lib/commerce/repository"
 import { processNotificationOutbox } from "@lib/notifications/outbox"
 
@@ -211,6 +212,7 @@ export async function PATCH(req: NextRequest) {
     "failed",
   ]
   const fulfillmentStatuses = [
+    "delivery_scheduled",
     "not_fulfilled",
     "preparing",
     "shipped",
@@ -232,6 +234,16 @@ export async function PATCH(req: NextRequest) {
   }
   if (fulfillmentStatus === "shipped" && (!status || status === "processing")) {
     status = "shipped"
+  }
+
+  const localDelivery = body?.shipping_carrier === ZK_HOME_DELIVERY
+  let deliveryPlan: DeliveryPlan | null = null
+  if (localDelivery && fulfillmentStatus === "shipped") fulfillmentStatus = "delivery_scheduled"
+  if (fulfillmentStatus === "delivery_scheduled") {
+    if (!localDelivery) return NextResponse.json({ error: "Planlı teslimat için ZK Home Teslimat seçin." }, { status: 400 })
+    try { deliveryPlan = validateDeliveryPlan(body?.delivery_plan) }
+    catch (error) { return NextResponse.json({ error: error instanceof Error ? error.message : "Geçersiz teslimat planı." }, { status: 400 }) }
+    status = "processing"
   }
 
   if (status && !orderStatuses.includes(status)) {
@@ -274,6 +286,7 @@ export async function PATCH(req: NextRequest) {
   }
 
   let birFaturaSyncQueued = false
+  let localDeliveryNotificationId: string | null = null
   let shippingNotificationId: string | null = null
   let deliveryNotificationId: string | null = null
   await withTransaction(async (client) => {
@@ -292,25 +305,27 @@ export async function PATCH(req: NextRequest) {
     if (!current.rows.length) throw new Error("Sipariş bulunamadı.")
 
     const ensureStatusNotification = async (
-      type: "order_shipped" | "order_delivered",
+      type: "order_shipped" | "order_delivered" | "order_local_delivery",
       subject: string,
-      payload: Record<string, unknown>
+      payload: Record<string, unknown>,
+      eventKey = ""
     ) => {
       const existing = await client.query<{ id: string; status: string }>(
         `SELECT id,status
          FROM notification_outbox
          WHERE type=$1
            AND (payload->>'internal_order_id'=$2 OR payload->>'order_id'=$2)
+           AND ($3='' OR payload->>'delivery_key'=$3)
          ORDER BY created_at ASC
          FOR UPDATE`,
-        [type, id]
+        [type, id, eventKey]
       )
       if (existing.rows.some((row) => row.status === "sent")) return null
 
       const reusable = existing.rows.find((row) =>
         ["pending", "failed"].includes(row.status)
       )
-      const notificationId = reusable?.id || `notif_${type}_${id}`
+      const notificationId = reusable?.id || `notif_${type}_${id}${eventKey ? `_${eventKey}` : ""}`
 
       if (reusable) {
         await client.query(
@@ -432,6 +447,8 @@ export async function PATCH(req: NextRequest) {
          email = COALESCE($14, email),
          delivered_at = CASE WHEN $4='delivered' AND delivered_at IS NULL
            THEN NOW() ELSE delivered_at END,
+         metadata = CASE WHEN $15::jsonb IS NOT NULL THEN COALESCE(metadata,'{}'::jsonb) || jsonb_build_object('delivery_plan',$15::jsonb)
+           WHEN $5 IS NOT NULL AND $5 <> 'ZK Home Teslimat' THEN COALESCE(metadata,'{}'::jsonb) - 'delivery_plan' ELSE metadata END,
          updated_at = NOW()
        WHERE id = $1`,
       [
@@ -440,8 +457,8 @@ export async function PATCH(req: NextRequest) {
         paymentStatus,
         fulfillmentStatus,
         body?.shipping_carrier || null,
-        body?.tracking_number || null,
-        body?.tracking_url || null,
+        localDelivery ? "" : body?.tracking_number || null,
+        localDelivery ? "" : body?.tracking_url || null,
         invoiceStatus,
         invoiceNumber,
         shippingAddress,
@@ -449,6 +466,7 @@ export async function PATCH(req: NextRequest) {
         createdAt,
         body?.customer_id === null ? 'CLEAR' : customerId,
         email,
+        deliveryPlan ? JSON.stringify(deliveryPlan) : null,
       ]
     )
 
@@ -495,6 +513,19 @@ export async function PATCH(req: NextRequest) {
 
     }
 
+    if (deliveryPlan) {
+      const key = `${deliveryPlan.date}_${deliveryPlan.start.replace(":","")}_${deliveryPlan.end.replace(":","")}`
+      localDeliveryNotificationId = await ensureStatusNotification("order_local_delivery", "ZK Home teslimatınız planlandı", {
+        order_id: `#${current.rows[0].display_id}`, internal_order_id: id,
+        delivery_key: key, delivery_plan: deliveryPlan, delivery_window: deliveryPlanText(deliveryPlan),
+      }, key)
+      // Switching to hand delivery must not send a stale queued carrier email.
+      await client.query("UPDATE notification_outbox SET status='superseded',updated_at=NOW() WHERE type='order_shipped' AND status IN ('pending','failed') AND payload->>'internal_order_id'=$1",[id])
+    }
+
+    if ((body?.shipping_carrier && !localDelivery) || ["delivered","cancelled","canceled"].includes(fulfillmentStatus || "")) {
+      await client.query("UPDATE notification_outbox SET status='superseded',updated_at=NOW() WHERE type='order_local_delivery' AND status IN ('pending','failed') AND payload->>'internal_order_id'=$1",[id])
+    }
     if (fulfillmentStatus === "shipped") {
       shippingNotificationId = await ensureStatusNotification(
         "order_shipped",
@@ -522,6 +553,7 @@ export async function PATCH(req: NextRequest) {
   })
 
   const pendingStatusNotificationIds: Array<string | null> = [
+    localDeliveryNotificationId as string | null,
     shippingNotificationId as string | null,
     deliveryNotificationId as string | null,
   ]

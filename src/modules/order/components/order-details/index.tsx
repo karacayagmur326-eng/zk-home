@@ -6,6 +6,7 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import { AlertTriangle, CheckCircle2 } from "@lib/icons"
 import { SellerQuestionPageContext } from "@components/common/SellerQuestion"
 import { CalendarDays, Download, FileText, RotateCcw } from "lucide-react"
+import LocalDeliveryNotice from "../local-delivery-notice"
 import OrderJourney from "@modules/order/components/order-journey"
 
 type OrderDetailsProps = {
@@ -389,14 +390,15 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order }) => {
         </div>
       </div>
 
+      <LocalDeliveryNotice order={order as any}/>
       {/* Sipariş Durumu İlerleme Çubuğu (Progress Tracker Bar) */}
       {!isCanceled ? (
         <div className="mt-6 pt-6 border-t border-slate-100">
-          <OrderJourney
+          <OrderJourney localDelivery={(order as any).shipping_carrier === "ZK Home Teslimat"}
             stage={
               ["delivered"].includes(String(fulfillmentStatus).toLowerCase()) || ["completed", "fulfilled"].includes(String(currentStatus).toLowerCase())
                 ? "delivered"
-                : ["shipped", "partially_shipped"].includes(String(fulfillmentStatus).toLowerCase()) || String(currentStatus).toLowerCase() === "shipped"
+                : ["shipped", "partially_shipped", "delivery_scheduled"].includes(String(fulfillmentStatus).toLowerCase()) || String(currentStatus).toLowerCase() === "shipped"
                 ? "shipped"
                 : String(fulfillmentStatus).toLowerCase() === "preparing" || String(currentStatus).toLowerCase() === "processing"
                 ? "preparing"

@@ -25,7 +25,7 @@ const feed = `WITH owned_contacts AS (
     OR (customer_id IS NULL AND $3::boolean AND LOWER(email)=$2)
 ), events AS (
   SELECT 'reply:' || n.id AS id, 'message' AS kind,
-    'Mesajınıza cevap verildi' AS title,
+    CASE WHEN m.initiated_by_admin THEN 'ZK Home’dan yeni mesaj' ELSE 'Mesajınıza cevap verildi' END AS title,
     LEFT(COALESCE(n.payload->>'reply',''),240) AS body,
     '/hesabim/mesajlarim?talep=' || m.id AS href, n.created_at
   FROM notification_outbox n JOIN owned_contacts m ON n.payload->>'message_id'=m.id::text

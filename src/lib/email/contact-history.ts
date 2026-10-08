@@ -20,7 +20,10 @@ async function initializeContactHistory() {
     ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'new',
     ADD COLUMN IF NOT EXISTS customer_id TEXT,
     ADD COLUMN IF NOT EXISTS admin_reply TEXT,
-    ADD COLUMN IF NOT EXISTS replied_at TIMESTAMPTZ;
+    ADD COLUMN IF NOT EXISTS replied_at TIMESTAMPTZ,
+    ADD COLUMN IF NOT EXISTS initiated_by_admin BOOLEAN NOT NULL DEFAULT FALSE,
+    ADD COLUMN IF NOT EXISTS admin_message_key TEXT;
+  CREATE UNIQUE INDEX IF NOT EXISTS contact_messages_admin_key_idx ON contact_messages(admin_message_key) WHERE admin_message_key IS NOT NULL;
   CREATE INDEX IF NOT EXISTS contact_messages_customer_idx ON contact_messages(customer_id);
   CREATE INDEX IF NOT EXISTS contact_messages_email_idx ON contact_messages(LOWER(email));`)
   await query(`CREATE TABLE IF NOT EXISTS contact_incoming_replies (
@@ -39,7 +42,7 @@ export async function contactHistory(id: string) {
   return query(`
     SELECT 'original_' || id AS id, 'incoming' AS direction, email AS sender,
       message AS body, created_at, 'received' AS delivery_status, NULL AS sent_at
-    FROM contact_messages WHERE id=$1
+    FROM contact_messages WHERE id=$1 AND NOT initiated_by_admin
     UNION ALL
     SELECT id, 'outgoing', 'ZK HOME', payload->>'reply', created_at,
       CASE WHEN payload->>'receipt_reply_id' IS NOT NULL THEN 'delivered' ELSE status END, sent_at
