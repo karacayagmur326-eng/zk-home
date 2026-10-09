@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import ConfirmModal from "../components/ConfirmModal"
 import MediaSelectorModal from "../components/MediaSelectorModal"
 import IconPickerModal from "../components/IconPickerModal"
-import HeroSlider from "@modules/home/components/hero-slider"
+import SliderPreview from "./SliderPreview"
 import { AppIcon, Wrench, Trash2, Pencil, Copy, Plus, Save, Image as ImageIcon } from "@lib/icons"
 import { sliderRevealEnd } from "@lib/content/slider-reveal"
 import { sliderColorParts, sliderColorOnWhite, withSliderOpacity } from "@lib/content/slider-colors"
@@ -421,17 +421,7 @@ function TypographySelectors({
 
 
 export default function SlidersPage() {
-  const previewRef = useRef<HTMLDivElement>(null)
-  const [previewViewportWidth, setPreviewViewportWidth] = useState(1440)
   const [previewSize, setPreviewSize] = useState<{ width: number; height: number } | null>(null)
-  useEffect(() => {
-    const measureViewport = () => {
-      setPreviewViewportWidth(document.documentElement.clientWidth)
-    }
-    measureViewport()
-    window.addEventListener("resize", measureViewport)
-    return () => window.removeEventListener("resize", measureViewport)
-  }, [])
   const router = useRouter()
   const [sliders, setSliders] = useState<any[]>([])
   const [categories, setCategories] = useState<any[]>([])
@@ -439,26 +429,6 @@ export default function SlidersPage() {
   const [pages, setPages] = useState<Array<{ title: string; url: string }>>(SYSTEM_PAGE_OPTIONS)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
-  useEffect(() => {
-    const element = previewRef.current
-    const parent = element?.parentElement
-    const child = element?.firstElementChild as HTMLElement | null
-    if (!element || !parent || !child) return
-    const resize = () => {
-      const height = child.offsetHeight
-      const width = child.offsetWidth
-      if (!width || !height) return
-      setPreviewSize(previous => previous?.width === width && previous.height === height ? previous : { width, height })
-      const scale = parent.clientWidth / width
-      element.style.transform = `scale(${scale})`
-      parent.style.height = `${height * scale}px`
-    }
-    const observer = new ResizeObserver(resize)
-    observer.observe(parent)
-    observer.observe(child)
-    resize()
-    return () => observer.disconnect()
-  }, [loading, previewViewportWidth])
   const [saving, setSaving] = useState(false)
   const [activeColorPicker, setActiveColorPicker] = useState<string | null>(null)
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null)
@@ -1084,16 +1054,10 @@ export default function SlidersPage() {
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
                     <span className="text-xs font-black uppercase tracking-wider text-gray-800">Canlı Önizleme</span>
                   </div>
-                  <span className="text-[10px] font-bold text-gray-400">{previewSize ? `${previewSize.width} × ${previewSize.height} px` : "…"}</span>
+                  <span className="text-[10px] font-bold text-gray-400">{previewSize ? `Görsel alanı: ${previewSize.width} × ${previewSize.height} px` : "…"}</span>
                 </div>
 
-                <div className="relative w-full overflow-hidden rounded-xl border border-gray-200 bg-gray-900 shadow-inner min-h-[220px]">
-                  <div
-                    style={{ width: `${previewViewportWidth}px`, transformOrigin: "top left", pointerEvents: "none" }}
-                    ref={previewRef}
-                  >
-                    <HeroSlider
-                      initialSliders={[{
+                <SliderPreview onImageAreaSize={setPreviewSize} slider={{
                         id: selectedId || "slider-preview",
                         badge_text: formData.badge_text,
                         badge_color: formData.badge_color,
@@ -1115,10 +1079,7 @@ export default function SlidersPage() {
                         top_bar_features: typeof formData.top_bar_features === "string" ? formData.top_bar_features : JSON.stringify(formData.top_bar_features || []),
                         features: typeof formData.features === "string" ? formData.features : JSON.stringify(formData.features || []),
                         right_features: typeof formData.right_features === "string" ? formData.right_features : JSON.stringify(formData.right_features || []),
-                      }]}
-                    />
-                  </div>
-                </div>
+                }} />
               </div>
               {/* Slider Görseli & Yayın Ayarları Card */}
               <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm space-y-4">
