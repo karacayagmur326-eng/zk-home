@@ -499,6 +499,7 @@ export default function SlidersPage() {
     badge_color: "#C98484",
     bg_color: "#eef0f2",
     image_reveal_end: 65,
+      image_reveal_enabled: true,
     image_url: "",
     button_text: "Ürünleri İncele",
     button_link: "/magaza",
@@ -634,6 +635,7 @@ export default function SlidersPage() {
       badge_color: slider.badge_color || "#C98484",
       bg_color: slider.bg_color || "#eef0f2",
       image_reveal_end: sliderRevealEnd(slider.image_reveal_end),
+      image_reveal_enabled: slider.image_reveal_enabled !== false,
       image_url: slider.image_url || "",
       button_text: slider.button_text || "",
       button_link: slider.button_link || "",
@@ -674,6 +676,7 @@ export default function SlidersPage() {
       badge_color: "#C98484",
       bg_color: "#eef0f2",
       image_reveal_end: 65,
+      image_reveal_enabled: true,
       image_url: "",
       button_text: "Ürünleri İncele",
       button_link: "/magaza",
@@ -1099,6 +1102,7 @@ export default function SlidersPage() {
                         description: formData.description,
                         bg_color: formData.bg_color,
                         image_reveal_end: formData.image_reveal_end,
+                        image_reveal_enabled: formData.image_reveal_enabled,
                         image_url: formData.image_url,
                         button_text: formData.button_text,
                         button_link: formData.button_link || "#",
@@ -1176,13 +1180,19 @@ export default function SlidersPage() {
                 </div>
 
                 <div className="space-y-2 rounded-xl border border-gray-200 bg-gray-50 p-3">
+                  <label className="flex items-center justify-between gap-3 text-xs font-bold text-gray-700">
+                    Geçiş Efekti
+                    <input type="checkbox" role="switch" aria-label="Geçiş Efekti" checked={formData.image_reveal_enabled}
+                      onChange={event => setFormData({ ...formData, image_reveal_enabled: event.target.checked })}
+                      className="h-4 w-4 accent-[#C98484]" />
+                  </label>
                   <label htmlFor="image-reveal-end" className="text-xs font-bold text-gray-700">Görsel Geçiş Mesafesi</label>
                   <p className="text-[11px] text-gray-500">Görselin sol kenarında görünürlük %0’dır. Seçtiğiniz mesafede %100’e ulaşır.</p>
                   <div className="flex items-center gap-3">
-                    <input id="image-reveal-end" type="range" min="5" max="100" value={formData.image_reveal_end}
+                    <input id="image-reveal-end" disabled={!formData.image_reveal_enabled} type="range" min="5" max="100" value={formData.image_reveal_end}
                       onChange={event => setFormData({ ...formData, image_reveal_end: Number(event.target.value) })}
                       className="min-w-0 flex-1 accent-[#C98484]" />
-                    <input type="number" aria-label="Görsel geçiş mesafesi yüzdesi" min="5" max="100" value={formData.image_reveal_end}
+                    <input type="number" disabled={!formData.image_reveal_enabled} aria-label="Görsel geçiş mesafesi yüzdesi" min="5" max="100" value={formData.image_reveal_end}
                       onChange={event => setFormData({ ...formData, image_reveal_end: sliderRevealEnd(event.target.value) })}
                       className="h-8 w-16 rounded border border-gray-200 bg-white px-2 text-xs" />
                     <span className="text-xs text-gray-500">%</span>

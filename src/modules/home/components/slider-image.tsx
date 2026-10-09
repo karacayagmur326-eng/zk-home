@@ -5,7 +5,7 @@ import type { ImageProps } from "next/image"
 import Image from "@components/common/SmartImage"
 import { sliderRevealEnd } from "@lib/content/slider-reveal"
 
-export default function SliderImage({ src, onLoad, imageRevealEnd, ...props }: ImageProps & { src: string; imageRevealEnd?: number }) {
+export default function SliderImage({ src, onLoad, imageRevealEnd, imageRevealEnabled = true, ...props }: ImageProps & { src: string; imageRevealEnd?: number; imageRevealEnabled?: boolean }) {
   const [loadedSource, setLoadedSource] = useState<string | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -18,7 +18,7 @@ export default function SliderImage({ src, onLoad, imageRevealEnd, ...props }: I
       <Image
         {...props}
         src={src}
-        style={{ ...props.style, "--slider-reveal-mask": `linear-gradient(90deg, transparent 0%, #000 ${sliderRevealEnd(imageRevealEnd)}%, #000 100%)` } as CSSProperties}
+        style={{ ...props.style, "--slider-reveal-mask": imageRevealEnabled ? `linear-gradient(90deg, transparent 0%, #000 ${sliderRevealEnd(imageRevealEnd)}%, #000 100%)` : "none" } as CSSProperties}
         onLoad={(event) => {
           setLoadedSource(src)
           onLoad?.(event)

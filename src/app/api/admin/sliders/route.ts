@@ -12,6 +12,7 @@ export async function GET() {
 
   try {
     await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS image_reveal_end INTEGER DEFAULT 65")
+    await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS image_reveal_enabled BOOLEAN DEFAULT TRUE")
     const rows = await query<any>(
       `SELECT * FROM slider WHERE deleted_at IS NULL ORDER BY order_index ASC, created_at DESC`
     )
@@ -31,6 +32,7 @@ export async function POST(req: NextRequest) {
 
   try {
     await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS image_reveal_end INTEGER DEFAULT 65")
+    await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS image_reveal_enabled BOOLEAN DEFAULT TRUE")
     const body = await req.json()
     const {
       title,
@@ -42,6 +44,7 @@ export async function POST(req: NextRequest) {
       badge_color,
       bg_color,
       image_reveal_end,
+      image_reveal_enabled,
       button_text,
       button_link,
       button_color,
@@ -77,8 +80,8 @@ export async function POST(req: NextRequest) {
         id, title, image_url, heading, subheading, description, badge_text, badge_color, 
         bg_color, button_text, button_link, button_color, button2_text, button2_link, 
         button2_color, text_color, features, right_features, top_bar_features, top_bar_color, is_active, order_index, 
-        created_at, updated_at, image_reveal_end
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $23, $24)
+        created_at, updated_at, image_reveal_end, image_reveal_enabled
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $23, $24, $25)
       RETURNING *`,
       [
         id,
@@ -105,6 +108,7 @@ export async function POST(req: NextRequest) {
         order_index || 0,
         now,
         sliderRevealEnd(image_reveal_end),
+        image_reveal_enabled !== false,
       ]
     )
 
