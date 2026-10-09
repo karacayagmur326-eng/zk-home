@@ -33,7 +33,7 @@ export default function TransitionControls({ value, disabled, onChange }: {
   onChange: (value: SliderTransitions) => void
 }) {
   return <>
-    <p className="text-[11px] text-gray-500">Konumlar resmin solundan sağına %0–100 arasındadır. Renk opaklığı %0 iken resim görünür, %100 iken seçtiğiniz zemin rengi görünür.</p>
+    <p className="text-[11px] text-gray-500">Her geçiş kendi kenarındaki %0 noktasından resmin içine doğru hesaplanır: sol soldan, sağ sağdan. Aynı değerler iki tarafta simetrik geçiş oluşturur. Renk opaklığı %0 iken resim, %100 iken zemin rengi görünür. Bulanıklık 0 px iken kapalıdır.</p>
     <div className="grid gap-3 sm:grid-cols-2">
       {(["left", "right"] as const).map(side => (
         <fieldset key={side} disabled={disabled} className="space-y-3 rounded-lg border border-gray-200 bg-white p-3 disabled:opacity-50">
@@ -43,6 +43,7 @@ export default function TransitionControls({ value, disabled, onChange }: {
             ["startOpacity", "Başlangıç renk opaklığı"],
             ["end", "Bitiş konumu"],
             ["endOpacity", "Bitiş renk opaklığı"],
+            ["blur", "Bulanıklık derecesi"],
           ] as const).map(([key, label]) => {
             const name = `${side === "left" ? "Sol" : "Sağ"} geçiş ${label.toLocaleLowerCase("tr-TR")}`
             const update = (next: string) => onChange(sliderTransitions({
@@ -51,13 +52,13 @@ export default function TransitionControls({ value, disabled, onChange }: {
             }))
             return <div key={key} className="space-y-1">
               <label htmlFor={`transition-${side}-${key}`} className="text-[11px] font-semibold text-gray-600">{label}</label>
-              <input id={`transition-${side}-${key}`} type="range" min={key === "end" ? 1 : 0} max={key === "start" ? 99 : 100} step="1"
+              <input id={`transition-${side}-${key}`} type="range" min={key === "end" ? 1 : 0} max={key === "blur" ? 30 : key === "start" ? 99 : 100} step="1"
                 value={value[side][key]} onChange={event => update(event.target.value)}
                 className="block h-6 w-full min-w-0 cursor-pointer accent-[#C98484] disabled:cursor-not-allowed" />
               <div className="flex items-center gap-2">
-                <PercentInput label={name} min={key === "end" ? value[side].start + 1 : 0} max={key === "start" ? 99 : 100}
+                <PercentInput label={name} min={key === "end" ? value[side].start + 1 : 0} max={key === "blur" ? 30 : key === "start" ? 99 : 100}
                   value={value[side][key]} onCommit={update} />
-                <span className="text-xs text-gray-500">%</span>
+                <span className="text-xs text-gray-500">{key === "blur" ? "px" : "%"}</span>
               </div>
             </div>
           })}
