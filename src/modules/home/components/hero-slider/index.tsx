@@ -779,7 +779,7 @@ export default function HeroSlider({
                 aria-hidden={!isActive}
                 style={{ backgroundColor }}
               >
-                <div className="zkhome-slide-body relative mx-auto h-full w-full" style={{ maxWidth: "var(--container-content)" }}>
+                <div className="zkhome-slide-body relative mx-auto h-full w-full" style={{ maxWidth: 1920 }}>
                 {slider.image_url && (
                   <div className="absolute inset-0 z-[1] isolate overflow-hidden pointer-events-none">
                     <div className="absolute inset-0">
