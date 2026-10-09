@@ -787,6 +787,7 @@ export default function HeroSlider({
                     <SliderImage
                       src={slider.image_url}
                       imageRevealEnd={slider.image_reveal_end}
+                      imageRevealSettings={slider.image_reveal_settings}
                       imageRevealEnabled={slider.image_reveal_enabled !== false}
                       alt=""
                       fill

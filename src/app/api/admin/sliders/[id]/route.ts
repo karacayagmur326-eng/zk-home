@@ -3,7 +3,7 @@ import { getAdminSession } from "@lib/admin/auth"
 import { query } from "@lib/admin/db"
 import { isSafePublicImageUrl } from "@lib/security/public-assets"
 import { persistInlineImageUrl } from "@lib/storage/persist-inline-image"
-import { sliderRevealEnd } from "@lib/content/slider-reveal"
+import { sliderRevealEnd, sliderTransitions } from "@lib/content/slider-reveal"
 import { revalidatePath } from "next/cache"
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -14,6 +14,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   try {
     await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS image_reveal_end INTEGER DEFAULT 65")
     await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS image_reveal_enabled BOOLEAN DEFAULT TRUE")
+    await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS image_reveal_settings JSONB")
     const body = await req.json()
     const {
       title,
@@ -26,6 +27,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       bg_color,
       image_reveal_end,
       image_reveal_enabled,
+      image_reveal_settings,
       button_text,
       button_link,
       button_color,
@@ -58,7 +60,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         title=$1, image_url=$2, image_url_light=NULL, heading=$3, subheading=$4, description=$5, badge_text=$6, 
         badge_color=$7, bg_color=$8, button_text=$9, button_link=$10, button_color=$11, 
         button2_text=$12, button2_link=$13, button2_color=$14, text_color=$15, 
-        features=$16, right_features=$17, top_bar_features=$18, top_bar_color=$19, is_active=$20, order_index=$21, updated_at=NOW(), image_reveal_end=$23, image_reveal_enabled=COALESCE($24, image_reveal_enabled, TRUE)
+        features=$16, right_features=$17, top_bar_features=$18, top_bar_color=$19, is_active=$20, order_index=$21, updated_at=NOW(), image_reveal_end=$23, image_reveal_enabled=COALESCE($24, image_reveal_enabled, TRUE), image_reveal_settings=COALESCE($25::jsonb, image_reveal_settings)
        WHERE id=$22 RETURNING *`,
       [
         title || heading || "İsimsiz Slider",
@@ -85,6 +87,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         id,
         sliderRevealEnd(image_reveal_end),
         typeof image_reveal_enabled === "boolean" ? image_reveal_enabled : null,
+        image_reveal_settings == null ? null : JSON.stringify(sliderTransitions(image_reveal_settings, image_reveal_end)),
       ]
     )
 
@@ -108,6 +111,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
   try {
     await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS image_reveal_end INTEGER DEFAULT 65")
     await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS image_reveal_enabled BOOLEAN DEFAULT TRUE")
+    await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS image_reveal_settings JSONB")
     await query(`UPDATE slider SET deleted_at=NOW() WHERE id=$1`, [id])
     revalidatePath("/", "layout")
     return NextResponse.json({ success: true })

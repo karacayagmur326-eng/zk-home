@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react"
 import type { ImageProps } from "next/image"
 import Image from "@components/common/SmartImage"
-import { sliderRevealEnd } from "@lib/content/slider-reveal"
+import { sliderTransitionMask, type SliderTransitions } from "@lib/content/slider-reveal"
 
-export default function SliderImage({ src, onLoad, imageRevealEnd, imageRevealEnabled = true, ...props }: ImageProps & { src: string; imageRevealEnd?: number; imageRevealEnabled?: boolean }) {
+export default function SliderImage({ src, onLoad, imageRevealEnd, imageRevealSettings, imageRevealEnabled = true, ...props }: ImageProps & { src: string; imageRevealEnd?: number; imageRevealSettings?: SliderTransitions; imageRevealEnabled?: boolean }) {
   const [loadedSource, setLoadedSource] = useState<string | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -18,7 +18,7 @@ export default function SliderImage({ src, onLoad, imageRevealEnd, imageRevealEn
       <Image
         {...props}
         src={src}
-        style={{ ...props.style, "--slider-reveal-mask": imageRevealEnabled ? `linear-gradient(90deg, transparent 0%, #000 ${sliderRevealEnd(imageRevealEnd)}%, #000 100%), linear-gradient(90deg, #000 calc(100% - min(12%, 192px)), transparent 100%)` : "none", maskComposite: "intersect", WebkitMaskComposite: "source-in" } as CSSProperties}
+        style={{ ...props.style, "--slider-reveal-mask": imageRevealEnabled ? sliderTransitionMask(imageRevealSettings, imageRevealEnd) : "none", maskComposite: "intersect", WebkitMaskComposite: "source-in" } as CSSProperties}
         onLoad={(event) => {
           setLoadedSource(src)
           onLoad?.(event)

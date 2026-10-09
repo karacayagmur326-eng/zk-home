@@ -7,8 +7,9 @@ import ConfirmModal from "../components/ConfirmModal"
 import MediaSelectorModal from "../components/MediaSelectorModal"
 import IconPickerModal from "../components/IconPickerModal"
 import SliderPreview from "./SliderPreview"
+import TransitionControls from "./TransitionControls"
 import { AppIcon, Wrench, Trash2, Pencil, Copy, Plus, Save, Image as ImageIcon } from "@lib/icons"
-import { sliderRevealEnd } from "@lib/content/slider-reveal"
+import { sliderRevealEnd, sliderTransitions } from "@lib/content/slider-reveal"
 import { sliderColorParts, sliderColorOnWhite, withSliderOpacity } from "@lib/content/slider-colors"
 import { categoryPath } from "@lib/seo/category"
 
@@ -469,6 +470,7 @@ export default function SlidersPage() {
     badge_color: "#C98484",
     bg_color: "#eef0f2",
     image_reveal_end: 65,
+      image_reveal_settings: sliderTransitions(null),
       image_reveal_enabled: true,
     image_url: "",
     button_text: "Ürünleri İncele",
@@ -605,6 +607,7 @@ export default function SlidersPage() {
       badge_color: slider.badge_color || "#C98484",
       bg_color: slider.bg_color || "#eef0f2",
       image_reveal_end: sliderRevealEnd(slider.image_reveal_end),
+      image_reveal_settings: sliderTransitions(slider.image_reveal_settings, slider.image_reveal_end),
       image_reveal_enabled: slider.image_reveal_enabled !== false,
       image_url: slider.image_url || "",
       button_text: slider.button_text || "",
@@ -646,6 +649,7 @@ export default function SlidersPage() {
       badge_color: "#C98484",
       bg_color: "#eef0f2",
       image_reveal_end: 65,
+      image_reveal_settings: sliderTransitions(null),
       image_reveal_enabled: true,
       image_url: "",
       button_text: "Ürünleri İncele",
@@ -1066,6 +1070,7 @@ export default function SlidersPage() {
                         description: formData.description,
                         bg_color: formData.bg_color,
                         image_reveal_end: formData.image_reveal_end,
+                        image_reveal_settings: formData.image_reveal_settings,
                         image_reveal_enabled: formData.image_reveal_enabled,
                         image_url: formData.image_url,
                         button_text: formData.button_text,
@@ -1147,17 +1152,8 @@ export default function SlidersPage() {
                       onChange={event => setFormData({ ...formData, image_reveal_enabled: event.target.checked })}
                       className="h-4 w-4 accent-[#C98484]" />
                   </label>
-                  <label htmlFor="image-reveal-end" className="text-xs font-bold text-gray-700">Görsel Geçiş Mesafesi</label>
-                  <p className="text-[11px] text-gray-500">Görselin sol kenarında görünürlük %0’dır. Seçtiğiniz mesafede %100’e ulaşır.</p>
-                  <div className="flex items-center gap-3">
-                    <input id="image-reveal-end" disabled={!formData.image_reveal_enabled} type="range" min="5" max="100" value={formData.image_reveal_end}
-                      onChange={event => setFormData({ ...formData, image_reveal_end: Number(event.target.value) })}
-                      className="min-w-0 flex-1 accent-[#C98484]" />
-                    <input type="number" disabled={!formData.image_reveal_enabled} aria-label="Görsel geçiş mesafesi yüzdesi" min="5" max="100" value={formData.image_reveal_end}
-                      onChange={event => setFormData({ ...formData, image_reveal_end: sliderRevealEnd(event.target.value) })}
-                      className="h-8 w-16 rounded border border-gray-200 bg-white px-2 text-xs" />
-                    <span className="text-xs text-gray-500">%</span>
-                  </div>
+                  <TransitionControls value={formData.image_reveal_settings} disabled={!formData.image_reveal_enabled}
+                    onChange={value => setFormData({ ...formData, image_reveal_settings: value })} />
                 </div>
 
                 {/* Status & Order Row */}
