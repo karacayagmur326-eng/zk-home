@@ -784,6 +784,7 @@ export default function HeroSlider({
                     <div className={slider.image_url === EDITORIAL_HERO_IMAGE ? "absolute inset-y-0 right-0 w-full min-[1900px]:w-[1860px]" : "absolute inset-0"}>
                     <SliderImage
                       src={slider.image_url}
+                      tintColor={backgroundColor}
                       alt=""
                       fill
                       sizes="100vw"
@@ -793,14 +794,7 @@ export default function HeroSlider({
                       className={slider.image_url === EDITORIAL_HERO_IMAGE ? "object-cover object-top min-[1900px]:object-[center_20%] zkhome-panorama-img" : "object-scale-down object-right mobile-hero-img"}
                     />
                     </div>
-                    {/* A clear color tint preserves image detail like colored glass. */}
-                    <div
-                      style={{
-                        background: `linear-gradient(90deg, ${backgroundColor} 0%, ${backgroundColor} 38%, ${backgroundColor}CC 48%, ${backgroundColor}66 59%, ${backgroundColor}00 73%)`,
-                        mixBlendMode: "multiply",
-                      }}
-                      className="zkhome-desktop-gradient absolute inset-0 z-10 hidden md:block pointer-events-none"
-                    />
+
                   </div>
                 )}
 
