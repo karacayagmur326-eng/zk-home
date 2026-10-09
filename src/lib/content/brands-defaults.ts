@@ -1,6 +1,6 @@
 export const defaultBrandsPageInfo = {
   title: "Markalarımız",
-  description: "<p>Mağazada yer alacak markalar ve marka açıklamaları yönetim panelinden eklenecektir.</p>",
+  description: "",
   hero_image: "/brand/placeholder.svg",
   hero_cta_text: "Teklif Talebi Oluştur",
   hero_cta_href: "/toptan-ve-kurumsal-satis",
@@ -9,7 +9,7 @@ export const defaultBrandsPageInfo = {
   feat1_title: "Marka Bilgileri", feat1_desc: "Marka detayları katalogla birlikte yayınlanacaktır.", feat1_icon: "award",
   feat2_title: "Ürün Koşulları", feat2_desc: "Koşullar ilgili ürün sayfasında belirtilecektir.", feat2_icon: "shield-check",
   feat3_title: "Güncel Fiyatlar", feat3_desc: "Fiyatlar ürünler yayınlandığında görüntülenecektir.", feat3_icon: "tag",
-  feat4_title: "İletişim", feat4_desc: "İletişim bilgileri mağaza açılmadan önce eklenecektir.", feat4_icon: "headphones",
+  feat4_title: "İletişim", feat4_desc: "", feat4_icon: "headphones",
   main_title: "Ana Markalarımız",
   main_cta_text: "Tüm Markaları Görüntüle",
   main_cta_href: "/magaza",

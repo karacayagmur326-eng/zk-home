@@ -53,7 +53,7 @@ export const defaultFaqPageContent = {
 
 export const defaultBlogPageContent = {
   title: "İçerikler",
-  description: "Bu alan yönetim panelinden oluşturulacaktır.",
+  description: "",
   hero_text: "Yeni içerikler yakında burada yer alacak.",
   hero_image: "",
   article_categories: defaultArticleCategories,
@@ -64,5 +64,5 @@ export const defaultBlogPageContent = {
   banner_description: "İçerikler hazırlanıyor.",
   banner_image: "",
   newsletter_title: "Yeni İçeriklerden Haberdar Olun",
-  newsletter_description: "E-posta bülteni ayarları yönetim panelinden yapılacaktır.",
+  newsletter_description: "",
 }

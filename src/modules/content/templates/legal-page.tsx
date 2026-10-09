@@ -171,10 +171,10 @@ export default async function LegalPage({ handle, fallbackTitle, fallbackDescrip
   const theme = await getThemeSettings()
   const brandName = contact.brand_name || theme?.logo_text || "Mağazamız"
   const companyName = contact.company_name || brandName
-  const phone = contact.phone || "0850 ..."
+  const phone = contact.phone || ""
   const phoneRaw = contact.phone_raw || ""
   const email = contact.email || ""
-  const address = contact.full_address || contact.street_address || "Türkiye"
+  const address = contact.full_address || contact.street_address || ""
   const website = contact.website || ""
   const taxOffice = contact.tax_office || ""
   const taxNo = contact.tax_no || ""
@@ -190,10 +190,10 @@ export default async function LegalPage({ handle, fallbackTitle, fallbackDescrip
       .replace(/%email%/gi, email)
       .replace(/ZK Home/gi, brandName)
       .replace(/www\.zk-home\.com/gi, website ? website.replace(/^https?:\/\//, "") : "")
-      .replace(/info@zk-home\.com/gi, email || "[E-posta yönetim panelinden eklenecektir]")
-      .replace(/\[Telefon yönetim panelinden eklenecektir\]/g, phone || "[Telefon yönetim panelinden eklenecektir]")
-      .replace(/\[Şirket adresi yönetim panelinden eklenecektir\]/g, address || "[Şirket adresi yönetim panelinden eklenecektir]")
-      .replace(/\[Vergi bilgileri yönetim panelinden eklenecektir\]/g, taxOffice && taxNo ? `${taxOffice} / ${taxNo}` : "[Vergi bilgileri yönetim panelinden eklenecektir]")
+      .replace(/info@zk-home\.com/gi, email)
+      .replace(/\[Telefon yönetim panelinden eklenecektir\]/g, phone)
+      .replace(/\[Şirket adresi yönetim panelinden eklenecektir\]/g, address)
+      .replace(/\[Vergi bilgileri yönetim panelinden eklenecektir\]/g, [taxOffice, taxNo].filter(Boolean).join(" / "))
   }
 
   const config = configs[handle]

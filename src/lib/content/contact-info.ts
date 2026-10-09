@@ -34,7 +34,7 @@ export const CONTACT_DEFAULTS = {
   street_address: "",
   district: "",
   city: "",
-  country: "Türkiye",
+  country: "",
   postal_code: "",
   full_address: "",
 
@@ -58,6 +58,12 @@ export const CONTACT_DEFAULTS = {
   map_url:
     "https://maps.google.com",
   map_embed_url: "",
+}
+
+/** Eski kurulum notları gerçek iletişim bilgisi değildir. */
+export function cleanContactValue(value: unknown): string {
+  if (typeof value !== "string") return ""
+  return value.replace(/\[[^\]]*(?:yönetim panelinden|adminden)[^\]]*\]/gi, "").trim()
 }
 
 export type ContactInfo = typeof CONTACT_DEFAULTS
@@ -84,7 +90,7 @@ export async function getContactInfo(): Promise<ContactInfo> {
       `SELECT value FROM store_settings WHERE key = 'contact_info' LIMIT 1`
     )
     if (rows.length > 0 && rows[0].value) {
-      const dbData = rows[0].value
+      const dbData = Object.fromEntries(Object.entries(rows[0].value).map(([key, value]) => [key, typeof value === "string" ? cleanContactValue(value) : value]))
       // DB verisini defaults ile birleştir (eksik alanlar default'tan gelir)
       const merged: ContactInfo = {
         ...defaults,
@@ -101,14 +107,9 @@ export async function getContactInfo(): Promise<ContactInfo> {
         // full_address: eğer ayrı ayrı girilmişse birleştir
         full_address:
           dbData.full_address ||
-          [
-            dbData.street_address || CONTACT_DEFAULTS.street_address,
-            dbData.district || CONTACT_DEFAULTS.district,
-            dbData.city || CONTACT_DEFAULTS.city,
-            dbData.country || CONTACT_DEFAULTS.country,
-          ]
-            .filter(Boolean)
-            .join(", "),
+          ([dbData.street_address, dbData.district, dbData.city].some(Boolean)
+            ? [dbData.street_address, dbData.district, dbData.city, dbData.country].filter(Boolean).join(", ")
+            : ""),
       }
       _cachedContactInfo = merged
       _cacheTime = now

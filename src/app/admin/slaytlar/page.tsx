@@ -190,6 +190,7 @@ function ColorPickerPopover({ color, onChange, pickerId, activePicker, setActive
       <input
         type="text"
         value={color}
+        aria-label={label || "Renk kodu"}
         onChange={(e) => onChange(e.target.value)}
         placeholder="#FFFFFF"
         className="w-full border border-gray-200 rounded px-2 h-8 text-xs font-mono font-bold uppercase bg-white focus:border-[#C98484] focus:outline-none"
@@ -391,7 +392,7 @@ export default function SlidersPage() {
     description: "",
     badge_text: "|16px|Inter|600",
     badge_color: "#C98484",
-    bg_color: "#111827",
+    bg_color: "#eef0f2",
     image_url: "",
     button_text: "Ürünleri İncele",
     button_link: "/magaza",
@@ -525,7 +526,7 @@ export default function SlidersPage() {
       description: slider.description || "",
       badge_text: slider.badge_text || "",
       badge_color: slider.badge_color || "#C98484",
-      bg_color: slider.bg_color || "#111827",
+      bg_color: slider.bg_color || "#eef0f2",
       image_url: slider.image_url || "",
       button_text: slider.button_text || "",
       button_link: slider.button_link || "",
@@ -564,7 +565,7 @@ export default function SlidersPage() {
       description: "",
       badge_text: "|16px|Inter|600",
       badge_color: "#C98484",
-      bg_color: "#111827",
+      bg_color: "#eef0f2",
       image_url: "",
       button_text: "Ürünleri İncele",
       button_link: "/magaza",
@@ -1047,6 +1048,21 @@ export default function SlidersPage() {
                       )}
                     </div>
                   </div>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-200 bg-gray-50 p-3">
+                  <div>
+                    <label className="text-xs font-bold text-gray-700">Slider Zemin Rengi</label>
+                    <p className="mt-1 text-[11px] text-gray-500">Görselin çevresindeki zemin ve metin arkasındaki geçiş rengi.</p>
+                  </div>
+                  <ColorPickerPopover
+                    color={formData.bg_color || "#eef0f2"}
+                    onChange={(val) => setFormData({ ...formData, bg_color: val })}
+                    pickerId="bg_color"
+                    activePicker={activeColorPicker}
+                    setActivePicker={setActiveColorPicker}
+                    label="Slider Zemin Rengi"
+                  />
                 </div>
 
                 {/* Status & Order Row */}

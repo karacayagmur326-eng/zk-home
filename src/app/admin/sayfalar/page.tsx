@@ -391,7 +391,7 @@ function AdminPagesContent() {
     company_kep: "",
     company_email: "",
     company_phone: "",
-    company_address: "[Şirket adresi yönetim panelinden eklenecektir]",
+    company_address: "",
     company_callout: "Tüm soru ve görüşleriniz için bizlere dilediğiniz zaman ulaşabilirsiniz.",
 
     visit_title: "Ziyaret Etmek İster misiniz?",

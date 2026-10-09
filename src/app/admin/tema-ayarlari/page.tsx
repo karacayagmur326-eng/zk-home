@@ -3271,7 +3271,7 @@ export default function ThemeSettingsPage(props: any = {}) {
                     style={{ fontSize: 13, padding: "10px 12px", borderRadius: 8 }}
                     value={contactPhone}
                     onChange={(e) => setContactPhone(e.target.value)}
-                    placeholder="[Telefon yönetim panelinden eklenecektir]"
+                    placeholder="Telefon"
                   />
                 </div>
                 <div>

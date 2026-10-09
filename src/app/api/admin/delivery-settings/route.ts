@@ -3,7 +3,7 @@ import { query } from "@lib/admin/db"
 import { NextResponse } from "next/server"
 
 const defaultContentHtml = `<h3>Teslimat ve İade Bilgileri</h3>
-<p>Mağazanın teslimat, iptal, cayma ve iade koşulları yönetim panelinden yapılandırılacaktır.</p>`
+`
 
 export async function GET() {
   const session = await getAdminSession()

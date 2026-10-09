@@ -868,7 +868,7 @@ export default function AdminContactPage() {
                     type="text"
                     value={contactInfo.address}
                     onChange={(e) => setContactInfo({ ...contactInfo, address: e.target.value, full_address: e.target.value })}
-                    placeholder="[Şirket adresi yönetim panelinden eklenecektir]"
+                    placeholder="Adres"
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#C98484] transition"
                   />
                 </div>

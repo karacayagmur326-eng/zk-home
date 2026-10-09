@@ -1,5 +1,5 @@
 import { getMenu } from "@lib/data/menus"
-import { getContactInfo } from "@lib/content/contact-info"
+import { cleanContactValue, getContactInfo } from "@lib/content/contact-info"
 import { getThemeSettings } from "@lib/content/theme-settings"
 import {
   AppIcon,
@@ -130,9 +130,9 @@ export default async function Footer() {
   const footerDescription =
     (themeSettings?.footer_description as string | undefined) ||
     ""
-  const phone = themeSettings?.contact_phone || contactInfo.phone || ""
-  const email = storeReady ? (themeSettings?.contact_email as string | undefined) || contactInfo.email || "" : ""
-  const address = themeSettings?.contact_address || contactInfo.full_address || ""
+  const phone = cleanContactValue(themeSettings?.contact_phone) || contactInfo.phone || ""
+  const email = storeReady ? cleanContactValue(themeSettings?.contact_email) || contactInfo.email || "" : ""
+  const address = cleanContactValue(themeSettings?.contact_address) || contactInfo.full_address || ""
 
   const col2Title = turkishTitleCase((themeSettings?.footer_col2_title as string | undefined) || "Kurumsal")
   const col3Title = turkishTitleCase((themeSettings?.footer_col3_title as string | undefined) || "Müşteri Hizmetleri")

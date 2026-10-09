@@ -145,7 +145,7 @@ export default function EditProductPage() {
           setDescription(p.description || "")
           setStatus(p.status || "draft")
           setThumbnail(p.thumbnail || "")
-          setImages((p.images || []).map((img: any) => img.url).filter((u: string) => u !== p.thumbnail))
+          setImages((p.images || []).map((img: any) => img.url))
           setWeight(p.weight?.toString() || "")
           setLength(p.length?.toString() || "")
           setWidth(p.width?.toString() || "")
@@ -340,9 +340,9 @@ export default function EditProductPage() {
       body.categories = selectedCats.map((cid) => ({ id: cid }))
       if (selectedColId) body.collection_id = selectedColId
       body.tags = selectedTags.map((tid) => ({ id: tid }))
-      if (thumbnail) body.thumbnail = thumbnail
+      body.thumbnail = thumbnail
       if (images.length || thumbnail) {
-        body.images = Array.from(new Set([thumbnail, ...images].filter(Boolean))).map((url) => ({ url }))
+        body.images = Array.from(new Set([...images, thumbnail].filter(Boolean))).map((url) => ({ url }))
       } else {
         body.images = []
       }
@@ -947,7 +947,7 @@ export default function EditProductPage() {
       <MediaSelectorModal
         isOpen={isGalleryModalOpen}
         onClose={() => setIsGalleryModalOpen(false)}
-        onSelect={(urls) => setImages((prev) => Array.from(new Set([...prev, ...urls])).filter(url => url !== thumbnail))}
+        onSelect={(urls) => setImages((prev) => Array.from(new Set([...prev, ...urls])))}
         addedUrls={[...images, thumbnail].filter(Boolean)}
         multi={true}
         allowIcons={false}

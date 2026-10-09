@@ -770,17 +770,10 @@ export default function HeroSlider({
                 aria-roledescription="slide"
                 aria-label={`${index + 1} / ${sliders.length}`}
                 aria-hidden={!isActive}
-                style={
-                  slider.image_url
-                    ? { backgroundColor: slider.bg_color || "#eef0f2" }
-                    : {
-                        background:
-                          "radial-gradient(circle at 78% 42%, rgba(201,132,132,.22), transparent 24%), linear-gradient(115deg, #fffdfc 0%, #f7efed 55%, #edd8d5 100%)",
-                      }
-                }
+                style={{ backgroundColor: slider.bg_color || "#eef0f2" }}
               >
                 {slider.image_url && (
-                  <div className={slider.image_url === EDITORIAL_HERO_IMAGE ? "absolute inset-0 z-[1] overflow-hidden pointer-events-none bg-[linear-gradient(180deg,#d1c3b6,#c3b5a7)]" : "absolute inset-0 z-[1] overflow-hidden pointer-events-none"}>
+                  <div className="absolute inset-0 z-[1] overflow-hidden pointer-events-none">
                     <div className={slider.image_url === EDITORIAL_HERO_IMAGE ? "absolute inset-y-0 right-0 w-full min-[1900px]:w-[1860px]" : "absolute inset-0"}>
                     <SliderImage
                       src={slider.image_url}
@@ -797,10 +790,10 @@ export default function HeroSlider({
                 )}
                 {/* Desktop text readability; mobile keeps the photo unobstructed. */}
                 <div
-                  style={{ background: `linear-gradient(90deg, ${slider.bg_color || "#fffdfc"} 0%, transparent 65%)` }}
+                  style={{ background: `linear-gradient(90deg, ${slider.bg_color || "#eef0f2"} 0%, transparent 65%)` }}
                   className="zkhome-desktop-gradient absolute inset-0 z-10 hidden md:block pointer-events-none"
                 />
-                <div className="absolute inset-0 bg-black/5 dark:bg-black/10 z-11 pointer-events-none" />
+
 
                 <div className="absolute inset-0 flex items-end sm:items-center justify-start content-container z-20 px-3.5 sm:px-6 md:px-10 lg:px-14 pb-8 sm:pb-0">
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-6 w-full sm:items-center">

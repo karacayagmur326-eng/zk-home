@@ -270,7 +270,7 @@ export default function NewProductPage() {
     if (selectedTagIds.length) body.tags = selectedTagIds.map((id) => ({ id }))
     if (thumbnail) body.thumbnail = thumbnail
     if (images.length || thumbnail) {
-      body.images = Array.from(new Set([thumbnail, ...images].filter(Boolean))).map((url) => ({ url }))
+      body.images = Array.from(new Set([...images, thumbnail].filter(Boolean))).map((url) => ({ url }))
     }
     if (weight) body.weight = parseFloat(weight)
     if (length) body.length = parseFloat(length)
@@ -841,7 +841,7 @@ export default function NewProductPage() {
       <MediaSelectorModal
         isOpen={isGalleryModalOpen}
         onClose={() => setIsGalleryModalOpen(false)}
-        onSelect={(urls) => setImages((prev) => Array.from(new Set([...prev, ...urls])).filter(url => url !== thumbnail))}
+        onSelect={(urls) => setImages((prev) => Array.from(new Set([...prev, ...urls])))}
         addedUrls={[...images, thumbnail].filter(Boolean)}
         multi={true}
         allowIcons={false}

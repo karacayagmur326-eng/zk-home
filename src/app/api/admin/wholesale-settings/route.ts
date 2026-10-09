@@ -5,7 +5,7 @@ import { NextResponse } from "next/server"
 const defaultWholesaleInfo = {
   eyebrow: "Kurumsal",
   title: "İşinizi Güçlendiren Profesyonel Çözümler",
-  description: "Kurumsal satış koşulları ve ürün grupları yönetim panelinden yapılandırılır.",
+  description: "",
   hero_image: "",
   hero_cta1_text: "Teklif Talebi Oluştur",
   hero_cta1_href: "#quote-form",

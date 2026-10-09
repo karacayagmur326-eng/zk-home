@@ -59,9 +59,7 @@ export default function BrandLogos({
             })}
           </div>
         ) : (
-          <p className="rounded-rounded border border-dashed border-border bg-background p-6 text-center text-sm text-muted">
-            Marka logoları yönetim panelinden eklendiğinde burada görünecek.
-          </p>
+null
         )}
       </div>
     </section>

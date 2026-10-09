@@ -1,3 +1,4 @@
+import { cleanContactValue } from "@lib/content/contact-info"
 import { getAdminSession } from "@lib/admin/auth"
 import { query } from "@lib/admin/db"
 import { encryptSettings } from "@lib/security/encrypted-settings"
@@ -123,16 +124,11 @@ export async function POST(request: Request) {
         contact_info.whatsapp_phone || contact_info.phone || existingVal.whatsapp_phone
       )
 
-      const chosenAddress =
-        contact_info.full_address ||
-        contact_info.company_address ||
-        contact_info.address ||
-        contact_info.card4_address ||
-        existingVal.full_address ||
-        existingVal.company_address ||
-        existingVal.address ||
-        existingVal.card4_address ||
-        "[Şirket adresi yönetim panelinden eklenecektir]"
+      const addressKeys = ["full_address", "company_address", "address", "card4_address"]
+      const submittedAddressKey = addressKeys.find((key) => Object.prototype.hasOwnProperty.call(contact_info, key))
+      const chosenAddress = submittedAddressKey
+        ? cleanContactValue(contact_info[submittedAddressKey])
+        : addressKeys.map((key) => cleanContactValue(existingVal[key])).find(Boolean) || ""
 
       mergedContact.full_address = chosenAddress
       mergedContact.address = chosenAddress
