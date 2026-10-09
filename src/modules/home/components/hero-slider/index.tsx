@@ -684,10 +684,11 @@ export default function HeroSlider({
             height: auto !important;
             max-width: 100%;
             max-height: 100%;
-            left: auto !important;
+            left: 50% !important;
+            right: auto !important;
             top: 50% !important;
             bottom: auto !important;
-            transform: translateY(-50%);
+            transform: translate(-50%, -50%);
             mask-image: var(--slider-reveal-mask, none);
             -webkit-mask-image: var(--slider-reveal-mask, none);
           }
@@ -793,7 +794,7 @@ export default function HeroSlider({
                       unoptimized
                       priority={index === 0}
                       fetchPriority={index === 0 ? "high" : "auto"}
-                      className={slider.image_url === EDITORIAL_HERO_IMAGE ? "object-cover object-top min-[1900px]:object-[center_20%] zkhome-panorama-img" : "object-scale-down object-right mobile-hero-img"}
+                      className={slider.image_url === EDITORIAL_HERO_IMAGE ? "object-cover object-top min-[1900px]:object-[center_20%] zkhome-panorama-img" : "object-scale-down object-center mobile-hero-img"}
                     />
                     </div>
 

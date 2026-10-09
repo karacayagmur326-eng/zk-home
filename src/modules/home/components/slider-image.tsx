@@ -18,7 +18,7 @@ export default function SliderImage({ src, onLoad, imageRevealEnd, imageRevealEn
       <Image
         {...props}
         src={src}
-        style={{ ...props.style, "--slider-reveal-mask": imageRevealEnabled ? `linear-gradient(90deg, transparent 0%, #000 ${sliderRevealEnd(imageRevealEnd)}%, #000 100%), linear-gradient(90deg, #000 calc(100% - min(6%, 96px)), transparent 100%)` : "none", maskComposite: "intersect", WebkitMaskComposite: "source-in" } as CSSProperties}
+        style={{ ...props.style, "--slider-reveal-mask": imageRevealEnabled ? `linear-gradient(90deg, transparent 0%, #000 ${sliderRevealEnd(imageRevealEnd)}%, #000 100%), linear-gradient(90deg, #000 calc(100% - min(8%, 128px)), transparent 100%)` : "none", maskComposite: "intersect", WebkitMaskComposite: "source-in" } as CSSProperties}
         onLoad={(event) => {
           setLoadedSource(src)
           onLoad?.(event)
