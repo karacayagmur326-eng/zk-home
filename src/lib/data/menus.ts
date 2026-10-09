@@ -1,3 +1,4 @@
+import { ensureManagedMenus } from "./managed-menus"
 import { query } from "@lib/admin/db"
 import { getCached } from "@lib/cache"
 import { NavigationItem, NavigationMenu } from "@lib/types/navigation"
@@ -66,6 +67,7 @@ function normalizeMenuItem(value: unknown): NavigationItem | null {
     url: typeof item.url === "string" && item.url.trim() ? item.url : "#",
     type,
     children,
+    ...Object.fromEntries(Object.entries(item).filter(([key, value]) => key.startsWith("promo_") && (typeof value === "string" || typeof value === "boolean"))),
   }
 }
 
@@ -95,6 +97,7 @@ export async function getMenu(
     `navigation-menu:${locationName}`,
     async () => {
       try {
+        if (locationName === "header-menu" || locationName === "category-sidebar") await ensureManagedMenus()
         const menus = await query<MenuRow>(
           `SELECT id, name, handle, location, items FROM navigation_menu
            WHERE location IS NOT NULL AND location @> $1::jsonb
@@ -108,12 +111,13 @@ export async function getMenu(
 
         const byHandle = await query<MenuRow>(
           `SELECT id, name, handle, location, items FROM navigation_menu
-           WHERE handle = $1
+           WHERE handle = $1 AND (location IS NULL OR location = '[]'::jsonb)
            LIMIT 1`,
           [locationName]
         )
 
         if (byHandle.length > 0) {
+          if (locationName === "header-menu" || locationName === "category-sidebar") return null
           return normalizeMenu(byHandle[0])
         }
 

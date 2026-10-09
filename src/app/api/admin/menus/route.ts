@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getAdminSession } from "@lib/admin/auth"
-import { query } from "@lib/admin/db"
+import { query, withTransaction } from "@lib/admin/db"
+import { ensureManagedMenus } from "@lib/data/managed-menus"
+import { revalidatePath } from "next/cache"
 
 const defaultMenusToSeed = [
   {
@@ -88,37 +90,12 @@ async function ensureColumnsExist() {
     await query(
       `INSERT INTO navigation_menu (id, name, handle, location, items, created_at, updated_at)
        VALUES ($1, $2, $3, $4::jsonb, $5::jsonb, NOW(), NOW())
-       ON CONFLICT (id) DO UPDATE SET
-         name = EXCLUDED.name,
-         handle = EXCLUDED.handle,
-         location = EXCLUDED.location,
-         items = CASE
-           WHEN navigation_menu.items IS NULL OR jsonb_array_length(navigation_menu.items) = 0
-           THEN EXCLUDED.items
-           ELSE navigation_menu.items
-         END`,
+       ON CONFLICT (id) DO NOTHING`,
       [m.id, m.name, m.handle, JSON.stringify(m.location), JSON.stringify(m.items)]
     ).catch(() => {})
   }
 
-  await query(`
-    UPDATE navigation_menu
-    SET items = COALESCE((
-      SELECT jsonb_agg(
-        CASE
-          WHEN item->>'id' = 'fm4'
-          THEN jsonb_set(item, '{url}', '"/garanti-ve-teknik-servis"'::jsonb)
-          ELSE item
-        END
-      )
-      FROM jsonb_array_elements(items) AS item
-    ), '[]'::jsonb), updated_at = NOW()
-    WHERE id = 'footer_musteri'
-      AND EXISTS (
-        SELECT 1 FROM jsonb_array_elements(items) AS item
-        WHERE item->>'id' = 'fm4' AND item->>'url' <> '/garanti-ve-teknik-servis'
-      )
-  `).catch(() => {})
+
 }
 
 export async function GET() {
@@ -127,8 +104,9 @@ export async function GET() {
 
   try {
     await ensureColumnsExist()
+    await ensureManagedMenus()
     const menus = await query<{ id: string; name: string; location: string[]; items: any[] }>(
-      `SELECT id, name, location, items FROM navigation_menu ORDER BY created_at ASC`
+      `SELECT id, name, location, items FROM navigation_menu ORDER BY CASE WHEN location @> '["header-menu"]'::jsonb THEN 0 WHEN location @> '["category-sidebar"]'::jsonb THEN 1 ELSE 2 END, created_at ASC`
     )
     return NextResponse.json({ menus })
   } catch (e: any) {
@@ -147,28 +125,23 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const { id, name, items, location } = body
 
-    let menu: any
-
-    if (id) {
-      // Update existing
-      const [updated] = await query<{ id: string; name: string; location: string[]; items: any[] }>(
-        `UPDATE navigation_menu SET name = $1, items = $2::jsonb, location = $3::jsonb, updated_at = NOW()
-         WHERE id = $4 RETURNING id, name, location, items`,
-        [name, JSON.stringify(items || []), JSON.stringify(location || []), id]
-      )
-      menu = updated
-    } else {
-      // Create new
-      const newId = `menu_${Date.now()}`
-      const now = new Date().toISOString()
-      const [created] = await query<{ id: string; name: string; location: string[]; items: any[] }>(
-        `INSERT INTO navigation_menu (id, name, items, location, created_at, updated_at)
-         VALUES ($1, $2, $3::jsonb, $4::jsonb, $5, $5)
-         RETURNING id, name, location, items`,
-        [newId, name, JSON.stringify(items || []), JSON.stringify(location || []), now]
-      )
-      menu = created
+    if (typeof name !== "string" || !name.trim() || !Array.isArray(items) || !Array.isArray(location)) {
+      return NextResponse.json({ error: "Menü adı, öğeleri ve konumları geçerli olmalıdır." }, { status: 400 })
     }
+    const menuId = id || `menu_${crypto.randomUUID()}`
+    const menu = await withTransaction(async client => {
+      await client.query("SELECT pg_advisory_xact_lock(872194)")
+      for (const value of location) {
+        await client.query(`UPDATE navigation_menu SET location = location - $1::text, updated_at = NOW()
+          WHERE id <> $2 AND location @> $3::jsonb`, [value, menuId, JSON.stringify([value])])
+      }
+      const result = await client.query(`INSERT INTO navigation_menu (id,name,items,location,created_at,updated_at)
+        VALUES ($1,$2,$3::jsonb,$4::jsonb,NOW(),NOW())
+        ON CONFLICT (id) DO UPDATE SET name=EXCLUDED.name,items=EXCLUDED.items,location=EXCLUDED.location,updated_at=NOW()
+        RETURNING id,name,location,items`, [menuId, name.trim(), JSON.stringify(items), JSON.stringify(location)])
+      return result.rows[0]
+    })
+    revalidatePath("/", "layout")
 
     clearMemoryCache("navigation-menu:")
     return NextResponse.json({ menu })
@@ -190,6 +163,7 @@ export async function DELETE(req: NextRequest) {
 
     await query(`DELETE FROM navigation_menu WHERE id = $1`, [id])
     clearMemoryCache("navigation-menu:")
+    revalidatePath("/", "layout")
     return NextResponse.json({ success: true })
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 })

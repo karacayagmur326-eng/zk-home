@@ -16,7 +16,8 @@ import {
   ChevronDown, 
   ChevronRight, 
   MoveUp, 
-  MoveDown, 
+  MoveDown,
+  ArrowLeft, 
   Edit3, 
   Check, 
   Menu as MenuIcon,
@@ -51,7 +52,7 @@ interface Menu {
   location: string[]
 }
 
-interface Category { id: string; name: string; handle: string }
+interface Category { id: string; name: string; handle: string; metadata?: Record<string, unknown> }
 interface PageItem { handle: string; title: string }
 
 const MENU_LOCATIONS = [
@@ -81,6 +82,7 @@ export default function MenusPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [error, setError] = useState("")
   const [locationSaving, setLocationSaving] = useState(false)
   const [locationSaved, setLocationSaved] = useState(false)
   const [activeTab, setActiveTab] = useUrlState<"edit" | "locations">("edit", "tab", ["edit", "locations"])
@@ -105,7 +107,7 @@ export default function MenusPage() {
 
   useEffect(() => {
     fetch("/api/admin/menus")
-      .then(r => r.json())
+      .then(readResponse)
       .then(d => {
         const list: Menu[] = (d.menus || []).map((menu: Menu) => ({
           ...menu,
@@ -116,7 +118,7 @@ export default function MenusPage() {
         if (list.length) setActiveMenuId(list[0].id)
         setLoading(false)
       })
-      .catch(() => setLoading(false))
+      .catch(error => { setError(error.message); setLoading(false) })
 
     fetch("/api/admin/categories")
       .then(r => r.json())
@@ -158,41 +160,45 @@ export default function MenusPage() {
     )
   }
 
-  function createMenu() {
-    if (!newMenuName.trim()) return
-    setCreatingNew(true)
-    const newM: Menu = { id: generateId(), name: newMenuName.trim(), items: [], location: [] }
-    fetch("/api/admin/menus", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newM)
-    })
-      .then(r => r.json())
-      .then(() => {
-        setMenus(m => [...m, newM])
-        setActiveMenuId(newM.id)
-        setNewMenuName("")
-        setCreatingNew(false)
-      })
-      .catch(() => setCreatingNew(false))
+  async function readResponse(response: Response) {
+    const data = await response.json()
+    if (!response.ok) throw new Error(data.error || "Menü işlemi tamamlanamadı.")
+    return data
   }
 
-  function saveMenu() {
+  async function createMenu() {
+    if (!newMenuName.trim()) return
+    setCreatingNew(true)
+    setError("")
+    try {
+      const response = await fetch("/api/admin/menus", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: generateId(), name: newMenuName.trim(), items: [], location: [] }),
+      })
+      const data = await readResponse(response)
+      setMenus(current => [...current, data.menu])
+      setActiveMenuId(data.menu.id)
+      setNewMenuName("")
+    } catch (error) { setError(error instanceof Error ? error.message : "Menü oluşturulamadı.") }
+    finally { setCreatingNew(false) }
+  }
+
+  async function saveMenu() {
     if (!activeMenu) return
     setSaving(true)
     setSaved(false)
-    fetch("/api/admin/menus", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(activeMenu)
-    })
-      .then(r => r.json())
-      .then(() => {
-        setSaving(false)
-        setSaved(true)
-        setTimeout(() => setSaved(false), 2500)
+    setError("")
+    try {
+      const response = await fetch("/api/admin/menus", {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(activeMenu),
       })
-      .catch(() => setSaving(false))
+      const data = await readResponse(response)
+      setMenus(current => current.map(menu => menu.id === data.menu.id ? { ...data.menu, items: normalizeMenuItems(data.menu.items) }
+        : { ...menu, location: menu.location.filter(location => !data.menu.location.includes(location)) }))
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2500)
+    } catch (error) { setError(error instanceof Error ? error.message : "Menü kaydedilemedi.") }
+    finally { setSaving(false) }
   }
 
   function assignMenuToLocation(location: string, menuId: string) {
@@ -230,8 +236,11 @@ export default function MenusPage() {
         throw new Error("Menü konumları kaydedilemedi.")
       }
 
+      setError("")
       setLocationSaved(true)
       setTimeout(() => setLocationSaved(false), 2500)
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Menü konumları kaydedilemedi.")
     } finally {
       setLocationSaving(false)
     }
@@ -337,6 +346,17 @@ export default function MenusPage() {
     return newItems
   }
 
+  function outdentItem(items: MenuItem[], id: string): MenuItem[] {
+    return items.flatMap(parent => {
+      const children = parent.children || []
+      const index = children.findIndex(child => child.id === id)
+      if (index >= 0) return [
+        { ...parent, children: children.filter(child => child.id !== id) }, children[index],
+      ]
+      return [{ ...parent, children: outdentItem(children, id) }]
+    })
+  }
+
   function renderItem(item: MenuItem, depth = 0) {
     const typeLabel = item.type === "page" ? "Sayfa" : item.type === "category" ? "Kategori" : "Özel Bağlantı"
     const iconBg = item.type === "page" ? "bg-emerald-50 text-emerald-600" : item.type === "category" ? "bg-blue-50 text-blue-600" : "bg-amber-50 text-amber-600"
@@ -383,6 +403,13 @@ export default function MenusPage() {
               >
                 <MoveDown className="w-3.5 h-3.5" />
               </button>
+              {depth > 0 && (
+                <button type="button" title="Üst Seviyeye Taşı"
+                  onClick={event => { event.stopPropagation(); updateActiveMenu({ items: outdentItem(activeMenu!.items, item.id) }) }}
+                  className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition">
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                </button>
+              )}
               <button
                 type="button"
                 title="Alt Öge Yap"
@@ -598,6 +625,7 @@ export default function MenusPage() {
         onChange={setActiveTab}
         items={[{ value: "edit", label: "Menüleri Düzenle", icon: MenuIcon }, { value: "locations", label: "Menü Konumları", icon: LayoutGrid }]}/>
 
+      {error && <div role="alert" className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
       {activeTab === "edit" && (
         <>
           {/* Menu Selector bar */}
@@ -609,7 +637,7 @@ export default function MenusPage() {
               onChange={e => setActiveMenuId(e.target.value)}
               style={{ minWidth: 220, fontSize: 13, fontWeight: 600 }}
             >
-              {menus.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+              {menus.map(m => <option key={m.id} value={m.id}>{m.name}{m.location.includes("category-sidebar") ? " — Kategori Sol Menü" : ""}</option>)}
             </select>
 
             <span style={{ color: "#94a3b8", fontSize: 13 }}>veya yeni oluştur:</span>
@@ -894,7 +922,7 @@ export default function MenusPage() {
                 }
               >
                 <option value="">— Menü seçin —</option>
-                {menus.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                {menus.map(m => <option key={m.id} value={m.id}>{m.name}{m.location.includes("category-sidebar") ? " — Kategori Sol Menü" : ""}</option>)}
               </select>
             </div>
             )

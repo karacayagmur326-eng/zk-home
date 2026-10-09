@@ -9,6 +9,7 @@ import CartButton from "@modules/layout/components/cart-button"
 import CustomerNotifications from "@modules/layout/components/customer-notifications"
 import { SideMenu, DesktopMenu, HeaderSearch } from "@modules/layout/components/desktop-header-components"
 import ThemeToggle from "@modules/layout/components/theme-toggle"
+import { categoryPath } from "@lib/seo/category"
 import { getMenu } from "@lib/data/menus"
 import { listCategories } from "@lib/data/categories"
 import { query, cachedQuery } from "@lib/admin/db"
@@ -17,8 +18,6 @@ import { isStoreReady, sanitizePublicSettings } from "@lib/security/store-readin
 import { User, Heart, ShoppingCart, AppIcon } from "@lib/icons"
 import { getThemeSettings } from "@lib/content/theme-settings"
 import { retrieveCustomer } from "@lib/data/customer"
-import { categoryPath } from "@lib/seo/category"
-import type { NavigationItem } from "@lib/types/navigation"
 
 export default async function Nav() {
   const [
@@ -71,7 +70,10 @@ export default async function Nav() {
   const categoryMap = new Map<string, StoreProductCategory>()
   const buildCategoryMap = (cats: StoreProductCategory[]) => {
     for (const cat of cats) {
-      if (cat.handle) categoryMap.set(cat.handle, cat)
+      if (cat.handle) {
+        categoryMap.set(cat.handle, cat)
+        categoryMap.set(categoryPath(cat), cat)
+      }
       if (cat.category_children?.length) {
         buildCategoryMap(cat.category_children)
       }
@@ -84,14 +86,14 @@ export default async function Nav() {
       .filter((item) => {
         const match =
           typeof item.url === "string" &&
-          item.url.match(/^\/kategoriler\/([^/?#]+)/)
+          item.url.match(/^\/kategoriler\/([^?#]+)/)
         return !match || activeCategoryHandles.has(match[1])
       })
       .map((item) => {
         const match =
           typeof item.url === "string" &&
-          item.url.match(/^\/kategoriler\/([^/?#]+)/)
-        const category = match ? categoryMap.get(match[1]) : null
+          item.url.match(/^\/kategoriler\/([^?#]+)/)
+        const category = match ? categoryMap.get(match[1]) : categoryMap.get(item.url)
 
         let imageUrl: string | undefined = undefined
         let iconName: string | undefined = undefined
@@ -128,32 +130,16 @@ export default async function Nav() {
         }
 
         return {
+          ...promoFields,
           ...item,
           imageUrl,
           iconName,
           description,
-          ...promoFields,
           children: filterAndEnrichMenuCategories(item.children),
         }
       })
 
-  const categoryMenuItem = (category: (typeof activeCategories)[number]): NavigationItem => {
-    const metadata = (category.metadata || {}) as Record<string, unknown>
-    return {
-      id: category.id,
-      label: category.name,
-      url: categoryPath(category),
-      type: "category",
-      imageUrl: typeof metadata.card_image_url === "string" ? metadata.card_image_url : undefined,
-      description: category.description || undefined,
-      children: (category.category_children || []).map((child) => categoryMenuItem(child as typeof category)),
-    }
-  }
-  const categoryMenu = activeCategories.map(categoryMenuItem)
-  categoryMenu.push({ id: "brands", label: "Markalar", url: "/markalar", type: "page", children: [] })
-  const visibleHeaderMenu = headerMenu?.items?.length
-    ? { ...headerMenu, items: filterAndEnrichMenuCategories(headerMenu.items) }
-    : { items: categoryMenu }
+  const visibleHeaderMenu = { items: filterAndEnrichMenuCategories(headerMenu?.items || []) }
 
   let topBarColor = "#C98484"
   let topBarFeatures = [

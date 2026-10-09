@@ -113,13 +113,11 @@ const RefinementList = ({
   }
 
   useEffect(() => {
-    if (sidebarMenu || secondaryMenu) {
-      setCustomSidebarMenu(sidebarMenu || secondaryMenu)
-    }
+    setCustomSidebarMenu(sidebarMenu || secondaryMenu || null)
   }, [sidebarMenu, secondaryMenu])
 
   const hasCustomSidebar = Boolean(
-    customSidebarMenu?.items && customSidebarMenu.items.length > 0
+    customSidebarMenu && Array.isArray(customSidebarMenu.items)
   )
 
   const isItemActive = useCallback(
