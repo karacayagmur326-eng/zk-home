@@ -23,6 +23,8 @@ import SortProducts, { SortOptions } from "./sort-products"
 import MobileTopCategoriesStrip from "@modules/store/components/mobile-top-categories-strip"
 import { categoryPath } from "@lib/seo/category"
 
+const PRICE_FILTER_MAX = 100000
+
 type RefinementListProps = {
   sortBy: SortOptions
   search?: boolean
@@ -625,20 +627,20 @@ const RefinementList = ({
                         0,
                         Math.min(
                           100,
-                          ((priceMin ? Number(priceMin) : 250) / 10000) * 100,
+                          ((priceMin ? Number(priceMin) : 0) / PRICE_FILTER_MAX) * 100,
                         ),
                       )}%`,
                       width: `${Math.max(
                         0,
                         Math.min(
                           100,
-                          ((priceMax ? Number(priceMax) : 7500) / 10000) * 100,
+                          ((priceMax ? Number(priceMax) : PRICE_FILTER_MAX) / PRICE_FILTER_MAX) * 100,
                         ) -
                           Math.max(
                             0,
                             Math.min(
                               100,
-                              ((priceMin ? Number(priceMin) : 250) / 10000) *
+                              ((priceMin ? Number(priceMin) : 0) / PRICE_FILTER_MAX) *
                                 100,
                             ),
                           ),
@@ -651,13 +653,13 @@ const RefinementList = ({
                 <input
                   type="range"
                   min={0}
-                  max={10000}
+                  max={PRICE_FILTER_MAX}
                   step={50}
-                  value={priceMin !== "" ? Number(priceMin) : 250}
+                  value={priceMin !== "" ? Number(priceMin) : 0}
                   onChange={(e) => {
                     const val = Math.min(
                       Number(e.target.value),
-                      (priceMax !== "" ? Number(priceMax) : 7500) - 100,
+                      (priceMax !== "" ? Number(priceMax) : PRICE_FILTER_MAX),
                     )
                     setPriceMin(String(val))
                   }}
@@ -670,13 +672,13 @@ const RefinementList = ({
                 <input
                   type="range"
                   min={0}
-                  max={10000}
+                  max={PRICE_FILTER_MAX}
                   step={50}
-                  value={priceMax !== "" ? Number(priceMax) : 7500}
+                  value={priceMax !== "" ? Number(priceMax) : PRICE_FILTER_MAX}
                   onChange={(e) => {
                     const val = Math.max(
                       Number(e.target.value),
-                      (priceMin !== "" ? Number(priceMin) : 250) + 100,
+                      (priceMin !== "" ? Number(priceMin) : 0),
                     )
                     setPriceMax(String(val))
                   }}
@@ -695,10 +697,12 @@ const RefinementList = ({
                   <Input
                     type="number"
                     aria-label="En düşük fiyat"
-                    value={priceMin}
-                    onChange={(e) => setPriceMin(e.target.value)}
+                    min={0}
+                    max={PRICE_FILTER_MAX}
+                    value={priceMin || 0}
+                    onChange={(e) => setPriceMin(e.target.value === "" ? "" : String(Math.max(0, Math.min(PRICE_FILTER_MAX, Number(e.target.value)))))}
                     onBlur={applyPriceFilter}
-                    placeholder="250"
+                    placeholder="0"
                     unstyled
                     containerClassName="flex-1"
                     className="w-full text-xs text-center outline-none bg-transparent font-medium text-gray-700"
@@ -712,10 +716,12 @@ const RefinementList = ({
                   <Input
                     type="number"
                     aria-label="En yüksek fiyat"
-                    value={priceMax}
-                    onChange={(e) => setPriceMax(e.target.value)}
+                    min={0}
+                    max={PRICE_FILTER_MAX}
+                    value={priceMax || PRICE_FILTER_MAX}
+                    onChange={(e) => setPriceMax(e.target.value === "" ? "" : String(Math.max(0, Math.min(PRICE_FILTER_MAX, Number(e.target.value)))))}
                     onBlur={applyPriceFilter}
-                    placeholder="7.500+"
+                    placeholder="100000"
                     unstyled
                     containerClassName="flex-1"
                     className="w-full text-xs text-center outline-none bg-transparent font-medium text-gray-700"

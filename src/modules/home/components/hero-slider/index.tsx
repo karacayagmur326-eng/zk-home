@@ -435,7 +435,7 @@ export default function HeroSlider({
             color: lineColor,
             fontFamily: resolveSliderFont(lineFontFamily, "Plus Jakarta Sans"),
             fontWeight: resolveSliderWeight(lineFontWeight, 600),
-            fontSize: `clamp(1.1rem, 3.1vw, ${lineSize || "3.8rem"})`,
+            fontSize: `clamp(1.1rem, 3.1cqi, ${lineSize || "3.8rem"})`,
             lineHeight: 1.12,
           }}
         >
@@ -465,7 +465,7 @@ export default function HeroSlider({
       aria-roledescription="carousel"
       aria-label="Öne çıkan kampanyalar"
       {...gestures}
-      className="group relative w-full overflow-hidden bg-[#eef0f2] font-sans aspect-[16/8] sm:aspect-[16/7.4] md:aspect-[16/6.8] lg:aspect-[16/6.4] max-h-[560px] min-h-[280px]"
+      className="group relative mx-auto w-full max-w-[1920px] overflow-hidden bg-[#eef0f2] font-sans aspect-[16/8] sm:aspect-[16/7.4] md:aspect-[16/6.8] lg:aspect-[16/6.4] max-h-[560px] min-h-[280px]"
       style={{ isolation: "isolate" }}
     >
       <style>{`
