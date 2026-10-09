@@ -680,8 +680,14 @@ export default function HeroSlider({
         }
         @media (min-width: 768px) {
           .mobile-hero-img {
-            object-fit: cover;
-            object-position: right center;
+            width: auto !important;
+            height: auto !important;
+            max-width: 100%;
+            max-height: 100%;
+            left: auto !important;
+            top: 50% !important;
+            bottom: auto !important;
+            transform: translateY(-50%);
             mask-image: none;
             -webkit-mask-image: none;
           }
