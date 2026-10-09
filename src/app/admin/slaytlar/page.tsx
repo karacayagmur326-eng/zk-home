@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import ConfirmModal from "../components/ConfirmModal"
 import MediaSelectorModal from "../components/MediaSelectorModal"
 import IconPickerModal from "../components/IconPickerModal"
-import HeroSlider from "@modules/home/components/hero-slider"
+import HeroSlider, { HERO_SLIDER_MAX_WIDTH } from "@modules/home/components/hero-slider"
 import { AppIcon, Wrench, Trash2, Pencil, Copy, Plus, Save, Image as ImageIcon } from "@lib/icons"
 import { sliderRevealEnd } from "@lib/content/slider-reveal"
 import { sliderColorParts, sliderColorOnWhite, withSliderOpacity } from "@lib/content/slider-colors"
@@ -422,14 +422,11 @@ function TypographySelectors({
 
 export default function SlidersPage() {
   const previewRef = useRef<HTMLDivElement>(null)
-  const [previewHeight, setPreviewHeight] = useState(0)
-  const [previewWidth, setPreviewWidth] = useState(1440)
+  const [previewViewportWidth, setPreviewViewportWidth] = useState(HERO_SLIDER_MAX_WIDTH)
+  const [previewSize, setPreviewSize] = useState<{ width: number; height: number } | null>(null)
   useEffect(() => {
     const measureViewport = () => {
-      const width = document.documentElement.clientWidth
-      const ratio = width < 640 ? 8 / 16 : width < 768 ? 7.4 / 16 : width < 1024 ? 6.8 / 16 : 6.4 / 16
-      setPreviewWidth(width)
-      setPreviewHeight(Math.round(Math.min(560, Math.max(280, width * ratio))))
+      setPreviewViewportWidth(Math.min(document.documentElement.clientWidth, HERO_SLIDER_MAX_WIDTH))
     }
     measureViewport()
     window.addEventListener("resize", measureViewport)
@@ -449,7 +446,10 @@ export default function SlidersPage() {
     if (!element || !parent || !child) return
     const resize = () => {
       const height = child.offsetHeight
-      const scale = parent.clientWidth / 1440
+      const width = child.offsetWidth
+      if (!width || !height) return
+      setPreviewSize(previous => previous?.width === width && previous.height === height ? previous : { width, height })
+      const scale = parent.clientWidth / width
       element.style.transform = `scale(${scale})`
       parent.style.height = `${height * scale}px`
     }
@@ -458,7 +458,7 @@ export default function SlidersPage() {
     observer.observe(child)
     resize()
     return () => observer.disconnect()
-  }, [loading])
+  }, [loading, previewViewportWidth])
   const [saving, setSaving] = useState(false)
   const [activeColorPicker, setActiveColorPicker] = useState<string | null>(null)
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null)
@@ -1084,12 +1084,12 @@ export default function SlidersPage() {
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
                     <span className="text-xs font-black uppercase tracking-wider text-gray-800">Canlı Önizleme</span>
                   </div>
-                  <span className="text-[10px] font-bold text-gray-400">{previewWidth} × {previewHeight || "…"} px</span>
+                  <span className="text-[10px] font-bold text-gray-400">{previewSize ? `${previewSize.width} × ${previewSize.height} px` : "…"}</span>
                 </div>
 
                 <div className="relative w-full overflow-hidden rounded-xl border border-gray-200 bg-gray-900 shadow-inner min-h-[220px]">
                   <div
-                    style={{ width: "1440px", transformOrigin: "top left", pointerEvents: "none" }}
+                    style={{ width: `${previewViewportWidth}px`, transformOrigin: "top left", pointerEvents: "none" }}
                     ref={previewRef}
                   >
                     <HeroSlider

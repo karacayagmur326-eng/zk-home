@@ -16,6 +16,8 @@ function sliderForeground(background: string) {
   return brightness > 160 ? "#16181B" : "#FFFFFF"
 }
 
+export const HERO_SLIDER_MAX_WIDTH = 1920
+
 const EDITORIAL_HERO_IMAGE = "/hero/zkhome-panorama-v4.png"
 
 const SLIDER_FONT_STACKS: Record<string, string> = {
@@ -465,8 +467,8 @@ export default function HeroSlider({
       aria-roledescription="carousel"
       aria-label="Öne çıkan kampanyalar"
       {...gestures}
-      className="group relative mx-auto w-full max-w-[1920px] overflow-hidden bg-[#eef0f2] font-sans aspect-[16/8] sm:aspect-[16/7.4] md:aspect-[16/6.8] lg:aspect-[16/6.4] max-h-[560px] min-h-[280px]"
-      style={{ isolation: "isolate" }}
+      className="group relative mx-auto w-full overflow-hidden bg-[#eef0f2] font-sans aspect-[16/8] sm:aspect-[16/7.4] md:aspect-[16/6.8] lg:aspect-[16/6.4] max-h-[560px] min-h-[280px]"
+      style={{ isolation: "isolate", maxWidth: HERO_SLIDER_MAX_WIDTH }}
     >
       <style>{`
         @keyframes rotateBorder {
