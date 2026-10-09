@@ -3,6 +3,7 @@ import { getAdminSession } from "@lib/admin/auth"
 import { query } from "@lib/admin/db"
 import { isSafePublicImageUrl } from "@lib/security/public-assets"
 import { persistInlineImageUrl } from "@lib/storage/persist-inline-image"
+import { sliderRevealEnd } from "@lib/content/slider-reveal"
 import { revalidatePath } from "next/cache"
 
 export async function GET() {
@@ -10,6 +11,7 @@ export async function GET() {
   if (!session) return NextResponse.json({ error: "Yetkisiz işlem." }, { status: 401 })
 
   try {
+    await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS image_reveal_end INTEGER DEFAULT 65")
     const rows = await query<any>(
       `SELECT * FROM slider WHERE deleted_at IS NULL ORDER BY order_index ASC, created_at DESC`
     )
@@ -28,6 +30,7 @@ export async function POST(req: NextRequest) {
   if (!session) return NextResponse.json({ error: "Yetkisiz işlem." }, { status: 401 })
 
   try {
+    await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS image_reveal_end INTEGER DEFAULT 65")
     const body = await req.json()
     const {
       title,
@@ -38,6 +41,7 @@ export async function POST(req: NextRequest) {
       badge_text,
       badge_color,
       bg_color,
+      image_reveal_end,
       button_text,
       button_link,
       button_color,
@@ -73,8 +77,8 @@ export async function POST(req: NextRequest) {
         id, title, image_url, heading, subheading, description, badge_text, badge_color, 
         bg_color, button_text, button_link, button_color, button2_text, button2_link, 
         button2_color, text_color, features, right_features, top_bar_features, top_bar_color, is_active, order_index, 
-        created_at, updated_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $23) 
+        created_at, updated_at, image_reveal_end
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $23, $24)
       RETURNING *`,
       [
         id,
@@ -100,6 +104,7 @@ export async function POST(req: NextRequest) {
         is_active ?? true,
         order_index || 0,
         now,
+        sliderRevealEnd(image_reveal_end),
       ]
     )
 

@@ -688,14 +688,14 @@ export default function HeroSlider({
             top: 50% !important;
             bottom: auto !important;
             transform: translateY(-50%);
-            mask-image: none;
-            -webkit-mask-image: none;
+            mask-image: var(--slider-reveal-mask, none);
+            -webkit-mask-image: var(--slider-reveal-mask, none);
           }
         }
-        @media (min-width: 1900px) {
+        @media (min-width: 768px) {
           .zkhome-panorama-img {
-            mask-image: none;
-            -webkit-mask-image: none;
+            mask-image: var(--slider-reveal-mask, none);
+            -webkit-mask-image: var(--slider-reveal-mask, none);
           }
         }
 
@@ -784,7 +784,7 @@ export default function HeroSlider({
                     <div className={slider.image_url === EDITORIAL_HERO_IMAGE ? "absolute inset-y-0 right-0 w-full min-[1900px]:w-[1860px]" : "absolute inset-0"}>
                     <SliderImage
                       src={slider.image_url}
-                      tintColor={backgroundColor}
+                      imageRevealEnd={slider.image_reveal_end}
                       alt=""
                       fill
                       sizes="100vw"
