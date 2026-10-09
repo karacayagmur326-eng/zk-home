@@ -17,7 +17,7 @@ import {
   ChevronRight, 
   MoveUp, 
   MoveDown,
-  ArrowLeft, 
+  ArrowLeft,
   Edit3, 
   Check, 
   Menu as MenuIcon,
