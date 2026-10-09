@@ -5,7 +5,16 @@ import SliderImage from "../slider-image"
 import useFadeSlider from "../use-fade-slider"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { AppIcon, ArrowLeft, ArrowRight, Pause, Play } from "@lib/icons"
+import { sliderColorOnWhite } from "@lib/content/slider-colors"
 import { turkishTitleCase } from "@lib/util/turkish-title-case"
+
+function sliderForeground(background: string) {
+  const match = /^#([0-9a-f]{6})$/i.exec(background)
+  if (!match) return "#FFFFFF"
+  const hex = match[1]
+  const brightness = (parseInt(hex.slice(0, 2), 16) * 299 + parseInt(hex.slice(2, 4), 16) * 587 + parseInt(hex.slice(4, 6), 16) * 114) / 1000
+  return brightness > 160 ? "#16181B" : "#FFFFFF"
+}
 
 const EDITORIAL_HERO_IMAGE = "/hero/zkhome-panorama-v4.png"
 
@@ -671,22 +680,16 @@ export default function HeroSlider({
         }
         @media (min-width: 768px) {
           .mobile-hero-img {
-            width: auto !important;
-            height: auto !important;
-            max-width: 100%;
-            max-height: 100%;
-            left: auto !important;
-            top: 50% !important;
-            bottom: auto !important;
-            transform: translateY(-50%);
-            mask-image: linear-gradient(to right, transparent 0, rgba(0,0,0,.12) 64px, rgba(0,0,0,.55) 176px, rgba(0,0,0,.9) 272px, black 320px);
-            -webkit-mask-image: linear-gradient(to right, transparent 0, rgba(0,0,0,.12) 64px, rgba(0,0,0,.55) 176px, rgba(0,0,0,.9) 272px, black 320px);
+            object-fit: cover;
+            object-position: right center;
+            mask-image: none;
+            -webkit-mask-image: none;
           }
         }
         @media (min-width: 1900px) {
           .zkhome-panorama-img {
-            mask-image: linear-gradient(to right, transparent 0%, black 18%);
-            -webkit-mask-image: linear-gradient(to right, transparent 0%, black 18%);
+            mask-image: none;
+            -webkit-mask-image: none;
           }
         }
 
@@ -752,13 +755,11 @@ export default function HeroSlider({
               rightFeaturesList = []
             }
 
-            const textColor = "#16181B"
-            const configuredHighlight = slider.button_color || "#C98484"
-            const highlightColor =
-              configuredHighlight.toUpperCase() === "#C94700" ||
-              configuredHighlight.toUpperCase() === "#C98484"
-                ? "#C98484"
-                : configuredHighlight
+            const backgroundColor = sliderColorOnWhite(slider.bg_color || "#eef0f2")
+            const textColor = slider.text_color || "#16181B"
+            const highlightColor = slider.button_color || "#C98484"
+            const badgeColor = slider.badge_color || highlightColor
+            const secondaryButtonColor = slider.button2_color || "#FFFFFF"
 
             return (
               <div
@@ -770,10 +771,10 @@ export default function HeroSlider({
                 aria-roledescription="slide"
                 aria-label={`${index + 1} / ${sliders.length}`}
                 aria-hidden={!isActive}
-                style={{ backgroundColor: slider.bg_color || "#eef0f2" }}
+                style={{ backgroundColor }}
               >
                 {slider.image_url && (
-                  <div className="absolute inset-0 z-[1] overflow-hidden pointer-events-none">
+                  <div className="absolute inset-0 z-[1] isolate overflow-hidden pointer-events-none">
                     <div className={slider.image_url === EDITORIAL_HERO_IMAGE ? "absolute inset-y-0 right-0 w-full min-[1900px]:w-[1860px]" : "absolute inset-0"}>
                     <SliderImage
                       src={slider.image_url}
@@ -786,13 +787,16 @@ export default function HeroSlider({
                       className={slider.image_url === EDITORIAL_HERO_IMAGE ? "object-cover object-top min-[1900px]:object-[center_20%] zkhome-panorama-img" : "object-scale-down object-right mobile-hero-img"}
                     />
                     </div>
+                    {/* A clear color tint preserves image detail like colored glass. */}
+                    <div
+                      style={{
+                        background: `linear-gradient(90deg, ${backgroundColor} 0%, ${backgroundColor} 38%, ${backgroundColor}CC 48%, ${backgroundColor}66 59%, ${backgroundColor}00 73%)`,
+                        mixBlendMode: "multiply",
+                      }}
+                      className="zkhome-desktop-gradient absolute inset-0 z-10 hidden md:block pointer-events-none"
+                    />
                   </div>
                 )}
-                {/* Desktop text readability; mobile keeps the photo unobstructed. */}
-                <div
-                  style={{ background: `linear-gradient(90deg, ${slider.bg_color || "#eef0f2"} 0%, transparent 65%)` }}
-                  className="zkhome-desktop-gradient absolute inset-0 z-10 hidden md:block pointer-events-none"
-                />
 
 
                 <div className="absolute inset-0 flex items-end sm:items-center justify-start content-container z-20 px-3.5 sm:px-6 md:px-10 lg:px-14 pb-8 sm:pb-0">
@@ -807,8 +811,8 @@ export default function HeroSlider({
                         <div
                           style={
                             {
-                              backgroundColor: highlightColor || "#C98484",
-                              color: "#FFFFFF",
+                              backgroundColor: badgeColor,
+                              color: sliderForeground(badgeColor),
                               fontFamily: resolveSliderFont(
                                 slider.badge_text.split("|")[2],
                                 "Inter"
@@ -826,8 +830,8 @@ export default function HeroSlider({
                           className="zkhome-badge electric-hover-trigger inline-flex items-center gap-1.5 bg-[#C98484] text-white shadow-md cursor-default transition-all border border-rose-400/30"
                         >
                           <ElectricBeamBorder radius={20} />
-                          <span className="text-white/80 font-bold">//</span>{" "}
-                          <span className="text-white">{slider.badge_text.split("|")[0]}</span>
+                          <span className="opacity-80 font-bold">//</span>{" "}
+                          <span>{slider.badge_text.split("|")[0]}</span>
                         </div>
                       )}
 
@@ -855,8 +859,9 @@ export default function HeroSlider({
                       {/* 3. Subheading description */}
                       {slider.subheading?.split("|")[0]?.trim() && (
                         <p
-                          className="zkhome-subheading max-w-lg font-normal leading-snug sm:leading-relaxed text-gray-600 transition-colors"
+                          className="zkhome-subheading max-w-lg font-normal leading-snug sm:leading-relaxed transition-colors"
                           style={{
+                            color: textColor,
                             fontFamily: resolveSliderFont(
                               slider.subheading.split("|")[2],
                               "Inter"
@@ -963,7 +968,7 @@ export default function HeroSlider({
                             tabIndex={isActive ? 0 : -1}
                             style={{
                               backgroundColor: highlightColor,
-                              color: "#FFFFFF",
+                              color: sliderForeground(highlightColor),
                               animation: isActive
                                 ? `nailButton 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.7s forwards`
                                 : "none",
@@ -984,6 +989,8 @@ export default function HeroSlider({
                             tabIndex={isActive ? 0 : -1}
                             style={
                               {
+                                backgroundColor: secondaryButtonColor,
+                                color: sliderForeground(secondaryButtonColor),
                                 animation: isActive
                                   ? `nailButton 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.8s forwards`
                                   : "none",

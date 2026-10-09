@@ -8,6 +8,7 @@ import MediaSelectorModal from "../components/MediaSelectorModal"
 import IconPickerModal from "../components/IconPickerModal"
 import HeroSlider from "@modules/home/components/hero-slider"
 import { AppIcon, Wrench, Trash2, Pencil, Copy, Plus, Save, Image as ImageIcon } from "@lib/icons"
+import { sliderColorParts, sliderColorOnWhite, withSliderOpacity } from "@lib/content/slider-colors"
 import { categoryPath } from "@lib/seo/category"
 
 // SVG Icons matching backend sliders page
@@ -124,11 +125,14 @@ interface ColorPickerPopoverProps {
   activePicker: string | null
   setActivePicker: (id: string | null) => void
   label?: string
+  allowOpacity?: boolean
 }
 
-function ColorPickerPopover({ color, onChange, pickerId, activePicker, setActivePicker, label }: ColorPickerPopoverProps) {
+function ColorPickerPopover({ color, onChange, pickerId, activePicker, setActivePicker, label, allowOpacity = false }: ColorPickerPopoverProps) {
   const isOpen = activePicker === pickerId
-  const displayColor = color || "#FFFFFF"
+  const colorParts = sliderColorParts(color)
+  const displayColor = allowOpacity ? sliderColorOnWhite(color) : color || "#FFFFFF"
+  const setSelectedColor = (value: string) => onChange(allowOpacity ? withSliderOpacity(value, colorParts.opacity) : value)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const anchorRef = useRef<HTMLDivElement>(null)
   const popupRef = useRef<HTMLDivElement>(null)
@@ -188,7 +192,7 @@ function ColorPickerPopover({ color, onChange, pickerId, activePicker, setActive
     setActivePicker(null)
     try {
       const result = await new EyeDropper().open()
-      onChange(result.sRGBHex.toUpperCase())
+      setSelectedColor(result.sRGBHex.toUpperCase())
     } catch (error) {
       if (!(error instanceof DOMException && error.name === "AbortError")) {
         setPickerMessage("Ekrandan renk alınamadı. Lütfen tekrar deneyin.")
@@ -241,10 +245,11 @@ function ColorPickerPopover({ color, onChange, pickerId, activePicker, setActive
 
     const imgData = ctx.getImageData(x, y, 1, 1).data
     const hex = '#' + [imgData[0], imgData[1], imgData[2]].map(val => val.toString(16).padStart(2, '0')).join('').toUpperCase()
-    onChange(hex)
+    setSelectedColor(hex)
   }
 
   return (
+    <div className="w-full space-y-2">
     <div ref={anchorRef} style={{ position: "relative", display: "flex", gap: 8, alignItems: "center", width: "100%" }}>
       <button
         ref={triggerRef}
@@ -262,9 +267,9 @@ function ColorPickerPopover({ color, onChange, pickerId, activePicker, setActive
       />
       <input
         type="text"
-        value={color}
+        value={allowOpacity ? colorParts.color : color}
         aria-label={label || "Renk kodu"}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => setSelectedColor(e.target.value)}
         placeholder="#FFFFFF"
         className="w-full border border-gray-200 rounded px-2 h-8 text-xs font-mono font-bold uppercase bg-white focus:border-[#C98484] focus:outline-none"
       />
@@ -300,7 +305,7 @@ function ColorPickerPopover({ color, onChange, pickerId, activePicker, setActive
                 <button
                   key={p}
                   type="button"
-                  onClick={() => onChange(p)}
+                  onClick={() => setSelectedColor(p)}
                   className="w-5 h-5 rounded border border-gray-200 cursor-pointer transition-transform hover:scale-110 flex-shrink-0"
                   style={{ backgroundColor: p }}
                   title={p}
@@ -317,6 +322,20 @@ function ColorPickerPopover({ color, onChange, pickerId, activePicker, setActive
           </button>
         </div>, document.body
       )}
+    </div>
+    {allowOpacity && (
+      <div className="flex flex-wrap items-center gap-2">
+        <label htmlFor={`${pickerId}-opacity`} className="text-xs font-medium text-gray-600">Opaklık</label>
+        <input id={`${pickerId}-opacity`} type="range" min="0" max="100" step="1" value={colorParts.opacity}
+          onChange={(event) => onChange(withSliderOpacity(colorParts.color, Number(event.target.value)))}
+          className="min-w-24 flex-1 accent-[#C98484]" />
+        <input type="number" aria-label={`${label || "Renk"} opaklık yüzdesi`} min="0" max="100" value={colorParts.opacity}
+          onChange={(event) => onChange(withSliderOpacity(colorParts.color, Number(event.target.value)))}
+          className="h-8 w-16 rounded border border-gray-200 bg-white px-2 text-xs" />
+        <span className="text-xs text-gray-500">%</span>
+        <span className="w-full text-[11px] text-gray-500">%0 beyaz, %100 seçilen renk.</span>
+      </div>
+    )}
     </div>
   )
 }
@@ -1143,6 +1162,7 @@ export default function SlidersPage() {
                   <ColorPickerPopover
                     color={formData.bg_color || "#eef0f2"}
                     onChange={(val) => setFormData({ ...formData, bg_color: val })}
+                    allowOpacity
                     pickerId="bg_color"
                     activePicker={activeColorPicker}
                     setActivePicker={setActiveColorPicker}
