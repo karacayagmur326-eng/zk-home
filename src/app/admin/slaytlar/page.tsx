@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import ConfirmModal from "../components/ConfirmModal"
 import MediaSelectorModal from "../components/MediaSelectorModal"
 import IconPickerModal from "../components/IconPickerModal"
-import HeroSlider, { HERO_SLIDER_MAX_WIDTH } from "@modules/home/components/hero-slider"
+import HeroSlider from "@modules/home/components/hero-slider"
 import { AppIcon, Wrench, Trash2, Pencil, Copy, Plus, Save, Image as ImageIcon } from "@lib/icons"
 import { sliderRevealEnd } from "@lib/content/slider-reveal"
 import { sliderColorParts, sliderColorOnWhite, withSliderOpacity } from "@lib/content/slider-colors"
@@ -422,11 +422,11 @@ function TypographySelectors({
 
 export default function SlidersPage() {
   const previewRef = useRef<HTMLDivElement>(null)
-  const [previewViewportWidth, setPreviewViewportWidth] = useState(HERO_SLIDER_MAX_WIDTH)
+  const [previewViewportWidth, setPreviewViewportWidth] = useState(1440)
   const [previewSize, setPreviewSize] = useState<{ width: number; height: number } | null>(null)
   useEffect(() => {
     const measureViewport = () => {
-      setPreviewViewportWidth(Math.min(document.documentElement.clientWidth, HERO_SLIDER_MAX_WIDTH))
+      setPreviewViewportWidth(document.documentElement.clientWidth)
     }
     measureViewport()
     window.addEventListener("resize", measureViewport)

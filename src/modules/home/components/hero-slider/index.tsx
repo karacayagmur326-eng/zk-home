@@ -16,8 +16,6 @@ function sliderForeground(background: string) {
   return brightness > 160 ? "#16181B" : "#FFFFFF"
 }
 
-export const HERO_SLIDER_MAX_WIDTH = 1920
-
 const EDITORIAL_HERO_IMAGE = "/hero/zkhome-panorama-v4.png"
 
 const SLIDER_FONT_STACKS: Record<string, string> = {
@@ -468,7 +466,7 @@ export default function HeroSlider({
       aria-label="Öne çıkan kampanyalar"
       {...gestures}
       className="group relative mx-auto w-full overflow-hidden bg-[#eef0f2] font-sans aspect-[16/8] sm:aspect-[16/7.4] md:aspect-[16/6.8] lg:aspect-[16/6.4] max-h-[560px] min-h-[280px]"
-      style={{ isolation: "isolate", maxWidth: HERO_SLIDER_MAX_WIDTH }}
+      style={{ isolation: "isolate" }}
     >
       <style>{`
         @keyframes rotateBorder {
@@ -559,7 +557,7 @@ export default function HeroSlider({
         }
 
         
-        .zkhome-hero-slide-item {
+        .zkhome-slide-body {
           container-type: inline-size;
           container-name: heroslide;
         }
@@ -781,9 +779,10 @@ export default function HeroSlider({
                 aria-hidden={!isActive}
                 style={{ backgroundColor }}
               >
+                <div className="zkhome-slide-body relative mx-auto h-full w-full" style={{ maxWidth: "var(--container-content)" }}>
                 {slider.image_url && (
                   <div className="absolute inset-0 z-[1] isolate overflow-hidden pointer-events-none">
-                    <div className={slider.image_url === EDITORIAL_HERO_IMAGE ? "absolute inset-y-0 right-0 w-full min-[1900px]:w-[1860px]" : "absolute inset-0"}>
+                    <div className="absolute inset-0">
                     <SliderImage
                       src={slider.image_url}
                       imageRevealEnd={slider.image_reveal_end}
@@ -1067,6 +1066,7 @@ export default function HeroSlider({
                       )}
                     </div>
                   </div>
+                </div>
                 </div>
               </div>
             )
