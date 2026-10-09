@@ -1,5 +1,7 @@
 "use client"
 import React, { useState, useEffect, useRef } from "react"
+import { createPortal } from "react-dom"
+import { Pipette } from "lucide-react"
 import { useRouter } from "next/navigation"
 import ConfirmModal from "../components/ConfirmModal"
 import MediaSelectorModal from "../components/MediaSelectorModal"
@@ -128,9 +130,76 @@ function ColorPickerPopover({ color, onChange, pickerId, activePicker, setActive
   const isOpen = activePicker === pickerId
   const displayColor = color || "#FFFFFF"
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const anchorRef = useRef<HTMLDivElement>(null)
+  const popupRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const [position, setPosition] = useState({ left: 8, top: 8 })
+  const [eyeDropperSupported, setEyeDropperSupported] = useState(false)
+  const [sampling, setSampling] = useState(false)
+  const [pickerMessage, setPickerMessage] = useState("")
+
+  useEffect(() => {
+    setEyeDropperSupported("EyeDropper" in window && window.isSecureContext)
+  }, [])
+
+  useEffect(() => {
+    if (!isOpen) return
+    function reposition() {
+      const anchor = anchorRef.current?.getBoundingClientRect()
+      if (!anchor) return
+      const height = popupRef.current?.offsetHeight || 350
+      const width = popupRef.current?.offsetWidth || 220
+      const top = anchor.bottom + height + 8 <= window.innerHeight
+        ? anchor.bottom + 6
+        : Math.max(8, anchor.top - height - 6)
+      setPosition({
+        left: Math.max(8, Math.min(anchor.right - width, window.innerWidth - width - 8)),
+        top: Math.min(top, Math.max(8, window.innerHeight - height - 8)),
+      })
+    }
+    function onOutside(event: PointerEvent) {
+      const target = event.target as Node
+      if (!popupRef.current?.contains(target) && !anchorRef.current?.contains(target)) setActivePicker(null)
+    }
+    function onEscape(event: KeyboardEvent) {
+      if (event.key !== "Escape") return
+      setActivePicker(null)
+      triggerRef.current?.focus()
+    }
+    reposition()
+    window.addEventListener("resize", reposition)
+    window.addEventListener("scroll", reposition, true)
+    document.addEventListener("pointerdown", onOutside)
+    document.addEventListener("keydown", onEscape)
+    return () => {
+      window.removeEventListener("resize", reposition)
+      window.removeEventListener("scroll", reposition, true)
+      document.removeEventListener("pointerdown", onOutside)
+      document.removeEventListener("keydown", onEscape)
+    }
+  }, [isOpen, setActivePicker])
+
+  async function sampleScreenColor() {
+    type EyeDropperConstructor = new () => { open: () => Promise<{ sRGBHex: string }> }
+    const EyeDropper = (window as Window & { EyeDropper?: EyeDropperConstructor }).EyeDropper
+    if (!EyeDropper || sampling) return
+    setPickerMessage("")
+    setSampling(true)
+    setActivePicker(null)
+    try {
+      const result = await new EyeDropper().open()
+      onChange(result.sRGBHex.toUpperCase())
+    } catch (error) {
+      if (!(error instanceof DOMException && error.name === "AbortError")) {
+        setPickerMessage("Ekrandan renk alınamadı. Lütfen tekrar deneyin.")
+      }
+    } finally {
+      setSampling(false)
+    }
+  }
 
   const presets = [
-    "#C98484", "#1A1A1A", "#FFFFFF", "#C98484", "#3B82F6", "#10B981", "#FBBF24",
+    "#C98484", "#1A1A1A", "#FFFFFF", "#F7EFED", "#3B82F6", "#10B981", "#FBBF24",
     "#8B5CF6", "#EC4899", "#6B7280", "#000000", "#111827", "#374151"
   ]
 
@@ -167,8 +236,8 @@ function ColorPickerPopover({ color, onChange, pickerId, activePicker, setActive
     if (!ctx) return
 
     const rect = canvas.getBoundingClientRect()
-    const x = Math.max(0, Math.min(canvas.width - 1, e.clientX - rect.left))
-    const y = Math.max(0, Math.min(canvas.height - 1, e.clientY - rect.top))
+    const x = Math.max(0, Math.min(canvas.width - 1, (e.clientX - rect.left) * canvas.width / rect.width))
+    const y = Math.max(0, Math.min(canvas.height - 1, (e.clientY - rect.top) * canvas.height / rect.height))
 
     const imgData = ctx.getImageData(x, y, 1, 1).data
     const hex = '#' + [imgData[0], imgData[1], imgData[2]].map(val => val.toString(16).padStart(2, '0')).join('').toUpperCase()
@@ -176,9 +245,13 @@ function ColorPickerPopover({ color, onChange, pickerId, activePicker, setActive
   }
 
   return (
-    <div style={{ position: "relative", display: "flex", gap: 8, alignItems: "center", width: "100%" }}>
+    <div ref={anchorRef} style={{ position: "relative", display: "flex", gap: 8, alignItems: "center", width: "100%" }}>
       <button
+        ref={triggerRef}
         type="button"
+        aria-expanded={isOpen}
+        aria-controls={`${pickerId}-palette`}
+        aria-label={label || "Renk Seçin"}
         onClick={(e) => {
           e.stopPropagation()
           setActivePicker(isOpen ? null : pickerId)
@@ -195,9 +268,21 @@ function ColorPickerPopover({ color, onChange, pickerId, activePicker, setActive
         placeholder="#FFFFFF"
         className="w-full border border-gray-200 rounded px-2 h-8 text-xs font-mono font-bold uppercase bg-white focus:border-[#C98484] focus:outline-none"
       />
-      {isOpen && (
-        <div 
-          className="absolute right-0 top-9 z-50 bg-white p-3 rounded-lg shadow-xl border border-gray-200 flex flex-col gap-2.5 w-[220px]"
+      <button type="button" onClick={sampleScreenColor} disabled={!eyeDropperSupported || sampling}
+        aria-label={`${label || "Renk"}: ekrandan renk al`}
+        title={eyeDropperSupported ? "Damlalık: ekrandaki görsele tıklayıp renk alın (Esc ile iptal)" : "Ekran damlalığı için masaüstü Chrome veya Edge kullanın"}
+        className="grid h-8 w-8 shrink-0 place-items-center rounded border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-40">
+        <Pipette className="h-4 w-4" aria-hidden="true" />
+      </button>
+      {pickerMessage && <span role="status" className="absolute left-0 top-9 text-xs text-red-600">{pickerMessage}</span>}
+      {isOpen && createPortal(
+        <div
+          ref={popupRef}
+          id={`${pickerId}-palette`}
+          role="dialog"
+          aria-label={`${label || "Renk"} paleti`}
+          style={{ position: "fixed", left: position.left, top: position.top, zIndex: 10000, maxHeight: "calc(100dvh - 16px)", maxWidth: "calc(100vw - 16px)", overflowY: "auto" }}
+          className="bg-white p-3 rounded-lg shadow-xl border border-gray-200 flex flex-col gap-2.5 w-[220px]"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="text-[10px] font-bold text-gray-500 uppercase">Renk Seçin (HEX)</div>
@@ -230,7 +315,7 @@ function ColorPickerPopover({ color, onChange, pickerId, activePicker, setActive
           >
             Tamam
           </button>
-        </div>
+        </div>, document.body
       )}
     </div>
   )
