@@ -1,6 +1,8 @@
 "use client"
+import { browserAnalyticsAllowed } from "./traffic-policy"
 
 export function analyticsAllowed() {
+  if (!browserAnalyticsAllowed()) return false
   try {
     const consent = JSON.parse(
       localStorage.getItem("zkhome_cookie_consent_v2") || "{}"

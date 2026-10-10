@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react"
 import Script from "next/script"
+import { usePathname } from "next/navigation"
+import { browserAnalyticsAllowed } from "@lib/analytics/traffic-policy"
 import { ChevronDown, ChevronUp, X, Check, Cookie } from "lucide-react"
 
 export type CookieCategoryPreferences = {
@@ -19,6 +21,15 @@ const DEFAULT_PREFERENCES: CookieCategoryPreferences = {
 }
 
 export default function CookieConsent({ ga4Id, gtmId }: { ga4Id?: string; gtmId?: string }) {
+  const pathname = usePathname()
+  const [trackingEnabled, setTrackingEnabled] = useState(false)
+  useEffect(() => {
+    setTrackingEnabled(browserAnalyticsAllowed())
+    if (ga4Id) {
+      // GA checks this flag before sending, including automatic history events.
+      Object.defineProperty(window, `ga-disable-${ga4Id}`, { configurable: true, get: () => !browserAnalyticsAllowed() })
+    }
+  }, [pathname, ga4Id])
   const [consentSaved, setConsentSaved] = useState<boolean | null>(null)
   const [preferences, setPreferences] = useState<CookieCategoryPreferences>(DEFAULT_PREFERENCES)
   const [bannerOpen, setBannerOpen] = useState(false)
@@ -95,7 +106,7 @@ export default function CookieConsent({ ga4Id, gtmId }: { ga4Id?: string; gtmId?
   return (
     <>
       {/* GA4 Script Integration */}
-      {preferences.analytics && ga4Id && (
+      {trackingEnabled && preferences.analytics && ga4Id && (
         <>
           <Script
             id="zkhome-ga4-loader"
@@ -116,7 +127,7 @@ export default function CookieConsent({ ga4Id, gtmId }: { ga4Id?: string; gtmId?
 
 
 
-      {preferences.analytics && gtmId && <Script id="zkhome-gtm-consent" strategy="afterInteractive" onReady={() => { (window as any).__zkGtmReady = true; window.dispatchEvent(new Event("zk-analytics-ready")) }}>{`
+      {trackingEnabled && preferences.analytics && gtmId && <Script id="zkhome-gtm-consent" strategy="afterInteractive" onReady={() => { (window as any).__zkGtmReady = true; window.dispatchEvent(new Event("zk-analytics-ready")) }}>{`
         (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s);j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${gtmId}');
       `}</Script>}
 

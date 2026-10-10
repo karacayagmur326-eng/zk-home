@@ -19,6 +19,7 @@ import { serializeJsonLd } from "@lib/security/html"
 import { omitStandardGa4Snippet } from "@lib/util/analytics-snippet"
 import { normalizeGoogleVerification } from "@lib/seo/google-settings"
 import { indexingEnabled } from "@lib/seo/indexing"
+import { headers } from "next/headers"
 
 
 const inter = Inter({
@@ -164,6 +165,7 @@ export default async function RootLayout({
     : undefined
   const gtmId = /^GTM-[A-Z0-9]+$/i.test(settings.seo_gtm_id || "")
     ? settings.seo_gtm_id : undefined
+  const analyticsEnabled = (await headers()).get("x-zk-analytics-enabled") === "true"
   // Older settings stored the same standard GA4 tag as raw HTML. Route that
   // exact snippet through the consent-aware loader too; preserve custom code.
   const customHeadScripts = omitStandardGa4Snippet(settings.custom_head_scripts, ga4Id)
@@ -214,6 +216,7 @@ export default async function RootLayout({
 
       </head>
       <body
+        data-analytics-enabled={String(analyticsEnabled)}
         className="antialiased overflow-x-hidden max-w-full"
         style={{
           fontFamily:
@@ -223,7 +226,7 @@ export default async function RootLayout({
         {/* Raw admin snippets may contain complete script tags. Rendering their
             wrapper inside <head> creates invalid HTML and a hydration mismatch;
             scripts still execute correctly at the beginning of <body>. */}
-        {customHeadScripts && (
+        {analyticsEnabled && customHeadScripts && (
           <div
             style={{ display: "contents" }}
             dangerouslySetInnerHTML={{ __html: customHeadScripts }}
@@ -231,7 +234,7 @@ export default async function RootLayout({
         )}
 
         {/* Dynamic Custom Body Scripts (e.g. GTM Noscript, Live Chat) */}
-        {customBodyScripts && (
+        {analyticsEnabled && customBodyScripts && (
           <div
             style={{ display: "contents" }}
             dangerouslySetInnerHTML={{ __html: customBodyScripts }}
@@ -279,13 +282,14 @@ export default async function RootLayout({
               />
               {/* CookieConsent owns GA4 loading and configuration. Avoid a second
                   loader when the administrator already supplies a custom tag. */}
-              <CookieConsent gtmId={gtmId} ga4Id={
+              <CookieConsent gtmId={analyticsEnabled ? gtmId : undefined} ga4Id={
+                !analyticsEnabled ? undefined :
                 [customHeadScripts, customBodyScripts]
                   .some((script) => script?.includes("googletagmanager.com/gtag/js"))
                   ? undefined
                   : ga4Id
               } />
-              {process.env.VERCEL === "1" && Boolean(process.env.VERCEL_URL) && <SpeedInsights />}
+              {analyticsEnabled && process.env.VERCEL === "1" && Boolean(process.env.VERCEL_URL) && <SpeedInsights />}
             </SellerQuestionProvider>
           </ToastProvider>
         </ThemeProvider>
