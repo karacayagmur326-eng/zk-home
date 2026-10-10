@@ -180,6 +180,7 @@ const RefinementList = ({
     const hasChildren = children.length > 0
     const isActive = isItemActive(item.url)
     const isOpen = Boolean(openCategoryGroups[itemKey])
+    const isAllCategories = item.url?.split("?")[0] === "/magaza"
 
     return (
       <li
@@ -191,6 +192,7 @@ const RefinementList = ({
         <div
           className={clx(
             "flex items-center rounded-lg transition-colors hover:bg-rose-50",
+            isAllCategories ? "mb-2 border border-rose-100 bg-rose-50/60" : depth === 0 ? "bg-gray-50" : hasChildren ? "bg-gray-50/60" : "",
             isActive && "bg-rose-50 text-[#C98484]"
           )}
         >
@@ -208,15 +210,15 @@ const RefinementList = ({
               }
             }}
             className={clx(
-              "min-w-0 flex-1 px-2 py-2 text-left truncate transition-colors",
+              "relative min-w-0 flex-1 px-2 py-2 text-left transition-colors break-words",
               depth === 0
-                ? "text-[12.5px] xl:text-[13px]"
-                : "text-[12px] xl:text-[12.5px]",
+                ? "text-[13px] xl:text-[13.5px]"
+                : depth === 1 ? "text-[12.5px] xl:text-[13px]" : "pl-4 text-[12px] xl:text-[12.5px] before:absolute before:left-1 before:top-1/2 before:h-1 before:w-1 before:-translate-y-1/2 before:rounded-full before:bg-current before:opacity-40",
               isActive
                 ? "font-bold text-[#C98484]"
-                : depth === 0
+                : isAllCategories ? "font-bold text-[#C98484]" : depth === 0
                 ? "font-bold text-gray-900 hover:text-[#C98484]"
-                : "font-medium text-gray-700 hover:text-[#C98484]"
+                : hasChildren || depth === 1 ? "font-semibold text-gray-800 hover:text-[#C98484]" : "font-normal text-gray-600 hover:text-[#C98484]"
             )}
           >
             {item.label}
@@ -248,7 +250,7 @@ const RefinementList = ({
         </div>
 
         {isOpen && hasChildren && (
-          <ul className="mb-1 ml-3 border-l border-rose-200 pl-2 flex flex-col gap-0.5">
+          <ul className={clx("mb-2 mt-1 ml-3 pl-3 flex flex-col gap-0.5", depth === 0 ? "border-l-2 border-rose-200" : "border-l border-gray-200")}>
             {children.map((child: any, cIdx: number) =>
               renderSidebarItem(child, depth + 1, cIdx)
             )}
@@ -485,7 +487,7 @@ const RefinementList = ({
                       type="button"
                       onClick={() => router.push("/magaza")}
                       className={clx(
-                        "w-full rounded-lg px-2 py-2 text-left text-[12.5px] xl:text-[13px] transition-colors hover:bg-rose-50 hover:text-[#C98484]",
+                        "mb-2 w-full rounded-lg border border-rose-100 bg-rose-50/60 px-2 py-2.5 text-left font-bold text-[13px] xl:text-[13.5px] text-[#C98484] transition-colors hover:bg-rose-50",
                         !pathname.includes("/kategoriler") &&
                           "font-bold text-[#C98484]",
                       )}
@@ -504,7 +506,7 @@ const RefinementList = ({
                       <li key={cat.id} className="border-t border-gray-100 pt-1">
                         <div
                           className={clx(
-                            "flex items-center rounded-lg transition-colors hover:bg-rose-50",
+                            "flex items-center rounded-lg bg-gray-50 transition-colors hover:bg-rose-50",
                             isActive && "bg-rose-50 text-[#C98484]",
                           )}
                         >
@@ -513,7 +515,7 @@ const RefinementList = ({
                             onClick={() =>
                               router.push(categoryPath(cat))
                             }
-                            className="min-w-0 flex-1 px-2 py-2 text-left font-bold text-[12.5px] xl:text-[13px] text-gray-900 hover:text-[#C98484] truncate"
+                            className="min-w-0 flex-1 px-2 py-2 text-left font-bold text-[13px] xl:text-[13.5px] text-gray-900 hover:text-[#C98484] break-words"
                           >
                             {cat.name}
                           </button>
@@ -542,7 +544,7 @@ const RefinementList = ({
                         </div>
 
                         {isOpen && children.length > 0 && (
-                          <ul className="mb-1 ml-3 border-l border-rose-200 pl-2">
+                          <ul className="mb-2 mt-1 ml-3 border-l-2 border-rose-200 pl-3">
                             {children.map((child: any) => {
                               const childActive = pathname.includes(categoryPath(child))
                               const grandchildren = Array.isArray(child.category_children) ? child.category_children : []
@@ -557,7 +559,8 @@ const RefinementList = ({
                                       )
                                     }
                                     className={clx(
-                                      "w-full rounded-md px-2 py-2 text-left text-[12.5px] transition-colors hover:bg-rose-50 hover:text-[#C98484]",
+                                      "w-full rounded-md px-2 py-2 text-left font-semibold text-[12.5px] text-gray-800 transition-colors hover:bg-rose-50 hover:text-[#C98484]",
+                                      grandchildren.length > 0 && "bg-gray-50/60",
                                       (childActive || descendantActive) &&
                                         "bg-rose-50 font-bold text-[#C98484]",
                                     )}
@@ -565,14 +568,14 @@ const RefinementList = ({
                                     {child.name}
                                   </button>
                                   {grandchildren.length > 0 && (
-                                    <ul className="mb-1 ml-2 border-l border-rose-200 pl-2">
+                                    <ul className="mb-2 mt-1 ml-3 border-l border-gray-200 pl-3">
                                       {grandchildren.map((grandchild: any) => (
                                         <li key={grandchild.id}>
                                           <button
                                             type="button"
                                             onClick={() => router.push(categoryPath(grandchild))}
                                             className={clx(
-                                              "w-full rounded-md px-2 py-1.5 text-left text-xs text-gray-600 transition-colors hover:bg-rose-50 hover:text-[#C98484]",
+                                              "relative w-full rounded-md pl-4 pr-2 py-1.5 text-left text-xs font-normal text-gray-600 transition-colors hover:bg-rose-50 hover:text-[#C98484] before:absolute before:left-1 before:top-1/2 before:h-1 before:w-1 before:-translate-y-1/2 before:rounded-full before:bg-current before:opacity-40",
                                               pathname.includes(categoryPath(grandchild)) && "font-semibold text-[#C98484]",
                                             )}
                                           >
