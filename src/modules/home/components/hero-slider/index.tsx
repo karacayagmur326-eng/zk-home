@@ -700,6 +700,44 @@ export default function HeroSlider({
           }
         }
 
+        /* Narrow screens need a filled image and a bounded text column. */
+        @media (max-width: 1279px) {
+          .zkhome-slide-body .mobile-hero-img {
+            width: 100% !important;
+            height: 100% !important;
+            inset: 0 !important;
+            transform: none;
+            object-fit: cover;
+            object-position: center;
+          }
+
+          .zkhome-mobile-content {
+            width: 46%;
+            min-width: 0;
+          }
+
+          .zkhome-heading {
+            overflow-wrap: break-word;
+            text-wrap: balance;
+          }
+        }
+
+        @media (max-width: 767px) {
+          .zkhome-mobile-content {
+            width: 75%;
+          }
+
+          .zkhome-buttons-container {
+            flex-wrap: wrap;
+          }
+        }
+
+        @media (min-width: 1024px) and (max-width: 1279px) {
+          .zkhome-mobile-content {
+            width: 69%;
+          }
+        }
+
         @media (prefers-reduced-motion: reduce) {
           html:not([data-site-motion="on"] ) .zkhome-slider-motion,
           html:not([data-site-motion="on"] ) .zkhome-slider-motion * {
@@ -806,7 +844,7 @@ export default function HeroSlider({
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-6 w-full sm:items-center">
                     {/* Left Column: Staggered entrance animations and hover states */}
                     <div
-                      className="zkhome-mobile-content zkhome-slide-content col-span-12 lg:col-span-8 max-w-[680px] lg:max-w-[620px] xl:max-w-[700px] flex flex-col items-start z-20"
+                      className="zkhome-mobile-content zkhome-slide-content col-span-1 lg:col-span-8 max-w-[680px] lg:max-w-[620px] xl:max-w-[700px] flex flex-col items-start z-20"
                       style={{ color: textColor }}
                     >
                       {/* 1. Badge with double slashes (Orange background, white text) */}
