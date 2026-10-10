@@ -1,3 +1,4 @@
+import { contentPageMetadata, contentPageSeo } from "@lib/seo/content-page"
 import { getThemeSettings } from "@lib/content/theme-settings"
 import { query } from "@lib/admin/db"
 import { Metadata } from "next"
@@ -9,14 +10,7 @@ import { Target, Eye, ArrowRight } from "lucide-react"
 import { getBaseURL } from "@lib/util/env"
 import { serializeJsonLd } from "@lib/security/html"
 
-export const metadata: Metadata = {
-  title: "Hakkımızda",
-  description:
-    "Geniş ürün yelpazesi, kaliteli markalar ve müşteri odaklı hizmet anlayışımızla e-ticarette güvenilir çözüm ortağınız. Misyonumuz, vizyonumuz ve kurumsal yapımız hakkında bilgi edinin.",
-  alternates: {
-    canonical: `${getBaseURL()}/hakkimizda`,
-  },
-}
+export async function generateMetadata() { return contentPageMetadata("hakkimizda", "Hakkımızda", "Geniş ürün yelpazesi, kaliteli markalar ve müşteri odaklı hizmet anlayışımızla e-ticarette güvenilir çözüm ortağınız. Misyonumuz, vizyonumuz ve kurumsal yapımız hakkında bilgi edinin.") }
 export const dynamic = "force-dynamic"
 
 const defaultAboutData = {
@@ -127,7 +121,7 @@ export default async function AboutPage({ searchParams }: AboutPageProps) {
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(aboutJsonLd) }}
       />
       {/* 1. Reusable Hero Section */}
-      <PageHero
+      <PageHero seoHandle="hakkimizda"
         breadcrumb={[{ title: "Hakkımızda" }]}
         title={contentData.title}
         subtitle={contentData.subtitle}

@@ -1,4 +1,7 @@
 "use client"
+import SeoFields from "../../components/SeoFields"
+import { productFieldIssues } from "@lib/commerce/product-validation"
+import { plainText } from "@lib/seo/entity"
 import AdminTabs from "@components/admin/AdminTabs"
 
 import { useUrlState } from "@lib/hooks/use-url-state"
@@ -87,6 +90,7 @@ export default function EditProductPage() {
   const [barcode, setBarcode] = useState("")
   const [manageInv, setManageInv] = useState(false)
   const [inventoryQty, setInventoryQty] = useState("")
+  const [seoMetadata, setSeoMetadata] = useState<Record<string, any>>({})
   const [shortDesc, setShortDesc] = useState("")
   const [weight, setWeight] = useState("")
   const [length, setLength] = useState("")
@@ -168,6 +172,7 @@ export default function EditProductPage() {
           }
 
           const md = p.metadata || {}
+          setSeoMetadata(md)
           setUsageTitle(typeof md.usage_title === "string" ? md.usage_title : "")
           setUsageContent(typeof md.usage_content === "string" ? md.usage_content : "")
           setShortDesc(
@@ -285,6 +290,12 @@ export default function EditProductPage() {
       setError("Lütfen geçerli bir fiyat girin! Fiyatı 0 TL olan ürünler sitede yayınlanamaz.")
       return
     }
+    const issues = productFieldIssues({ title, description, status: forcedStatus ?? status,
+      metadata: { ...seoMetadata, product_summary: shortDesc }, thumbnail, images,
+      collection_id: selectedColId, categories: selectedCats,
+      variants: [{ sku, manage_inventory: manageInv, inventory_quantity: inventoryQty,
+        prices: [{ currency_code: "try", amount: parsedPrice * 100 }] }] })
+    if (issues.length) { setError(issues[0].message); return }
     setSaving(true)
     setError("")
 
@@ -297,9 +308,10 @@ export default function EditProductPage() {
 
       const body: Record<string, unknown> = {
         title: safeTitle,
-        description: safeDesc || undefined,
+        description: safeDesc,
         status: forcedStatus ?? status,
         metadata: {
+          ...seoMetadata,
           product_summary: shortDesc.trim(),
           usage_title: usageTitle.trim(),
           usage_content: usageContent.trim(),
@@ -533,9 +545,9 @@ export default function EditProductPage() {
             </div>
 
             {/* Ürün Özeti (WordPress Klasik Editör) */}
-            <div>
+            <div tabIndex={-1} {...fieldProps("summary")}>
               <RichTextEditorField
-                label="Ürün Özeti"
+                label="Ürün Özeti *"
                 value={shortDesc}
                 onChange={setShortDesc}
                 rows={6}
@@ -543,6 +555,8 @@ export default function EditProductPage() {
               />
             </div>
           </div>
+
+          <SeoFields value={seoMetadata} onChange={setSeoMetadata} title={title} description={plainText(shortDesc)} images={Array.from(new Set([thumbnail, ...images].filter(Boolean)))} />
 
           {/* Card 2: Ürün Verisi (Tabbed Box) */}
           <div className="rounded-3xl bg-white border border-slate-200/80 p-6 shadow-xs space-y-5">
@@ -598,9 +612,9 @@ export default function EditProductPage() {
                     </div>
                   </div>
 
-                  <div>
+                  <div tabIndex={-1} {...fieldProps("description")}>
                     <RichTextEditorField
-                      label="Ürün Açıklaması"
+                      label="Ürün Açıklaması *"
                       value={description}
                       onChange={setDescription}
                       placeholder="Ürün hakkında detaylı açıklama..."
@@ -651,7 +665,7 @@ export default function EditProductPage() {
                       <input
                         type="number"
                         min="0"
-                        value={inventoryQty}
+                        value={inventoryQty} {...fieldProps("stock")}
                         onChange={(e) => {
                           setInventoryQty(e.target.value)
                           if (e.target.value) setManageInv(true)
@@ -770,15 +784,15 @@ export default function EditProductPage() {
             </button>
           </div>
 
-          <ProductMediaEditor thumbnail={thumbnail} images={images} onCoverChange={setThumbnail} onImagesChange={setImages}
-            onUploadCover={() => setIsThumbModalOpen(true)} onUploadGallery={() => setIsGalleryModalOpen(true)} />
+          <div tabIndex={-1} {...fieldProps("image")}><ProductMediaEditor thumbnail={thumbnail} images={images} onCoverChange={setThumbnail} onImagesChange={setImages}
+            onUploadCover={() => setIsThumbModalOpen(true)} onUploadGallery={() => setIsGalleryModalOpen(true)} /></div>
 
           {/* Card 4: Ürün Kategorileri */}
           <div className="rounded-2xl bg-white border border-[#EADBD4]/70 p-4 shadow-sm space-y-3">
             <h3 className="text-sm font-semibold text-slate-800 border-b border-[#F3ECE8] pb-3">
               Ürün Kategorileri
             </h3>
-            <ProductCategoryPicker categories={categories} selected={selectedCats} onToggle={toggleCat} />
+            <div tabIndex={-1} {...fieldProps("category")}><ProductCategoryPicker categories={categories} selected={selectedCats} onToggle={toggleCat} /></div>
             <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
               <input
                 type="text"
@@ -900,7 +914,7 @@ export default function EditProductPage() {
               Marka
             </h3>
             <select
-              value={selectedColId}
+              value={selectedColId} {...fieldProps("brand")}
               onChange={(e) => setSelectedColId(e.target.value)}
               className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold text-slate-800 outline-none focus:border-[#C98484] cursor-pointer"
             >

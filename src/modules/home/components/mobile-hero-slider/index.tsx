@@ -47,7 +47,6 @@ export default function MobileHeroSlider({ slides, prioritize = true }: { slides
                 sizes="(max-width: 767px) 100vw, 480px"
                 priority={prioritize && idx === 0}
                 fetchPriority={prioritize && idx === 0 ? "high" : "auto"}
-                unoptimized
                 loading={idx === 0 ? "eager" : "lazy"}
               />
             )}
@@ -57,9 +56,9 @@ export default function MobileHeroSlider({ slides, prioritize = true }: { slides
                   {slide.badge}
                 </span>
               )}
-              <h1 className="font-[family-name:var(--font-barlow-condensed)] text-[22px] font-black leading-[1.02] text-slate-950">
+              <h2 className="font-[family-name:var(--font-barlow-condensed)] text-[22px] font-black leading-[1.02] text-slate-950">
                 {slide.title}
-              </h1>
+              </h2>
               {slide.description && (
                 <p className="mt-2 line-clamp-2 text-[10px] leading-relaxed text-slate-600">
                   {slide.description}

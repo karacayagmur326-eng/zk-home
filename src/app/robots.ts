@@ -1,3 +1,4 @@
+import { indexingEnabled } from "@lib/seo/indexing"
 import { getBaseURL } from "@lib/util/env"
 import { MetadataRoute } from "next"
 import { getThemeSettings } from "@lib/content/theme-settings"
@@ -8,7 +9,7 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
   const baseUrl = getBaseURL()
   const settings = await getThemeSettings().catch(() => null)
   const isPreview = process.env.VERCEL_ENV === "preview"
-  const isIndexingDisabled = settings?.seo_indexing_enabled === false || isPreview
+  const isIndexingDisabled = !indexingEnabled(settings) || isPreview
 
   if (isIndexingDisabled) {
     return {

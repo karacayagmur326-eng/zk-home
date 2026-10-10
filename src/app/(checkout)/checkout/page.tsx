@@ -5,6 +5,7 @@ import CheckoutForm from "@modules/checkout/templates/checkout-form"
 import CheckoutSummary from "@modules/checkout/templates/checkout-summary"
 import { Metadata } from "next"
 import { ShieldCheck, RotateCcw, Headphones } from "@lib/icons"
+import EcommerceEvent from "@components/common/EcommerceEvent"
 
 export const metadata: Metadata = {
   title: "Güvenli Ödeme",
@@ -22,6 +23,7 @@ export default async function Checkout() {
 
   return (
     <div className="w-full max-w-full overflow-x-hidden pb-8 sm:pb-12">
+      {cart?.items?.length ? <EcommerceEvent event="begin_checkout" once={`checkout:${cart.id}:${cart.total}`} data={{ currency: String(cart.currency_code || "TRY").toUpperCase(), value: Number(cart.item_total ?? cart.subtotal ?? 0) / 100, items: cart.items.map(item => ({ item_id: item.variant_id, item_name: item.title, price: Number(item.unit_price) / 100, quantity: item.quantity })) }} /> : null}
       <div className="content-container mx-auto max-sm:px-0 grid grid-cols-1 gap-4 sm:gap-8 py-3 sm:py-8 lg:grid-cols-[1fr_420px] lg:py-12">
         <div className="order-2 min-w-0 lg:order-1">
           <PaymentWrapper cart={cart}>

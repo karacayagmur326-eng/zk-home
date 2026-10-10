@@ -1,22 +1,25 @@
+import { ensureBlogSeoSchema } from "@lib/seo/blog"
+import { indexingEnabled } from "@lib/seo/indexing"
+import { getThemeSettings } from "@lib/content/theme-settings"
 import { emptySitemap } from "@lib/seo/sitemap-response"
 import { query } from "@lib/admin/db"
 import { getBaseURL } from "@lib/util/env"
 import { NextResponse } from "next/server"
 import { escapeXml, lastModifiedXml } from "@lib/seo/indexing"
-import { isStoreReady } from "@lib/security/store-readiness"
 
 export const dynamic = "force-dynamic"
 
 export async function GET() {
-  if (!isStoreReady()) return emptySitemap()
   try {
+  if (!indexingEnabled(await getThemeSettings())) return emptySitemap()
+  await ensureBlogSeoSchema()
   const baseUrl = getBaseURL()
   // 2. Fetch Published Blog Posts
   const blogPosts = await query<{ slug: string; title: string; image?: string; updated_at?: string; published_at?: string; created_at?: string }>(
-    `SELECT slug, title, image, updated_at, published_at, created_at 
-     FROM blog_posts 
-     WHERE status = 'published' 
-     ORDER BY published_at DESC, created_at DESC`
+    `SELECT slug, title, image, updated_at, published_at, created_at
+     FROM blog_posts
+     WHERE status = 'published' AND seo_metadata->>'seo_noindex' IS DISTINCT FROM 'true' AND seo_metadata->>'seo_sitemap' IS DISTINCT FROM 'false' AND (NULLIF(seo_metadata->>'seo_canonical','') IS NULL OR seo_metadata->>'seo_canonical' = $1 || '/blog/' || slug)
+     ORDER BY published_at DESC, created_at DESC`, [baseUrl]
   )
 
   // Main Blog Index URL
@@ -46,13 +49,13 @@ export async function GET() {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
-${(isStoreReady() ? [mainBlogXml, ...postXmlRows] : []).join("\n")}
+${postXmlRows.join("\n")}
 </urlset>`
 
   return new NextResponse(xml, {
     headers: {
       "Content-Type": "application/xml; charset=utf-8",
-      "Cache-Control": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400",
+      "Cache-Control": "public, max-age=60, s-maxage=60, stale-while-revalidate=60",
     },
   })
   } catch {

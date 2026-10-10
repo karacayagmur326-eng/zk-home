@@ -1,5 +1,8 @@
+import { ensureBlogSeoSchema } from "@lib/seo/blog"
+import { entityMetadata } from "@lib/seo/entity"
+import { indexingEnabled } from "@lib/seo/indexing"
 import { Metadata } from "next"
-import { notFound } from "next/navigation"
+import { notFound, permanentRedirect } from "next/navigation"
 import Image from "@components/common/SmartImage"
 import Link from "next/link"
 import {
@@ -24,12 +27,13 @@ type Props = {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  await ensureBlogSeoSchema()
   const { slug } = await params
   const [rows, settings] = await Promise.all([
     query<any>(
-      "SELECT title, excerpt, image, seo_title, seo_description, published_at FROM blog_posts WHERE slug = $1 AND status = 'published' LIMIT 1",
+      "SELECT slug, title, excerpt, image, seo_title, seo_description, seo_metadata, published_at FROM blog_posts WHERE (slug = $1 OR seo_metadata->'slug_history' ? $1) AND status = 'published' LIMIT 1",
       [slug]
-    ).catch(() => []),
+    ),
     getThemeSettings().catch(() => null),
   ])
 
@@ -38,6 +42,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const post = rows[0]
+  if (post.slug !== slug) permanentRedirect(`/blog/${post.slug}`)
   const siteName = settings?.logo_text || "Mağaza"
   const separator = settings?.seo_title_separator || "|"
 
@@ -54,37 +59,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     settings?.seo_blog_title_template || "%yazi_basligi% %ayirici% %site_adi%"
   const descTemplate = settings?.seo_blog_desc_template || "%yazi_ozeti%"
 
-  const title = post.seo_title || renderSeoTemplate(titleTemplate, tokens)
+  const title = post.seo_metadata?.seo_title || post.seo_title || renderSeoTemplate(titleTemplate, tokens)
   const description =
-    post.seo_description ||
+    post.seo_metadata?.seo_description || post.seo_description ||
     renderSeoTemplate(descTemplate, tokens) ||
     post.excerpt ||
     "Kapsamlı ürün kullanım ve seçim rehberi."
   const url = `${getBaseURL()}/blog/${slug}`
 
-  return {
-    title: { absolute: title },
-    description,
-    alternates: { canonical: url },
-    openGraph: {
-      title,
-      description,
-      url,
-      type: "article",
-      publishedTime: post.published_at,
-      images: post.image ? [post.image] : [],
-      locale: "tr_TR",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      images: post.image ? [post.image] : [],
-    },
-  }
+  const metadata = entityMetadata({ title, description, path: `/blog/${slug}`, metadata: post.seo_metadata || {}, image: post.image, index: indexingEnabled(settings) })
+  return { ...metadata, openGraph: { ...metadata.openGraph, type: "article", publishedTime: post.published_at } }
+
 }
 
 export default async function ArticlePage({ params }: Props) {
+  await ensureBlogSeoSchema()
   const { slug } = await params
 
   const rows = await query<any>(`
@@ -94,9 +83,9 @@ export default async function ArticlePage({ params }: Props) {
       c.slug as category_slug
     FROM blog_posts p
     LEFT JOIN blog_categories c ON p.category_id = c.id
-    WHERE p.slug = $1 AND p.status = 'published'
+    WHERE (p.slug = $1 OR p.seo_metadata->'slug_history' ? $1) AND p.status = 'published'
     LIMIT 1
-  `, [slug]).catch(() => [])
+  `, [slug])
 
   if (rows.length === 0) {
     notFound()

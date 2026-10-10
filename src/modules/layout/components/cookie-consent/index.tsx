@@ -18,7 +18,7 @@ const DEFAULT_PREFERENCES: CookieCategoryPreferences = {
   functional: false,
 }
 
-export default function CookieConsent({ ga4Id }: { ga4Id?: string }) {
+export default function CookieConsent({ ga4Id, gtmId }: { ga4Id?: string; gtmId?: string }) {
   const [consentSaved, setConsentSaved] = useState<boolean | null>(null)
   const [preferences, setPreferences] = useState<CookieCategoryPreferences>(DEFAULT_PREFERENCES)
   const [bannerOpen, setBannerOpen] = useState(false)
@@ -100,9 +100,10 @@ export default function CookieConsent({ ga4Id }: { ga4Id?: string }) {
           <Script
             id="zkhome-ga4-loader"
             src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`}
-            strategy="lazyOnload"
+            strategy="afterInteractive"
+            onLoad={() => window.dispatchEvent(new Event("zk-analytics-ready"))}
           />
-          <Script id="zkhome-ga4-consent" strategy="afterInteractive">
+          <Script id="zkhome-ga4-consent" strategy="afterInteractive" onReady={() => { window.dispatchEvent(new Event("zk-analytics-ready")) }}>
             {`
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
@@ -114,6 +115,10 @@ export default function CookieConsent({ ga4Id }: { ga4Id?: string }) {
       )}
 
 
+
+      {preferences.analytics && gtmId && <Script id="zkhome-gtm-consent" strategy="afterInteractive" onReady={() => { (window as any).__zkGtmReady = true; window.dispatchEvent(new Event("zk-analytics-ready")) }}>{`
+        (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s);j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${gtmId}');
+      `}</Script>}
 
       {/* Bottom Right Floating Banner */}
       {bannerOpen && !modalOpen && (

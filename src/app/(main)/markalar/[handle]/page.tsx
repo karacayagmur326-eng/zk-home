@@ -1,5 +1,7 @@
+import { entityMetadata } from "@lib/seo/entity"
+import { indexingEnabled } from "@lib/seo/indexing"
 import { Metadata } from "next"
-import { notFound } from "next/navigation"
+import { notFound, permanentRedirect } from "next/navigation"
 
 import { getCollectionByHandle, listCollections } from "@lib/data/collections"
 import { StoreCollection } from "@medusajs/types"
@@ -37,6 +39,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   if (!collection) {
     notFound()
   }
+  if (collection.handle !== params.handle) permanentRedirect(`/markalar/${collection.handle}`)
   if ((collection.metadata as Record<string, unknown> | undefined)?.active === false) notFound()
 
   const siteName = settings?.logo_text || "Mağaza"
@@ -62,14 +65,8 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const description = typeof brandMetadata.seo_description === "string" && brandMetadata.seo_description.trim()
     ? brandMetadata.seo_description.trim() : renderSeoTemplate(descTemplate, tokens)
 
-  return {
-    title: { absolute: title },
-    description,
-    robots: { index: isStoreReady() && brandMetadata.is_indexable === true && Boolean(collection.products?.length), follow: true },
-    alternates: {
-      canonical: getBaseURL() + paginatedPath(`/markalar/${params.handle}`, page),
-    },
-  } as Metadata
+  return entityMetadata({ title, description, path: paginatedPath(`/markalar/${params.handle}`, page), metadata: brandMetadata, image: String(brandMetadata.image_url || ""), index: indexingEnabled(settings) && brandMetadata.is_indexable === true && Boolean(collection.products?.length) })
+
 }
 
 export default async function CollectionPage(props: Props) {
@@ -85,6 +82,7 @@ export default async function CollectionPage(props: Props) {
   if (!collection) {
     notFound()
   }
+  if (collection.handle !== params.handle) permanentRedirect(`/markalar/${collection.handle}`)
   if ((collection.metadata as Record<string, unknown> | undefined)?.active === false) notFound()
 
   return (

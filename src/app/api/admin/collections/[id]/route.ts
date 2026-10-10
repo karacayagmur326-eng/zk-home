@@ -19,6 +19,11 @@ export async function POST(req: NextRequest, { params }: Context) {
     return NextResponse.json({ error: "Yetkisiz işlem." }, { status: 401 })
   await ensureCommerceSchema()
   const body = await req.json()
+  const id = (await params).id
+  const previous = (await query<any>("SELECT * FROM store_collection WHERE id=$1", [id]))[0]
+  const nextHandle = body.handle ? slugify(body.handle) : previous?.handle || slugify(body.title || "")
+  body.metadata = { ...previous?.metadata, ...body.metadata }
+  if (previous?.handle && previous.handle !== nextHandle) body.metadata.slug_history = Array.from(new Set([...(previous.metadata?.slug_history || []), previous.handle])).filter(value => value !== nextHandle).slice(-100)
   const rows = await query<any>(
     `UPDATE store_collection SET
        title=COALESCE($2,title), handle=COALESCE($3,handle),
@@ -27,11 +32,7 @@ export async function POST(req: NextRequest, { params }: Context) {
     [
       (await params).id,
       body.title || null,
-      body.handle
-        ? slugify(body.handle)
-        : body.title
-          ? slugify(body.title)
-          : null,
+      nextHandle || null,
       body.metadata || null,
     ]
   )

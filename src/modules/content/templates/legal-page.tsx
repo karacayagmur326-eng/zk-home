@@ -1,3 +1,4 @@
+import { contentPageMetadata } from "@lib/seo/content-page"
 import { query } from "@lib/admin/db"
 import { Metadata } from "next"
 import Link from "next/link"
@@ -143,22 +144,8 @@ const configs: Record<string, LegalConfig> = {
   },
 }
 
-export function legalMetadata(title: string, description: string, path: string): Metadata {
-  const baseUrl = getBaseURL()
-  const isTransactionContract =
-    path === "/on-bilgilendirme-formu" ||
-    path === "/mesafeli-satis-sozlesmesi"
-
-  return {
-    title: `${title}`,
-    description,
-    alternates: {
-      canonical: `${baseUrl}${path}`,
-    },
-    robots: isTransactionContract
-      ? { index: false, follow: true }
-      : { index: true, follow: true },
-  }
+export async function legalMetadata(title: string, description: string, path: string): Promise<Metadata> {
+  return contentPageMetadata(path === "/kvkk" ? "kvkk-aydinlatma-metni" : path.slice(1), title, description, path)
 }
 
 export default async function LegalPage({ handle, fallbackTitle, fallbackDescription }: LegalPageProps) {
@@ -207,7 +194,7 @@ export default async function LegalPage({ handle, fallbackTitle, fallbackDescrip
   if (!config) {
     return (
       <main className="min-h-screen bg-white pb-20">
-        <PageHero breadcrumb={[{ title }]} title={title} paragraphs={[heroText]} heroImage={heroImage} heroImageAlt={title} />
+        <PageHero seoHandle={handle} breadcrumb={[{ title }]} title={title} paragraphs={[heroText]} heroImage={heroImage} heroImageAlt={title} />
         <section className="content-container py-10">
           <article className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-9 shadow-xs text-sm leading-7 text-slate-600 whitespace-pre-line">{sanitizeDynamicText(fallbackDescription)}</article>
         </section>
@@ -233,7 +220,7 @@ export default async function LegalPage({ handle, fallbackTitle, fallbackDescrip
 
   return (
     <main className="min-h-screen bg-[#fbfcfd] pb-16">
-      <PageHero breadcrumb={[{ title }]} title={title} paragraphs={[heroText]} heroImage={heroImage} heroImageAlt={title} />
+      <PageHero seoHandle={handle} breadcrumb={[{ title }]} title={title} paragraphs={[heroText]} heroImage={heroImage} heroImageAlt={title} />
 
       <section className="content-container py-8 sm:py-10">
         <div className="grid gap-5 lg:grid-cols-[260px_minmax(0,1fr)]">

@@ -48,7 +48,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
     <div className="bg-white pt-2 pb-6 sm:pb-8 lg:py-6 font-sans">
       <div className="max-w-[1440px] mx-auto px-3 sm:px-5">
         {/* Breadcrumbs (Hidden on mobile) */}
-        <div className="hidden sm:flex no-scrollbar mb-3 sm:mb-5 items-center gap-2 overflow-x-auto whitespace-nowrap text-xs text-slate-500 font-medium">
+        <nav aria-label="Sayfa yolu" className="hidden sm:flex no-scrollbar mb-3 sm:mb-5 items-center gap-2 overflow-x-auto whitespace-nowrap text-xs text-slate-500 font-medium">
           <LocalizedClientLink href="/" className="hover:text-[#C98484] transition-colors">
             Ana Sayfa
           </LocalizedClientLink>
@@ -71,7 +71,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
           <span className="text-slate-900 font-bold truncate max-w-[200px] sm:max-w-[300px]">
             {product.title}
           </span>
-        </div>
+        </nav>
 
         {/* ── MAIN PRODUCT CONTAINER (Seamless Full-Width White Stage) ── */}
         <div
@@ -80,49 +80,10 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
         >
           {/* ── MOBILE: Stacked layout | DESKTOP: 3-column grid ── */}
 
-          {/* MOBILE GALLERY (shown only on mobile, above product info) */}
-          <div className="lg:hidden">
-            <ImageGallery images={images} productTitle={product.title} discountBadge={discountBadge} product={product} />
-          </div>
-
-          {/* MOBILE PRODUCT INFO (shown only on mobile, below gallery) */}
-          <div className="lg:hidden">
-            <ProductInfo product={product} />
-          </div>
-
-          {/* MOBILE BUY BOX (shown only on mobile, below product info) */}
-          <div className="lg:hidden">
-            <ProductOnboardingCta />
-            <Suspense
-              fallback={<ProductActions disabled={true} product={product} region={region} />}
-            >
-              <ProductActions product={product} region={region} />
-            </Suspense>
-          </div>
-
-          {/* DESKTOP: 3-Column Grid (hidden on mobile) */}
-          <div className="hidden lg:grid lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1.4fr)_minmax(240px,0.9fr)] lg:items-stretch lg:gap-0 lg:pb-6">
-            {/* Left Column: Image Gallery (4 cols with vertical thumbnails on left) */}
-            <div className="min-w-0 pr-4">
-              <ImageGallery images={images} productTitle={product.title} discountBadge={discountBadge} product={product} />
-            </div>
-
-            {/* Middle Column: Product Info (5 cols) */}
-            <div className="min-w-0 flex flex-col px-4">
-              <ProductInfo product={product} />
-            </div>
-
-            {/* Right Column: Buy Box Card (3 cols) */}
-            <div className="min-w-0 pl-5">
-              <div className="sticky top-24">
-                <ProductOnboardingCta />
-                <Suspense
-                  fallback={<ProductActions disabled={true} product={product} region={region} />}
-                >
-                  <ProductActions product={product} region={region} />
-                </Suspense>
-              </div>
-            </div>
+          <div className="space-y-3 sm:space-y-8 lg:grid lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1.4fr)_minmax(240px,0.9fr)] lg:items-stretch lg:gap-0 lg:space-y-0 lg:pb-6">
+            <div className="min-w-0 lg:pr-4"><ImageGallery images={images} productTitle={product.title} discountBadge={discountBadge} product={product} /></div>
+            <div className="min-w-0 flex flex-col lg:px-4"><ProductInfo product={product} /></div>
+            <div className="min-w-0 lg:pl-5"><div className="lg:sticky lg:top-24"><ProductOnboardingCta /><Suspense fallback={<ProductActions disabled={true} product={product} region={region} />}><ProductActions product={product} region={region} /></Suspense></div></div>
           </div>
 
           {/* Sweet Thin Horizontal Divider Line 1 */}

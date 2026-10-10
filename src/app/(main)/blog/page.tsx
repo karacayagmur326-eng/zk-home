@@ -1,3 +1,4 @@
+import { contentPageMetadata, contentPageSeo } from "@lib/seo/content-page"
 import { Metadata } from "next"
 import Image from "@components/common/SmartImage"
 import Link from "next/link"
@@ -10,14 +11,7 @@ import { getBaseURL } from "@lib/util/env"
 
 export const dynamic = "force-dynamic"
 
-export const metadata: Metadata = {
-  title: "Blog ve Rehber Makaleleri",
-  description:
-    "Ürün kullanım rehberleri, ürün seçimi ipuçları, bakım önerileri ve faydalı makaleler. Doğru bilgiyle en iyi performansı elde edin.",
-  alternates: {
-    canonical: `${getBaseURL()}/blog`,
-  },
-}
+export async function generateMetadata() { return contentPageMetadata("blog", "Blog ve Rehber Makaleleri", "Ürün kullanım rehberleri, ürün seçimi ipuçları, bakım önerileri ve faydalı makaleler. Doğru bilgiyle en iyi performansı elde edin.") }
 
 export default async function BlogPage({
   searchParams,
@@ -85,7 +79,7 @@ export default async function BlogPage({
   return (
     <main className="min-h-screen bg-[#fbfcfd] pb-16">
       {/* 1. Hero Alanı (Admin'den Yönetilen Başlık, Açıklama ve Görsel) */}
-      <PageHero
+      <PageHero seoHandle="blog"
         breadcrumb={[{ title: pageContent.title || "Ürün Rehberi & Blog" }]}
         title={pageContent.title || "Ürün Rehberi ve Makaleler"}
         paragraphs={[pageContent.hero_text || pageContent.description || "Profesyonel işlerinizde size yardımcı olacak ipuçları, kullanım rehberleri ve sektörel içerikler."]}

@@ -1,3 +1,4 @@
+import { contentPageMetadata, contentPageSeo } from "@lib/seo/content-page"
 import type { Metadata } from "next"
 import Link from "next/link"
 import { getBaseURL } from "@lib/util/env"
@@ -6,11 +7,7 @@ import { convertToLocale } from "@lib/util/money"
 
 export const dynamic = "force-dynamic"
 
-export const metadata: Metadata = {
-  title: "Teslimat, İptal ve İade Koşulları",
-  description: "Mağaza kargo ücretleri, teslimat, iptal ve iade süreçleri.",
-  alternates: { canonical: `${getBaseURL()}/teslimat-ve-iade` },
-}
+export async function generateMetadata() { return contentPageMetadata("teslimat-ve-iade", "Teslimat, İptal ve İade Koşulları", "Mağaza kargo ücretleri, teslimat, iptal ve iade süreçleri.") }
 
 const topics = [
   { title: "Sipariş hazırlığı ve teslimat", body: "Siparişiniz ödeme onayından sonra hazırlanır ve adresinize kargo ile gönderilir. Tahmini teslimat bilgisi sipariş sırasında gösterilir. Fiziksel mağazadan teslim seçeneğimiz yoktur." },
@@ -21,6 +18,7 @@ const topics = [
 ]
 
 export default async function DeliveryAndReturnsPage() {
+  const seo = await contentPageSeo("teslimat-ve-iade")
   const settings = await getCommerceSettings()
   const shippingRanges = [...(settings.shipping_ranges || [])].sort((a, b) => a.min - b.min)
   const money = (amount: number) => convertToLocale({ amount, currency_code: "TRY" })
@@ -28,7 +26,7 @@ export default async function DeliveryAndReturnsPage() {
     <main className="min-h-screen bg-[#fbf8f7] pb-20">
       <section className="border-b border-rose-100 bg-white py-16 sm:py-20"><div className="content-container max-w-5xl">
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#bd8585]">Müşteri bilgilendirme</p>
-        <h1 className="mt-4 text-4xl font-bold text-slate-900 sm:text-5xl">Teslimat, İptal ve İade</h1>
+        <h1 className="mt-4 text-4xl font-bold text-slate-900 sm:text-5xl">{seo.h1_title || "Teslimat, İptal ve İade"}</h1>
         <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slate-600">Siparişinizin teslimatından iade talebine kadar süreçle ilgili temel bilgileri burada bulabilirsiniz.</p>
       </div></section>
       <div className="content-container max-w-6xl grid gap-8 py-12 lg:grid-cols-[1.5fr_1fr]">

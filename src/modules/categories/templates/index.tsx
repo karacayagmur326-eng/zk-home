@@ -1,3 +1,4 @@
+import { sanitizePublicHtml } from "@lib/security/html"
 import { notFound } from "next/navigation"
 import Image from "@components/common/SmartImage"
 import { CSSProperties, Suspense } from "react"
@@ -190,7 +191,7 @@ export default async function CategoryTemplate({
     "hero_mobile_image_url",
     heroImageUrl,
   )
-  const displayTitle = textValue(metadata, "display_title", category.name)
+  const displayTitle = textValue(metadata, "h1_title", textValue(metadata, "display_title", category.name))
   const eyebrow = textValue(metadata, "eyebrow", "").trim() || parents[0]?.name || "Mağaza Seçkisi"
   const heroHeight = numberValue(metadata, "hero_height", 300, 240, 620)
   const heroMobileHeight = numberValue(
@@ -362,6 +363,7 @@ export default async function CategoryTemplate({
           />
 
           <div className="min-w-0 w-full flex-1">
+            <h1 className="sr-only">{displayTitle}</h1>
             <header
               className="hidden sm:flex group/hero relative mb-6 flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-soft hover:shadow-lg transition-all duration-500 lg:min-h-[var(--category-hero-height)] lg:flex-row"
               style={{ backgroundColor: heroBackground }}
@@ -373,17 +375,15 @@ export default async function CategoryTemplate({
                     {turkishTitleCase(eyebrow)}
                   </p>
                 ) : null}
-                <h1
+                <h2
                   data-testid="category-page-title"
                   className="mt-2 max-w-3xl text-[clamp(1.75rem,8.5vw,var(--category-mobile-title-size))] font-bold leading-[1.12] tracking-tight text-slate-800 lg:text-[length:var(--category-title-size)]"
                 >
                   {turkishTitleCase(displayTitle)}
-                </h1>
+                </h2>
                 <span className="mt-3 h-0.5 w-12 rounded-full bg-primary/80" />
                 {category.description && (
-                  <p className="mt-3 max-w-xl text-[12px] font-normal leading-relaxed text-slate-600 sm:text-sm">
-                    {category.description}
-                  </p>
+                  <div className="mt-3 max-w-xl text-[12px] font-normal leading-relaxed text-slate-600 sm:text-sm" dangerouslySetInnerHTML={{ __html: sanitizePublicHtml(category.description).replace(/<(\/?)h1\b/gi, "<$1h2") }} />
                 )}
 
                 {features && features.length > 0 && (
@@ -419,7 +419,7 @@ export default async function CategoryTemplate({
                   {heroImageUrl.startsWith("/") ? (
                     <Image
                       src={heroImageUrl}
-                      alt={`${category.name} kategori kapak görseli`}
+                      alt={textValue(metadata, "image_alt", `${category.name} kategori kapak görseli`)}
                       fill
                       sizes="(max-width: 639px) 100vw, (max-width: 1023px) 100vw, 42vw"
                       quality={75}
@@ -429,7 +429,7 @@ export default async function CategoryTemplate({
                   ) : (
                     <SafeImage
                       src={heroImageUrl}
-                      alt={`${category.name} kategori kapak görseli`}
+                      alt={textValue(metadata, "image_alt", `${category.name} kategori kapak görseli`)}
                       className="absolute inset-0 h-full w-full object-cover transform group-hover/hero:scale-105 transition-transform duration-700 ease-out"
                       style={{ objectPosition: heroObjectPosition }}
                     />
@@ -578,6 +578,7 @@ export default async function CategoryTemplate({
               />
             </Suspense>
             </div>
+            {typeof metadata.lower_description === "string" && metadata.lower_description.trim() && <section className="product-rich-text prose mt-8 max-w-none" dangerouslySetInnerHTML={{ __html: sanitizePublicHtml(metadata.lower_description).replace(/<(\/?)h1\b/gi, "<$1h2") }} />}
           </div>
         </div>
       </div>

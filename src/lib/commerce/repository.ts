@@ -1,3 +1,4 @@
+import { validateProduct } from "./product-validation"
 import { randomUUID } from "crypto"
 import { query, withTransaction } from "@lib/admin/db"
 import { getCached, clearMemoryCache } from "@lib/cache"
@@ -344,6 +345,8 @@ export async function createStoreProduct(body: any) {
   }
   const finalStatus = productPrice <= 0 ? "draft" : requestedStatus
 
+  validateProduct({ ...body, status: requestedStatus })
+
   await withTransaction(async (client) => {
     await client.query(
       `INSERT INTO store_product
@@ -442,6 +445,19 @@ export async function updateStoreProduct(id: string, body: any) {
     throw new Error("Lütfen geçerli bir fiyat girin! Fiyatı 0 TL olan ürünler sitede yayınlanamaz.")
   }
   const finalStatus = productPrice <= 0 ? "draft" : requestedStatus
+
+  validateProduct({ ...existing, ...body, metadata, status: requestedStatus,
+    variants: [{ ...currentVariant, ...variant, calculated_price: undefined,
+      prices: [{ amount: productPrice, currency_code: "try" }] }] })
+  const nextHandle = body.handle ? slugify(body.handle) : existing.handle
+  if (nextHandle !== existing.handle) {
+    metadata.slug_history = Array.from(new Set([...(Array.isArray(metadata.slug_history) ? metadata.slug_history : []), existing.handle])).slice(-100)
+  }
+  const seoKeys = ["seo_title", "seo_description", "seo_canonical", "seo_noindex", "seo_sitemap", "h1_title", "og_title", "og_image", "image_alt_texts"]
+  if (seoKeys.some(key => JSON.stringify(metadata[key]) !== JSON.stringify(existing.metadata?.[key]))) {
+    metadata.seo_history = [...(Array.isArray(existing.metadata?.seo_history) ? existing.metadata.seo_history : []),
+      { at: new Date().toISOString(), before: Object.fromEntries(seoKeys.map(key => [key, existing.metadata?.[key] ?? null])), after: Object.fromEntries(seoKeys.map(key => [key, metadata[key] ?? null])) }].slice(-50)
+  }
 
   await withTransaction(async (client) => {
     await client.query(
@@ -701,6 +717,10 @@ export async function createStoreCategory(body: any) {
 
 export async function updateStoreCategory(id: string, body: any) {
   await ensureCommerceSchema()
+  const previous = (await query<any>("SELECT handle,metadata FROM store_category WHERE id=$1", [id]))[0]
+  if (previous && body.handle && categoryHandle(body.handle) !== previous.handle) {
+    body = { ...body, metadata: { ...body.metadata, slug_history: Array.from(new Set([...(previous.metadata?.slug_history || []), previous.handle])).filter(value => value !== categoryHandle(body.handle)).slice(-100) } }
+  }
   const rows = await query<any>(
     `UPDATE store_category SET
        name=COALESCE($2,name),

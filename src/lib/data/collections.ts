@@ -38,9 +38,9 @@ export const getCollectionByHandle = async (handle: string) => {
     `SELECT c.*,
        COALESCE((
          SELECT jsonb_agg(jsonb_build_object('id',p.id,'title',p.title,'handle',p.handle))
-         FROM store_product p WHERE p.collection_id=c.id AND p.status='published'
+         FROM store_product p WHERE p.collection_id=c.id AND p.status='published' AND p.deleted_at IS NULL
        ), '[]'::jsonb) AS products
-     FROM store_collection c WHERE c.handle=$1 LIMIT 1`,
+     FROM store_collection c WHERE c.handle=$1 OR c.metadata->'slug_history' ? $1 ORDER BY (c.handle=$1) DESC LIMIT 1`,
     [handle]
   )
   return (rows[0] || null) as HttpTypes.StoreCollection | null

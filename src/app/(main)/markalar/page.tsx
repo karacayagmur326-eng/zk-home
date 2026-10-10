@@ -1,3 +1,4 @@
+import { contentPageMetadata, contentPageSeo } from "@lib/seo/content-page"
 import { query } from "@lib/admin/db"
 import { Metadata } from "next"
 import { redirect } from "next/navigation"
@@ -18,14 +19,7 @@ import {
 } from "lucide-react"
 import { getBaseURL } from "@lib/util/env"
 
-export const metadata: Metadata = {
-  title: "Markalarımız",
-  description:
-    "Kalite ve güvenilirliğini kanıtlamış, alanında lider markaların ürünlerini sizlere sunuyoruz.",
-  alternates: {
-    canonical: `${getBaseURL()}/markalar`,
-  },
-}
+export async function generateMetadata() { return contentPageMetadata("markalar", "Markalarımız", "Kalite ve güvenilirliğini kanıtlamış, alanında lider markaların ürünlerini sizlere sunuyoruz.") }
 
 export const dynamic = "force-dynamic"
 
@@ -73,7 +67,7 @@ export default async function BrandsListingPage({ searchParams }: BrandsPageProp
     <div className="bg-[#f8fafc] min-h-screen pb-20 font-sans text-slate-800">
       
       {/* 1. Standart PageHero Header */}
-      <PageHero
+      <PageHero seoHandle="markalar"
         breadcrumb={[
           { title: "Kurumsal", href: "/hakkimizda" },
           { title: info.title || "Markalarımız" },

@@ -15,5 +15,6 @@ export default function CollectionTemplate({ collection, ...filters }: {
   searchQuery?: string
   viewMode?: string
 }) {
-  return <StoreTemplate {...filters} title={collection.title} collectionId={collection.id} fixedCollectionId={collection.id} />
+  const heading = typeof collection.metadata?.h1_title === "string" && collection.metadata.h1_title.trim() ? collection.metadata.h1_title : collection.title
+  return <StoreTemplate {...filters} title={heading} collectionId={collection.id} fixedCollectionId={collection.id} />
 }

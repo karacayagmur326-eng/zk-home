@@ -9,6 +9,7 @@ const getPublicCategories = async () => {
     if (categories.length || await isDatabaseReachable()) return categories
   } catch (error) {
     console.error("Kategoriler yüklenemedi:", error)
+    if (process.env.NODE_ENV === "production") throw error
   }
   return getFallbackCategories()
 }
@@ -49,7 +50,7 @@ export const filterActiveCategories = <
 export const getCategoryByHandle = async (categoryHandle: string[]) => {
   const handle = categoryHandle.join("/")
   const categories = await getPublicCategories()
-  const category = categories.find((item) => item.handle === handle)
+  const category = categories.find((item) => item.handle === handle) || categories.find(item => Array.isArray(item.metadata?.slug_history) && item.metadata.slug_history.includes(handle))
   if (!category) return undefined
   let parentId = category.parent_category_id
   while (parentId) {

@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useRef } from "react"
+import React, { useRef, useId } from "react"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { ChevronLeft, ChevronRight, ArrowRight } from "@lib/icons"
 import FeaturedProductCard from "@modules/products/components/featured-product-card"
@@ -17,6 +17,7 @@ export default function RelatedProductsCarousel({
   title?: string
   subtitle?: string
 }) {
+  const titleId = useId()
   const scrollRef = useRef<HTMLDivElement>(null)
 
   if (!products || products.length === 0) return null
@@ -34,7 +35,7 @@ export default function RelatedProductsCarousel({
   }
 
   return (
-    <section aria-labelledby="related-products-title" className="w-full font-sans">
+    <section aria-labelledby={titleId} className="w-full font-sans">
       {/* ── Seamless Full-Width on Mobile | Elegant White Card on Desktop ── */}
       <div className="space-y-4 rounded-none border-0 bg-transparent p-0 shadow-none sm:space-y-6 sm:rounded-2xl sm:border sm:border-slate-200/80 sm:bg-white sm:p-7 sm:shadow-2xs lg:!rounded-none lg:!border-0 lg:!bg-transparent lg:!p-0 lg:!shadow-none">
         
@@ -46,7 +47,7 @@ export default function RelatedProductsCarousel({
             <span className="w-1.5 h-5 sm:h-7 rounded-full bg-[#C98484] shrink-0 mt-0.5 sm:mt-1" />
             <div>
               <h2
-                id="related-products-title"
+                id={titleId}
                 className="text-base sm:text-2xl font-black text-slate-900 tracking-tight uppercase leading-tight"
               >
                 {title}

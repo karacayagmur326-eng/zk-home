@@ -729,7 +729,7 @@ export default function HeroSlider({
         <div className="relative h-full w-full touch-pan-y">
           {sliders.map((slider, index) => {
             const isActive = index === selectedIndex
-            const HeadingTag = index === 0 ? "h1" : "h2"
+            const HeadingTag = "h2"
             const showSecondaryButton = Boolean(
               slider.button2_link && slider.button2_text
             )
@@ -791,8 +791,7 @@ export default function HeroSlider({
                       imageRevealEnabled={slider.image_reveal_enabled !== false}
                       alt=""
                       fill
-                      sizes="100vw"
-                      unoptimized
+                      sizes="(min-width: 1920px) 1920px, 100vw"
                       priority={index === 0}
                       fetchPriority={index === 0 ? "high" : "auto"}
                       className={slider.image_url === EDITORIAL_HERO_IMAGE ? "object-cover object-top min-[1900px]:object-[center_20%] zkhome-panorama-img" : "object-scale-down object-center mobile-hero-img"}

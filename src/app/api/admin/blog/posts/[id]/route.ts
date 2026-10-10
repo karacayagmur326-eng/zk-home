@@ -1,3 +1,4 @@
+import { ensureBlogSeoSchema } from "@lib/seo/blog"
 import { NextRequest, NextResponse } from "next/server"
 import { query } from "@lib/admin/db"
 import { getAdminSession } from "@lib/admin/auth"
@@ -75,6 +76,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       slug = `${slug}-${Date.now().toString().slice(-4)}`
     }
 
+    await ensureBlogSeoSchema()
+    const previous = (await query<any>("SELECT slug,seo_metadata,seo_title,seo_description FROM blog_posts WHERE id=$1", [id]))[0]
+    if (!previous) return NextResponse.json({ error: "Makale bulunamadı." }, { status: 404 })
+    if (previous.slug !== slug) await query("UPDATE blog_posts SET seo_metadata=jsonb_set(seo_metadata,'{slug_history}',$2::jsonb) WHERE id=$1", [id, JSON.stringify(Array.from(new Set([...(previous.seo_metadata?.slug_history || []), previous.slug])).filter(value => value !== slug).slice(-100))])
+    // Values entered in the article form override older values in the SEO hub.
+    await query("UPDATE blog_posts SET seo_metadata=seo_metadata - 'seo_title' - 'seo_description' WHERE id=$1", [id])
     const pubDate = published_at ? new Date(published_at).toISOString() : new Date().toISOString()
 
     await query(
@@ -107,8 +114,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         reading_time,
         status,
         featured,
-        seo_title || title.trim(),
-        seo_description || excerpt.trim(),
+        seo_title !== undefined ? seo_title : previous.seo_metadata?.seo_title || previous.seo_title || title.trim(),
+        seo_description !== undefined ? seo_description : previous.seo_metadata?.seo_description || previous.seo_description || excerpt.trim(),
         pubDate,
         id,
       ]

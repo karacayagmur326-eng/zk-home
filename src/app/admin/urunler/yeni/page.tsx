@@ -1,4 +1,7 @@
 "use client"
+import SeoFields from "../../components/SeoFields"
+import { productFieldIssues } from "@lib/commerce/product-validation"
+import { plainText } from "@lib/seo/entity"
 import AdminTabs from "@components/admin/AdminTabs"
 
 import { useUrlState } from "@lib/hooks/use-url-state"
@@ -62,6 +65,7 @@ export default function NewProductPage() {
   const [description, setDescription] = useState("")
   const [usageTitle, setUsageTitle] = useState("")
   const [usageContent, setUsageContent] = useState("")
+  const [seoMetadata, setSeoMetadata] = useState<Record<string, any>>({})
   const [shortDesc, setShortDesc] = useState("")
   const [status, setStatus] = useState<"draft" | "published">("draft")
   const [thumbnail, setThumbnail] = useState("")
@@ -217,6 +221,12 @@ export default function NewProductPage() {
       setError("Lütfen geçerli bir fiyat girin! Fiyatı 0 TL olan ürünler sitede yayınlanamaz.")
       return
     }
+    const issues = productFieldIssues({ title, description, status: publishStatus ?? status,
+      metadata: { ...seoMetadata, product_summary: shortDesc }, thumbnail, images,
+      collection_id: selectedColId, categories: selectedCats,
+      variants: [{ sku, manage_inventory: manageInventory, inventory_quantity: inventoryQty,
+        prices: [{ currency_code: "try", amount: parsedPrice * 100 }] }] })
+    if (issues.length) { setError(issues[0].message); return }
     setSaving(true)
     setError("")
 
@@ -228,6 +238,7 @@ export default function NewProductPage() {
       description: description.trim() || undefined,
       status: finalStatus,
       metadata: {
+          ...seoMetadata,
         product_summary: shortDesc.trim(),
         usage_title: usageTitle.trim(),
         usage_content: usageContent.trim(),
@@ -397,9 +408,9 @@ export default function NewProductPage() {
             </div>
 
             {/* Ürün Özeti (WordPress Klasik Editör) */}
-            <div>
+            <div tabIndex={-1} {...fieldProps("summary")}>
               <RichTextEditorField
-                label="Ürün Özeti"
+                label="Ürün Özeti *"
                 value={shortDesc}
                 onChange={setShortDesc}
                 rows={6}
@@ -407,6 +418,8 @@ export default function NewProductPage() {
               />
             </div>
           </div>
+
+          <SeoFields value={seoMetadata} onChange={setSeoMetadata} title={title} description={plainText(shortDesc)} images={Array.from(new Set([thumbnail, ...images].filter(Boolean)))} />
 
           {/* Card 2: Ürün Verisi (Tabbed Box) */}
           <div className="rounded-3xl bg-white border border-slate-200/80 p-6 shadow-xs space-y-5">
@@ -462,9 +475,9 @@ export default function NewProductPage() {
                     </div>
                   </div>
 
-                  <div>
+                  <div tabIndex={-1} {...fieldProps("description")}>
                     <RichTextEditorField
-                      label="Ürün Açıklaması"
+                      label="Ürün Açıklaması *"
                       value={description}
                       onChange={setDescription}
                       placeholder="Ürün hakkında detaylı açıklama..."
@@ -515,7 +528,7 @@ export default function NewProductPage() {
                       <input
                         type="number"
                         min="0"
-                        value={inventoryQty}
+                        value={inventoryQty} {...fieldProps("stock")}
                         onChange={(e) => {
                           setInventoryQty(e.target.value)
                           if (e.target.value) setManageInventory(true)
@@ -679,15 +692,15 @@ export default function NewProductPage() {
             </button>
           </div>
 
-          <ProductMediaEditor thumbnail={thumbnail} images={images} onCoverChange={setThumbnail} onImagesChange={setImages}
-            onUploadCover={() => setIsThumbModalOpen(true)} onUploadGallery={() => setIsGalleryModalOpen(true)} />
+          <div tabIndex={-1} {...fieldProps("image")}><ProductMediaEditor thumbnail={thumbnail} images={images} onCoverChange={setThumbnail} onImagesChange={setImages}
+            onUploadCover={() => setIsThumbModalOpen(true)} onUploadGallery={() => setIsGalleryModalOpen(true)} /></div>
 
           {/* Card 4: Ürün Kategorileri */}
           <div className="rounded-2xl bg-white border border-[#EADBD4]/70 p-4 shadow-sm space-y-3">
             <h3 className="text-sm font-extrabold text-slate-900 border-b border-slate-100 pb-3">
               Ürün Kategorileri
             </h3>
-            <ProductCategoryPicker categories={categories} selected={selectedCats} onToggle={toggleCat} />
+            <div tabIndex={-1} {...fieldProps("category")}><ProductCategoryPicker categories={categories} selected={selectedCats} onToggle={toggleCat} /></div>
             <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
               <input
                 type="text"
@@ -794,7 +807,7 @@ export default function NewProductPage() {
               Marka
             </h3>
             <select
-              value={selectedColId}
+              value={selectedColId} {...fieldProps("brand")}
               onChange={(e) => setSelectedColId(e.target.value)}
               className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold text-slate-800 outline-none focus:border-[#C98484] cursor-pointer"
             >

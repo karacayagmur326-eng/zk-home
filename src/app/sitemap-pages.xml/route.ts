@@ -1,3 +1,5 @@
+import { indexingEnabled } from "@lib/seo/indexing"
+import { getThemeSettings } from "@lib/content/theme-settings"
 import { emptySitemap } from "@lib/seo/sitemap-response"
 import { query } from "@lib/admin/db"
 import { ensureCommerceSchema } from "@lib/commerce/schema"
@@ -6,19 +8,17 @@ import { NextResponse } from "next/server"
 import { escapeXml, isPublicContentPath, lastModifiedXml } from "@lib/seo/indexing"
 import legacyRedirects from "@lib/seo/legacy-redirects.json"
 import { getPublicPageAliases } from "@lib/seo/page-aliases"
-import { isStoreReady } from "@lib/security/store-readiness"
 
 export const dynamic = "force-dynamic"
 
 export async function GET() {
-  if (!isStoreReady()) return emptySitemap()
   try {
+  if (!indexingEnabled(await getThemeSettings())) return emptySitemap()
   const baseUrl = getBaseURL()
   await ensureCommerceSchema()
 
-  const pages = await query<{ handle: string; updated_at: string; custom_slug: string | null }>(
-    `SELECT handle, updated_at, content->>'custom_slug' AS custom_slug FROM content_pages
-     WHERE COALESCE(content->>'status', 'published') = 'published'`
+  const pages = await query<{ handle: string; updated_at: string; custom_slug: string | null; content: Record<string, any> }>(
+    `SELECT handle, updated_at, content, content->>'custom_slug' AS custom_slug FROM content_pages`
   )
 
   const staticConfig = [
@@ -44,6 +44,7 @@ export async function GET() {
     "on-bilgilendirme-formu",
     "mesafeli-satis-sozlesmesi",
     "siparis-takibi",
+    "kvkk-aydinlatma-metni",
   ])
 
   const aliases = await getPublicPageAliases()
@@ -54,6 +55,9 @@ export async function GET() {
     if (alias) item.path = alias.path
     else if (isPublicContentPath(customPath)) item.path = customPath
   }
+  const pagePath = (page: typeof pages[number]) => page.handle === "kvkk-aydinlatma-metni" ? "/kvkk" : `/${page.custom_slug || page.handle}`
+  const blocked = pages.filter(page => page.content.status === "draft" || page.content.seo_noindex === true || page.content.seo_sitemap === false || (page.content.seo_canonical && page.content.seo_canonical !== `${baseUrl}${pagePath(page)}`)).map(pagePath)
+  for (let index = staticConfig.length - 1; index >= 0; index--) if (blocked.includes(staticConfig[index].path)) staticConfig.splice(index, 1)
   const staticSet = new Set(staticConfig.map((item) => item.path))
   const redirectSources = new Set(
     (legacyRedirects as Array<{ source: string }>).map((item) => item.source)
@@ -72,7 +76,7 @@ export async function GET() {
     .filter(
       (page) => {
         const path = `/${page.custom_slug || page.handle}`
-        if (!isPublicContentPath(path) || seen.has(path) || redirectSources.has(path) || excludedDynamicHandles.has(page.handle)) return false
+        if (page.content.status === "draft" || page.content.seo_noindex === true || page.content.seo_sitemap === false || (page.content.seo_canonical && page.content.seo_canonical !== `${baseUrl}/${page.custom_slug || page.handle}`) || !isPublicContentPath(path) || seen.has(path) || redirectSources.has(path) || excludedDynamicHandles.has(page.handle)) return false
         seen.add(path)
         return true
       }
@@ -89,13 +93,13 @@ export async function GET() {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${(isStoreReady() ? [...staticXmlRows, ...dynamicXmlRows] : []).join("\n")}
+${[...staticXmlRows, ...dynamicXmlRows].join("\n")}
 </urlset>`
 
   return new NextResponse(xml, {
     headers: {
       "Content-Type": "application/xml; charset=utf-8",
-      "Cache-Control": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400",
+      "Cache-Control": "public, max-age=60, s-maxage=60, stale-while-revalidate=60",
     },
   })
   } catch {

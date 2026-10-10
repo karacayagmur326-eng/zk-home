@@ -5,15 +5,11 @@ import { getCanonicalURL } from "@lib/util/env"
 import { paginatedPath } from "@lib/seo/indexing"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import StoreTemplate from "@modules/store/templates"
+import { contentPageMetadata, contentPageSeo } from "@lib/seo/content-page"
 
 export async function generateMetadata({ searchParams }: Params): Promise<Metadata> {
   const { page } = await searchParams
-  return {
-  title: "Mağaza | Tüm Ürünler",
-  description:
-    "Geniş ürün yelpazesi, kaliteli markalar, uygun fiyatlar ve güvenli alışveriş seçenekleriyle tüm ürünlerimizi keşfedin.",
-  alternates: { canonical: getCanonicalURL(paginatedPath("/magaza", page)) },
-  }
+  return contentPageMetadata("magaza", "Tüm Ürünler", "ZK Home dekorasyon, sofra ve ev tekstili ürünlerini inceleyin. Ürünleri kategori, marka ve fiyata göre karşılaştırın.", paginatedPath("/magaza", page))
 }
 
 type StorePageSearchParams = Record<string, string | string[] | undefined> & {
@@ -33,6 +29,7 @@ type Params = {
 
 export default async function StorePage(props: Params) {
   const searchParams = await props.searchParams
+  const seo = await contentPageSeo("magaza")
   const {
     sortBy,
     page,
@@ -47,6 +44,7 @@ export default async function StorePage(props: Params) {
 
   return (
     <StoreTemplate
+      title={seo.h1_title || "Tüm Ürünler"}
       sortBy={sortBy}
       page={page}
       countryCode="tr"

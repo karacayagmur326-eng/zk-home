@@ -1,3 +1,5 @@
+import { indexingEnabled } from "@lib/seo/indexing"
+import { entityMetadata, plainText } from "@lib/seo/entity"
 import { Metadata } from "next"
 import { notFound, permanentRedirect } from "next/navigation"
 
@@ -58,22 +60,16 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       "%kategori% Modelleri ve Fiyatları %ayirici% %site_adi%"
     const descTemplate =
       settings?.seo_category_desc_template ||
-      "En kaliteli %kategori% çeşitleri uygun fiyatlar, taksit seçenekleri ve hızlı kargo avantajıyla %site_adi% üzerinde!"
+      "%kategori% modellerini, ürün özelliklerini ve güncel fiyatlarını %site_adi% üzerinde inceleyin."
 
     const customSeo = categorySeoText(productCategory)
     const title = customSeo.title || renderSeoTemplate(titleTemplate, tokens)
     const description = customSeo.description || productCategory.description || renderSeoTemplate(descTemplate, tokens)
 
-    return {
-      title: { absolute: title },
-      description,
-      robots: { index: isStoreReady() && categoryIndexable(productCategory), follow: true },
-      alternates: {
-        canonical: getBaseURL() + paginatedPath(categoryPath(productCategory), page),
-      },
-    }
-  } catch {
-    notFound()
+    return entityMetadata({ title, description: plainText(description), path: paginatedPath(categoryPath(productCategory), page), metadata: productCategory.metadata || {}, image: String(productCategory.metadata?.hero_image_url || ""), index: categoryIndexable(productCategory) && indexingEnabled(settings) })
+
+  } catch (error) {
+    throw error
   }
 }
 

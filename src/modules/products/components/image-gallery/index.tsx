@@ -4,6 +4,7 @@ import { useUrlState } from "@lib/hooks/use-url-state"
 import { HttpTypes } from "@medusajs/types"
 import Image from "@components/common/SmartImage"
 import { useState, useRef, useEffect } from "react"
+import { imageAlt } from "@lib/seo/entity"
 import clx from "clsx"
 import { Search, X, ChevronLeft, ChevronRight } from "@lib/icons"
 import { FavoriteButton } from "@modules/products/components/product-card-actions"
@@ -107,9 +108,8 @@ const ImageGallery = ({ images, productTitle, discountBadge, product }: ImageGal
               >
                 <Image
                   src={safeUrl(image.url)}
-                  alt={`${productTitle} - ${index + 1}. görünüm`}
+                  alt={imageAlt(product, image.url, index)}
                   fill
-                  unoptimized
                   className="object-contain"
                   sizes="100px"
                 />
@@ -158,9 +158,8 @@ const ImageGallery = ({ images, productTitle, discountBadge, product }: ImageGal
 
         <Image
           src={safeUrl(mainImage.url)}
-          alt={`${productTitle} ürün görseli`}
+          alt={imageAlt(product, mainImage.url, activeIndex)}
           fill
-          unoptimized
           priority
           className="object-contain"
           sizes="(max-width: 768px) 100vw, 640px"
@@ -277,7 +276,6 @@ const ImageGallery = ({ images, productTitle, discountBadge, product }: ImageGal
                   src={safeUrl(mainImage.url)}
                   alt={`${productTitle} büyük görünüm`}
                   fill
-                  unoptimized
                   priority
                   className="object-contain select-none"
                 />
@@ -317,8 +315,7 @@ const ImageGallery = ({ images, productTitle, discountBadge, product }: ImageGal
                       src={safeUrl(img.url)}
                       alt=""
                       fill
-                      unoptimized
-                      className="object-contain"
+                          className="object-contain"
                     />
                   </button>
                 ))}

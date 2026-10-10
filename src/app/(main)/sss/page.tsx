@@ -1,3 +1,4 @@
+import { contentPageMetadata, contentPageSeo } from "@lib/seo/content-page"
 import { Metadata } from "next"
 import { query } from "@lib/admin/db"
 import { defaultFaqPageContent } from "@lib/content/knowledge-pages"
@@ -6,13 +7,7 @@ import PageHero from "../../../components/common/PageHero"
 import FaqContent from "./FaqContent"
 import { serializeJsonLd } from "@lib/security/html"
 
-export const metadata: Metadata = {
-  title: "Sıkça Sorulan Sorular (SSS)",
-  description: "Yemek takımı, kahve fincanı, dekorasyon, nevresim, havlu, kargo ve iade hakkında 100 sık sorulan sorunun yanıtını keşfedin.",
-  alternates: {
-    canonical: getCanonicalURL("/sss"),
-  },
-}
+export async function generateMetadata() { return contentPageMetadata("sss", "Sıkça Sorulan Sorular (SSS)", "Yemek takımı, kahve fincanı, dekorasyon, nevresim, havlu, kargo ve iade hakkında 100 sık sorulan sorunun yanıtını keşfedin.") }
 
 const removedQuestions = new Set([
   "Porselen ve stoneware yemek takımı arasındaki fark nedir?",
@@ -65,7 +60,7 @@ export default async function FaqPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(faqSchema) }}
       />
-      <PageHero
+      <PageHero seoHandle="sss"
         breadcrumb={[{ title: content.title || "Sıkça Sorulan Sorular" }]}
         title={content.title || "Sıkça Sorulan Sorular"}
         paragraphs={[content.hero_text || content.description]}

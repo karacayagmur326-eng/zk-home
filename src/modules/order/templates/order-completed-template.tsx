@@ -2,6 +2,8 @@
 
 import LocalDeliveryNotice from "@modules/order/components/local-delivery-notice"
 import React, { useState } from "react"
+import EcommerceEvent from "@components/common/EcommerceEvent"
+import { analyticsItems } from "@lib/analytics/ecommerce"
 import { convertToLocale } from "@lib/util/money"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { SellerQuestionButton } from "@components/common/SellerQuestion"
@@ -108,6 +110,7 @@ export default function OrderCompletedTemplate({
 
   return (
     <main className="min-h-screen bg-[#F8F9FA] py-8 sm:py-12 text-slate-900 font-sans">
+      {order.status !== "canceled" && order.status !== "cancelled" && <EcommerceEvent event="purchase" once={`purchase:${order.id}`} data={{ transaction_id: order.id, currency: String(currencyCode).toUpperCase(), value: Number(order.item_total ?? order.subtotal ?? 0) / 100, tax: Number(order.tax_total || 0) / 100, shipping: Number(order.shipping_total || 0) / 100, items: analyticsItems(items) }} />}
       <div className="content-container mx-auto max-w-5xl px-4 sm:px-6 space-y-6">
 
         <LocalDeliveryNotice order={order as any}/>

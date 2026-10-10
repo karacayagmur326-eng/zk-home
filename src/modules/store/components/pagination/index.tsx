@@ -28,6 +28,12 @@ export function Pagination({
         page={page}
         pageCount={totalPages}
         onPageChange={handlePageChange}
+        getPageHref={(target) => {
+          const params = new URLSearchParams(searchParams.toString())
+          if (target === 1) params.delete("page")
+          else params.set("page", String(target))
+          return `${pathname}${params.size ? `?${params}` : ""}`
+        }}
       />
     </div>
   )

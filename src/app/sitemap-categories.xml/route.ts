@@ -1,16 +1,17 @@
+import { indexingEnabled } from "@lib/seo/indexing"
+import { getThemeSettings } from "@lib/content/theme-settings"
 import { emptySitemap } from "@lib/seo/sitemap-response"
 import { query } from "@lib/admin/db"
 import { ensureCommerceSchema } from "@lib/commerce/schema"
 import { getBaseURL } from "@lib/util/env"
 import { NextResponse } from "next/server"
 import { escapeXml, lastModifiedXml } from "@lib/seo/indexing"
-import { isStoreReady } from "@lib/security/store-readiness"
 
 export const dynamic = "force-dynamic"
 
 export async function GET() {
-  if (!isStoreReady()) return emptySitemap()
   try {
+  if (!indexingEnabled(await getThemeSettings())) return emptySitemap()
   const baseUrl = getBaseURL()
   await ensureCommerceSchema()
 
@@ -23,15 +24,18 @@ export async function GET() {
      )
      SELECT c.handle, c.updated_at, c.metadata FROM store_category c
      WHERE c.active = true AND c.metadata->>'is_indexable' = 'true'
+       AND c.metadata->>'seo_noindex' IS DISTINCT FROM 'true'
+       AND c.metadata->>'seo_sitemap' IS DISTINCT FROM 'false'
+       AND (NULLIF(c.metadata->>'seo_canonical', '') IS NULL OR c.metadata->>'seo_canonical' = $1 || CASE WHEN c.metadata->>'pretty_url'='true' THEN '/' ELSE '/kategoriler/' END || c.handle)
        AND NOT EXISTS (SELECT 1 FROM descendants d JOIN store_category ancestor ON ancestor.id=d.root_id
                        WHERE d.id=c.id AND ancestor.active=false)
        AND EXISTS (SELECT 1 FROM store_product_category pc JOIN store_product p ON p.id=pc.product_id
                    WHERE pc.category_id IN (SELECT id FROM descendants WHERE root_id=c.id)
-                     AND p.status='published')
-     ORDER BY c.rank, c.created_at`
+                     AND p.status='published' AND p.deleted_at IS NULL)
+     ORDER BY c.rank, c.created_at`, [baseUrl]
   )
 
-  const xmlRows = (isStoreReady() ? categories : []).map(
+  const xmlRows = categories.map(
     (category) => `  <url>
     <loc>${escapeXml(`${baseUrl}${category.metadata?.pretty_url === true ? "" : "/kategoriler"}/${category.handle}`)}</loc>
     ${lastModifiedXml(category.updated_at)}
@@ -49,7 +53,7 @@ ${xmlRows.join("\n")}
   return new NextResponse(xml, {
     headers: {
       "Content-Type": "application/xml; charset=utf-8",
-      "Cache-Control": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400",
+      "Cache-Control": "public, max-age=60, s-maxage=60, stale-while-revalidate=60",
     },
   })
   } catch {

@@ -1,13 +1,10 @@
+import { contentPageMetadata, contentPageSeo } from "@lib/seo/content-page"
 import type { Metadata } from "next"
 import Link from "next/link"
 import GiftInquiryForm from "./GiftInquiryForm"
 import { getBaseURL } from "@lib/util/env"
 
-export const metadata: Metadata = {
-  title: "Kurumsal ve Özel Gün Hediyeleri",
-  description: "Çalışanlarınız ve müşterileriniz için özel gün hediye paketi taleplerinizi Mağaza'a iletin.",
-  alternates: { canonical: `${getBaseURL()}/toptan-ve-kurumsal-satis` },
-}
+export async function generateMetadata() { return contentPageMetadata("toptan-ve-kurumsal-satis", "Kurumsal ve Özel Gün Hediyeleri", "Çalışanlarınız ve müşterileriniz için özel gün hediye paketi taleplerinizi Mağaza'a iletin.") }
 
 const examples = [
   { title: "Yeni yıl kutuları", detail: "Çikolata ve seçili dekoratif parçalarla hazırlanan kutular", image: "/gift-examples/yeni-yil-kutulari.webp", url: "https://www.instagram.com/p/DSiHCM5CFRS/" },
@@ -15,13 +12,14 @@ const examples = [
   { title: "Dekoratif sunum hediyeleri", detail: "Gondol ve büyük dekoratif objelerle özel gün sunumları", image: "/gift-examples/gondol-hediyeleri.webp", url: "https://www.instagram.com/p/DDMFJ-1AmP-/" },
 ]
 
-export default function CorporateGiftsPage() {
+export default async function CorporateGiftsPage() {
+  const seo = await contentPageSeo("toptan-ve-kurumsal-satis")
   return (
     <main className="min-h-screen bg-[#fbf8f7] pb-20">
       <section className="bg-white border-b border-rose-100 py-16 sm:py-24">
         <div className="content-container max-w-5xl">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#b97e7e]">Mağaza · Kurumsal hediyeler</p>
-          <h1 className="mt-4 max-w-3xl text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">Özel günler için özenli hediye fikirleri</h1>
+          <h1 className="mt-4 max-w-3xl text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">{seo.h1_title || "Özel günler için özenli hediye fikirleri"}</h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-600">Çalışanlarınıza ve müşterilerinize yönelik yılbaşı, bayram ve kutlama hediyeleri için tercihlerinizi bize iletin. Ürün, sunum ve adet seçeneklerini birlikte değerlendirip size dönüş yapalım.</p>
           <a href="#hediye-talebi" className="mt-8 inline-flex rounded-full bg-[#bd8585] px-7 py-3 font-semibold text-white hover:bg-[#a96d6d]">Hediye talebi gönder</a>
         </div>

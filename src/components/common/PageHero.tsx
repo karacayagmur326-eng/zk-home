@@ -1,9 +1,11 @@
+import { contentPageSeo } from "@lib/seo/content-page"
 import Link from "next/link"
 import Image from "@components/common/SmartImage"
 import { Home, ArrowRight, ChevronRight } from "lucide-react"
 import { sanitizePublicHtml } from "@lib/security/html"
 
 export interface PageHeroProps {
+  seoHandle?: string
   breadcrumb?: Array<{ title: string; href?: string }>
   title?: string
   subtitle?: string
@@ -19,7 +21,8 @@ export interface PageHeroProps {
   heroImageAlt?: string
 }
 
-export default function PageHero({
+export default async function PageHero({
+  seoHandle,
   breadcrumb = [],
   title,
   subtitle,
@@ -34,9 +37,13 @@ export default function PageHero({
   heroImage,
   heroImageAlt = "Mağaza Hero",
 }: PageHeroProps) {
+  if (seoHandle) { const seo = await contentPageSeo(seoHandle); title = seo.h1_title || title; heroImageAlt = seo.image_alt || heroImageAlt }
   // If paragraphs or htmlContent contains HTML tags, render rich HTML
   const hasRawHtml = htmlContent || (paragraphs.length > 0 && /<[a-z][\s\S]*>/i.test(paragraphs.join("")))
-  const rawHtmlText = sanitizePublicHtml(htmlContent || paragraphs.join("\n"))
+  const sourceHtml = htmlContent || paragraphs.join("\n")
+  const richHeading = sourceHtml.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i)
+  const heading = title || richHeading?.[1]?.replace(/<[^>]*>/g, "").trim() || breadcrumb.at(-1)?.title
+  const rawHtmlText = sanitizePublicHtml(sourceHtml.replace(/<h1(\b[^>]*)>/gi, "<h2$1>").replace(/<\/h1>/gi, "</h2>"))
 
   return (
     <section className="w-full bg-[#f8fafc] border-b border-slate-200/60 py-0 my-0">
@@ -109,10 +116,13 @@ export default function PageHero({
             {/* Metin ve Başlık İçeriği */}
             <div className="space-y-3">
               {hasRawHtml ? (
+                <>
+                {heading && <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900">{heading}</h1>}
                 <div
                   className="[&>h1]:text-3xl [&>h1]:sm:text-4xl [&>h1]:font-black [&>h1]:text-slate-900 [&>h1]:tracking-tight [&>h1]:leading-tight [&>h1]:mb-3 [&>h1]:after:content-[''] [&>h1]:after:block [&>h1]:after:w-12 [&>h1]:after:h-1 [&>h1]:after:bg-[#C98484] [&>h1]:after:rounded-full [&>h1]:after:mt-3 [&>h1]:after:mb-4 [&>h2]:text-xs [&>h2]:sm:text-sm [&>h2]:font-extrabold [&>h2]:text-[#C98484] [&>h2]:uppercase [&>h2]:tracking-wider [&>h2]:mb-2 [&>h3]:text-[0.9rem] [&>h3]:leading-[1.25rem] [&>h3]:font-bold [&>h3]:text-slate-900 [&>h3]:tracking-tight [&>h3]:mb-2 [&>p]:text-[0.8rem] [&>p]:text-slate-600 [&>p]:leading-relaxed [&>p]:font-normal [&>p]:mb-3 [&>b]:font-black [&>strong]:font-black"
                   dangerouslySetInnerHTML={{ __html: rawHtmlText }}
                 />
+                </>
               ) : (
                 <>
                   {subtitle && (

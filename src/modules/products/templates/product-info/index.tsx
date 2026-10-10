@@ -1,4 +1,5 @@
 "use client"
+import { useSearchParams } from "next/navigation"
 
 import { useEffect, useState } from "react"
 import { HttpTypes } from "@medusajs/types"
@@ -22,7 +23,9 @@ export default function ProductInfo({ product }: ProductInfoProps) {
 
   const md = (product.metadata as Record<string, any>) || {}
   const brandName = (md.brand_name as string) || product.collection?.title || (md.brand as string) || ""
-  const sku = String(product.variants?.[0]?.sku || md.sku || "").trim()
+  const selected = useSearchParams().get("v_id")
+  const variant = product.variants?.find(item => item.id === selected) || product.variants?.[0]
+  const sku = String(variant?.sku || md.sku || "").trim()
 
   useEffect(() => {
     // Fetch real reviews for this product
@@ -32,12 +35,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
         if (data?.reviews && Array.isArray(data.reviews) && data.reviews.length > 0) {
           const revs = data.reviews
           const count = revs.length
-          const avg = revs.reduce((acc: number, r: any) => acc + (Number(r.rating) || 5), 0) / count
-          setReviewsData({ count, avg: Math.round(avg * 10) / 10 })
-        } else if (md.reviews && Array.isArray(md.reviews) && md.reviews.length > 0) {
-          const revs = md.reviews
-          const count = revs.length
-          const avg = revs.reduce((acc: number, r: any) => acc + (Number(r.rating) || 5), 0) / count
+          const avg = revs.reduce((acc: number, r: any) => acc + Number(r.rating), 0) / count
           setReviewsData({ count, avg: Math.round(avg * 10) / 10 })
         }
       })
@@ -59,7 +57,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
   // Ürün açıklaması, başlık veya başka alanlardan otomatik içerik üretilmez.
   const productSummary =
     typeof md.product_summary === "string"
-      ? sanitizeRichTextHtml(md.product_summary).trim()
+      ? sanitizeRichTextHtml(md.product_summary).replace(/<(\/?)h1\b/gi, "<$1h2").trim()
       : ""
 
   return (
@@ -67,29 +65,10 @@ export default function ProductInfo({ product }: ProductInfoProps) {
       <div className="space-y-3.5">
         {/* 1. Brand Tag & Main Title */}
         <div>
-          {/* Mobile Only: Brand + Title Side-by-Side (Inline) with smaller font */}
-          <div className="sm:hidden">
-            <h1 className="text-sm font-bold text-slate-900 leading-snug tracking-tight">
-              <span className="text-[#C98484] text-xs font-black tracking-wider uppercase mr-1.5 inline-block">
-                {brandName}
-              </span>
-              {product.title}
-            </h1>
-          </div>
-
-          {/* Desktop Only: Original Stacked Brand & Title */}
-          <div className="hidden sm:block">
-            <span className="text-[#C98484] text-xs font-extrabold tracking-widest uppercase mb-1 block">
-              {brandName}
-            </span>
-            <Heading
-              level="h1"
-              className="text-lg sm:text-xl lg:text-[22px] font-black text-slate-900 leading-snug tracking-tight"
-              data-testid="product-title"
-            >
-              {product.title}
-            </Heading>
-          </div>
+          <h1 className="text-sm sm:text-xl lg:text-[22px] font-black text-slate-900 leading-snug tracking-tight" data-testid="product-title">
+            {brandName && <span className="mr-1.5 inline-block text-xs font-extrabold uppercase tracking-wider text-[#C98484] sm:mb-1 sm:block">{brandName}</span>}
+            {md.h1_title || product.title}
+          </h1>
         </div>
 
         {/* 2. Ratings, Reviews & Questions Row */}
@@ -103,7 +82,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
           >
             <div className="flex items-center gap-1">
               <span className="font-black text-slate-900 group-hover:text-[#C98484] text-sm leading-none transition-colors">
-                {reviewsData.avg > 0 ? reviewsData.avg : (md.rating ? Number(md.rating) : "5.0")}
+                {reviewsData.avg > 0 ? reviewsData.avg : "—"}
               </span>
               <Star className="w-3.5 h-3.5 fill-[#C98484] stroke-[#C98484] shrink-0" />
             </div>
@@ -119,7 +98,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
             className="group flex flex-col items-center justify-center py-1.5 px-1 rounded-xl hover:bg-rose-50/90 active:bg-rose-100/80 active:scale-95 transition-all duration-200 cursor-pointer"
           >
             <span className="font-black text-slate-900 group-hover:text-[#C98484] text-sm leading-none transition-colors">
-              {reviewsData.count || md.review_count || 0}
+              {reviewsData.count}
             </span>
             <span className="text-[10px] font-bold text-slate-400 group-hover:text-[#C98484] mt-1.5 leading-none transition-colors">
               Değerlendirme
@@ -152,12 +131,12 @@ export default function ProductInfo({ product }: ProductInfoProps) {
               {[...Array(5)].map((_, i) => (
                 <Star
                   key={i}
-                  className="w-3.5 h-3.5 fill-[#C98484] stroke-[#C98484]"
+                  className={`w-3.5 h-3.5 stroke-[#C98484] ${i < Math.round(reviewsData.avg) ? "fill-[#C98484]" : "fill-none"}`}
                 />
               ))}
             </div>
             <span className="font-black text-slate-900 text-xs">
-              {reviewsData.avg > 0 ? reviewsData.avg : (md.rating ? Number(md.rating) : "5.0")}
+              {reviewsData.avg > 0 ? reviewsData.avg : "—"}
             </span>
           </button>
 
@@ -168,7 +147,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
             onClick={() => scrollToReviews("degerlendir")}
             className="hover:text-[#C98484] transition-colors font-medium text-slate-600 cursor-pointer"
           >
-            {reviewsData.count || md.review_count || 0} Değerlendirme
+            {reviewsData.count} Değerlendirme
           </button>
 
           <span className="text-slate-300">|</span>
@@ -185,7 +164,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
         {/* 3. Admin panelinden girilen ürün özeti (masaüstü) */}
         {productSummary ? (
           <div
-            className="product-rich-text hidden sm:block prose prose-sm max-w-none py-1 text-slate-700 prose-headings:text-slate-900 prose-a:text-[#C98484]"
+            className="product-rich-text prose prose-sm max-w-none py-1 text-slate-700 prose-headings:text-slate-900 prose-a:text-[#C98484]"
             dangerouslySetInnerHTML={{ __html: productSummary }}
           />
         ) : null}

@@ -1,3 +1,5 @@
+import { indexingEnabled } from "@lib/seo/indexing"
+import { entityMetadata, plainText } from "@lib/seo/entity"
 import { query as databaseQuery } from "@lib/admin/db"
 import { Metadata } from "next"
 import { notFound, permanentRedirect } from "next/navigation"
@@ -8,8 +10,7 @@ import BrandsPage from "../markalar/page"
 
 // Optional CMS content must not turn an unknown URL into a server error.
 async function query<T>(sql: string, params: unknown[] = []): Promise<T[]> {
-  try { return await databaseQuery<T>(sql, params) }
-  catch { return [] }
+  return databaseQuery<T>(sql, params)
 }
 
 export const dynamic = "force-dynamic"
@@ -34,10 +35,13 @@ import type { SortOptions } from "@modules/store/components/refinement-list/sort
 
 export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
   const { slug } = await params
+
+  if (slug === "kvkk-aydinlatma-metni") permanentRedirect("/kvkk")
   if (slug.startsWith("_") || slug === "api" || slug === "admin" || slug.includes(".")) {
     return { title: "Sayfa" }
   }
   const category = await getCategoryByHandle([slug])
+  if (category && category.handle !== slug) permanentRedirect(categoryPath(category))
   if (category && categoryPath(category) === `/${slug}`) {
     return getCategoryMetadata({
       params: Promise.resolve({ category: [slug] }),
@@ -46,7 +50,7 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
   }
   const [rows, settings] = await Promise.all([
     query<{ content: any }>(
-      "SELECT content FROM content_pages WHERE (handle = $1 OR content->>'custom_slug' = $1) AND COALESCE(content->>'status', 'published') = 'published' LIMIT 1",
+      "SELECT content FROM content_pages WHERE (handle = $1 OR content->>'custom_slug' = $1 OR content->'slug_history' ? $1) AND COALESCE(content->>'status', 'published') = 'published' LIMIT 1",
       [slug]
     ),
     getThemeSettings().catch(() => null),
@@ -77,17 +81,14 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
   const title = page.seo_title || renderSeoTemplate(titleTemplate, tokens)
   const description = page.seo_description || page.description || ""
 
-  return {
-    title: { absolute: title },
-    description,
-    alternates: {
-      canonical: `${getBaseURL()}/${page.custom_slug && isPublicContentPath(`/${page.custom_slug}`) ? page.custom_slug : slug}`,
-    },
-  }
+  return entityMetadata({ title, description: plainText(description), path: `/${page.custom_slug && isPublicContentPath(`/${page.custom_slug}`) ? page.custom_slug : slug}`, metadata: page, image: page.image || page.hero_image_url, index: indexingEnabled(settings) })
+
 }
 
 export default async function DynamicSlugPage({ params, searchParams }: PageProps) {
   const { slug } = await params
+
+  if (slug === "kvkk-aydinlatma-metni") permanentRedirect("/kvkk")
 
   // Exclude system static paths and Next.js internal routes
   if (
@@ -102,6 +103,7 @@ export default async function DynamicSlugPage({ params, searchParams }: PageProp
   }
 
   const category = await getCategoryByHandle([slug])
+  if (category && category.handle !== slug) permanentRedirect(categoryPath(category))
   if (category && categoryPath(category) === `/${slug}`) {
     const filters = await searchParams
     return <CategoryTemplate
@@ -133,14 +135,15 @@ export default async function DynamicSlugPage({ params, searchParams }: PageProp
 
   // 2. Fetch page from content_pages DB
   let pageRows = await query<{ handle: string; content: any }>(
-    "SELECT handle, content FROM content_pages WHERE (handle = $1 OR content->>'custom_slug' = $1) AND COALESCE(content->>'status', 'published') = 'published' LIMIT 1",
+    "SELECT handle, content FROM content_pages WHERE (handle = $1 OR content->>'custom_slug' = $1 OR content->'slug_history' ? $1) AND COALESCE(content->>'status', 'published') = 'published' LIMIT 1",
     [slug]
   )
 
   let page = pageRows[0]?.content
   let handle = pageRows[0]?.handle || slug
-  if (page?.custom_slug && page.custom_slug !== slug && isPublicContentPath(`/${page.custom_slug}`)) {
-    permanentRedirect(`/${page.custom_slug}`)
+  const currentSlug = page?.custom_slug || handle
+  if (page && currentSlug !== slug && isPublicContentPath(`/${currentSlug}`)) {
+    permanentRedirect(`/${currentSlug}`)
   }
 
   // Match special pages by handle or custom_slug
@@ -171,10 +174,11 @@ export default async function DynamicSlugPage({ params, searchParams }: PageProp
   }
 
   // 5. Generic / Legal Page Fallback
-  const heroDesc = sanitizePublicHtml(page.description || "")
+  const heroDesc = sanitizePublicHtml(page.description || "").replace(/<(\/?)h1\b/gi, "<$1h2")
   return (
     <div className="bg-white min-h-screen pb-20">
       <PageHero
+        seoHandle={handle}
         breadcrumb={[{ title: page.title }]}
         title={heroDesc && /<[a-z][\s\S]*>/i.test(heroDesc) ? undefined : page.title}
         paragraphs={[heroDesc]}

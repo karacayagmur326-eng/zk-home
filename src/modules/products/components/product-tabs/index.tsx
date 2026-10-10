@@ -75,7 +75,7 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
 
   const featuresContent =
     typeof md.features_content === "string"
-      ? sanitizeRichTextHtml(md.features_content).trim()
+      ? sanitizeRichTextHtml(md.features_content).replace(/<(\/?)h1\b/gi, "<$1h2").trim()
       : ""
   const usageTitle = typeof md.usage_title === "string" ? md.usage_title.trim() : ""
   const usageParagraphs = typeof md.usage_content === "string"
@@ -89,11 +89,12 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
       : rawDescription.replace(/\r\n?|\n/g, "<br />")
   const descriptionContent =
     rawDescription
-      ? sanitizeRichTextHtml(descriptionWithPreservedLines).trim()
+      ? sanitizeRichTextHtml(descriptionWithPreservedLines).replace(/<(\/?)h1\b/gi, "<$1h2").trim()
       : ""
 
   return (
     <div id="product-tabs" className="w-full pt-4 font-sans">
+      <p className="mb-4 text-sm"><a className="text-[#A95E5E] underline" href="/teslimat-ve-iade">Teslimat, iptal ve iade koşulları</a></p>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
         {/* ── LEFT COLUMN (6 cols): TABS & TAB CONTENT (Açıklama, Özellikler, Taksit) ── */}
         <div className="lg:col-span-6 flex flex-col space-y-4">
@@ -183,7 +184,9 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
 
           {/* Tab Content Panel */}
           <div className="pt-2 sm:pt-3">
-            {activeTab === "aciklama" && (
+            {(
+              <section hidden={activeTab !== "aciklama"} aria-labelledby="product-description-heading">
+                <h2 id="product-description-heading" className="mb-3 text-base font-semibold">Ürün Açıklaması</h2>
               <div className="space-y-4">
                 {descriptionContent ? (
                   <div
@@ -191,9 +194,7 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
                     dangerouslySetInnerHTML={{ __html: descriptionContent }}
                   />
                 ) : (
-                  <p className="text-xs sm:text-sm text-slate-500 italic">
-                    Bu ürün için henüz detaylı açıklama girilmemiş.
-                  </p>
+null
                 )}
                 {usageParagraphs.length > 0 && (
                   <section aria-labelledby="product-usage-heading" className="mt-6 border-t border-[#eadfda] pt-6">
@@ -203,10 +204,13 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
                     </div>
                   </section>
                 )}
-              </div>
+              </div></section>
             )}
 
-            {activeTab === "ozellikler" && (
+            {(
+              <section hidden={activeTab !== "ozellikler"} aria-labelledby="product-specs-heading">
+                <h2 id="product-specs-heading" className="mb-3 text-base font-semibold">Ürün Özellikleri</h2>
+                <dl className="mb-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">{[["Marka", md.brand_name || product.collection?.title || md.brand], ["Model", md.model], ["Üretici parça numarası", md.mpn]].filter(([, value]) => value).map(([label, value]) => <div key={String(label)} className="contents"><dt className="font-medium">{String(label)}</dt><dd>{String(value)}</dd></div>)}</dl>
               <div className="space-y-4">
                 {featuresContent ? (
                   <div
@@ -214,11 +218,11 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
                     dangerouslySetInnerHTML={{ __html: featuresContent }}
                   />
                 ) : (
-                  <p className="text-xs sm:text-sm text-slate-500 italic">
-                    Bu ürün için ek teknik özellik bilgisi girilmemiş.
-                  </p>
+null
                 )}
               </div>
+                {Array.isArray(md.tech_specs) && md.tech_specs.length > 0 && <table className="mt-4 w-full text-sm"><tbody>{md.tech_specs.filter((spec: any) => spec.key && spec.value).map((spec: any, index: number) => <tr key={index} className="border-b border-slate-100"><th scope="row" className="p-2 text-left font-medium">{spec.key}</th><td className="p-2">{spec.value}</td></tr>)}</tbody></table>}
+              </section>
             )}
 
             {activeTab === "taksit" && (

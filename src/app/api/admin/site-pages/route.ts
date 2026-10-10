@@ -244,6 +244,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const previousRows = await query<{ content: any }>("SELECT content FROM content_pages WHERE handle=$1", [old_handle || handle])
+    const previous = previousRows[0]?.content || {}
+    const previousSlug = previous.custom_slug || old_handle || handle
+    const mergedContent = { ...previous, ...content }
+    if (previousRows.length && previousSlug !== requestedSlug) mergedContent.slug_history = Array.from(new Set([...(previous.slug_history || []), previousSlug])).filter(value => value !== requestedSlug).slice(-100)
+
     // 2. Eğer sayfanın kalıcı bağlantısı/handle değişmişse eski handle kaydını sil
     if (old_handle && old_handle !== handle) {
       await query("DELETE FROM content_pages WHERE handle = $1", [old_handle])
@@ -252,7 +258,7 @@ export async function POST(request: NextRequest) {
     // 3. Yeni veya güncellenen sayfayı kaydet
     await query(
       "INSERT INTO content_pages (handle, content, updated_at) VALUES ($1, $2::jsonb, NOW()) ON CONFLICT (handle) DO UPDATE SET content = EXCLUDED.content, updated_at = NOW()",
-      [handle, JSON.stringify(content)],
+      [handle, JSON.stringify(mergedContent)],
     )
 
     return NextResponse.json({ success: true })

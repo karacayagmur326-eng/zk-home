@@ -30,16 +30,6 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-async function HomeStructuredData() {
-  const { siteName } = getSiteSeoMetadata(await getThemeSettings())
-  return <>
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd({
-      "@context": "https://schema.org", "@type": "WebSite", "@id": `${getBaseURL()}/#website`,
-      name: siteName, url: getBaseURL(), inLanguage: "tr-TR",
-    }) }} />
-  </>
-}
-
 export default async function Home() {
   const countryCode = "tr"
 
@@ -87,7 +77,7 @@ export default async function Home() {
 
   return (
     <>
-      <HomeStructuredData />
+      <h1 className="sr-only">{getSiteSeoMetadata(await getThemeSettings()).title}</h1>
       {mobileSettings.enabled && (
         <MobileHomeExperience
           prioritizeHero={false}

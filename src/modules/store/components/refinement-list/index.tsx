@@ -1,4 +1,5 @@
 "use client"
+import Link from "next/link"
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useMemo, useEffect, useRef, useState } from "react"
@@ -196,18 +197,10 @@ const RefinementList = ({
             isActive && "bg-rose-50 text-[#C98484]"
           )}
         >
-          <button
-            type="button"
-            onClick={() => {
-              if (item.url && item.url !== "#") {
-                router.push(item.url)
-                setMobileFiltersOpen(false)
-              } else if (hasChildren) {
-                setOpenCategoryGroups((current) => ({
-                  ...current,
-                  [itemKey]: !current[itemKey],
-                }))
-              }
+          <Link href={item.url && item.url !== "#" ? item.url : "#"}
+            onClick={(event) => {
+              if (!item.url || item.url === "#") { event.preventDefault(); if (hasChildren) setOpenCategoryGroups(current => ({ ...current, [itemKey]: !current[itemKey] })) }
+              else setMobileFiltersOpen(false)
             }}
             className={clx(
               "relative min-w-0 flex-1 px-2 py-2 text-left transition-colors break-words",
@@ -222,7 +215,7 @@ const RefinementList = ({
             )}
           >
             {item.label}
-          </button>
+          </Link>
 
           {hasChildren && (
             <button
@@ -249,8 +242,8 @@ const RefinementList = ({
           )}
         </div>
 
-        {isOpen && hasChildren && (
-          <ul className={clx("mb-2 mt-1 ml-3 pl-3 flex flex-col gap-0.5", depth === 0 ? "border-l-2 border-rose-200" : "border-l border-gray-200")}>
+        {hasChildren && (
+          <ul hidden={!isOpen} style={!isOpen ? { display: "none" } : undefined} className={clx("mb-2 mt-1 ml-3 pl-3 flex flex-col gap-0.5", depth === 0 ? "border-l-2 border-rose-200" : "border-l border-gray-200")}>
             {children.map((child: any, cIdx: number) =>
               renderSidebarItem(child, depth + 1, cIdx)
             )}

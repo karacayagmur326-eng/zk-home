@@ -7,7 +7,13 @@ export function useProductFormError(activeTab: string, setActiveTab: (tab: strin
   const error = failure.message
   const errorField = /fiyat|price/i.test(error) ? priceField
     : /sku|stok kodu/i.test(error) ? "sku"
-    : /ürün adı|title/i.test(error) ? "title" : ""
+    : /ürün adı|title/i.test(error) ? "title"
+    : /ürün özeti/i.test(error) ? "summary"
+    : /detaylı ürün açıklaması/i.test(error) ? "description"
+    : /görsel/i.test(error) ? "image"
+    : /kategorisi/i.test(error) ? "category"
+    : /markasını/i.test(error) ? "brand"
+    : /stok miktarı/i.test(error) ? "stock" : ""
 
   function setError(message: string) {
     setFailure(previous => ({ message, sequence: previous.sequence + 1 }))
@@ -15,7 +21,7 @@ export function useProductFormError(activeTab: string, setActiveTab: (tab: strin
 
   useEffect(() => {
     if (!error) return
-    const requiredTab = errorField === "sku" ? "stock" : /price/.test(errorField) ? "general" : null
+    const requiredTab = ["sku", "stock"].includes(errorField) ? "stock" : /price/.test(errorField) || errorField === "description" ? "general" : null
     if (requiredTab && activeTab !== requiredTab) {
       setActiveTab(requiredTab)
       return
@@ -34,7 +40,7 @@ export function useProductFormError(activeTab: string, setActiveTab: (tab: strin
     return {
       id: `product-${field}`,
       "aria-invalid": invalid,
-      "aria-describedby": invalid ? `product-${field}-error` : undefined,
+      "aria-describedby": invalid ? "product-form-error" : undefined,
       style: invalid ? { borderColor: "#dc2626", boxShadow: "0 0 0 3px #fee2e2", scrollMarginTop: 120 } : undefined,
     }
   }

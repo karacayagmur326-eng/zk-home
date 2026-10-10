@@ -37,3 +37,8 @@ export function lastModifiedXml(value?: string | null): string {
   const date = new Date(value)
   return Number.isNaN(date.getTime()) ? "" : `<lastmod>${date.toISOString()}</lastmod>`
 }
+
+/** Indexing is controlled separately from order/payment activation. */
+export function indexingEnabled(settings: { seo_indexing_enabled?: boolean } | null | undefined): boolean {
+  return settings?.seo_indexing_enabled === true && process.env.VERCEL_ENV !== "preview"
+}

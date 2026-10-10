@@ -1,3 +1,8 @@
+import { getCommerceSettings } from "@lib/commerce/settings"
+import { indexingEnabled } from "@lib/seo/indexing"
+import EcommerceEvent from "@components/common/EcommerceEvent"
+import { entityMetadata, productSeo } from "@lib/seo/entity"
+import { productStructuredData } from "@lib/seo/product-schema"
 import { Metadata } from "next"
 import { notFound, permanentRedirect } from "next/navigation"
 import { getProductForStorefront } from "@lib/commerce/product-preview"
@@ -73,7 +78,8 @@ function getImagesForVariant(
 
   const variant = product.variants.find((v) => v.id === selectedVariantId)
   if (!variant || !variant.images || !variant.images.length) {
-    return product.images
+    const thumbnail = variant?.thumbnail
+    return thumbnail ? [{ id: `variant-${variant.id}`, url: thumbnail, rank: 0 }, ...(product.images || []).filter(image => image.url !== thumbnail)] : product.images
   }
 
   const imageIdsMap = new Map(variant.images.map((i) => [i.id, true]))
@@ -84,7 +90,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params
   const { handle } = params
   const [view, settings] = await Promise.all([
-    getProductForStorefront(handle).catch(() => ({ product: null, isPreview: false })),
+    getProductForStorefront(handle),
     getThemeSettings().catch(() => null),
   ])
   const { product, isPreview } = view
@@ -99,47 +105,9 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     }
   }
 
-  const categoryName = (product.categories?.[0] as any)?.name || ""
-  const brandName = (product.metadata as any)?.brand || product.collection?.title || ""
-  const priceVal = (product.variants?.[0] as any)?.calculated_price?.calculated_amount
-    ? `${(product.variants?.[0] as any).calculated_price.calculated_amount} TL`
-    : ""
-  const skuVal = (product.variants?.[0] as any)?.sku || ""
-  const siteName = settings?.logo_text || "Mağaza"
-  const separator = settings?.seo_title_separator || "|"
+  const seo = productSeo(product, settings)
+  return entityMetadata({ ...seo, path: `/urunler/${product.handle}`, metadata: product.metadata || {}, image: product.thumbnail, index: !isPreview && indexingEnabled(settings) })
 
-  const tokens = {
-    urun_adi: product.title,
-    kategori: categoryName,
-    marka: brandName,
-    fiyat: priceVal,
-    sku: skuVal,
-    site_adi: siteName,
-    ayirici: separator,
-    ozet: product.subtitle || product.description || "",
-  }
-
-  const titleTemplate = settings?.seo_product_title_template || "%urun_adi% %ayirici% %site_adi%"
-  const configuredDescTemplate = settings?.seo_product_desc_template || ""
-  const descTemplate = /2\s*yıl.*garanti|tüm ürün.*garanti/i.test(configuredDescTemplate)
-    ? "%urun_adi% ürününü %site_adi% üzerinde inceleyin. Ürün özellikleri ve sipariş bilgilerine göz atın."
-    : configuredDescTemplate || "%urun_adi% ürününü %site_adi% üzerinde inceleyin. Ürün özellikleri ve sipariş bilgilerine göz atın."
-
-  const title = renderSeoTemplate(titleTemplate, tokens)
-  const description =
-    product.description || renderSeoTemplate(descTemplate, tokens)
-
-  return {
-    title: { absolute: title },
-    ...(isPreview ? { robots: { index: false, follow: false } } : {}),
-    description,
-    alternates: { canonical: `${getBaseURL()}/urunler/${product.handle}` },
-    openGraph: {
-      title,
-      description,
-      images: product.thumbnail ? [product.thumbnail] : [],
-    },
-  }
 }
 
 export default async function ProductPage(props: Props) {
@@ -148,8 +116,8 @@ export default async function ProductPage(props: Props) {
   const selectedVariantId = searchParams.v_id
 
   const [region, view, rawCategories] = await Promise.all([
-    getRegion("tr").catch(() => null),
-    getProductForStorefront(params.handle).catch(() => ({ product: null, isPreview: false })),
+    getRegion("tr"),
+    getProductForStorefront(params.handle),
     listCategories().catch(() => []),
   ])
   const { product: pricedProduct, isPreview } = view
@@ -187,7 +155,7 @@ export default async function ProductPage(props: Props) {
   const md = (pricedProduct.metadata as Record<string, any>) || {}
   const safeProduct = {
     ...pricedProduct,
-    description: sanitizePublicHtml(pricedProduct.description || ""),
+    description: sanitizePublicHtml((pricedProduct.description || "").replace(/<h1(\b[^>]*)>/gi, "<h2$1>").replace(/<\/h1>/gi, "</h2>")),
     metadata: {
       ...md,
       product_summary: sanitizePublicHtml(md.product_summary),
@@ -203,80 +171,14 @@ export default async function ProductPage(props: Props) {
     `product-reviews:${pricedProduct.id}`,
     `SELECT author, rating, comment, created_at
      FROM product_reviews
-     WHERE product_id = $1 AND status = 'approved'
-     ORDER BY created_at DESC LIMIT 10`,
+     WHERE product_id = $1 AND status = 'approved' AND type = 'review'
+     ORDER BY created_at DESC`,
     [pricedProduct.id],
     120
   ).catch(() => [])
 
-  // Only approved, real reviews may contribute to search markup.
-  const reviewsList = dbReviews.filter((r: any) =>
-    Number(r.rating) >= 1 && Number(r.rating) <= 5 &&
-    typeof r.author === "string" && r.author.trim() &&
-    typeof r.comment === "string" && r.comment.trim()
-  )
-  const reviewCount = reviewsList.length
-  const avgRating = reviewCount
-    ? (reviewsList.reduce((sum, r) => sum + Number(r.rating), 0) / reviewCount).toFixed(1)
-    : undefined
-  const finalReviews = reviewsList.map((r: any) => ({
-    "@type": "Review",
-    reviewRating: { "@type": "Rating", ratingValue: String(r.rating), bestRating: "5", worstRating: "1" },
-    author: { "@type": "Person", name: r.author },
-    reviewBody: r.comment,
-    ...(r.created_at && !Number.isNaN(new Date(r.created_at).getTime())
-      ? { datePublished: new Date(r.created_at).toISOString().split("T")[0] } : {}),
-  }))
-
-  const brandName =
-    (pricedProduct as any).brand ||
-    (pricedProduct.metadata as any)?.brand
-
-  const productSku = variant?.sku || (pricedProduct.variants?.[0] as any)?.sku || pricedProduct.id
-  const productMpn = (pricedProduct.metadata as any)?.mpn || productSku
-  const productGtin = (pricedProduct.metadata as any)?.gtin || (pricedProduct.metadata as any)?.barcode || undefined
-
-  const inStock =
-    !!variant && (variant.manage_inventory === false || variant.allow_backorder === true ||
-      (variant.inventory_quantity != null && variant.inventory_quantity > 0))
-
-  // Schema.org Structured Data for Google Rich Snippets & Merchant Listings
-  const jsonLdProduct: Record<string, any> = {
-    "@context": "https://schema.org/",
-    "@type": "Product",
-    name: pricedProduct.title,
-    image:
-      (pricedProduct.images?.length ? pricedProduct.images.map((i) => i.url) : undefined) ||
-      (pricedProduct.thumbnail ? [pricedProduct.thumbnail] : []),
-    description:
-      pricedProduct.description ||
-      `${pricedProduct.title} ürün özellikleri, güncel fiyat ve stok bilgileri.`,
-    ...(variant?.sku ? { sku: variant.sku } : {}),
-    ...((pricedProduct.metadata as any)?.mpn ? { mpn: productMpn } : {}),
-    ...(/^\d{13}$/.test(String(productGtin || "")) ? { gtin13: productGtin } : {}),
-    ...(brandName ? { brand: {
-      "@type": "Brand",
-      name: brandName,
-    } } : {}),
-    ...(reviewCount ? {
-      aggregateRating: {
-        "@type": "AggregateRating", ratingValue: avgRating,
-        reviewCount, bestRating: "5", worstRating: "1",
-      },
-      review: finalReviews,
-    } : {}),
-    ...(Number(schemaPrice) > 0 ? {
-      offers: {
-        "@type": "Offer",
-        url: `${getBaseURL()}/urunler/${pricedProduct.handle}`,
-        priceCurrency: "TRY",
-        price: schemaPrice,
-        itemCondition: "https://schema.org/NewCondition",
-        availability: inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-        seller: { "@type": "Organization", name: (await getThemeSettings())?.logo_text || "", url: getBaseURL() },
-      },
-    } : {}),
-  }
+  const [theme, commerce] = await Promise.all([getThemeSettings(), getCommerceSettings()])
+  const jsonLdProduct = productStructuredData(pricedProduct, { ...theme, commerce }, dbReviews, selectedVariantId)
 
   const jsonLdBreadcrumb = {
     "@context": "https://schema.org",
@@ -311,6 +213,7 @@ export default async function ProductPage(props: Props) {
 
   return (
     <>
+      {!isPreview && <EcommerceEvent event="view_item" data={{ currency: "TRY", value: Number(schemaPrice), items: [{ item_id: variant?.id || pricedProduct.id, item_name: pricedProduct.title, price: Number(schemaPrice), quantity: 1, item_brand: pricedProduct.collection?.title || md.brand_name || md.brand || "" }] }} />}
       {isPreview && (
         <div role="status" className="border-b border-rose-200 bg-rose-50 px-6 py-3 text-center text-sm text-rose-900">
           <strong>Taslak ürün ön izlemesi</strong> — Bu ürün henüz yayımlanmadı. Yalnızca yönetici oturumuyla görüntülenebilir.

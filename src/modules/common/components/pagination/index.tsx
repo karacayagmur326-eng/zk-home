@@ -2,11 +2,13 @@
 
 import { ChevronLeft, ChevronRight } from "@lib/icons"
 import clsx from "clsx"
+import Link from "next/link"
 
 type PaginationProps = {
   page: number
   pageCount: number
   onPageChange: (page: number) => void
+  getPageHref?: (page: number) => string
   siblingCount?: number
   className?: string
 }
@@ -35,11 +37,18 @@ export default function Pagination({
   page,
   pageCount,
   onPageChange,
+  getPageHref,
   siblingCount = 1,
   className,
 }: PaginationProps) {
   if (pageCount <= 1) return null
   const pages = getPages(page, pageCount, siblingCount)
+
+  if (getPageHref) return <nav aria-label="Sayfalama" className={clsx("flex items-center justify-center gap-1", className)}>
+    {page > 1 && <Link href={getPageHref(page - 1)} aria-label="Önceki sayfa" className="p-3"><ChevronLeft className="h-4 w-4" /></Link>}
+    {pages.map(item => typeof item === "number" ? <Link key={item} href={getPageHref(item)} aria-label={`${item}. sayfa`} aria-current={item === page ? "page" : undefined} className={clsx("inline-flex h-10 min-w-10 items-center justify-center rounded-base px-3 text-ui-sm font-medium", item === page ? "bg-primary text-on-primary" : "border border-border bg-card text-foreground hover:bg-subtle")}>{item}</Link> : <span key={item} aria-hidden="true" className="px-2">…</span>)}
+    {page < pageCount && <Link href={getPageHref(page + 1)} aria-label="Sonraki sayfa" className="p-3"><ChevronRight className="h-4 w-4" /></Link>}
+  </nav>
 
   return (
     <nav

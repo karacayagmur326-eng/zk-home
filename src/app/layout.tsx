@@ -17,7 +17,7 @@ import ChatbotWidget from "@components/common/ChatbotWidget"
 import { getChatbotSettings } from "@lib/chatbot/settings"
 import { serializeJsonLd } from "@lib/security/html"
 import { omitStandardGa4Snippet } from "@lib/util/analytics-snippet"
-import { isStoreReady } from "@lib/security/store-readiness"
+import { indexingEnabled } from "@lib/seo/indexing"
 
 
 const inter = Inter({
@@ -87,8 +87,7 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 
   const indexing =
-    isStoreReady() && settings?.seo_indexing_enabled === true &&
-    process.env.VERCEL_ENV !== "preview"
+    indexingEnabled(settings)
 
   return {
     title: {
@@ -124,8 +123,9 @@ export async function generateMetadata(): Promise<Metadata> {
       locale: "tr_TR",
       type: "website",
     },
+    twitter: { card: "summary_large_image", title, description, images: [ogImage] },
     verification: {
-      google: settings?.seo_google_verification || undefined,
+      google: settings?.seo_google_verification?.replace(/^google-site-verification=/, "").trim() || undefined,
     },
   }
 }
@@ -209,22 +209,6 @@ export default async function RootLayout({
           h4 { --heading-size: ${settings.h4_size || "1.5rem"}; }
         `}</style>
 
-        {/* Dynamic GTM Tag */}
-        {gtmId && (
-          <Script
-            id="google-tag-manager"
-            strategy="afterInteractive"
-            dangerouslySetInnerHTML={{
-              __html: `
-                (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-                new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-                j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-                'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-                })(window,document,'script','dataLayer','${gtmId}');
-              `,
-            }}
-          />
-        )}
       </head>
       <body
         className="antialiased overflow-x-hidden max-w-full"
@@ -255,6 +239,7 @@ export default async function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: serializeJsonLd(organizationJsonLd) }}
         />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd({ "@context": "https://schema.org", "@type": "WebSite", name: settings.logo_text, url: getCanonicalURL(), inLanguage: "tr" }) }} />
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
@@ -291,7 +276,7 @@ export default async function RootLayout({
               />
               {/* CookieConsent owns GA4 loading and configuration. Avoid a second
                   loader when the administrator already supplies a custom tag. */}
-              <CookieConsent ga4Id={
+              <CookieConsent gtmId={gtmId} ga4Id={
                 [customHeadScripts, customBodyScripts]
                   .some((script) => script?.includes("googletagmanager.com/gtag/js"))
                   ? undefined
