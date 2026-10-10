@@ -90,7 +90,8 @@ export default function GoogleSeoSettings({
       </div>
       <p className="rounded-lg bg-slate-50 p-3 text-sm text-slate-600">
         Analytics yalnızca canlı mağazada ölçüm yapar. Admin panelini kullanan tarayıcılar,
-        localhost ve test yayınları ölçülmez. Admin kullanımından sonra bu tarayıcıdaki
+        localhost, test yayınları ve Tag Assistant / GTM test bağlantıları ölçülmez.
+        Admin veya test bağlantısı kullanımından sonra bu tarayıcıdaki
         mağaza ziyaretleri de analiz dışında kalır. Gerçek müşteri ölçümünü kontrol etmek
         için admin açılmamış ayrı bir tarayıcı profili kullanın. Search Console ise
         Google aramasındaki gösterim ve tıklamaları raporlar.

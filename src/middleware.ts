@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { isPrivatePath, isSearchOrFilterPage } from "./lib/seo/indexing"
-import { analyticsHostAllowed, INTERNAL_TRAFFIC_COOKIE, isAdminAnalyticsPath, isLocalAnalyticsHost } from "./lib/analytics/traffic-policy"
+import { analyticsHostAllowed, INTERNAL_TRAFFIC_COOKIE, isAdminAnalyticsPath, isAnalyticsDebugTraffic, isLocalAnalyticsHost } from "./lib/analytics/traffic-policy"
 import { getBaseURL } from "./lib/util/env"
 
 const unsafeMethods = new Set(["POST", "PUT", "PATCH", "DELETE"])
@@ -13,9 +13,14 @@ const crossSitePostAllowlist = [
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
   const privatePage = isPrivatePath(pathname)
-  const internalTraffic = isAdminAnalyticsPath(pathname) || request.cookies.has("zkhome_admin_token") || request.cookies.get(INTERNAL_TRAFFIC_COOKIE)?.value === "1"
+  const debugTraffic = isAnalyticsDebugTraffic(request.nextUrl.searchParams, request.headers.get("referer") || "")
+  const internalTraffic = debugTraffic || isAdminAnalyticsPath(pathname) || request.cookies.has("zkhome_admin_token") || request.cookies.get(INTERNAL_TRAFFIC_COOKIE)?.value === "1"
+  // A standalone installation can use its own public request host without a
+  // Vercel-specific variable or a domain embedded in the theme.
+  const configuredHost = new URL(getBaseURL()).hostname
+  const productionHost = isLocalAnalyticsHost(configuredHost) ? request.nextUrl.hostname : configuredHost
   const analyticsEnabled = process.env.NODE_ENV === "production" && process.env.VERCEL_ENV !== "preview" &&
-    analyticsHostAllowed(request.nextUrl.hostname, new URL(getBaseURL()).hostname) && !internalTraffic
+    analyticsHostAllowed(request.nextUrl.hostname, productionHost) && !internalTraffic
   const requestHeaders = new Headers(request.headers)
   requestHeaders.set("x-zk-analytics-enabled", String(analyticsEnabled))
   const finish = (response: NextResponse) => {
@@ -25,7 +30,7 @@ export function middleware(request: NextRequest) {
     }
     if (privatePage || isLocalAnalyticsHost(request.nextUrl.hostname) || process.env.VERCEL_ENV === "preview" || request.nextUrl.hostname.endsWith(".vercel.app")) {
       response.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive")
-    } else if (isSearchOrFilterPage(pathname, request.nextUrl.searchParams)) {
+    } else if (debugTraffic || isSearchOrFilterPage(pathname, request.nextUrl.searchParams)) {
       response.headers.set("X-Robots-Tag", "noindex, follow")
     }
     if (privatePage || internalTraffic) {

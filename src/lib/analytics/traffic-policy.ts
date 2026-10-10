@@ -2,8 +2,16 @@ export const INTERNAL_TRAFFIC_COOKIE = "zkhome_internal_traffic"
 
 export function isLocalAnalyticsHost(hostname: string): boolean {
   const host = hostname.toLowerCase().replace(/^\[|\]$/g, "")
-  return host === "localhost" || host.endsWith(".localhost") || host === "::1" ||
+  return host === "localhost" || host.endsWith(".localhost") || host === "::1" || host === "0.0.0.0" ||
+    [".local", ".test", ".internal"].some(suffix => host.endsWith(suffix)) ||
     /^(127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(host)
+}
+
+export function isAnalyticsDebugTraffic(params: URLSearchParams, referrer = ""): boolean {
+  // These are Tag Assistant / GTM preview parameters, not campaign parameters.
+  if (["gtm_debug", "gtm_latency", "gtm_preview", "gtm_auth", "gtm_cookies_win", "debug_mode"]
+    .some(key => params.has(key))) return true
+  try { return new URL(referrer).hostname === "tagassistant.google.com" } catch { return false }
 }
 
 export function isAdminAnalyticsPath(pathname: string): boolean {
@@ -22,5 +30,6 @@ export function browserAnalyticsAllowed(): boolean {
   return document.body?.dataset.analyticsEnabled === "true" &&
     !isLocalAnalyticsHost(window.location.hostname) &&
     !isAdminAnalyticsPath(window.location.pathname) &&
+    !isAnalyticsDebugTraffic(new URLSearchParams(window.location.search), document.referrer) &&
     !document.cookie.split(";").some(value => value.trim() === `${INTERNAL_TRAFFIC_COOKIE}=1`)
 }
