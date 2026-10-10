@@ -3,7 +3,8 @@
 import { addToCart, showCartWarning } from "@lib/util/cart-feedback"
 import { HttpTypes } from "@medusajs/types"
 import OptionSelect from "@modules/products/components/product-actions/option-select"
-import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
+import { useProductPageState } from "../product-page-state"
 import { useEffect, useMemo, useState, useRef } from "react"
 import { ShoppingCart, Zap, ShieldCheck, Truck, Shield, Check, Loader2 } from "@lib/icons"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -49,10 +50,12 @@ export default function ProductActions({
   disabled,
 }: ProductActionsProps) {
   const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
+  const pageState = useProductPageState()
 
-  const [options, setOptions] = useState<Record<string, string | undefined>>({})
+  const [options, setOptions] = useState<Record<string, string | undefined>>(() => {
+    const variant = product.variants?.find(v => v.id === pageState?.variantId)
+    return optionsAsKeymap(variant?.options ?? null) ?? {}
+  })
   const [isAdding, setIsAdding] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const addingRef = useRef(false)
@@ -99,12 +102,8 @@ export default function ProductActions({
   }, [product.variants, options])
 
   useEffect(() => {
-    const params = new URLSearchParams(searchParams.toString())
     const value = isValidVariant ? selectedVariant?.id : null
-    if (params.get("v_id") === value) return
-    if (value) params.set("v_id", value)
-    else params.delete("v_id")
-    router.replace(pathname + "?" + params.toString())
+    pageState?.setVariantId(value || null)
   }, [selectedVariant, isValidVariant])
 
   const handleAddToCart = async () => {

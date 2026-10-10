@@ -1,5 +1,6 @@
 "use client"
 import { useUrlState } from "@lib/hooks/use-url-state"
+import { useProductPageState } from "../product-page-state"
 
 import { HttpTypes } from "@medusajs/types"
 import Image from "@components/common/SmartImage"
@@ -24,8 +25,15 @@ const safeUrl = (url: string) => {
   }
 }
 
-const ImageGallery = ({ images, productTitle, discountBadge, product }: ImageGalleryProps) => {
-  const [imageIndex, setImageIndex] = useUrlState<string>("0", "image", (images || []).map((_, index) => String(index)))
+const ImageGallery = ({ images: initialImages, productTitle, discountBadge, product }: ImageGalleryProps) => {
+  const variantId = useProductPageState()?.variantId
+  const variant = product?.variants?.find(item => item.id === variantId)
+  const images = variant?.images?.length
+    ? (product?.images || []).filter(image => variant.images!.some(item => item.id === image.id))
+    : variant?.thumbnail
+      ? [{ id: `variant-${variant.id}`, url: variant.thumbnail, rank: 0 }, ...(product?.images || initialImages || []).filter(image => image.url !== variant.thumbnail)]
+      : initialImages
+  const [imageIndex, setImageIndex] = useUrlState<string>("0", "image", (images || []).map((_, index) => String(index)), false)
   const activeIndex = Number(imageIndex)
   const setActiveIndex = (index: React.SetStateAction<number>) => setImageIndex(previous => String(typeof index === "function" ? index(Number(previous)) : index))
   const [isLightboxOpen, setIsLightboxOpen] = useState(false)

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState, type SetStateAction } from "r
 import { usePathname } from "next/navigation"
 
 /** Keep non-sensitive page selections in the URL across reloads and history. */
-export function useUrlState<T extends string>(initial: T, key: string, allowed?: readonly string[]) {
+export function useUrlState<T extends string>(initial: T, key: string, allowed?: readonly string[], writeToUrl = true) {
   const pathname = usePathname()
   const [value, setValue] = useState<T>(initial)
   const current = useRef(value)
@@ -25,9 +25,10 @@ export function useUrlState<T extends string>(initial: T, key: string, allowed?:
     const next = typeof update === "function" ? update(current.current) : update
     current.current = next
     setValue(next)
+    if (!writeToUrl) return
     const url = new URL(window.location.href)
     url.searchParams.set(key, next)
     window.history.replaceState(window.history.state, "", url)
-  }, [key])
+  }, [key, writeToUrl])
   return [value, select] as const
 }

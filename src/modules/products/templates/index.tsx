@@ -10,6 +10,7 @@ import SkeletonRelatedProducts from "@modules/skeletons/templates/skeleton-relat
 import { notFound } from "next/navigation"
 import { HttpTypes } from "@medusajs/types"
 import { getProductPrice } from "@lib/util/get-product-price"
+import ProductPageStateProvider from "@modules/products/components/product-page-state"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { categoryPath } from "@lib/seo/category"
@@ -45,6 +46,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
       : undefined
 
   return (
+    <ProductPageStateProvider key={product.id}>
     <div className="bg-white pt-2 pb-6 sm:pb-8 lg:py-6 font-sans">
       <div className="max-w-[1440px] mx-auto px-3 sm:px-5">
         {/* Breadcrumbs (Hidden on mobile) */}
@@ -105,6 +107,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
         </div>
       </div>
     </div>
+    </ProductPageStateProvider>
   )
 }
 

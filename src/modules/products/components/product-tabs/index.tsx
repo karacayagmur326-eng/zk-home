@@ -17,7 +17,7 @@ type ProductTabsProps = {
 }
 
 const ProductTabs = ({ product, price }: ProductTabsProps) => {
-  const [activeTab, setActiveTab] = useUrlState<string>("aciklama", "product_tab", ["aciklama", "ozellikler", "taksit", "yorumlar"])
+  const [activeTab, setActiveTab] = useUrlState<string>("aciklama", "product_tab", ["aciklama", "ozellikler", "taksit", "yorumlar"], false)
   const md = (product.metadata as Record<string, any>) || {}
   const { cheapestPrice } = getProductPrice({ product })
   const finalPrice = price || cheapestPrice?.calculated_price_number || 0
@@ -27,7 +27,7 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
       const reload = (performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined)?.type === "reload"
       if (reload && !event) return
       const scroll = () => { if (event || !reload) document.getElementById("product-tabs")?.scrollIntoView({ behavior: "smooth" }) }
-      const hash = window.location.hash
+      const hash = event instanceof CustomEvent ? `#${event.detail}` : window.location.hash
       if (hash === "#aciklama") {
         setActiveTab("aciklama")
         setTimeout(() => {
@@ -53,18 +53,15 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
 
     handleHashChange()
     window.addEventListener("hashchange", handleHashChange)
-    return () => window.removeEventListener("hashchange", handleHashChange)
+    window.addEventListener("product:section", handleHashChange)
+    return () => {
+      window.removeEventListener("hashchange", handleHashChange)
+      window.removeEventListener("product:section", handleHashChange)
+    }
   }, [])
 
   const handleTabClick = (tabKey: string) => {
     setActiveTab(tabKey)
-    if (typeof window !== "undefined") {
-      window.history.replaceState(
-        window.history.state,
-        "",
-        window.location.pathname + window.location.search + `#${tabKey}`
-      )
-    }
   }
 
   const reviewsCount =

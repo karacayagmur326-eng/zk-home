@@ -1,5 +1,5 @@
 "use client"
-import { useSearchParams } from "next/navigation"
+import { useProductPageState } from "@modules/products/components/product-page-state"
 
 import { useEffect, useState } from "react"
 import { HttpTypes } from "@medusajs/types"
@@ -23,7 +23,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
 
   const md = (product.metadata as Record<string, any>) || {}
   const brandName = (md.brand_name as string) || product.collection?.title || (md.brand as string) || ""
-  const selected = useSearchParams().get("v_id")
+  const selected = useProductPageState()?.variantId
   const variant = product.variants?.find(item => item.id === selected) || product.variants?.[0]
   const sku = String(variant?.sku || md.sku || "").trim()
 
@@ -44,8 +44,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
 
   const scrollToReviews = (targetHash: string) => {
     if (typeof window !== "undefined") {
-      window.location.hash = targetHash
-      window.dispatchEvent(new Event("hashchange"))
+      window.dispatchEvent(new CustomEvent("product:section", { detail: targetHash }))
       const tabsElem = document.getElementById("product-tabs")
       if (tabsElem) {
         tabsElem.scrollIntoView({ behavior: "smooth" })

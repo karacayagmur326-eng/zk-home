@@ -27,7 +27,7 @@ export default function ProductReviews({
   const siteContact = useSiteContact()
   const [reviews, setReviews] = useState<ReviewItem[]>([])
   const [questions, setQuestions] = useState<ReviewItem[]>([])
-  const [activeTab, setActiveTab] = useUrlState<"reviews" | "questions">("reviews", "reviews_tab", ["reviews", "questions"])
+  const [activeTab, setActiveTab] = useUrlState<"reviews" | "questions">("reviews", "reviews_tab", ["reviews", "questions"], false)
   
   // Form State
   const [formType, setFormType] = useState<"review" | "question">("review")
@@ -52,9 +52,6 @@ export default function ProductReviews({
   const selectMode = (mode: "review" | "question") => {
     setFormType(mode)
     setActiveTab(mode === "question" ? "questions" : "reviews")
-    const url = new URL(window.location.href)
-    url.hash = mode === "question" ? "sorular" : "degerlendir"
-    window.history.replaceState(window.history.state, "", url)
     setErrorMessage("")
     setSuccessMessage("")
   }
@@ -69,8 +66,8 @@ export default function ProductReviews({
       .catch(() => undefined)
 
     // Listen to hash changes for #degerlendir and #sorular
-    const handleHash = () => {
-      const hash = window.location.hash
+    const handleHash = (event?: Event) => {
+      const hash = event instanceof CustomEvent ? `#${event.detail}` : window.location.hash
       if (hash === "#sorular") {
         selectMode("question")
       } else if (hash === "#degerlendir") {
@@ -79,7 +76,11 @@ export default function ProductReviews({
     }
     handleHash()
     window.addEventListener("hashchange", handleHash)
-    return () => window.removeEventListener("hashchange", handleHash)
+    window.addEventListener("product:section", handleHash)
+    return () => {
+      window.removeEventListener("hashchange", handleHash)
+      window.removeEventListener("product:section", handleHash)
+    }
   }, [productId])
 
   // Calculate average rating
