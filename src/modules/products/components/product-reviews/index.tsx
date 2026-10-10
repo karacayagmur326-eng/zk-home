@@ -194,7 +194,7 @@ export default function ProductReviews({
               onClick={() => selectMode("review")}
               className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1.5 sm:gap-2 ${
                 formType === "review"
-                  ? "bg-[#A95E5E] text-white shadow-xs"
+                  ? "bg-primary text-white shadow-xs"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
@@ -207,7 +207,7 @@ export default function ProductReviews({
               onClick={() => selectMode("question")}
               className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1.5 sm:gap-2 ${
                 formType === "question"
-                  ? "bg-[#A95E5E] text-white shadow-xs"
+                  ? "bg-primary text-white shadow-xs"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
@@ -384,7 +384,7 @@ export default function ProductReviews({
           <button
             type="submit"
             disabled={status === "sending"}
-            className="w-full h-11 rounded-xl bg-[#A95E5E] text-white text-xs font-black shadow-md hover:bg-rose-600 active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+            className="w-full h-11 rounded-xl bg-primary text-white text-xs font-black shadow-md hover:bg-primary-hover active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
           >
             {status === "sending" ? (
               <>

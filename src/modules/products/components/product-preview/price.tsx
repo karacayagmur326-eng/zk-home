@@ -9,8 +9,8 @@ export default function PreviewPrice({ price }: { price: VariantPrice }) {
   return (
     <>
       <Text
-        className={clx("text-lg font-bold text-[#A95E5E]", {
-          "text-[#A95E5E]": price.price_type === "sale",
+        className={clx("text-lg font-bold text-primary", {
+          "text-primary": price.price_type === "sale",
         })}
         data-testid="price"
       >

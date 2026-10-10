@@ -9,6 +9,7 @@ import ProductReviews from "@modules/products/components/product-reviews"
 import { sanitizeRichTextHtml } from "@modules/common/components/rich-text-editor"
 import ProductInstallments from "@modules/products/components/product-installments"
 import { getProductPrice } from "@lib/util/get-product-price"
+import { formatProductLabels } from "@lib/util/format-product-labels"
 
 type ProductTabsProps = {
   product: HttpTypes.StoreProduct
@@ -75,7 +76,7 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
 
   const featuresContent =
     typeof md.features_content === "string"
-      ? sanitizeRichTextHtml(md.features_content).replace(/<(\/?)h1\b/gi, "<$1h2").trim()
+      ? formatProductLabels(sanitizeRichTextHtml(md.features_content).replace(/<(\/?)h1\b/gi, "<$1h2").trim())
       : ""
   const usageTitle = typeof md.usage_title === "string" ? md.usage_title.trim() : ""
   const usageParagraphs = typeof md.usage_content === "string"
@@ -89,12 +90,11 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
       : rawDescription.replace(/\r\n?|\n/g, "<br />")
   const descriptionContent =
     rawDescription
-      ? sanitizeRichTextHtml(descriptionWithPreservedLines).replace(/<(\/?)h1\b/gi, "<$1h2").trim()
+      ? formatProductLabels(sanitizeRichTextHtml(descriptionWithPreservedLines).replace(/<(\/?)h1\b/gi, "<$1h2").trim())
       : ""
 
   return (
     <div id="product-tabs" className="w-full pt-4 font-sans">
-      <p className="mb-4 text-sm"><a className="text-[#A95E5E] underline" href="/teslimat-ve-iade">Teslimat, iptal ve iade koşulları</a></p>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
         {/* ── LEFT COLUMN (6 cols): TABS & TAB CONTENT (Açıklama, Özellikler, Taksit) ── */}
         <div className="lg:col-span-6 flex flex-col space-y-4">
@@ -106,11 +106,11 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
               className={clx(
                 "flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all duration-200 cursor-pointer active:scale-95",
                 activeTab === "aciklama"
-                  ? "bg-[#A95E5E] text-white font-extrabold shadow-2xs"
+                  ? "bg-primary text-white font-extrabold shadow-2xs"
                   : "text-slate-700 hover:bg-rose-50/80 hover:text-[#A95E5E] font-bold"
               )}
             >
-              <span className="text-xs leading-none">Açıklama</span>
+              <span className="text-xs leading-tight">Ürün Açıklaması</span>
             </button>
 
             <button
@@ -119,7 +119,7 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
               className={clx(
                 "flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all duration-200 cursor-pointer active:scale-95",
                 activeTab === "ozellikler"
-                  ? "bg-[#A95E5E] text-white font-extrabold shadow-2xs"
+                  ? "bg-primary text-white font-extrabold shadow-2xs"
                   : "text-slate-700 hover:bg-rose-50/80 hover:text-[#A95E5E] font-bold"
               )}
             >
@@ -132,7 +132,7 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
               className={clx(
                 "flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all duration-200 cursor-pointer active:scale-95",
                 activeTab === "taksit"
-                  ? "bg-[#A95E5E] text-white font-extrabold shadow-2xs"
+                  ? "bg-primary text-white font-extrabold shadow-2xs"
                   : "text-slate-700 hover:bg-rose-50/80 hover:text-[#A95E5E] font-bold"
               )}
             >
@@ -152,7 +152,7 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
                   : "border-transparent text-slate-700 hover:text-slate-900"
               )}
             >
-              Açıklama
+              Ürün Açıklaması
             </button>
 
             <button
@@ -185,8 +185,7 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
           {/* Tab Content Panel */}
           <div className="pt-2 sm:pt-3">
             {(
-              <section hidden={activeTab !== "aciklama"} aria-labelledby="product-description-heading">
-                <h2 id="product-description-heading" className="mb-3 text-base font-semibold">Ürün Açıklaması</h2>
+              <section hidden={activeTab !== "aciklama"} aria-label="Ürün Açıklaması">
               <div className="space-y-4">
                 {descriptionContent ? (
                   <div

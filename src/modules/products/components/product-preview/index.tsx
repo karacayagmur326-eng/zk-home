@@ -84,7 +84,7 @@ export default function ProductPreview({
           {badges.map((badge) => (
             <span
               key={badge}
-              className="rounded-sm bg-[#A95E5E] px-2 py-1 text-[9px] font-bold tracking-wide text-white"
+              className="rounded-sm bg-primary px-2 py-1 text-[9px] font-bold tracking-wide text-white"
             >
               {badge}
             </span>

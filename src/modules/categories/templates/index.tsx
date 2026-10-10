@@ -192,7 +192,6 @@ export default async function CategoryTemplate({
     heroImageUrl,
   )
   const displayTitle = textValue(metadata, "h1_title", textValue(metadata, "display_title", category.name))
-  const eyebrow = textValue(metadata, "eyebrow", "").trim() || parents[0]?.name || "Mağaza Seçkisi"
   const heroHeight = numberValue(metadata, "hero_height", 300, 240, 620)
   const heroMobileHeight = numberValue(
     metadata,
@@ -369,12 +368,6 @@ export default async function CategoryTemplate({
               style={{ backgroundColor: heroBackground }}
             >
               <div className="relative z-10 flex min-w-0 flex-1 flex-col justify-center p-4 min-[400px]:p-5 sm:p-7 lg:p-9">
-                {eyebrow ? (
-                  <p className="inline-flex items-center gap-2 text-xs font-semibold normal-case tracking-wide text-primary">
-                    <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-primary" />
-                    {turkishTitleCase(eyebrow)}
-                  </p>
-                ) : null}
                 <h2
                   data-testid="category-page-title"
                   className="mt-2 max-w-3xl text-[clamp(1.75rem,8.5vw,var(--category-mobile-title-size))] font-bold leading-[1.12] tracking-tight text-slate-800 lg:text-[length:var(--category-title-size)]"

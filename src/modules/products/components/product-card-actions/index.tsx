@@ -189,7 +189,7 @@ export function AddToCartButton({
         "inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-colors disabled:cursor-not-allowed",
         isSuccess
           ? "bg-emerald-600 hover:bg-emerald-700"
-          : "bg-[#A95E5E] hover:bg-[#874747] disabled:bg-gray-300",
+          : "bg-primary hover:bg-primary-hover disabled:bg-gray-300",
         className,
       )}
     >

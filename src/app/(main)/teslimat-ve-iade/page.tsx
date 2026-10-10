@@ -31,7 +31,7 @@ export default async function DeliveryAndReturnsPage() {
       </div></section>
       <div className="content-container max-w-6xl grid gap-8 py-12 lg:grid-cols-[1.5fr_1fr]">
         <section className="space-y-3" aria-label="Teslimat ve iade bilgileri">
-          {topics.map((topic) => <details key={topic.title} className="group rounded-2xl border border-rose-100 bg-white px-6 py-5 shadow-sm" open={topic.title === "Cayma hakkı ve iade"}>
+          {topics.map((topic) => <details key={topic.title} className="group rounded-2xl border border-rose-100 bg-white px-6 py-5 shadow-sm" open>
             <summary className="cursor-pointer list-none font-semibold text-slate-900">{topic.title}<span className="float-right text-[#bd8585] group-open:rotate-45">＋</span></summary>
             <p className="mt-4 text-sm leading-7 text-slate-600">{topic.body}</p>
           </details>)}

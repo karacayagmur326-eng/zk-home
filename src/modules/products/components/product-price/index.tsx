@@ -44,7 +44,7 @@ export default function ProductPrice({
             {selectedPrice.original_price}
           </span>
         )}
-        <span className="text-xl font-black text-[#A95E5E] leading-none">
+        <span className="text-xl font-black text-primary leading-none">
           {selectedPrice.calculated_price}
         </span>
         {percentage && (
@@ -70,7 +70,7 @@ export default function ProductPrice({
 
       {/* Main Sale Price + KDV Dahil Inline */}
       <div className="flex items-baseline gap-2 flex-wrap">
-        <div className="storefront-price flex items-baseline gap-1 text-3xl sm:text-4xl text-[#A95E5E] leading-none font-black">
+        <div className="storefront-price flex items-baseline gap-1 text-3xl sm:text-4xl text-primary leading-none font-black">
           {selectedPrice.calculated_price}
         </div>
         <span className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">

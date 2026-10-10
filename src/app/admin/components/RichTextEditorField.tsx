@@ -30,6 +30,7 @@ import {
   Table as TableIcon,
 } from "lucide-react"
 import MediaSelectorModal from "./MediaSelectorModal"
+import { formatProductLabels } from "@lib/util/format-product-labels"
 
 interface RichTextEditorFieldProps {
   label?: string
@@ -39,6 +40,7 @@ interface RichTextEditorFieldProps {
   placeholder?: string
   helpText?: string
   minHeight?: number
+  boldColonLabels?: boolean
 }
 
 const PRESET_COLORS = [
@@ -222,6 +224,7 @@ export default function RichTextEditorField({
   placeholder = "Detaylı açıklama ve metin girin...",
   helpText,
   minHeight = 220,
+  boldColonLabels = false,
 }: RichTextEditorFieldProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const editableRef = useRef<HTMLDivElement>(null)
@@ -290,11 +293,15 @@ export default function RichTextEditorField({
 
   useEffect(() => {
     if (activeTab === "visual" && editableRef.current) {
-      if (editableRef.current.innerHTML !== (value || "")) {
-        editableRef.current.innerHTML = value || ""
+      if (document.activeElement === editableRef.current) return
+      const html = boldColonLabels
+        ? formatProductLabels(/<[^>]+>/.test(value || "") ? value : (value || "").replace(/\r\n?|\n/g, "<br />"))
+        : value || ""
+      if (editableRef.current.innerHTML !== html) {
+        editableRef.current.innerHTML = html
       }
     }
-  }, [value, activeTab])
+  }, [value, activeTab, boldColonLabels])
 
   function updateValue(newValue: string) {
     onChange(newValue)
@@ -1020,7 +1027,12 @@ export default function RichTextEditorField({
                 handleVisualInput()
                 updateCurrentFormat()
               }}
-              onBlur={handleVisualInput}
+              onBlur={() => {
+                if (boldColonLabels && editableRef.current) {
+                  editableRef.current.innerHTML = formatProductLabels(editableRef.current.innerHTML)
+                }
+                handleVisualInput()
+              }}
               onKeyUp={updateCurrentFormat}
               onMouseUp={updateCurrentFormat}
               onClick={updateCurrentFormat}

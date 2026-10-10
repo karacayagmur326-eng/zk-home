@@ -209,7 +209,7 @@ export default function ProductActions({
               className={`flex w-full h-11 items-center justify-center gap-2 rounded-xl text-xs font-black text-white shadow-md active:scale-[0.99] transition-all disabled:opacity-75 disabled:cursor-not-allowed cursor-pointer ${
                 isSuccess
                   ? "bg-emerald-600 hover:bg-emerald-700"
-                  : "bg-[#A95E5E] hover:bg-rose-600"
+                  : "bg-primary hover:bg-primary-hover"
               }`}
             >
               {isSuccess ? (
@@ -299,7 +299,7 @@ export default function ProductActions({
             className={`flex h-11 items-center justify-center gap-1.5 rounded-xl text-xs font-black text-white shadow-md active:scale-95 transition-all disabled:opacity-75 disabled:cursor-not-allowed cursor-pointer ${
               isSuccess
                 ? "bg-emerald-600 hover:bg-emerald-700"
-                : "bg-[#A95E5E] hover:bg-rose-600"
+                : "bg-primary hover:bg-primary-hover"
             }`}
           >
             {isSuccess ? (

@@ -556,7 +556,7 @@ export default function EditProductPage() {
             </div>
           </div>
 
-          <SeoFields value={seoMetadata} onChange={setSeoMetadata} title={title} description={plainText(shortDesc)} images={Array.from(new Set([thumbnail, ...images].filter(Boolean)))} />
+
 
           {/* Card 2: Ürün Verisi (Tabbed Box) */}
           <div className="rounded-3xl bg-white border border-slate-200/80 p-6 shadow-xs space-y-5">
@@ -614,6 +614,7 @@ export default function EditProductPage() {
 
                   <div tabIndex={-1} {...fieldProps("description")}>
                     <RichTextEditorField
+                      boldColonLabels
                       label="Ürün Açıklaması *"
                       value={description}
                       onChange={setDescription}
@@ -742,6 +743,7 @@ export default function EditProductPage() {
               {activeTab === "metadata" && (
                 <div className="text-xs text-slate-700">
                   <RichTextEditorField
+                    boldColonLabels
                     label="Ürün özellikleri"
                     value={featuresContent}
                     onChange={setFeaturesContent}
@@ -950,6 +952,8 @@ export default function EditProductPage() {
           </div>
         </div>
       </div>
+
+      <SeoFields value={seoMetadata} onChange={setSeoMetadata} title={title} description={plainText(shortDesc)} images={Array.from(new Set([thumbnail, ...images].filter(Boolean)))} />
 
       <MediaSelectorModal
         isOpen={isThumbModalOpen}
