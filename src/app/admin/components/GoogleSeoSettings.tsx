@@ -17,6 +17,8 @@ export default function GoogleSeoSettings({
     verification: "",
     ga4: "",
     gtm: "",
+    headScripts: "",
+    bodyScripts: "",
     sitemap: normalizeSitemapSettings(),
     baseUrl: "",
   })
@@ -29,7 +31,7 @@ export default function GoogleSeoSettings({
       .then(async (response) => {
         const result = await response.json()
         if (!response.ok) throw new Error(result.error)
-        setValues(result)
+        setValues((previous) => ({ ...previous, ...result }))
       })
       .catch((error) => setMessage(error.message))
       .finally(() => setLoading(false))
@@ -49,7 +51,7 @@ export default function GoogleSeoSettings({
         setErrors(result.errors || {})
         throw new Error(result.error)
       }
-      setMessage("Search Console, Analytics ve sitemap ayarları kaydedildi.")
+      setMessage("Google, sitemap ve özel kod ayarları kaydedildi.")
       onSaved?.()
     } catch (error: any) {
       setMessage(error.message)
@@ -83,7 +85,7 @@ export default function GoogleSeoSettings({
           Search Console, Google Analytics ve Sitemap
         </h2>
         <p className="mt-1 text-sm text-slate-600">
-          Google kodlarını ve site haritasını buradan yönetin.
+          Google kodlarını, site haritasını ve özel kod entegrasyonlarını buradan yönetin.
         </p>
       </div>
       {loading ? (
@@ -141,6 +143,46 @@ export default function GoogleSeoSettings({
                 >
                   {errors[key] || help}
                 </p>
+              </div>
+            ))}
+          </div>
+          <div className="space-y-4 rounded-xl border bg-slate-50 p-5">
+            <div>
+              <h3 className="font-bold">
+                Özel Kod Entegrasyonları (&lt;head&gt; ve &lt;body&gt;)
+              </h3>
+              <p className="mt-1 text-sm text-slate-600">
+                Meta Pixel, TikTok Pixel, Yandex Metrika ve canlı destek gibi
+                servislerin kodlarını ekleyebilirsiniz. GA4 ve GTM için yukarıdaki
+                kimlik alanlarını kullanmanız yeterlidir.
+              </p>
+            </div>
+            {([
+              ["headScripts", "<head> Bölümüne Eklenecek Kodlar (Header Scripts)", 7],
+              ["bodyScripts", "<body> Bölümüne Eklenecek Kodlar (Body / Footer Scripts)", 4],
+            ] as const).map(([key, label, rows]) => (
+              <div key={key}>
+                <label htmlFor={`google-${key}`} className="mb-2 block text-sm font-semibold">
+                  {label}
+                </label>
+                <textarea
+                  id={`google-${key}`}
+                  rows={rows}
+                  value={values[key]}
+                  onChange={(event) => setValues({ ...values, [key]: event.target.value })}
+                  spellCheck={false}
+                  autoCapitalize="off"
+                  autoCorrect="off"
+                  aria-invalid={Boolean(errors[key])}
+                  aria-describedby={errors[key] ? `google-${key}-error` : undefined}
+                  placeholder="Servisin sağladığı kodu buraya yapıştırın."
+                  className={`admin-input w-full resize-y bg-white font-mono text-xs ${errors[key] ? "!border-red-500" : ""}`}
+                />
+                {errors[key] && (
+                  <p id={`google-${key}-error`} className="mt-2 text-xs text-red-700">
+                    {errors[key]}
+                  </p>
+                )}
               </div>
             ))}
           </div>
@@ -337,7 +379,7 @@ export default function GoogleSeoSettings({
               disabled={saving || loading || !values.baseUrl}
               onClick={save}
             >
-              {saving ? "Kaydediliyor…" : "Google ve Sitemap Ayarlarını Kaydet"}
+              {saving ? "Kaydediliyor…" : "Google, Sitemap ve Kod Ayarlarını Kaydet"}
             </button>
             <p role="status" className="text-sm">
               {message}

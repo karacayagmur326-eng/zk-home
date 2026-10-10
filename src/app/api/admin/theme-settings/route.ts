@@ -214,9 +214,9 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     // The dedicated Google settings screen owns these fields. A theme save
     // must preserve them when its form does not send them.
-    const googleFields = ["seo_google_verification", "seo_ga4_id", "seo_gtm_id"] as const
+    const googleFields = ["seo_google_verification", "seo_ga4_id", "seo_gtm_id", "custom_head_scripts", "custom_body_scripts"] as const
     if (googleFields.some(field => !Object.prototype.hasOwnProperty.call(body, field))) {
-      const [existing] = await query<any>("SELECT seo_google_verification, seo_ga4_id, seo_gtm_id FROM theme_settings WHERE id=1")
+      const [existing] = await query<any>("SELECT seo_google_verification, seo_ga4_id, seo_gtm_id, custom_head_scripts, custom_body_scripts FROM theme_settings WHERE id=1")
       for (const field of googleFields) {
         if (!Object.prototype.hasOwnProperty.call(body, field)) body[field] = existing?.[field] || null
       }

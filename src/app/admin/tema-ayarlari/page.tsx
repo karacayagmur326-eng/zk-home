@@ -22,7 +22,7 @@ import {
   Save,
   ShieldCheck,
 } from "@lib/icons"
-import { Code, Sparkles } from "lucide-react"
+import { Sparkles } from "lucide-react"
 import clx from "clsx"
 
 const FONT_OPTIONS = [
@@ -162,11 +162,6 @@ export default function ThemeSettingsPage(props: any = {}) {
   const [seoMetaTitle, setSeoMetaTitle] = useState("")
   const [seoMetaDescription, setSeoMetaDescription] = useState("")
   const [seoMetaKeywords, setSeoMetaKeywords] = useState("")
-  const [seoGoogleVerification, setSeoGoogleVerification] = useState("")
-  const [seoGa4Id, setSeoGa4Id] = useState("")
-  const [seoGtmId, setSeoGtmId] = useState("")
-  const [customHeadScripts, setCustomHeadScripts] = useState("")
-  const [customBodyScripts, setCustomBodyScripts] = useState("")
   const [seoOgImageUrl, setSeoOgImageUrl] = useState("")
   const [seoCanonicalUrl, setSeoCanonicalUrl] = useState("")
   const [seoIndexingEnabled, setSeoIndexingEnabled] = useState(true)
@@ -306,12 +301,6 @@ export default function ThemeSettingsPage(props: any = {}) {
           if (s.seo_meta_description)
             setSeoMetaDescription(s.seo_meta_description)
           if (s.seo_meta_keywords) setSeoMetaKeywords(s.seo_meta_keywords)
-          if (s.seo_google_verification)
-            setSeoGoogleVerification(s.seo_google_verification)
-          if (s.seo_ga4_id) setSeoGa4Id(s.seo_ga4_id)
-          if (s.seo_gtm_id) setSeoGtmId(s.seo_gtm_id)
-          if (s.custom_head_scripts) setCustomHeadScripts(s.custom_head_scripts)
-          if (s.custom_body_scripts) setCustomBodyScripts(s.custom_body_scripts)
           if (s.seo_og_image_url) setSeoOgImageUrl(s.seo_og_image_url)
           if (s.seo_canonical_url) setSeoCanonicalUrl(s.seo_canonical_url)
           if (
@@ -399,8 +388,6 @@ export default function ThemeSettingsPage(props: any = {}) {
           seo_meta_title: seoMetaTitle,
           seo_meta_description: seoMetaDescription,
           seo_meta_keywords: seoMetaKeywords,
-          custom_head_scripts: customHeadScripts,
-          custom_body_scripts: customBodyScripts,
           seo_og_image_url: seoOgImageUrl,
           seo_canonical_url: seoCanonicalUrl,
           seo_indexing_enabled: seoIndexingEnabled,
@@ -1791,7 +1778,7 @@ export default function ThemeSettingsPage(props: any = {}) {
                   Google & SEO Yönetim Merkezi
                 </h3>
                 <p style={{ margin: "4px 0 0 0", fontSize: 13, color: "#64748b" }}>
-                  Arama motoru görünürlüğü, Meta başlıklar, Google Search Console & Analytics entegrasyonu.
+                  Arama motoru görünürlüğü, meta etiketleri ve sayfa başlıklarını yönetin.
                 </p>
               </div>
             </div>
@@ -2293,124 +2280,8 @@ export default function ThemeSettingsPage(props: any = {}) {
 
           <div className="admin-card" style={{ padding: 24 }}>
             <h4>Search Console, Google Analytics ve Sitemap</h4>
-            <p>Doğrulama kodlarını, ölçüm kimliklerini ve site haritasını Google ayarlarından yönetin.</p>
+            <p>Doğrulama kodlarını, ölçüm kimliklerini, site haritasını ve özel kod entegrasyonlarını Google ayarlarından yönetin.</p>
             <a className="admin-btn admin-btn-secondary" href="/admin/ayarlar?tab=google">Google ve Sitemap Ayarlarını Aç</a>
-          </div>
-
-          {/* Section: Özel Head & Body Kodları (Google Tag, Pixel, Özel JS) */}
-          <div
-            className="admin-card"
-            style={{
-              background: "#ffffff",
-              border: "1px solid #e2e8f0",
-              borderRadius: 16,
-              padding: 24,
-              display: "flex",
-              flexDirection: "column",
-              gap: 20,
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingBottom: 14, borderBottom: "1px solid #f1f5f9" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 10, background: "#eff6ff", display: "flex", alignItems: "center", justifyContent: "center", color: "#2563eb", flexShrink: 0 }}>
-                  <Code style={{ width: 18, height: 18 }} />
-                </div>
-                <div>
-                  <h4 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: "#1e293b" }}>
-                    Özel Kod Entegrasyonları (&lt;head&gt; ve &lt;body&gt;)
-                  </h4>
-                  <p style={{ margin: "2px 0 0 0", fontSize: 12, color: "#64748b" }}>
-                    Google tag (gtag.js), Meta Pixel, TikTok Pixel, Yandex Metrika veya özel takip kodlarınızı buraya yapıştırabilirsiniz.
-                  </p>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => {
-                  const measurementId = seoGa4Id.trim()
-                  if (!measurementId) return
-                  setCustomHeadScripts(`<!-- Google tag (gtag.js) -->\n<script async src="https://www.googletagmanager.com/gtag/js?id=${measurementId}"></script>\n<script>\n  window.dataLayer = window.dataLayer || [];\n  function gtag(){dataLayer.push(arguments);}\n  gtag('js', new Date());\n\n  gtag('config', '${measurementId}');\n</script>`)
-                }}
-                style={{
-                  fontSize: 11,
-                  fontWeight: 700,
-                  color: "#2563eb",
-                  background: "#eff6ff",
-                  border: "1px solid #bfdbfe",
-                  padding: "6px 12px",
-                  borderRadius: 8,
-                  cursor: "pointer",
-                }}
-              >
-                + Google Analytics Şablonunu Doldur
-              </button>
-            </div>
-
-            {/* Custom Head Scripts */}
-            <div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                <label style={{ fontSize: 12, fontWeight: 800, color: "#1e293b", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                  &lt;head&gt; Bölümüne Eklenecek Kodlar (Header Scripts)
-                </label>
-                <span style={{ fontSize: 11, color: "#10b981", fontWeight: 700, background: "#ecfdf5", padding: "2px 8px", borderRadius: 6 }}>
-                  Otomatik Canlı Enjeksiyon
-                </span>
-              </div>
-              <p style={{ fontSize: 12, color: "#64748b", margin: "0 0 8px 0" }}>
-                Google Analytics gtag.js, Google Tag Manager script kodu veya Meta Pixel gibi &lt;head&gt; arasına konulması gereken tüm kodları doğrudan yapıştırabilirsiniz.
-              </p>
-              <textarea
-                rows={7}
-                value={customHeadScripts}
-                onChange={(e) => setCustomHeadScripts(e.target.value)}
-                placeholder="Yeni Mağaza analiz kodlarını buraya ekleyin."
-                style={{
-                  width: "100%",
-                  boxSizing: "border-box",
-                  fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
-                  fontSize: 12,
-                  lineHeight: 1.5,
-                  background: "#0f172a",
-                  color: "#38bdf8",
-                  padding: "14px 16px",
-                  borderRadius: 12,
-                  border: "1px solid #334155",
-                  resize: "vertical",
-                }}
-              />
-            </div>
-
-            {/* Custom Body Scripts */}
-            <div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                <label style={{ fontSize: 12, fontWeight: 800, color: "#1e293b", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                  &lt;body&gt; Bölümüne Eklenecek Kodlar (Body / Footer Scripts)
-                </label>
-                <span style={{ fontSize: 11, color: "#64748b" }}>
-                  GTM Noscript veya Canlı Destek Widget'ları
-                </span>
-              </div>
-              <textarea
-                rows={4}
-                value={customBodyScripts}
-                onChange={(e) => setCustomBodyScripts(e.target.value)}
-                placeholder={'<!-- Google Tag Manager (noscript) -->\n<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXXXXX" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>'}
-                style={{
-                  width: "100%",
-                  boxSizing: "border-box",
-                  fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
-                  fontSize: 12,
-                  lineHeight: 1.5,
-                  background: "#0f172a",
-                  color: "#38bdf8",
-                  padding: "14px 16px",
-                  borderRadius: 12,
-                  border: "1px solid #334155",
-                  resize: "vertical",
-                }}
-              />
-            </div>
           </div>
 
           {/* Section 3: Sosyal Medya Paylaşım Görseli (Open Graph) */}

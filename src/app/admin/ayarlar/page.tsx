@@ -73,14 +73,14 @@ function AyarlarContent() {
     {
       id: "seo" as MainTab,
       label: "SEO & Meta Etiketleri",
-      desc: "GA4, GTM, Search Console ve özel scriptler",
+      desc: "Meta etiketleri, sayfa başlıkları ve arama motoru görünürlüğü",
       icon: Globe,
-      badge: "Analytics",
+      badge: "SEO",
     },
     {
       id: "google" as MainTab,
       label: "Search Console, Analytics & Sitemap",
-      desc: "Google doğrulama, ölçümleme ve sitemap ayarları",
+      desc: "Google doğrulama, ölçümleme, sitemap ve özel kod ayarları",
       icon: Globe,
       badge: "Google",
     },
