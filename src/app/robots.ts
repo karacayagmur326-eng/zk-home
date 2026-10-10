@@ -2,6 +2,7 @@ import { indexingEnabled } from "@lib/seo/indexing"
 import { getBaseURL } from "@lib/util/env"
 import { MetadataRoute } from "next"
 import { getThemeSettings } from "@lib/content/theme-settings"
+import { sitemapEnabled } from "@lib/seo/sitemap-settings"
 
 export const dynamic = "force-dynamic"
 
@@ -28,7 +29,7 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
         // Blocking them here would prevent Google from reading that noindex.
       },
     ],
-    sitemap: `${baseUrl}/sitemap.xml`,
+    sitemap: sitemapEnabled(settings) ? `${baseUrl}/sitemap.xml` : undefined,
     host: baseUrl,
   }
 }

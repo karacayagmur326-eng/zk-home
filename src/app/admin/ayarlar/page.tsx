@@ -6,6 +6,7 @@ import { useSearchParams, useRouter } from "next/navigation"
 import ThemeSettingsComponent from "../tema-ayarlari/page"
 import IntegrationsComponent from "../entegrasyonlar/page"
 import MagazaAyarlariComponent from "../magaza-ayarlari/page"
+import GoogleSeoSettings from "../components/GoogleSeoSettings"
 import {
   Palette,
   PlugZap,
@@ -22,20 +23,20 @@ import {
   ReceiptText,
 } from "lucide-react"
 
-type MainTab = "tema" | "entegrasyonlar" | "magaza" | "seo" | "iletisim"
+type MainTab = "tema" | "entegrasyonlar" | "magaza" | "seo" | "google" | "iletisim"
 
 function AyarlarContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const tabParam = searchParams.get("tab") as MainTab | null
   const [activeMainTab, setActiveMainTab] = useState<MainTab>(
-    tabParam && ["tema", "entegrasyonlar", "magaza", "seo", "iletisim"].includes(tabParam)
+    tabParam && ["tema", "entegrasyonlar", "magaza", "seo", "google", "iletisim"].includes(tabParam)
       ? tabParam
       : "tema"
   )
 
   useEffect(() => {
-    if (tabParam && ["tema", "entegrasyonlar", "magaza", "seo", "iletisim"].includes(tabParam)) {
+    if (tabParam && ["tema", "entegrasyonlar", "magaza", "seo", "google", "iletisim"].includes(tabParam)) {
       setActiveMainTab(tabParam)
     }
   }, [tabParam])
@@ -71,10 +72,17 @@ function AyarlarContent() {
     },
     {
       id: "seo" as MainTab,
-      label: "Google & SEO Kodları",
+      label: "SEO & Meta Etiketleri",
       desc: "GA4, GTM, Search Console ve özel scriptler",
       icon: Globe,
       badge: "Analytics",
+    },
+    {
+      id: "google" as MainTab,
+      label: "Search Console, Analytics & Sitemap",
+      desc: "Google doğrulama, ölçümleme ve sitemap ayarları",
+      icon: Globe,
+      badge: "Google",
     },
     {
       id: "iletisim" as MainTab,
@@ -112,6 +120,7 @@ function AyarlarContent() {
 
       {/* TAB CONTENT CONTAINER */}
       <div className="pt-2">
+        {activeMainTab === "google" && <GoogleSeoSettings />}
         {activeMainTab === "tema" && (
           <div>
             <ThemeSettingsComponent mode="theme" initialTab="logos" />

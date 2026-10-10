@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import SeoFields from "../components/SeoFields"
+import GoogleSeoSettings from "../components/GoogleSeoSettings"
 import { plainText } from "@lib/seo/entity"
 import { isPrivatePath } from "@lib/seo/indexing"
 
@@ -196,6 +197,7 @@ export default function SeoPage() {
   )
   return (
     <div className="space-y-5 p-5">
+      <GoogleSeoSettings onSaved={refresh} />
       <section className="rounded-xl border bg-white p-4">
         <h2 className="font-semibold">Canlı HTML ve bağlantı kontrolü</h2>
         <p className="mt-2 text-sm text-slate-600">

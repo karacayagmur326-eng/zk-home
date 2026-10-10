@@ -1,4 +1,5 @@
-import { indexingEnabled } from "@lib/seo/indexing"
+import { sitemapEnabled, sitemapEntryOptions } from "@lib/seo/sitemap-settings"
+import { normalizeSitemapSettings } from "@lib/seo/google-settings"
 import { getThemeSettings } from "@lib/content/theme-settings"
 import { emptySitemap } from "@lib/seo/sitemap-response"
 import { query } from "@lib/admin/db"
@@ -13,7 +14,9 @@ export const dynamic = "force-dynamic"
 
 export async function GET() {
   try {
-  if (!indexingEnabled(await getThemeSettings())) return emptySitemap()
+  const settings = await getThemeSettings()
+  if (!sitemapEnabled(settings, "pages")) return emptySitemap()
+  const sitemapConfig = normalizeSitemapSettings(settings?.seo_sitemap_settings)
   const baseUrl = getBaseURL()
   await ensureCommerceSchema()
 
@@ -58,6 +61,10 @@ export async function GET() {
   const pagePath = (page: typeof pages[number]) => page.handle === "kvkk-aydinlatma-metni" ? "/kvkk" : `/${page.custom_slug || page.handle}`
   const blocked = pages.filter(page => page.content.status === "draft" || page.content.seo_noindex === true || page.content.seo_sitemap === false || (page.content.seo_canonical && page.content.seo_canonical !== `${baseUrl}${pagePath(page)}`)).map(pagePath)
   for (let index = staticConfig.length - 1; index >= 0; index--) if (blocked.includes(staticConfig[index].path)) staticConfig.splice(index, 1)
+  if (!sitemapConfig.home) {
+    const homeIndex = staticConfig.findIndex(item => item.path === "")
+    if (homeIndex >= 0) staticConfig.splice(homeIndex, 1)
+  }
   const staticSet = new Set(staticConfig.map((item) => item.path))
   const redirectSources = new Set(
     (legacyRedirects as Array<{ source: string }>).map((item) => item.source)
@@ -67,8 +74,7 @@ export async function GET() {
   const staticXmlRows = staticConfig.map(
     (item) => `  <url>
     <loc>${baseUrl}${item.path}</loc>
-    <changefreq>${item.changefreq}</changefreq>
-    <priority>${item.priority}</priority>
+    ${item.path === "" ? `<changefreq>${sitemapConfig.homeChangefreq}</changefreq><priority>${sitemapConfig.homePriority}</priority>` : sitemapEntryOptions(settings, "pages")}
   </url>`
   )
 
@@ -85,8 +91,7 @@ export async function GET() {
       (page) => `  <url>
     <loc>${escapeXml(`${baseUrl}/${page.custom_slug || page.handle}`)}</loc>
     ${lastModifiedXml(page.updated_at)}
-    <changefreq>monthly</changefreq>
-    <priority>0.4</priority>
+    ${sitemapEntryOptions(settings, "pages")}
   </url>`
     )
 

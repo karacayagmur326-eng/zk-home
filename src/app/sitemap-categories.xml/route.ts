@@ -1,4 +1,5 @@
-import { indexingEnabled } from "@lib/seo/indexing"
+import { sitemapEnabled, sitemapEntryOptions } from "@lib/seo/sitemap-settings"
+import { normalizeSitemapSettings } from "@lib/seo/google-settings"
 import { getThemeSettings } from "@lib/content/theme-settings"
 import { emptySitemap } from "@lib/seo/sitemap-response"
 import { query } from "@lib/admin/db"
@@ -11,7 +12,9 @@ export const dynamic = "force-dynamic"
 
 export async function GET() {
   try {
-  if (!indexingEnabled(await getThemeSettings())) return emptySitemap()
+  const settings = await getThemeSettings()
+  if (!sitemapEnabled(settings, "categories")) return emptySitemap()
+  const sitemapConfig = normalizeSitemapSettings(settings?.seo_sitemap_settings)
   const baseUrl = getBaseURL()
   await ensureCommerceSchema()
 
@@ -39,8 +42,7 @@ export async function GET() {
     (category) => `  <url>
     <loc>${escapeXml(`${baseUrl}${category.metadata?.pretty_url === true ? "" : "/kategoriler"}/${category.handle}`)}</loc>
     ${lastModifiedXml(category.updated_at)}
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    ${sitemapEntryOptions(settings, "categories")}
   </url>`
   )
 

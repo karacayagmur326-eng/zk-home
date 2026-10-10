@@ -399,9 +399,6 @@ export default function ThemeSettingsPage(props: any = {}) {
           seo_meta_title: seoMetaTitle,
           seo_meta_description: seoMetaDescription,
           seo_meta_keywords: seoMetaKeywords,
-          seo_google_verification: seoGoogleVerification,
-          seo_ga4_id: seoGa4Id,
-          seo_gtm_id: seoGtmId,
           custom_head_scripts: customHeadScripts,
           custom_body_scripts: customBodyScripts,
           seo_og_image_url: seoOgImageUrl,
@@ -2294,85 +2291,10 @@ export default function ThemeSettingsPage(props: any = {}) {
             </div>
           </div>
 
-          {/* Section 2: Google & Analitik Entegrasyonları */}
-          <div
-            className="admin-card"
-            style={{
-              background: "#ffffff",
-              border: "1px solid #e2e8f0",
-              borderRadius: 16,
-              padding: 24,
-              display: "flex",
-              flexDirection: "column",
-              gap: 20,
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 12, paddingBottom: 14, borderBottom: "1px solid #f1f5f9" }}>
-              <div style={{ width: 36, height: 36, borderRadius: 10, background: "#f0fdf4", display: "flex", alignItems: "center", justifyContent: "center", color: "#16a34a", flexShrink: 0 }}>
-                <ShieldCheck style={{ width: 18, height: 18 }} />
-              </div>
-              <div>
-                <h4 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: "#1e293b" }}>
-                  Google Entegrasyonları
-                </h4>
-                <p style={{ margin: "2px 0 0 0", fontSize: 12, color: "#64748b" }}>
-                  Google Search Console doğrulama kodu ve Google Analytics 4 (GA4) kimliği.
-                </p>
-              </div>
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
-              <div style={{ background: "#f8fafc", borderRadius: 12, padding: "16px 18px", border: "1px solid #e2e8f0" }}>
-                <label style={{ display: "block", marginBottom: 6, fontSize: 12, fontWeight: 700, color: "#1e293b", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                  Google Analytics 4 (GA4) Ölçüm Kimliği
-                </label>
-                <input
-                  type="text"
-                  className="admin-input"
-                  style={{ width: "100%", boxSizing: "border-box", fontSize: 13, padding: "10px 12px", background: "#ffffff", borderRadius: 8, fontFamily: "monospace" }}
-                  value={seoGa4Id}
-                  onChange={(e) => setSeoGa4Id(e.target.value)}
-                  placeholder="Ölçüm kimliğinizi girin"
-                />
-                <span style={{ fontSize: 11, color: "#64748b", marginTop: 6, display: "block", lineHeight: 1.4 }}>
-                  Google Analytics 4 veri akışı kimliğiniz (G- ile başlar).
-                </span>
-              </div>
-
-              <div style={{ background: "#f8fafc", borderRadius: 12, padding: "16px 18px", border: "1px solid #e2e8f0" }}>
-                <label style={{ display: "block", marginBottom: 6, fontSize: 12, fontWeight: 700, color: "#1e293b", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                  Google Tag Manager (GTM)
-                </label>
-                <input
-                  type="text"
-                  className="admin-input"
-                  style={{ width: "100%", boxSizing: "border-box", fontSize: 13, padding: "10px 12px", background: "#ffffff", borderRadius: 8, fontFamily: "monospace" }}
-                  value={seoGtmId}
-                  onChange={(e) => setSeoGtmId(e.target.value)}
-                  placeholder="GTM-XXXXXXX"
-                />
-                <span style={{ fontSize: 11, color: "#64748b", marginTop: 6, display: "block", lineHeight: 1.4 }}>
-                  Google Tag Manager konteyner kimliğiniz.
-                </span>
-              </div>
-
-              <div style={{ background: "#f8fafc", borderRadius: 12, padding: "16px 18px", border: "1px solid #e2e8f0" }}>
-                <label style={{ display: "block", marginBottom: 6, fontSize: 12, fontWeight: 700, color: "#1e293b", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                  Google Search Console
-                </label>
-                <input
-                  type="text"
-                  className="admin-input"
-                  style={{ width: "100%", boxSizing: "border-box", fontSize: 13, padding: "10px 12px", background: "#ffffff", borderRadius: 8 }}
-                  value={seoGoogleVerification}
-                  onChange={(e) => setSeoGoogleVerification(e.target.value)}
-                  placeholder="google-site-verification=..."
-                />
-                <span style={{ fontSize: 11, color: "#64748b", marginTop: 6, display: "block", lineHeight: 1.4 }}>
-                  HTML meta doğrulama kodu.
-                </span>
-              </div>
-            </div>
+          <div className="admin-card" style={{ padding: 24 }}>
+            <h4>Search Console, Google Analytics ve Sitemap</h4>
+            <p>Doğrulama kodlarını, ölçüm kimliklerini ve site haritasını Google ayarlarından yönetin.</p>
+            <a className="admin-btn admin-btn-secondary" href="/admin/ayarlar?tab=google">Google ve Sitemap Ayarlarını Aç</a>
           </div>
 
           {/* Section: Özel Head & Body Kodları (Google Tag, Pixel, Özel JS) */}

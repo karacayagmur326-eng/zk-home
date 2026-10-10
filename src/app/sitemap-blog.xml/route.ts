@@ -1,5 +1,6 @@
 import { ensureBlogSeoSchema } from "@lib/seo/blog"
-import { indexingEnabled } from "@lib/seo/indexing"
+import { sitemapEnabled, sitemapEntryOptions } from "@lib/seo/sitemap-settings"
+import { normalizeSitemapSettings } from "@lib/seo/google-settings"
 import { getThemeSettings } from "@lib/content/theme-settings"
 import { emptySitemap } from "@lib/seo/sitemap-response"
 import { query } from "@lib/admin/db"
@@ -11,7 +12,9 @@ export const dynamic = "force-dynamic"
 
 export async function GET() {
   try {
-  if (!indexingEnabled(await getThemeSettings())) return emptySitemap()
+  const settings = await getThemeSettings()
+  if (!sitemapEnabled(settings, "blog")) return emptySitemap()
+  const sitemapConfig = normalizeSitemapSettings(settings?.seo_sitemap_settings)
   await ensureBlogSeoSchema()
   const baseUrl = getBaseURL()
   // 2. Fetch Published Blog Posts
@@ -25,20 +28,18 @@ export async function GET() {
   // Main Blog Index URL
   const mainBlogXml = `  <url>
     <loc>${baseUrl}/blog</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
+    ${sitemapEntryOptions(settings, "blog")}
   </url>`
 
   // Article URLs with Image extensions
   const postXmlRows = blogPosts.map((post) => {
     const lastmod = lastModifiedXml(post.updated_at || post.published_at || post.created_at)
-    const imgUrl = post.image ? (post.image.startsWith("http") ? post.image : `${baseUrl}${post.image}`) : null
+    const imgUrl = sitemapConfig.images && post.image ? (post.image.startsWith("http") ? post.image : `${baseUrl}${post.image}`) : null
 
     return `  <url>
     <loc>${escapeXml(`${baseUrl}/blog/${post.slug}`)}</loc>
     ${lastmod}
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>${
+    ${sitemapEntryOptions(settings, "blog")}${
       imgUrl
         ? `\n    <image:image>\n      <image:loc>${escapeXml(imgUrl)}</image:loc>\n      <image:title>${escapeXml(post.title)}</image:title>\n    </image:image>`
         : ""
