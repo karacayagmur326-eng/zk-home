@@ -161,8 +161,9 @@ const ImageGallery = ({ images, productTitle, discountBadge, product }: ImageGal
           alt={imageAlt(product, mainImage.url, activeIndex)}
           fill
           priority
+          fetchPriority="high"
           className="object-contain"
-          sizes="(max-width: 768px) 100vw, 640px"
+          sizes="(max-width: 768px) calc(100vw - 32px), 560px"
         />
 
         {/* Mobile: Prev/Next arrows overlay */}
@@ -170,6 +171,7 @@ const ImageGallery = ({ images, productTitle, discountBadge, product }: ImageGal
           <>
             <button
               type="button"
+              aria-label="Önceki ürün görseli"
               onClick={(e) => {
                 e.stopPropagation()
                 handlePrevImage()
@@ -180,6 +182,7 @@ const ImageGallery = ({ images, productTitle, discountBadge, product }: ImageGal
             </button>
             <button
               type="button"
+              aria-label="Sonraki ürün görseli"
               onClick={(e) => {
                 e.stopPropagation()
                 handleNextImage()

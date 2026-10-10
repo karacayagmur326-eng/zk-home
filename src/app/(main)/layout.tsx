@@ -32,9 +32,10 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
     }
   }
 
-  const [cart, mobileSettings] = await Promise.all([
+  const [cart, mobileSettings, adminSession] = await Promise.all([
     retrieveCart(),
     getMobileSettings(),
+    getAdminSession(),
   ])
   let shippingOptions: StoreCartShippingOption[] = []
 
@@ -62,7 +63,7 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
       <div>{props.children}</div>
       <DesktopCartSidebar cart={cart} />
       <Footer />
-      <AdminQuickEditBar />
+      {adminSession && <AdminQuickEditBar />}
     </div>
   )
 }

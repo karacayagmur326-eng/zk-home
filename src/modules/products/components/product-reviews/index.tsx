@@ -238,6 +238,8 @@ export default function ProductReviews({
                   <button
                     key={star}
                     type="button"
+                    aria-label={`${star} yıldız ver`}
+                    aria-pressed={userRating === star}
                     onClick={() => setUserRating(star)}
                     onMouseEnter={() => setHoverRating(star)}
                     onMouseLeave={() => setHoverRating(0)}

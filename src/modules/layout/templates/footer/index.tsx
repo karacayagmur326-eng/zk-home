@@ -266,10 +266,10 @@ export default async function Footer() {
 
             {/* Mobile Social Links */}
             <div className="zk-footer-mobile-social flex flex-col space-y-3 pt-2">
-              <h4 className="text-sm font-semibold normal-case text-white tracking-normal flex items-center gap-2">
+              <h2 className="text-sm font-semibold normal-case text-white tracking-normal flex items-center gap-2">
                 <Users className="w-4 h-4 text-[#C98484] shrink-0" />
                 <span>{col5Title}</span>
-              </h4>
+              </h2>
               <p className="text-[13px] text-white/75 leading-relaxed">
                 {col5Desc}
               </p>
