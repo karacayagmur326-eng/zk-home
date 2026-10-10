@@ -106,8 +106,8 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
               className={clx(
                 "flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all duration-200 cursor-pointer active:scale-95",
                 activeTab === "aciklama"
-                  ? "bg-[#C98484] text-white font-extrabold shadow-2xs"
-                  : "text-slate-700 hover:bg-rose-50/80 hover:text-[#C98484] font-bold"
+                  ? "bg-[#A95E5E] text-white font-extrabold shadow-2xs"
+                  : "text-slate-700 hover:bg-rose-50/80 hover:text-[#A95E5E] font-bold"
               )}
             >
               <span className="text-xs leading-none">Açıklama</span>
@@ -119,8 +119,8 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
               className={clx(
                 "flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all duration-200 cursor-pointer active:scale-95",
                 activeTab === "ozellikler"
-                  ? "bg-[#C98484] text-white font-extrabold shadow-2xs"
-                  : "text-slate-700 hover:bg-rose-50/80 hover:text-[#C98484] font-bold"
+                  ? "bg-[#A95E5E] text-white font-extrabold shadow-2xs"
+                  : "text-slate-700 hover:bg-rose-50/80 hover:text-[#A95E5E] font-bold"
               )}
             >
               <span className="text-xs leading-none">Özellikler</span>
@@ -132,8 +132,8 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
               className={clx(
                 "flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all duration-200 cursor-pointer active:scale-95",
                 activeTab === "taksit"
-                  ? "bg-[#C98484] text-white font-extrabold shadow-2xs"
-                  : "text-slate-700 hover:bg-rose-50/80 hover:text-[#C98484] font-bold"
+                  ? "bg-[#A95E5E] text-white font-extrabold shadow-2xs"
+                  : "text-slate-700 hover:bg-rose-50/80 hover:text-[#A95E5E] font-bold"
               )}
             >
               <span className="text-xs leading-none">Taksit</span>
@@ -148,7 +148,7 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
               className={clx(
                 "pb-3 text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 border-b-2 -mb-px",
                 activeTab === "aciklama"
-                  ? "border-[#C98484] text-[#C98484] font-extrabold"
+                  ? "border-[#C98484] text-[#A95E5E] font-extrabold"
                   : "border-transparent text-slate-700 hover:text-slate-900"
               )}
             >
@@ -161,7 +161,7 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
               className={clx(
                 "pb-3 text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 border-b-2 -mb-px",
                 activeTab === "ozellikler"
-                  ? "border-[#C98484] text-[#C98484] font-extrabold"
+                  ? "border-[#C98484] text-[#A95E5E] font-extrabold"
                   : "border-transparent text-slate-700 hover:text-slate-900"
               )}
             >
@@ -174,7 +174,7 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
               className={clx(
                 "pb-3 text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 border-b-2 -mb-px",
                 activeTab === "taksit"
-                  ? "border-[#C98484] text-[#C98484] font-extrabold"
+                  ? "border-[#C98484] text-[#A95E5E] font-extrabold"
                   : "border-transparent text-slate-700 hover:text-slate-900"
               )}
             >
@@ -190,7 +190,7 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
               <div className="space-y-4">
                 {descriptionContent ? (
                   <div
-                    className="product-rich-text prose prose-sm max-w-none text-slate-700 prose-headings:text-slate-900 prose-headings:font-extrabold prose-a:text-[#C98484] leading-relaxed"
+                    className="product-rich-text prose prose-sm max-w-none text-slate-700 prose-headings:text-slate-900 prose-headings:font-extrabold prose-a:text-[#A95E5E] leading-relaxed"
                     dangerouslySetInnerHTML={{ __html: descriptionContent }}
                   />
                 ) : (
@@ -214,7 +214,7 @@ null
               <div className="space-y-4">
                 {featuresContent ? (
                   <div
-                    className="product-rich-text prose prose-sm max-w-none text-slate-700 prose-headings:text-slate-900 prose-a:text-[#C98484]"
+                    className="product-rich-text prose prose-sm max-w-none text-slate-700 prose-headings:text-slate-900 prose-a:text-[#A95E5E]"
                     dangerouslySetInnerHTML={{ __html: featuresContent }}
                   />
                 ) : (

@@ -40,11 +40,11 @@ export default function ProductPrice({
     return (
       <div className="flex items-center gap-2 flex-wrap">
         {isSale && (
-          <span className="text-gray-400 line-through text-[11px] font-semibold">
+          <span className="text-gray-500 line-through text-[11px] font-semibold">
             {selectedPrice.original_price}
           </span>
         )}
-        <span className="text-xl font-black text-[#C98484] leading-none">
+        <span className="text-xl font-black text-[#A95E5E] leading-none">
           {selectedPrice.calculated_price}
         </span>
         {percentage && (
@@ -52,7 +52,7 @@ export default function ProductPrice({
             %{percentage}
           </span>
         )}
-        <span className="text-[10px] text-gray-400 font-medium">KDV Dahil</span>
+        <span className="text-[10px] text-gray-500 font-medium">KDV Dahil</span>
       </div>
     )
   }
@@ -63,14 +63,14 @@ export default function ProductPrice({
       
       {/* Strikethrough Original Price */}
       {isSale && (
-        <span className="text-gray-400 line-through text-xs sm:text-sm font-semibold mt-1">
+        <span className="text-gray-500 line-through text-xs sm:text-sm font-semibold mt-1">
           {selectedPrice.original_price}
         </span>
       )}
 
       {/* Main Sale Price + KDV Dahil Inline */}
       <div className="flex items-baseline gap-2 flex-wrap">
-        <div className="storefront-price flex items-baseline gap-1 text-3xl sm:text-4xl text-[#C98484] leading-none font-black">
+        <div className="storefront-price flex items-baseline gap-1 text-3xl sm:text-4xl text-[#A95E5E] leading-none font-black">
           {selectedPrice.calculated_price}
         </div>
         <span className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">

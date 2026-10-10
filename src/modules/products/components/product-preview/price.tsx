@@ -9,8 +9,8 @@ export default function PreviewPrice({ price }: { price: VariantPrice }) {
   return (
     <>
       <Text
-        className={clx("text-lg font-bold text-[#C98484]", {
-          "text-[#C98484]": price.price_type === "sale",
+        className={clx("text-lg font-bold text-[#A95E5E]", {
+          "text-[#A95E5E]": price.price_type === "sale",
         })}
         data-testid="price"
       >
@@ -18,7 +18,7 @@ export default function PreviewPrice({ price }: { price: VariantPrice }) {
       </Text>
       {price.price_type === "sale" && (
         <Text
-          className="text-sm text-gray-400 line-through ml-2"
+          className="text-sm text-gray-500 line-through ml-2"
           data-testid="original-price"
         >
           {price.original_price}

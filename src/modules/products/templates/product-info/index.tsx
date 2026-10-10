@@ -66,7 +66,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
         {/* 1. Brand Tag & Main Title */}
         <div>
           <h1 className="text-sm sm:text-xl lg:text-[22px] font-black text-slate-900 leading-snug tracking-tight" data-testid="product-title">
-            {brandName && <span className="mr-1.5 inline-block text-xs font-extrabold uppercase tracking-wider text-[#C98484] sm:mb-1 sm:block">{brandName}</span>}
+            {brandName && <span className="mr-1.5 inline-block text-xs font-extrabold uppercase tracking-wider text-[#A95E5E] sm:mb-1 sm:block">{brandName}</span>}
             {md.h1_title || product.title}
           </h1>
         </div>
@@ -81,12 +81,12 @@ export default function ProductInfo({ product }: ProductInfoProps) {
             className="group flex flex-col items-center justify-center py-1.5 px-1 rounded-xl hover:bg-rose-50/90 active:bg-rose-100/80 active:scale-95 transition-all duration-200 cursor-pointer"
           >
             <div className="flex items-center gap-1">
-              <span className="font-black text-slate-900 group-hover:text-[#C98484] text-sm leading-none transition-colors">
+              <span className="font-black text-slate-900 group-hover:text-[#A95E5E] text-sm leading-none transition-colors">
                 {reviewsData.avg > 0 ? reviewsData.avg : "—"}
               </span>
               <Star className="w-3.5 h-3.5 fill-[#C98484] stroke-[#C98484] shrink-0" />
             </div>
-            <span className="text-[10px] font-bold text-slate-400 group-hover:text-[#C98484] mt-1.5 leading-none transition-colors">
+            <span className="text-[10px] font-bold text-slate-500 group-hover:text-[#A95E5E] mt-1.5 leading-none transition-colors">
               Yıldız
             </span>
           </button>
@@ -97,10 +97,10 @@ export default function ProductInfo({ product }: ProductInfoProps) {
             onClick={() => scrollToReviews("degerlendir")}
             className="group flex flex-col items-center justify-center py-1.5 px-1 rounded-xl hover:bg-rose-50/90 active:bg-rose-100/80 active:scale-95 transition-all duration-200 cursor-pointer"
           >
-            <span className="font-black text-slate-900 group-hover:text-[#C98484] text-sm leading-none transition-colors">
+            <span className="font-black text-slate-900 group-hover:text-[#A95E5E] text-sm leading-none transition-colors">
               {reviewsData.count}
             </span>
-            <span className="text-[10px] font-bold text-slate-400 group-hover:text-[#C98484] mt-1.5 leading-none transition-colors">
+            <span className="text-[10px] font-bold text-slate-500 group-hover:text-[#A95E5E] mt-1.5 leading-none transition-colors">
               Değerlendirme
             </span>
           </button>
@@ -111,10 +111,10 @@ export default function ProductInfo({ product }: ProductInfoProps) {
             onClick={() => scrollToReviews("sorular")}
             className="group flex flex-col items-center justify-center py-1.5 px-1 rounded-xl hover:bg-rose-50/90 active:bg-rose-100/80 active:scale-95 transition-all duration-200 cursor-pointer"
           >
-            <span className="font-black text-slate-900 group-hover:text-[#C98484] text-sm leading-none transition-colors">
+            <span className="font-black text-slate-900 group-hover:text-[#A95E5E] text-sm leading-none transition-colors">
               {md.questions_count || 0}
             </span>
-            <span className="text-[10px] font-bold text-slate-400 group-hover:text-[#C98484] mt-1.5 leading-none transition-colors">
+            <span className="text-[10px] font-bold text-slate-500 group-hover:text-[#A95E5E] mt-1.5 leading-none transition-colors">
               Soru
             </span>
           </button>
@@ -125,9 +125,9 @@ export default function ProductInfo({ product }: ProductInfoProps) {
           <button
             type="button"
             onClick={() => scrollToReviews("degerlendir")}
-            className="flex items-center gap-1.5 hover:text-[#C98484] transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 hover:text-[#A95E5E] transition-colors cursor-pointer"
           >
-            <div className="flex text-[#C98484]">
+            <div className="flex text-[#A95E5E]">
               {[...Array(5)].map((_, i) => (
                 <Star
                   key={i}
@@ -145,7 +145,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
           <button
             type="button"
             onClick={() => scrollToReviews("degerlendir")}
-            className="hover:text-[#C98484] transition-colors font-medium text-slate-600 cursor-pointer"
+            className="hover:text-[#A95E5E] transition-colors font-medium text-slate-600 cursor-pointer"
           >
             {reviewsData.count} Değerlendirme
           </button>
@@ -155,7 +155,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
           <button
             type="button"
             onClick={() => scrollToReviews("sorular")}
-            className="hover:text-[#C98484] transition-colors font-medium text-slate-600 cursor-pointer"
+            className="hover:text-[#A95E5E] transition-colors font-medium text-slate-600 cursor-pointer"
           >
             {md.questions_count || 0} Soru
           </button>
@@ -164,7 +164,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
         {/* 3. Admin panelinden girilen ürün özeti (masaüstü) */}
         {productSummary ? (
           <div
-            className="product-rich-text prose prose-sm max-w-none py-1 text-slate-700 prose-headings:text-slate-900 prose-a:text-[#C98484]"
+            className="product-rich-text prose prose-sm max-w-none py-1 text-slate-700 prose-headings:text-slate-900 prose-a:text-[#A95E5E]"
             dangerouslySetInnerHTML={{ __html: productSummary }}
           />
         ) : null}

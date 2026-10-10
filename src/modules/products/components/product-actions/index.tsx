@@ -209,7 +209,7 @@ export default function ProductActions({
               className={`flex w-full h-11 items-center justify-center gap-2 rounded-xl text-xs font-black text-white shadow-md active:scale-[0.99] transition-all disabled:opacity-75 disabled:cursor-not-allowed cursor-pointer ${
                 isSuccess
                   ? "bg-emerald-600 hover:bg-emerald-700"
-                  : "bg-[#C98484] hover:bg-rose-600"
+                  : "bg-[#A95E5E] hover:bg-rose-600"
               }`}
             >
               {isSuccess ? (
@@ -239,24 +239,24 @@ export default function ProductActions({
           <div className="flex items-start gap-3">
             <Truck className="h-4.5 w-4.5 text-slate-800 shrink-0 mt-0.5" />
             <div>
-              <h4 className="text-xs font-black text-slate-900">1-3 İş Gününde Kargo</h4>
-              <p className="text-[10px] text-slate-400 font-medium leading-tight">Hızlı ve güvenli teslimat</p>
+              <h2 className="text-xs font-black text-slate-900">1-3 İş Gününde Kargo</h2>
+              <p className="text-[10px] text-slate-500 font-medium leading-tight">Hızlı ve güvenli teslimat</p>
             </div>
           </div>
 
           <div className="flex items-start gap-3">
             <ShieldCheck className="h-4.5 w-4.5 text-slate-800 shrink-0 mt-0.5" />
             <div>
-              <h4 className="text-xs font-black text-slate-900">14 Gün İçinde Kolay İade</h4>
-              <p className="text-[10px] text-slate-400 font-medium leading-tight">Memnun kalmazsanız iade edin</p>
+              <h2 className="text-xs font-black text-slate-900">14 Gün İçinde Kolay İade</h2>
+              <p className="text-[10px] text-slate-500 font-medium leading-tight">Memnun kalmazsanız iade edin</p>
             </div>
           </div>
 
           <div className="flex items-start gap-3">
             <Shield className="h-4.5 w-4.5 text-slate-800 shrink-0 mt-0.5" />
             <div>
-              <h4 className="text-xs font-black text-slate-900">Alışveriş Desteği</h4>
-              <p className="text-[10px] text-slate-400 font-medium leading-tight">Sipariş ve iade sorularınız için bize ulaşın</p>
+              <h2 className="text-xs font-black text-slate-900">Alışveriş Desteği</h2>
+              <p className="text-[10px] text-slate-500 font-medium leading-tight">Sipariş ve iade sorularınız için bize ulaşın</p>
             </div>
           </div>
         </div>
@@ -299,7 +299,7 @@ export default function ProductActions({
             className={`flex h-11 items-center justify-center gap-1.5 rounded-xl text-xs font-black text-white shadow-md active:scale-95 transition-all disabled:opacity-75 disabled:cursor-not-allowed cursor-pointer ${
               isSuccess
                 ? "bg-emerald-600 hover:bg-emerald-700"
-                : "bg-[#C98484] hover:bg-rose-600"
+                : "bg-[#A95E5E] hover:bg-rose-600"
             }`}
           >
             {isSuccess ? (

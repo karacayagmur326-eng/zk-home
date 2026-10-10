@@ -23,6 +23,7 @@ import { indexingEnabled } from "@lib/seo/indexing"
 const inter = Inter({
   subsets: ["latin", "latin-ext"],
   display: "swap",
+  preload: false,
   variable: "--font-inter",
 })
 
@@ -39,6 +40,7 @@ const barlowCondensed = Barlow_Condensed({
 const playfairDisplay = Playfair_Display({
   subsets: ["latin", "latin-ext"],
   display: "swap",
+  preload: false,
   variable: "--font-playfair-display",
 })
 

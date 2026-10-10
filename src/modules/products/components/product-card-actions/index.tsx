@@ -124,11 +124,11 @@ export function FavoriteButton({
       aria-label={isFavorite ? "Favorilerden kaldır" : "Favorilere ekle"}
       aria-pressed={isFavorite}
       className={clsx(
-        "inline-flex items-center justify-center bg-white/90 transition-colors hover:text-[#C98484] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C98484]",
+        "inline-flex items-center justify-center bg-white/90 transition-colors hover:text-[#A95E5E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C98484]",
         variant === "icon"
           ? "h-9 w-9 rounded-full shadow-sm"
           : "gap-2 rounded-md bg-transparent px-1 py-2 text-xs font-bold",
-        isFavorite ? "text-[#C98484]" : "text-gray-500",
+        isFavorite ? "text-[#A95E5E]" : "text-gray-500",
         className,
       )}
     >
@@ -189,7 +189,7 @@ export function AddToCartButton({
         "inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-colors disabled:cursor-not-allowed",
         isSuccess
           ? "bg-emerald-600 hover:bg-emerald-700"
-          : "bg-[#C98484] hover:bg-[#A95E5E] disabled:bg-gray-300",
+          : "bg-[#A95E5E] hover:bg-[#874747] disabled:bg-gray-300",
         className,
       )}
     >

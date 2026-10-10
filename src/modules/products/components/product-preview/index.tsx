@@ -84,7 +84,7 @@ export default function ProductPreview({
           {badges.map((badge) => (
             <span
               key={badge}
-              className="rounded-sm bg-[#C98484] px-2 py-1 text-[9px] font-bold tracking-wide text-white"
+              className="rounded-sm bg-[#A95E5E] px-2 py-1 text-[9px] font-bold tracking-wide text-white"
             >
               {badge}
             </span>
@@ -110,11 +110,11 @@ export default function ProductPreview({
         <div className="flex min-w-0 flex-1 flex-col justify-between py-1">
           <div>
             <LocalizedClientLink href={`/urunler/${product.handle}`}>
-              <h2 className="pr-10 text-base font-bold leading-tight text-foreground transition-colors group-hover:text-[#C98484]">
+              <h2 className="pr-10 text-base font-bold leading-tight text-foreground transition-colors group-hover:text-[#A95E5E]">
                 {product.title}
               </h2>
             </LocalizedClientLink>
-            {summary && <p className="mt-2 line-clamp-2 text-xs leading-[1.5] text-[#827b78]">{summary}</p>}
+            {summary && <p className="mt-2 line-clamp-2 text-xs leading-[1.5] text-[#6B625E]">{summary}</p>}
             {specs.length > 0 && (
               <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted">
                 {specs.map(({ icon: Icon, value }) => (
@@ -194,18 +194,18 @@ export default function ProductPreview({
       {/* Body */}
       <div className="flex flex-1 flex-col gap-1 px-2.5 pb-3 pt-1.5 sm:px-3 sm:pt-3">
         <LocalizedClientLink href={`/urunler/${product.handle}`} className="cursor-pointer block z-10">
-          <h2 className="min-h-[34px] text-[11px] font-semibold leading-snug text-slate-900 line-clamp-2 group-hover:text-[#C98484] min-[390px]:text-[12px] sm:text-[13px]">
-            <span className="mr-1.5 text-[10px] font-bold uppercase tracking-wide text-[#C98484]">{brandName}</span>
+          <h2 className="min-h-[34px] text-[11px] font-semibold leading-snug text-slate-900 line-clamp-2 group-hover:text-[#A95E5E] min-[390px]:text-[12px] sm:text-[13px]">
+            <span className="mr-1.5 text-[10px] font-bold uppercase tracking-wide text-[#A95E5E]">{brandName}</span>
             {product.title}
           </h2>
         </LocalizedClientLink>
 
-        {showSummary && summary && <p className="min-h-[36px] line-clamp-2 text-xs leading-[1.5] text-[#827b78]">{summary}</p>}
+        {showSummary && summary && <p className="min-h-[36px] line-clamp-2 text-xs leading-[1.5] text-[#6B625E]">{summary}</p>}
 
         {reviewCount > 0 && (
           <div className="flex items-center gap-0.5">
             {[...Array(5)].map((_, i) => (
-              <Star key={i} className={`w-3 h-3 ${i < Math.round(rating) ? "fill-[#C98484] text-[#C98484]" : "fill-gray-200 text-gray-200"}`} />
+              <Star key={i} className={`w-3 h-3 ${i < Math.round(rating) ? "fill-[#C98484] text-[#A95E5E]" : "fill-gray-200 text-gray-200"}`} />
             ))}
           </div>
         )}

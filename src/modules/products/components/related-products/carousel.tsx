@@ -44,7 +44,7 @@ export default function RelatedProductsCarousel({
           
           {/* Left: Vertical Orange Bar Accent & Title & Subtitle */}
           <div className="flex items-start gap-2.5 sm:gap-3">
-            <span className="w-1.5 h-5 sm:h-7 rounded-full bg-[#C98484] shrink-0 mt-0.5 sm:mt-1" />
+            <span className="w-1.5 h-5 sm:h-7 rounded-full bg-[#A95E5E] shrink-0 mt-0.5 sm:mt-1" />
             <div>
               <h2
                 id={titleId}
@@ -52,7 +52,7 @@ export default function RelatedProductsCarousel({
               >
                 {title}
               </h2>
-              <p className="text-[11px] sm:text-xs font-medium text-slate-400 mt-0.5">
+              <p className="text-[11px] sm:text-xs font-medium text-slate-500 mt-0.5">
                 {subtitle}
               </p>
             </div>
@@ -64,7 +64,7 @@ export default function RelatedProductsCarousel({
               <button
                 type="button"
                 onClick={handleScrollLeft}
-                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-slate-200/90 bg-slate-50 hover:bg-white text-slate-700 hover:border-[#C98484] hover:text-[#C98484] flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-slate-200/90 bg-slate-50 hover:bg-white text-slate-700 hover:border-[#C98484] hover:text-[#A95E5E] flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
                 title="Sola Kaydır"
               >
                 <ChevronLeft className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
@@ -72,7 +72,7 @@ export default function RelatedProductsCarousel({
               <button
                 type="button"
                 onClick={handleScrollRight}
-                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-slate-200/90 bg-slate-50 hover:bg-white text-slate-700 hover:border-[#C98484] hover:text-[#C98484] flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-slate-200/90 bg-slate-50 hover:bg-white text-slate-700 hover:border-[#C98484] hover:text-[#A95E5E] flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
                 title="Sağa Kaydır"
               >
                 <ChevronRight className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
@@ -82,7 +82,7 @@ export default function RelatedProductsCarousel({
             {/* Tümünü Gör → Link */}
             <LocalizedClientLink
               href="/magaza"
-              className="inline-flex items-center gap-1 text-xs font-black text-[#C98484] hover:underline transition-all ml-1"
+              className="inline-flex items-center gap-1 text-xs font-black text-[#A95E5E] hover:underline transition-all ml-1"
             >
               <span>Tümünü Gör</span>
               <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
