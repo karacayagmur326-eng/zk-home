@@ -7,6 +7,7 @@ import ThemeSettingsComponent from "../tema-ayarlari/page"
 import IntegrationsComponent from "../entegrasyonlar/page"
 import MagazaAyarlariComponent from "../magaza-ayarlari/page"
 import GoogleSeoSettings from "../components/GoogleSeoSettings"
+import SeoControlReport from "../components/SeoControlReport"
 import {
   Palette,
   PlugZap,
@@ -72,8 +73,8 @@ function AyarlarContent() {
     },
     {
       id: "seo" as MainTab,
-      label: "SEO & Meta Etiketleri",
-      desc: "Meta etiketleri, sayfa başlıkları ve arama motoru görünürlüğü",
+      label: "SEO, Meta Etiketleri & Kontrol",
+      desc: "Meta etiketleri, sayfa başlıkları, görünürlük ve SEO kontrol raporu",
       icon: Globe,
       badge: "SEO",
     },
@@ -140,8 +141,9 @@ function AyarlarContent() {
         )}
 
         {activeMainTab === "seo" && (
-          <div>
+          <div className="space-y-6">
             <ThemeSettingsComponent mode="seo" initialTab="seo" />
+            <SeoControlReport />
           </div>
         )}
 

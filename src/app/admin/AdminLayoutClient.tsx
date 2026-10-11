@@ -28,7 +28,6 @@ const marketingSubItems = [
 ]
 
 const mainNavItems = [
-  { href: "/admin/seo", label: "SEO & Kontrol Raporu" },
   {
     "href": "/admin/siparisler",
     "label": "Siparişler"
