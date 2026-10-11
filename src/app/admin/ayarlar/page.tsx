@@ -8,6 +8,8 @@ import IntegrationsComponent from "../entegrasyonlar/page"
 import MagazaAyarlariComponent from "../magaza-ayarlari/page"
 import GoogleSeoSettings from "../components/GoogleSeoSettings"
 import SeoControlReport from "../components/SeoControlReport"
+import ContactManagement from "../components/ContactManagement"
+import { useUrlState } from "@lib/hooks/use-url-state"
 import {
   Palette,
   PlugZap,
@@ -27,6 +29,7 @@ import {
 type MainTab = "tema" | "entegrasyonlar" | "magaza" | "seo" | "google" | "iletisim"
 
 function AyarlarContent() {
+  const [contactSection, setContactSection] = useUrlState<"info_settings" | "smtp_settings" | "footer">("info_settings", "contact_section", ["info_settings", "smtp_settings", "footer"])
   const searchParams = useSearchParams()
   const router = useRouter()
   const tabParam = searchParams.get("tab") as MainTab | null
@@ -148,8 +151,16 @@ function AyarlarContent() {
         )}
 
         {activeMainTab === "iletisim" && (
-          <div>
-            <ThemeSettingsComponent mode="contact" initialTab="footer" />
+          <div className="space-y-6">
+            <AdminTabs label="İletişim ve e-posta ayarları" value={contactSection} onChange={setContactSection}
+              items={[
+                { value: "info_settings", label: "İletişim & Sayfa Ayarları", icon: Phone },
+                { value: "smtp_settings", label: "SMTP / E-posta Gönderme İzinleri", icon: PlugZap },
+                { value: "footer", label: "Firma & Alt Bilgi", icon: Store },
+              ]} />
+            {contactSection === "footer"
+              ? <ThemeSettingsComponent mode="contact" initialTab="footer" />
+              : <ContactManagement key={contactSection} settingsSection={contactSection} />}
           </div>
         )}
       </div>

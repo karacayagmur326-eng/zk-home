@@ -295,7 +295,7 @@ export default function AdminLayout({
     "/admin/menuler": "Mağaza üst ve alt menü yapısını düzenleyin.",
     "/admin/sayfalar": "Kurumsal sayfaları (Gizlilik, KVKK, vb.) düzenleyin ve yönetin.",
     "/admin/medya": "Yüklenen tüm görsel ve medya dosyalarını yönetin.",
-    "/admin/iletisim": "Gelen form mesajlarını yönetin, sayfa metinlerini düzenleyin ve SMTP bildirim izinlerini ayarlayın.",
+    "/admin/iletisim": "Gelen mesajları, iletişim formlarını, hediye taleplerini, ürün sorularını ve yorumları yönetin.",
     "/admin/chatbot": "Yapay Zeka Asistan yanıtlarını ve WhatsApp iletişim kanalını tek merkezden yönetin.",
     "/admin/ayarlar": "Mağaza kuralları, tema tasarımı, entegrasyonlar (İyzico, BirFatura) ve SEO ayarlarını tek merkezden yönetin.",
     "/admin/magaza-ayarlari": "Kargo, ödeme, vergi, fatura ve sipariş kurallarını yönetin.",
