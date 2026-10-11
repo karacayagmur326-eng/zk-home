@@ -65,6 +65,7 @@ export default function NewProductPage() {
   const [description, setDescription] = useState("")
   const [usageTitle, setUsageTitle] = useState("")
   const [usageContent, setUsageContent] = useState("")
+  const [faqContent, setFaqContent] = useState("")
   const [seoMetadata, setSeoMetadata] = useState<Record<string, any>>({})
   const [shortDesc, setShortDesc] = useState("")
   const [status, setStatus] = useState<"draft" | "published">("draft")
@@ -242,6 +243,7 @@ export default function NewProductPage() {
         product_summary: shortDesc.trim(),
         usage_title: usageTitle.trim(),
         usage_content: usageContent.trim(),
+          faq_content: faqContent.trim(),
         features: [],
         features_content: featuresContent.trim(),
         package_content: packageContent.filter((c) => c.trim()),
@@ -487,6 +489,7 @@ export default function NewProductPage() {
                     />
                   </div>
                   <ProductUsageFields title={usageTitle} content={usageContent} onTitleChange={setUsageTitle} onContentChange={setUsageContent} />
+                  <RichTextEditorField label="Sıkça Sorulan Sorular" value={faqContent} onChange={setFaqContent} rows={6} helpText="Her soruyu Başlık 3, yanıtını altındaki paragraf olarak yazın. Sitede ayrı SSS sekmesinde gösterilir." />
                 </div>
               )}
 

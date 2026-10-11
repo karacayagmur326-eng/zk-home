@@ -14,6 +14,7 @@ import { useRouter, useParams } from "next/navigation"
 import MediaSelectorModal from "../../components/MediaSelectorModal"
 import ProductCategoryPicker from "../../components/ProductCategoryPicker"
 import RichTextEditorField from "../../components/RichTextEditorField"
+import { splitProductFaq } from "@lib/util/product-faq"
 import ProductUsageFields from "../../components/ProductUsageFields"
 import { formatTryPriceInput, parseTryPriceInput } from "@lib/util/money"
 import { useProductFormError } from "@lib/admin/use-product-form-error"
@@ -76,6 +77,7 @@ export default function EditProductPage() {
   const [description, setDescription] = useState("")
   const [usageTitle, setUsageTitle] = useState("")
   const [usageContent, setUsageContent] = useState("")
+  const [faqContent, setFaqContent] = useState("")
   const [status, setStatus] = useState<"draft" | "published">("draft")
   const [thumbnail, setThumbnail] = useState("")
   const [images, setImages] = useState<string[]>([])
@@ -174,7 +176,9 @@ export default function EditProductPage() {
           const md = p.metadata || {}
           setSeoMetadata(md)
           setUsageTitle(typeof md.usage_title === "string" ? md.usage_title : "")
-          setUsageContent(typeof md.usage_content === "string" ? md.usage_content : "")
+          const legacyUsage = splitProductFaq(typeof md.usage_content === "string" ? md.usage_content : "")
+          setUsageContent(legacyUsage.usage)
+          setFaqContent(typeof md.faq_content === "string" ? md.faq_content : legacyUsage.faq)
           setShortDesc(
             typeof md.product_summary === "string"
               ? md.product_summary
@@ -315,6 +319,7 @@ export default function EditProductPage() {
           product_summary: shortDesc.trim(),
           usage_title: usageTitle.trim(),
           usage_content: usageContent.trim(),
+          faq_content: faqContent.trim(),
           features: [],
           features_content: featuresContent.trim(),
           package_content: (packageContent || []).filter((c) => typeof c === "string" && c.trim()),
@@ -624,6 +629,7 @@ export default function EditProductPage() {
                     />
                   </div>
                   <ProductUsageFields title={usageTitle} content={usageContent} onTitleChange={setUsageTitle} onContentChange={setUsageContent} />
+                  <RichTextEditorField label="Sıkça Sorulan Sorular" value={faqContent} onChange={setFaqContent} rows={6} helpText="Her soruyu Başlık 3, yanıtını altındaki paragraf olarak yazın. Sitede ayrı SSS sekmesinde gösterilir." />
                 </div>
               )}
 

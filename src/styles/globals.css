@@ -330,7 +330,7 @@ textarea {
 }
 
 
-/* Custom Orange Check-Circle List Formatting & Hanging Alignment */
+/* Single pink check marker; colour follows the admin theme. */
 [data-ui-scope="storefront"] .rich-list-item {
   display: flex !important;
   align-items: flex-start !important;
@@ -357,16 +357,95 @@ textarea {
 
 /* Fallback for standard HTML <ul> and <li> elements (Product Rich Text only) */
 [data-ui-scope="storefront"] .product-rich-text ul {
-  list-style-type: disc !important;
-  padding-left: 1.25rem !important;
+  list-style-type: none !important;
+  padding-left: 0 !important;
   margin-top: 0.5rem !important;
   margin-bottom: 0.75rem !important;
 }
 
 [data-ui-scope="storefront"] .product-rich-text ul > li {
   margin-bottom: 0.375rem !important;
-  list-style-type: disc !important;
-  padding-left: 0.25rem !important;
+  list-style-type: none !important;
+  position: relative;
+  padding-left: 1.7rem !important;
+}
+
+[data-ui-scope="storefront"] .product-rich-text ul > li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  top: .2rem;
+  display: grid;
+  place-items: center;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: rgb(var(--color-primary));
+  color: white;
+  font-size: .65rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+[data-ui-scope="storefront"] .product-rich-text ul > li:has(.rich-list-icon) {
+  padding-left: 0 !important;
+}
+
+[data-ui-scope="storefront"] .product-rich-text ul > li:has(.rich-list-icon)::before {
+  content: none;
+}
+
+[data-ui-scope="storefront"] .rich-list-icon {
+  background-image: none !important;
+  background-color: rgb(var(--color-primary));
+  border-radius: 50%;
+  color: white;
+  display: grid;
+  place-items: center;
+}
+
+[data-ui-scope="storefront"] .rich-list-icon::before {
+  content: "✓";
+  font-size: .7rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+[data-ui-scope="storefront"] .product-content-template .product-rich-text :where(h2, h3) {
+  border-left: 3px solid rgb(var(--color-primary));
+  padding: .75rem 1rem;
+  border-radius: 0 .75rem .75rem 0;
+  background: rgb(var(--color-primary) / .07);
+  margin-top: 1.75rem;
+  margin-bottom: 1rem;
+}
+
+[data-ui-scope="storefront"] .product-content-template .product-rich-text :where(ul, ol) {
+  border: 1px solid rgb(var(--color-primary) / .2);
+  border-radius: 1rem;
+  background: rgb(var(--color-primary) / .035);
+  padding: 1rem 1rem 1rem 1.25rem !important;
+}
+
+[data-ui-scope="storefront"] .product-content-template .product-rich-text ol {
+  padding-left: 2.5rem !important;
+}
+
+[data-ui-scope="storefront"] .product-content-template .product-rich-text ol li::marker {
+  color: rgb(var(--color-primary));
+  font-weight: 700;
+}
+
+[data-ui-scope="storefront"] .product-specifications .product-rich-text ul > li {
+  border-bottom: 1px solid rgb(var(--color-primary) / .12);
+  padding-bottom: .65rem;
+  margin-bottom: .65rem !important;
+}
+
+[data-ui-scope="storefront"] .product-specifications .product-rich-text ul > li:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+  margin-bottom: 0 !important;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
