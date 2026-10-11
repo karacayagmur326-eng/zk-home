@@ -96,7 +96,8 @@ const FULFILLMENT_LABELS: Record<string, string> = {
   preparing: "Hazırlanıyor",
   shipped: "Kargoda",
   delivered: "Teslim edildi",
-  returned: "İptal edildi",
+  returned: "İade edildi",
+  cancelled: "İptal edildi",
 }
 
 const money = (value: string | number, currency = "TRY") => {
@@ -144,7 +145,7 @@ export default function OrdersPage() {
   const [dateFilter, setDateFilter] = useUrlState<string>("", "date", ["", "today"])
   const [searchQuery, setSearchQuery] = useState("")
   const [paymentFilter, setPaymentFilter] = useUrlState<string>("", "payment_status", ["", "pending", "paid", "refunded"])
-  const [fulfillmentFilter, setFulfillmentFilter] = useUrlState<string>("", "fulfillment_status", ["", "not_fulfilled", "preparing", "delivery_scheduled", "shipped", "delivered"])
+  const [fulfillmentFilter, setFulfillmentFilter] = useUrlState<string>("", "fulfillment_status", ["", "not_fulfilled", "preparing", "delivery_scheduled", "shipped", "delivered", "cancelled", "returned"])
   const [loading, setLoading] = useState(true)
   const [detail, setDetail] = useState<OrderDetail | null>(null)
   const [saving, setSaving] = useState(false)
@@ -446,6 +447,8 @@ export default function OrdersPage() {
           <option value="delivery_scheduled">Mağaza Teslimatı Planlandı</option>
           <option value="shipped">Kargoda</option>
           <option value="delivered">Teslim Edildi</option>
+          <option value="cancelled">İptal Edildi</option>
+          <option value="returned">İade Edildi</option>
         </select>
 
         {/* Clear Filters */}

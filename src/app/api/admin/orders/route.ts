@@ -11,6 +11,8 @@ import { processNotificationOutbox } from "@lib/notifications/outbox"
 // Legacy shipped orders were saved as processing. Present/filter them consistently
 // without rewriting order history or payment records.
 const effectiveOrderStatusSql = `(CASE WHEN status = 'processing' AND fulfillment_status = 'shipped' THEN 'shipped' ELSE status END)`
+// Cancelled orders cannot await dispatch; preserve actual shipment/return history.
+const effectiveFulfillmentStatusSql = `(CASE WHEN status IN ('cancelled', 'canceled') AND fulfillment_status IN ('not_fulfilled', 'preparing', 'delivery_scheduled') THEN 'cancelled' ELSE fulfillment_status END)`
 
 export async function GET(req: NextRequest) {
   try {
@@ -22,7 +24,7 @@ export async function GET(req: NextRequest) {
     const id = search.get("id")
     if (id) {
       const orders = await query(
-        `SELECT *, ${effectiveOrderStatusSql} AS status FROM store_order WHERE id=$1 LIMIT 1`,
+        `SELECT *, ${effectiveOrderStatusSql} AS status, ${effectiveFulfillmentStatusSql} AS fulfillment_status FROM store_order WHERE id=$1 LIMIT 1`,
         [id]
       )
       if (!orders.length) {
@@ -122,7 +124,7 @@ export async function GET(req: NextRequest) {
 
     if (fulfillmentStatus) {
       params.push(fulfillmentStatus)
-      whereConditions.push(`fulfillment_status = $${params.length}`)
+      whereConditions.push(`${effectiveFulfillmentStatusSql} = $${params.length}`)
     }
 
     if (searchQuery.trim()) {
@@ -152,7 +154,7 @@ export async function GET(req: NextRequest) {
         params
       ).catch(() => [{ count: 0 }]),
       query(
-        `SELECT id,display_id,${effectiveOrderStatusSql} AS status,payment_status,fulfillment_status,email,
+        `SELECT id,display_id,${effectiveOrderStatusSql} AS status,payment_status,${effectiveFulfillmentStatusSql} AS fulfillment_status,email,
                 currency_code,total,shipping_carrier,tracking_number,tracking_url,
                 invoice_type,invoice_status,invoice_number,shipping_address,created_at
          FROM store_order ${where}
@@ -225,6 +227,7 @@ export async function PATCH(req: NextRequest) {
     "canceled",
   ]
   let status = body?.status ? String(body.status) : null
+  if (status === "canceled") status = "cancelled"
   const paymentStatus = body?.payment_status
     ? String(body.payment_status)
     : null
@@ -296,13 +299,13 @@ export async function PATCH(req: NextRequest) {
     if (!current.rows.length) throw new Error("Sipariş bulunamadı.")
 
     const isAlreadyCancelledOrRefunded =
-      current.rows[0].status === "cancelled" ||
+      ["cancelled", "canceled"].includes(current.rows[0].status) ||
       ["refunded"].includes(current.rows[0].payment_status)
 
-    if (isAlreadyCancelledOrRefunded) {
+    if (isAlreadyCancelledOrRefunded || status === "cancelled") {
       if (
         (status && ["processing", "completed", "shipped"].includes(status)) ||
-        (fulfillmentStatus && ["preparing", "shipped", "delivered"].includes(fulfillmentStatus))
+        (fulfillmentStatus && ["preparing", "delivery_scheduled", "shipped", "delivered"].includes(fulfillmentStatus) && (isAlreadyCancelledOrRefunded || fulfillmentStatus !== current.rows[0].fulfillment_status))
       ) {
         throw new Error(
           "İptal edilmiş veya ücreti iade edilmiş bir sipariş yeniden hazırlık/kargo sürecine alınamaz."
@@ -310,7 +313,7 @@ export async function PATCH(req: NextRequest) {
       }
     }
 
-    if (status === "cancelled" && current.rows[0].status !== "cancelled") {
+    if (status === "cancelled" && !["cancelled", "canceled"].includes(current.rows[0].status)) {
       if (
         ["paid", "authorized", "partially_refunded"].includes(
           current.rows[0].payment_status
@@ -337,6 +340,13 @@ export async function PATCH(req: NextRequest) {
           [current.rows[0].coupon_code]
         )
       }
+    }
+
+    if (
+      (status === "cancelled" || ["cancelled", "canceled"].includes(current.rows[0].status)) &&
+      ["not_fulfilled", "preparing", "delivery_scheduled"].includes(fulfillmentStatus || current.rows[0].fulfillment_status)
+    ) {
+      fulfillmentStatus = "cancelled"
     }
 
     if (paymentStatus === "paid") {

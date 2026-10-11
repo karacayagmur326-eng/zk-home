@@ -155,7 +155,7 @@ export async function POST(req: NextRequest) {
       await client.query(
         `UPDATE store_order
          SET status='cancelled',
-             fulfillment_status='not_fulfilled',
+             fulfillment_status='cancelled',
              payment_status=CASE
                WHEN payment_status='paid' AND $2=TRUE THEN 'refunded'
                WHEN payment_status='paid' AND $2=FALSE THEN 'refund_pending'
