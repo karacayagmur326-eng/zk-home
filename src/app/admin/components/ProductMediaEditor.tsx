@@ -39,9 +39,9 @@ export default function ProductMediaEditor({ thumbnail, images, onCoverChange, o
       <div className="flex items-center gap-3 border-b border-[#F3ECE8] px-4 py-4"><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#FAF3EF] text-[#B77B75]"><ImagePlus className="h-4 w-4" /></span><div><h3 className="text-sm font-semibold text-slate-800">Kapak Görseli</h3><p className="mt-0.5 text-[11px] text-slate-400">Ürünün vitrindeki ilk görünümü</p></div><span className="ml-auto rounded-full bg-[#FAF3EF] px-2 py-1 text-[10px] font-medium text-[#B77B75]">4:5</span></div>
       <div className="p-4">
         <button type="button" onClick={onUploadCover} className="group relative grid aspect-[4/5] w-full place-items-center overflow-hidden rounded-xl border border-[#EADBD4]/70 bg-[#FBF7F4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C98484]" aria-label={thumbnail ? "Kapak görselini değiştir" : "Kapak görseli yükle"}>
-          {thumbnail ? <><img src={thumbnail} alt="Ürün kapak görseli" className="h-full w-full object-contain" /><span className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-2 text-[11px] font-medium text-slate-700 shadow-sm"><Pencil className="h-3 w-3" />Değiştir</span></> : <span className="flex flex-col items-center gap-2 text-[#B77B75]"><ImagePlus className="h-7 w-7" /><span className="text-xs font-medium">Kapak görseli ekle</span></span>}
+          {thumbnail ? <><img src={thumbnail} alt={imageAltTexts[thumbnail] || title || "Ürün kapak görseli"} className="h-full w-full object-contain" /><span className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-2 text-[11px] font-medium text-slate-700 shadow-sm"><Pencil className="h-3 w-3" />Değiştir</span></> : <span className="flex flex-col items-center gap-2 text-[#B77B75]"><ImagePlus className="h-7 w-7" /><span className="text-xs font-medium">Kapak görseli ekle</span></span>}
         </button>
-        {thumbnail && altField(thumbnail, "Kapak görselinin")}
+        {thumbnail && !images.includes(thumbnail) && altField(thumbnail, "Kapak görselinin")}
         {thumbnail && <button type="button" onClick={() => onCoverChange("")} className="mx-auto mt-3 flex min-h-9 items-center gap-1.5 rounded-full px-3 text-[11px] font-medium text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-600"><Trash2 className="h-3.5 w-3.5" />Görseli kaldır</button>}
       </div>
     </section>
@@ -67,7 +67,7 @@ export default function ProductMediaEditor({ thumbnail, images, onCoverChange, o
               event.dataTransfer.effectAllowed = "move"
               event.dataTransfer.setData("text/plain", url)
             }} onDragEnd={finishDrag}>
-            <img src={url} draggable={false} alt={`Ürün galeri görseli ${index + 1}`} className="h-full w-full object-contain" />
+            <img src={url} draggable={false} alt={imageAltTexts[url] || title || `Ürün galeri görseli ${index + 1}`} className="h-full w-full object-contain" />
             <span className="pointer-events-none absolute left-1.5 top-1.5 flex items-center gap-1 rounded-full bg-white/95 px-2 py-1 text-[11px] text-slate-600 shadow-sm"><GripVertical className="h-3 w-3" />{index + 1}</span>
           </div>
           <div className="flex justify-between border-t border-[#F3ECE8] bg-white px-2 py-1">
