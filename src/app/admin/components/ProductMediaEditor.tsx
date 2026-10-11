@@ -3,13 +3,22 @@
 import { useRef, useState } from "react"
 import { ImagePlus, Images, Star, Trash2, Plus, Pencil, GripVertical, ArrowLeft, ArrowRight } from "lucide-react"
 
-export default function ProductMediaEditor({ thumbnail, images, onCoverChange, onImagesChange, onUploadCover, onUploadGallery }: {
+export default function ProductMediaEditor({ thumbnail, images, onCoverChange, onImagesChange, onUploadCover, onUploadGallery, imageAltTexts = {}, onImageAltChange, title = "" }: {
   thumbnail: string; images: string[]; onCoverChange: (url: string) => void
   onImagesChange: (urls: string[]) => void; onUploadCover: () => void; onUploadGallery: () => void
+  imageAltTexts?: Record<string, string>; onImageAltChange?: (url: string, text: string) => void; title?: string
 }) {
   const draggedIndex = useRef<number | null>(null)
   const [dropIndex, setDropIndex] = useState<number | null>(null)
   const [announcement, setAnnouncement] = useState("")
+  const altField = (url: string, label: string) => onImageAltChange && (
+    <label className="block bg-white p-2 text-[11px] font-medium text-slate-700">
+      {label} ALT açıklaması
+      <textarea rows={3} value={imageAltTexts[url] || ""} placeholder={title || "Görselde ne olduğunu açıklayın"}
+        onChange={event => onImageAltChange(url, event.target.value)}
+        className="mt-1 w-full rounded-lg border border-slate-200 p-2 text-xs font-normal" />
+    </label>
+  )
 
   function moveImage(from: number, to: number) {
     if (from === to || from < 0 || to < 0 || from >= images.length || to >= images.length) return
@@ -32,6 +41,7 @@ export default function ProductMediaEditor({ thumbnail, images, onCoverChange, o
         <button type="button" onClick={onUploadCover} className="group relative grid aspect-[4/5] w-full place-items-center overflow-hidden rounded-xl border border-[#EADBD4]/70 bg-[#FBF7F4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C98484]" aria-label={thumbnail ? "Kapak görselini değiştir" : "Kapak görseli yükle"}>
           {thumbnail ? <><img src={thumbnail} alt="Ürün kapak görseli" className="h-full w-full object-contain" /><span className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-2 text-[11px] font-medium text-slate-700 shadow-sm"><Pencil className="h-3 w-3" />Değiştir</span></> : <span className="flex flex-col items-center gap-2 text-[#B77B75]"><ImagePlus className="h-7 w-7" /><span className="text-xs font-medium">Kapak görseli ekle</span></span>}
         </button>
+        {thumbnail && altField(thumbnail, "Kapak görselinin")}
         {thumbnail && <button type="button" onClick={() => onCoverChange("")} className="mx-auto mt-3 flex min-h-9 items-center gap-1.5 rounded-full px-3 text-[11px] font-medium text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-600"><Trash2 className="h-3.5 w-3.5" />Görseli kaldır</button>}
       </div>
     </section>
@@ -66,6 +76,7 @@ export default function ProductMediaEditor({ thumbnail, images, onCoverChange, o
           </div>
           <button type="button" aria-label={`${index + 1}. galeri görselini kaldır`} onClick={() => { onImagesChange(images.filter(item => item !== url)); if (thumbnail === url) onCoverChange("") }} className="absolute right-1.5 top-1.5 grid h-7 w-7 place-items-center rounded-full bg-white/95 text-slate-400 shadow-sm hover:text-rose-600"><Trash2 className="h-3 w-3" /></button>
           <button type="button" aria-pressed={thumbnail === url} onClick={() => onCoverChange(url)} className={`flex min-h-10 w-full items-center justify-center gap-1 border-t px-1 text-[10px] font-medium ${thumbnail === url ? "border-[#EADBD4] bg-[#F8ECE6] text-[#A95E5E]" : "border-[#F3ECE8] bg-white text-slate-500 hover:text-[#A95E5E]"}`}><Star className={`h-3 w-3 ${thumbnail === url ? "fill-current" : ""}`} />{thumbnail === url ? "Kapak görseli" : "Kapak yap"}</button>
+          {altField(url, `${index + 1}. görselin`)}
         </div>)}
         <button type="button" onClick={onUploadGallery} className="flex aspect-[4/5] flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-[#DCC5BC] bg-[#FDFAF8] px-2 text-center text-[#B77B75] transition-colors hover:bg-[#F8ECE6]"><Plus className="h-5 w-5" /><span className="text-[11px] font-medium">Görsel ekle</span></button>
       </div></div>

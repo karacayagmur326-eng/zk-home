@@ -76,9 +76,11 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
       ? formatProductLabels(sanitizeRichTextHtml(md.features_content).replace(/<(\/?)h1\b/gi, "<$1h2").trim())
       : ""
   const usageTitle = typeof md.usage_title === "string" ? md.usage_title.trim() : ""
-  const usageParagraphs = typeof md.usage_content === "string"
-    ? md.usage_content.trim().split(/\n\s*\n/).filter(Boolean)
-    : []
+  const rawUsage = typeof md.usage_content === "string" ? md.usage_content.trim() : ""
+  const usageContent = sanitizeRichTextHtml(/<[^>]+>/.test(rawUsage)
+    ? rawUsage
+    : rawUsage.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").split(/\n\s*\n/).filter(Boolean).map(paragraph => `<p>${paragraph.replace(/\r\n?|\n/g, "<br />")}</p>`).join("")
+  ).replace(/<(\/?)h1\b/gi, "<$1h2")
   const rawDescription =
     typeof product.description === "string" ? product.description : ""
   const descriptionWithPreservedLines =
@@ -192,12 +194,10 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
                 ) : (
 null
                 )}
-                {usageParagraphs.length > 0 && (
+                {usageContent && (
                   <section aria-labelledby="product-usage-heading" className="mt-6 border-t border-[#eadfda] pt-6">
                     <h2 id="product-usage-heading" className="mb-3 text-base font-semibold text-slate-900 sm:text-lg">{usageTitle || "Kullanım ve Sunum Önerileri"}</h2>
-                    <div className="space-y-3 text-sm leading-7 text-slate-700">
-                      {usageParagraphs.map((paragraph, index) => <p key={index} className="whitespace-pre-line">{paragraph}</p>)}
-                    </div>
+                    <div className="product-rich-text prose prose-sm max-w-none text-sm leading-7 text-slate-700 prose-headings:text-slate-900 prose-a:text-[#A95E5E]" dangerouslySetInnerHTML={{ __html: usageContent }} />
                   </section>
                 )}
               </div></section>

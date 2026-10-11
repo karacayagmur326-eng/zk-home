@@ -786,7 +786,7 @@ export default function EditProductPage() {
             </button>
           </div>
 
-          <div tabIndex={-1} {...fieldProps("image")}><ProductMediaEditor thumbnail={thumbnail} images={images} onCoverChange={setThumbnail} onImagesChange={setImages}
+          <div tabIndex={-1} {...fieldProps("image")}><ProductMediaEditor thumbnail={thumbnail} images={images} onCoverChange={setThumbnail} onImagesChange={setImages} title={title} imageAltTexts={seoMetadata.image_alt_texts || {}} onImageAltChange={(url, text) => setSeoMetadata(previous => ({ ...previous, image_alt_texts: { ...previous.image_alt_texts, [url]: text } }))}
             onUploadCover={() => setIsThumbModalOpen(true)} onUploadGallery={() => setIsGalleryModalOpen(true)} /></div>
 
           {/* Card 4: Ürün Kategorileri */}
@@ -953,7 +953,7 @@ export default function EditProductPage() {
         </div>
       </div>
 
-      <SeoFields value={seoMetadata} onChange={setSeoMetadata} title={title} description={plainText(shortDesc)} images={Array.from(new Set([thumbnail, ...images].filter(Boolean)))} />
+      <SeoFields value={seoMetadata} onChange={setSeoMetadata} title={title} description={plainText(shortDesc)} />
 
       <MediaSelectorModal
         isOpen={isThumbModalOpen}

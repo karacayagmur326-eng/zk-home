@@ -309,11 +309,12 @@ export default function RichTextEditorField({
 
   function execCommand(command: string, val: string | undefined = undefined) {
     if (activeTab === "visual") {
-      restoreSelection()
       if (editableRef.current) {
         editableRef.current.focus()
       }
+      restoreSelection()
       document.execCommand(command, false, val)
+      saveSelection()
       if (editableRef.current) {
         updateValue(editableRef.current.innerHTML)
       }
@@ -482,7 +483,13 @@ export default function RichTextEditorField({
       )}
 
       {/* ── WordPress Classic Editor Window ── */}
-      <div className={containerClasses}>
+      <div className={containerClasses} onMouseDownCapture={(event) => {
+        // Keep the editor's selected text when a formatting button is pressed.
+        if (activeTab === "visual" && (event.target as HTMLElement).closest("button")) {
+          saveSelection()
+          event.preventDefault()
+        }
+      }}>
         
         {/* TOP BAR: Ortam Ekle + Form Ekle + [Görsel] / [Kod] Tabs */}
         <div className="flex flex-wrap items-center justify-between bg-[#f0f0f1] border-b border-[#dcdcde] px-3 pt-2.5 pb-0 select-none">
@@ -1029,7 +1036,11 @@ export default function RichTextEditorField({
               }}
               onBlur={() => {
                 if (boldColonLabels && editableRef.current) {
-                  editableRef.current.innerHTML = formatProductLabels(editableRef.current.innerHTML)
+                  const html = formatProductLabels(editableRef.current.innerHTML)
+                  if (html !== editableRef.current.innerHTML) {
+                    editableRef.current.innerHTML = html
+                    savedSelectionRef.current = null
+                  }
                 }
                 handleVisualInput()
               }}

@@ -56,6 +56,8 @@ export const enhanceListFormatting = (html: string) => {
       // Process <li> elements — wrap each in rich-list-item structure
       const listItems = doc.querySelectorAll("li")
       listItems.forEach((li) => {
+        // Numbered lists keep their native numbering.
+        if (li.parentElement?.tagName === "OL") return
         if (!li.querySelector(".rich-list-icon")) {
           let inner = li.innerHTML.trim()
           inner = inner.replace(/^\s*(?:[•·*]|&bull;|&#8226;)\s*/i, "")

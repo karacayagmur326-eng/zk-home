@@ -1,3 +1,5 @@
+import RichTextEditorField from "./RichTextEditorField"
+
 type Props = {
   title: string
   content: string
@@ -14,10 +16,13 @@ export default function ProductUsageFields({ title, content, onTitleChange, onCo
         Öneri bölümü başlığı
         <input value={title} onChange={event => onTitleChange(event.target.value)} maxLength={120} placeholder="Örneğin: Pasta ve Tatlı Sunumlarınıza Zarif Bir Dokunuş" className="mt-2 h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-normal" />
       </label>
-      <label className="block text-xs font-semibold text-slate-700">
-        Kullanım ve sunum metni
-        <textarea value={content} onChange={event => onContentChange(event.target.value)} maxLength={4000} rows={6} placeholder="Paragrafları boş bir satırla ayırabilirsiniz." className="mt-2 w-full rounded-xl border border-slate-200 bg-white p-3 text-sm font-normal leading-relaxed" />
-      </label>
+      <RichTextEditorField
+        label="Kullanım ve sunum metni"
+        value={/<[^>]+>/.test(content) ? content : content.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\r\n?|\n/g, "<br />")}
+        onChange={onContentChange}
+        rows={6}
+        placeholder="Kullanım önerilerini başlıklar, paragraflar ve listelerle yazabilirsiniz."
+      />
     </fieldset>
   )
 }
