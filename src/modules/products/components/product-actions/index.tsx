@@ -6,7 +6,7 @@ import OptionSelect from "@modules/products/components/product-actions/option-se
 import { useParams, useRouter } from "next/navigation"
 import { useProductPageState } from "../product-page-state"
 import { useEffect, useMemo, useState, useRef } from "react"
-import { ShoppingCart, Zap, ShieldCheck, Truck, Shield, Check, Loader2 } from "@lib/icons"
+import { ShoppingCart, Zap, Check, Loader2 } from "@lib/icons"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import ProductPrice from "../product-price"
 
@@ -233,32 +233,6 @@ export default function ProductActions({
           </div>
         </div>
 
-        {/* Trust Badges List (Matching Reference Mockup) */}
-        <div className="hidden lg:block border-t border-slate-100 pt-4 space-y-3">
-          <div className="flex items-start gap-3">
-            <Truck className="h-4.5 w-4.5 text-slate-800 shrink-0 mt-0.5" />
-            <div>
-              <h2 className="text-xs font-black text-slate-900">1-3 İş Gününde Kargo</h2>
-              <p className="text-[10px] text-slate-500 font-medium leading-tight">Hızlı ve güvenli teslimat</p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3">
-            <ShieldCheck className="h-4.5 w-4.5 text-slate-800 shrink-0 mt-0.5" />
-            <div>
-              <h2 className="text-xs font-black text-slate-900">14 Gün İçinde Kolay İade</h2>
-              <p className="text-[10px] text-slate-500 font-medium leading-tight">Memnun kalmazsanız iade edin</p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3">
-            <Shield className="h-4.5 w-4.5 text-slate-800 shrink-0 mt-0.5" />
-            <div>
-              <h2 className="text-xs font-black text-slate-900">Alışveriş Desteği</h2>
-              <p className="text-[10px] text-slate-500 font-medium leading-tight">Sipariş ve iade sorularınız için bize ulaşın</p>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* ── MOBILE PERMANENT STICKY BOTTOM BUY BAR (ALWAYS VISIBLE FROM SECOND 1 ON MOBILE) ── */}

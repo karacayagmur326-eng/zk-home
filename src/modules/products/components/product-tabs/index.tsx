@@ -27,10 +27,9 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
   useEffect(() => {
     const handleHashChange = (event?: Event) => {
       const reload = (performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined)?.type === "reload"
-      if (reload && !event) return
       const scroll = () => { if (event || !reload) document.getElementById("product-tabs")?.scrollIntoView({ behavior: "smooth" }) }
       const hash = event instanceof CustomEvent ? `#${event.detail}` : window.location.hash
-      if (hash === "#aciklama") {
+      if (hash === "#aciklama" || hash === "#urun-aciklamasi") {
         setActiveTab("aciklama")
         setTimeout(() => {
           scroll()
@@ -40,15 +39,15 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
         setTimeout(() => {
           scroll()
         }, 50)
-      } else if (hash === "#ozellikler" || hash === "#teknik") {
+      } else if (hash === "#ozellikler" || hash === "#teknik" || hash === "#urun-ozellikleri") {
         setActiveTab("ozellikler")
         setTimeout(() => {
           scroll()
         }, 50)
-      } else if (hash === "#sss") {
+      } else if (hash === "#sss" || hash === "#sikca-sorulan-sorular") {
         setActiveTab("sss")
         setTimeout(scroll, 50)
-      } else if (hash === "#taksit") {
+      } else if (hash === "#taksit" || hash === "#taksit-secenekleri") {
         setActiveTab("taksit")
         setTimeout(() => {
           scroll()
@@ -67,6 +66,11 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
 
   const handleTabClick = (tabKey: string) => {
     setActiveTab(tabKey)
+    const sections: Record<string, string> = { aciklama: "urun-aciklamasi", ozellikler: "urun-ozellikleri", taksit: "taksit-secenekleri", sss: "sikca-sorulan-sorular" }
+    const url = new URL(window.location.href)
+    url.searchParams.delete("product_tab")
+    url.hash = sections[tabKey] || tabKey
+    if (url.href !== window.location.href) window.history.pushState(window.history.state, "", url)
   }
 
   const featuresContent =

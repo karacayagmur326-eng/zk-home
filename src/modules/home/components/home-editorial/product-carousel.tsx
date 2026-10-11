@@ -40,8 +40,8 @@ export default function EditorialProductCarousel({ intro, children }: { intro: R
       const elapsed = previousTime ? Math.min(time - previousTime, 50) : 0
       previousTime = time
       if (cycle.current && visible && !document.hidden && !paused.current && !hovered.current && !focused.current && !reducedMotion.matches && time > manualUntil.current) {
-        // Decreasing scrollLeft moves the cards from left to right.
-        position -= elapsed * .025
+        // Increasing scrollLeft moves the cards automatically to the left.
+        position += elapsed * .025
         if (position < cycle.current) position += cycle.current
         else if (position >= cycle.current * 2) position -= cycle.current
         rail.scrollLeft = position
