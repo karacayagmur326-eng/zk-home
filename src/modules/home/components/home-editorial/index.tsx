@@ -5,6 +5,7 @@ import { ArrowRight } from "@lib/icons"
 import type { EditorialCard, HomeEditorialContent } from "@lib/content/home-editorial"
 import FeaturedProductCard from "@modules/products/components/featured-product-card"
 import EditorialNewsletter from "@modules/home/components/editorial-newsletter"
+import EditorialProductCarousel from "./product-carousel"
 import HomeMotion from "@modules/home/components/home-motion"
 
 export type HomeArticle = {
@@ -63,10 +64,10 @@ export default function HomeEditorial({
       </section>}
 
       {content.highlights_active && (products.length > 0 || activeCards(content.highlight_cards).length > 0) && <section aria-label={content.highlights_title}>
-        <SectionIntro title={products.length > 0 ? "Öne Çıkan Ürünler" : content.highlights_title} description={content.highlights_description} href="/magaza" discover />
-        {products.length > 0 ? <div className="home-featured-grid grid gap-2 sm:gap-4">
-          {products.slice(0, 9).map((product, index) => <div key={product.id} data-two={index < Math.floor(Math.min(6, products.length) / 2) * 2} data-three={index < Math.floor(Math.min(9, products.length) / 3) * 3} data-desktop={index < Math.floor(Math.min(5, products.length) / 5) * 5} className="h-full min-w-0"><FeaturedProductCard product={product} region={region} showSummary /></div>)}
-        </div> : <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        {products.length === 0 && <SectionIntro title={content.highlights_title} description={content.highlights_description} href="/magaza" discover />}
+        {products.length > 0 ? <EditorialProductCarousel intro={<div><EmphasisHeading>Öne Çıkan Ürünler</EmphasisHeading><p className="mt-2 text-sm text-[#827b78]">{content.highlights_description}</p></div>}>
+          {products.map(product => <FeaturedProductCard key={product.id} product={product} region={region} showSummary />)}
+        </EditorialProductCarousel> : <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           {activeCards(content.highlight_cards).map((card) => <Link key={card.id} href={card.href} className="group overflow-hidden rounded-[18px] border border-[#eee9e5] bg-white transition-shadow hover:shadow-[0_14px_30px_rgba(102,74,65,0.11)]">
             <div className="relative aspect-[4/3] overflow-hidden bg-[#f4efea]">{card.image && <Image src={card.image} alt={card.title} fill sizes="(max-width: 640px) 50vw, 25vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.035]" />}</div>
             <div className="px-3.5 py-3"><h3 className="line-clamp-1 text-sm font-semibold">{card.title}</h3><p className="mt-1 line-clamp-1 text-xs text-[#837a76]">{card.description}</p><span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[#b86f71]">Seçkiyi İncele <ArrowRight className="h-3.5 w-3.5" /></span></div>

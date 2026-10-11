@@ -22,6 +22,7 @@ type BankDetail = {
 
 type ProductInstallmentsProps = {
   price?: number
+  showHeading?: boolean
 }
 
 // Bank Visual Theme Configurations
@@ -100,7 +101,7 @@ const BANK_THEMES: Record<
   },
 }
 
-const ProductInstallments: React.FC<ProductInstallmentsProps> = ({ price = 0 }) => {
+const ProductInstallments: React.FC<ProductInstallmentsProps> = ({ price = 0, showHeading = true }) => {
   const [banks, setBanks] = useState<BankDetail[]>([])
   const [selectedBank, setSelectedBank] = useState<string>("Bonus")
   const [loading, setLoading] = useState(true)
@@ -160,9 +161,9 @@ const ProductInstallments: React.FC<ProductInstallmentsProps> = ({ price = 0 }) 
             <CreditCard className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight">
+            {showHeading && <h3 className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight">
               Taksit Seçenekleri
-            </h3>
+            </h3>}
             <p className="text-[11px] text-slate-500 font-medium">
               Anlaşmalı tüm banka ve kredi kartlarına 12 aya varan taksit seçenekleri
             </p>

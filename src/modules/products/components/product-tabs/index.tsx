@@ -98,7 +98,7 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
         {/* ── LEFT COLUMN (6 cols): TABS & TAB CONTENT (Açıklama, Özellikler, Taksit) ── */}
         <div className="lg:col-span-6 flex flex-col space-y-4">
           <div role="tablist" aria-label="Ürün detayları" className="flex items-center gap-2 overflow-x-auto border-b border-slate-200 pb-3 no-scrollbar">
-            {[["aciklama", "Ürün Açıklaması"], ["ozellikler", "Özellikler"], ["taksit", "Taksit"], ...(faqContent ? [["sss", "Sıkça Sorulan Sorular"]] : [])].map(([key, label]) => (
+            {[["aciklama", "Ürün Açıklaması"], ["ozellikler", "Ürün Özellikleri"], ["taksit", "Taksit Seçenekleri"], ...(faqContent ? [["sss", "Sıkça Sorulan Sorular"]] : [])].map(([key, label]) => (
               <button key={key} id={`product-tab-${key}`} type="button" role="tab" aria-selected={activeTab === key} aria-controls={`product-panel-${key}`} onClick={() => handleTabClick(key)}
                 className={clx("shrink-0 whitespace-nowrap rounded-xl px-3 py-2.5 text-xs font-semibold transition sm:text-sm", activeTab === key ? "bg-primary/10 text-primary" : "text-slate-600 hover:bg-slate-50")}>{label}</button>
             ))}
@@ -128,7 +128,6 @@ null
 
             {(
               <section id="product-panel-ozellikler" role="tabpanel" hidden={activeTab !== "ozellikler"} aria-labelledby="product-tab-ozellikler" className="product-content-template product-specifications">
-                <h2 id="product-specs-heading" className="mb-3 text-base font-semibold">Ürün Özellikleri</h2>
                 {!featuresContent && <dl className="mb-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">{[["Marka", md.brand_name || product.collection?.title || md.brand], ["Model", md.model], ["Üretici parça numarası", md.mpn]].filter(([, value]) => value).map(([label, value]) => <div key={String(label)} className="contents"><dt className="font-medium">{String(label)}</dt><dd>{String(value)}</dd></div>)}</dl>}
               <div className="space-y-4">
                 {featuresContent ? (
@@ -149,8 +148,8 @@ null
             </section>}
 
             {activeTab === "taksit" && (
-              <div className="space-y-4">
-                <ProductInstallments price={finalPrice} />
+              <div id="product-panel-taksit" role="tabpanel" aria-labelledby="product-tab-taksit" className="space-y-4">
+                <ProductInstallments price={finalPrice} showHeading={false} />
               </div>
             )}
           </div>

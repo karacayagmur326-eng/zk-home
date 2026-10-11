@@ -24,7 +24,6 @@ export default function ProductFaq({ html, productId }: { html: string; productI
     }
   }
   return <div className="product-faq space-y-4">
-    <h2 className="text-lg font-semibold text-slate-900">Sıkça Sorulan Sorular</h2>
     {items.length ? items.map(item => <article key={item.question} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <h3 className="mb-3 text-sm font-semibold text-slate-900" dangerouslySetInnerHTML={{ __html: item.question }} />
       <div className="product-rich-text" dangerouslySetInnerHTML={{ __html: item.answer }} />
