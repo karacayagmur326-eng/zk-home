@@ -11,6 +11,7 @@ import { notFound } from "next/navigation"
 import { HttpTypes } from "@medusajs/types"
 import { getProductPrice } from "@lib/util/get-product-price"
 import ProductPageStateProvider from "@modules/products/components/product-page-state"
+import ProductSpecifications from "@modules/products/components/product-specifications"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { categoryPath } from "@lib/seo/category"
@@ -90,6 +91,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
                 <ProductOnboardingCta />
                 <Suspense fallback={<ProductActions disabled={true} product={product} region={region} />}><ProductActions product={product} region={region} /></Suspense>
               </div>
+              <ProductSpecifications product={product} />
             </div>
           </div>
 

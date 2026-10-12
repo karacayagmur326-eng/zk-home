@@ -19,7 +19,7 @@ type ProductTabsProps = {
 }
 
 const ProductTabs = ({ product, price }: ProductTabsProps) => {
-  const [activeTab, setActiveTab] = useUrlState<string>("aciklama", "product_tab", ["aciklama", "ozellikler", "taksit", "sss", "yorumlar"], false)
+  const [activeTab, setActiveTab] = useUrlState<string>("aciklama", "product_tab", ["aciklama", "taksit", "sss", "yorumlar"], false)
   const md = (product.metadata as Record<string, any>) || {}
   const { cheapestPrice } = getProductPrice({ product })
   const finalPrice = price || cheapestPrice?.calculated_price_number || 0
@@ -28,7 +28,8 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
     const handleHashChange = (event?: Event) => {
       const reload = (performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined)?.type === "reload"
       const scroll = () => { if (event || !reload) document.getElementById("product-tabs")?.scrollIntoView({ behavior: "smooth" }) }
-      const hash = event instanceof CustomEvent ? `#${event.detail}` : window.location.hash
+      const legacyFeatures = new URL(window.location.href).searchParams.get("product_tab") === "ozellikler"
+      const hash = event instanceof CustomEvent ? `#${event.detail}` : window.location.hash || (legacyFeatures ? "#urun-ozellikleri" : "")
       if (hash === "#aciklama" || hash === "#urun-aciklamasi") {
         setActiveTab("aciklama")
         setTimeout(() => {
@@ -40,10 +41,8 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
           scroll()
         }, 50)
       } else if (hash === "#ozellikler" || hash === "#teknik" || hash === "#urun-ozellikleri") {
-        setActiveTab("ozellikler")
-        setTimeout(() => {
-          scroll()
-        }, 50)
+        setActiveTab("aciklama")
+        setTimeout(() => { if (event || !reload) document.getElementById("urun-ozellikleri")?.scrollIntoView({ behavior: "smooth" }) }, 50)
       } else if (hash === "#sss" || hash === "#sikca-sorulan-sorular") {
         setActiveTab("sss")
         setTimeout(scroll, 50)
@@ -66,17 +65,13 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
 
   const handleTabClick = (tabKey: string) => {
     setActiveTab(tabKey)
-    const sections: Record<string, string> = { aciklama: "urun-aciklamasi", ozellikler: "urun-ozellikleri", taksit: "taksit-secenekleri", sss: "sikca-sorulan-sorular" }
+    const sections: Record<string, string> = { aciklama: "urun-aciklamasi", taksit: "taksit-secenekleri", sss: "sikca-sorulan-sorular" }
     const url = new URL(window.location.href)
     url.searchParams.delete("product_tab")
     url.hash = sections[tabKey] || tabKey
     if (url.href !== window.location.href) window.history.pushState(window.history.state, "", url)
   }
 
-  const featuresContent =
-    typeof md.features_content === "string"
-      ? formatProductLabels(sanitizeRichTextHtml(md.features_content).replace(/<(\/?)h1\b/gi, "<$1h2").trim())
-      : ""
   const usageTitle = typeof md.usage_title === "string" ? md.usage_title.trim() : ""
   const rawUsage = typeof md.usage_content === "string" ? md.usage_content.trim() : ""
   const legacyUsage = splitProductFaq(rawUsage)
@@ -99,10 +94,10 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
   return (
     <div id="product-tabs" className="w-full pt-4 font-sans">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
-        {/* ── LEFT COLUMN (6 cols): TABS & TAB CONTENT (Açıklama, Özellikler, Taksit) ── */}
+        {/* Description, installments and frequently asked questions. */}
         <div className="lg:col-span-6 flex flex-col space-y-4">
           <div role="tablist" aria-label="Ürün detayları" className="flex items-center gap-1 overflow-x-auto rounded-t-xl border-b border-slate-200 bg-slate-50/70 px-1 pt-1 no-scrollbar">
-            {[["aciklama", "Ürün Açıklaması"], ["ozellikler", "Ürün Özellikleri"], ["taksit", "Taksit Seçenekleri"], ...(faqContent ? [["sss", "Sıkça Sorulan Sorular"]] : [])].map(([key, label]) => (
+            {[["aciklama", "Ürün Açıklaması"], ["taksit", "Taksit Seçenekleri"], ...(faqContent ? [["sss", "Sıkça Sorulan Sorular"]] : [])].map(([key, label]) => (
               <button key={key} id={`product-tab-${key}`} type="button" role="tab" aria-selected={activeTab === key} aria-controls={`product-panel-${key}`} onClick={() => handleTabClick(key)}
                 className={clx("shrink-0 whitespace-nowrap rounded-t-lg border-b-[3px] px-3 py-3 text-sm font-extrabold transition sm:text-[15px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset", activeTab === key ? "border-primary bg-primary/10 text-primary" : "border-transparent text-slate-800 hover:bg-white hover:text-primary")}>{label}</button>
             ))}
@@ -128,23 +123,6 @@ null
                   </section>
                 )}
               </div></section>
-            )}
-
-            {(
-              <section id="product-panel-ozellikler" role="tabpanel" hidden={activeTab !== "ozellikler"} aria-labelledby="product-tab-ozellikler" className="product-content-template product-specifications">
-                {!featuresContent && <dl className="mb-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">{[["Marka", md.brand_name || product.collection?.title || md.brand], ["Model", md.model], ["Üretici parça numarası", md.mpn]].filter(([, value]) => value).map(([label, value]) => <div key={String(label)} className="contents"><dt className="font-medium">{String(label)}</dt><dd>{String(value)}</dd></div>)}</dl>}
-              <div className="space-y-4">
-                {featuresContent ? (
-                  <div
-                    className="product-rich-text prose prose-sm max-w-none text-slate-700 prose-headings:text-slate-900 prose-a:text-[#A95E5E]"
-                    dangerouslySetInnerHTML={{ __html: featuresContent }}
-                  />
-                ) : (
-null
-                )}
-              </div>
-                {Array.isArray(md.tech_specs) && md.tech_specs.length > 0 && <table className="mt-4 w-full text-sm"><tbody>{md.tech_specs.filter((spec: any) => spec.key && spec.value).map((spec: any, index: number) => <tr key={index} className="border-b border-slate-100"><th scope="row" className="p-2 text-left font-medium">{spec.key}</th><td className="p-2">{spec.value}</td></tr>)}</tbody></table>}
-              </section>
             )}
 
             {faqContent && <section id="product-panel-sss" role="tabpanel" aria-labelledby="product-tab-sss" hidden={activeTab !== "sss"}>
