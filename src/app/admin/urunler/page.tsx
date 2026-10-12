@@ -453,14 +453,14 @@ export default function ProductsPage() {
       {/* ── Breadcrumbs & Page Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-2.5">
-          <Link href="/admin/urunler/ice-aktar" className="px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 font-bold text-xs hover:bg-slate-50 flex items-center gap-2">
+          <Link prefetch={false} href="/admin/urunler/ice-aktar" className="px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 font-bold text-xs hover:bg-slate-50 flex items-center gap-2">
             <Download className="w-4 h-4" />Excel'den İçe Aktar
           </Link>
           <a href="/api/admin/products/export" className="px-3.5 py-2.5 rounded-xl border border-[#C98484] bg-white text-[#C98484] font-bold text-xs hover:bg-rose-50 flex items-center gap-2">
             <Download className="w-4 h-4" />Excel'e Dışa Aktar
           </a>
 
-          <Link
+          <Link prefetch={false}
             href="/admin/urunler/yeni"
             className="px-4 py-2.5 rounded-xl bg-[#C98484] text-white font-bold text-xs hover:bg-[#A95E5E] transition-all flex items-center gap-1.5 shadow-md shadow-rose-500/20 cursor-pointer"
           >
@@ -701,7 +701,7 @@ export default function ProductsPage() {
                       {/* Product Title & Brand */}
                       <td className="px-3 py-3">
                         <div>
-                          <Link
+                          <Link prefetch={false}
                             href={!isDeleted ? `/admin/urunler/${p.id}` : "#"}
                             className={`font-bold text-xs ${
                               isDeleted ? "text-slate-500 line-through" : "text-slate-900 hover:text-[#C98484]"
@@ -754,7 +754,7 @@ export default function ProductsPage() {
                         <div className="flex items-center justify-end gap-1">
                           {!isTrashTab ? (
                             <>
-                              <Link
+                              <Link prefetch={false}
                                 href={`/admin/urunler/${p.id}`}
                                 title="Düzenle"
                                 className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-colors"
@@ -769,7 +769,7 @@ export default function ProductsPage() {
                               >
                                 <Copy className="w-4 h-4" />
                               </button>
-                              <Link
+                              <Link prefetch={false}
                                 href={`/urunler/${p.handle}`}
                                 target="_blank"
                                 title="Görüntüle"

@@ -48,7 +48,7 @@ export default function CustomerMessages({ initialId = "", kind = "messages" }: 
     const controller = new AbortController()
     loadList(controller.signal)
     const refresh = () => { if (!document.hidden) loadList(controller.signal) }
-    const timer = window.setInterval(refresh, 10000)
+    const timer = window.setInterval(refresh, 30000)
     window.addEventListener("focus", refresh)
     return () => { controller.abort(); clearInterval(timer); window.removeEventListener("focus", refresh) }
   }, [loadList])
@@ -69,7 +69,7 @@ export default function CustomerMessages({ initialId = "", kind = "messages" }: 
     }
     load()
     const refresh = () => { if (!document.hidden) load() }
-    const timer = window.setInterval(refresh, 10000)
+    const timer = window.setInterval(refresh, 30000)
     window.addEventListener("focus", refresh)
     return () => { controller.abort(); clearInterval(timer); window.removeEventListener("focus", refresh) }
   }, [selectedId, reload])
