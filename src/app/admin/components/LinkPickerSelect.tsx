@@ -166,12 +166,12 @@ export default function LinkPickerSelect({
   }
 
   return (
-    <div className="space-y-1.5">
+    <div className="min-w-0 w-full space-y-1.5">
       <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">{label}</label>
 
-      <div className="flex items-center gap-2">
+      <div className="flex min-w-0 flex-wrap items-center gap-2">
         {!isCustom ? (
-          <div className="relative flex-1">
+          <div className="relative min-w-0 flex-[1_1_200px]">
             <select
               value={selectedOption ? selectedOption.url : "custom"}
               onChange={(e) => handleSelectChange(e.target.value)}
@@ -219,7 +219,7 @@ export default function LinkPickerSelect({
             </select>
           </div>
         ) : (
-          <div className="relative flex-1">
+          <div className="relative min-w-0 flex-[1_1_200px]">
             <input
               type="text"
               value={value}

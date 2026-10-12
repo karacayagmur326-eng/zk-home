@@ -48,7 +48,7 @@ function IconField({
     <div className="w-full">
       <span className={label}>İkon / kategori görseli</span>
 
-      <div className="flex min-w-0 items-center gap-2">
+      <div className="flex min-w-0 flex-wrap items-center gap-2">
         <div className="relative grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-xl border border-rose-200 bg-rose-50 text-[#C98484] shadow-2xs">
           {hasImage ? (
             <>
@@ -68,7 +68,7 @@ function IconField({
           )}
         </div>
 
-        <div className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+        <div className="min-w-0 flex-[1_1_120px] rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
           <p className="truncate text-xs font-bold text-slate-700">{hasImage ? "Kategori görseli bağlı" : value || "İkon seçilmedi"}</p>
           <p className="truncate text-[10px] text-slate-400">{hasImage ? image : "Kategoriyle eşitlenir veya elle seçilir."}</p>
         </div>
@@ -387,7 +387,7 @@ function ListEditor({ title, items, onChange }: { title: string; items: MobileLi
     <div className="w-full space-y-5">
       {items.map((item, index) => (
         <Card key={item.id} title={`${title} ${index + 1}`} onRemove={() => onChange(items.filter((_, i) => i !== index))}>
-          <div className="grid items-end gap-4 md:grid-cols-2 2xl:grid-cols-4">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] items-end gap-4 [&>*]:min-w-0">
             <Field title="Başlık" value={item.label} onChange={(label) => update(index, { label })} />
             <Field title="Alt açıklama" value={item.subtitle || ""} onChange={(subtitle) => update(index, { subtitle })} />
             <IconField
