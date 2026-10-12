@@ -1,14 +1,8 @@
 "use client"
-import { useProductPageState } from "@modules/products/components/product-page-state"
 
 import { useEffect, useState } from "react"
 import { HttpTypes } from "@medusajs/types"
-import { Heading } from "@modules/common/components/ui"
-import {
-  Star,
-  Check,
-  X,
-} from "@lib/icons"
+import { Star } from "@lib/icons"
 import { sanitizeRichTextHtml } from "@modules/common/components/rich-text-editor"
 
 type ProductInfoProps = {
@@ -23,10 +17,6 @@ export default function ProductInfo({ product }: ProductInfoProps) {
 
   const md = (product.metadata as Record<string, any>) || {}
   const brandName = (md.brand_name as string) || product.collection?.title || (md.brand as string) || ""
-  const selected = useProductPageState()?.variantId
-  const variant = product.variants?.find(item => item.id === selected) || product.variants?.[0]
-  const sku = String(variant?.sku || md.sku || "").trim()
-
   useEffect(() => {
     // Fetch real reviews for this product
     fetch(`/api/products/${product.id}/reviews`)
@@ -168,40 +158,6 @@ export default function ProductInfo({ product }: ProductInfoProps) {
           />
         ) : null}
 
-        {/* 5. Stock Status + Stock Code Box (Side-by-Side on Mobile and Desktop) */}
-        <div className="flex flex-wrap items-center gap-2.5 rounded-2xl border border-slate-200/70 bg-slate-50/60 p-2.5 w-full">
-          {/* Stock Status Badge */}
-          {(() => {
-            const variant = product.variants?.[0] as any
-            const manageInventory = variant?.manage_inventory ?? false
-            const inventoryQty = variant?.inventory_quantity ?? 999
-            const allowBackorder = variant?.allow_backorder ?? false
-            const isInStock = !manageInventory || allowBackorder || inventoryQty > 0
-            return isInStock ? (
-              <span className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 border border-emerald-200/80 px-3 py-2 text-xs font-extrabold text-emerald-700 shrink-0">
-                <span className="w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
-                  <Check className="w-2.5 h-2.5 text-white stroke-[3]" />
-                </span>
-                Stokta Mevcut
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1.5 rounded-xl bg-red-50 border border-red-200/80 px-3 py-2 text-xs font-extrabold text-red-600 shrink-0">
-                <span className="w-4 h-4 rounded-full bg-red-500 flex items-center justify-center shrink-0">
-                  <X className="w-2.5 h-2.5 text-white stroke-[3]" />
-                </span>
-                Stokta Yok
-              </span>
-            )
-          })()}
-
-          {/* Stock Code: yalnızca yönetim panelinde girilmiş gerçek değer gösterilir. */}
-          {sku && (
-            <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1 rounded-xl border border-primary/15 bg-white py-2 px-3 sm:px-4 text-xs text-left">
-              <span className="font-semibold text-slate-500">Stok Kodu</span>
-              <strong className="break-all font-extrabold tracking-wide text-slate-900">{sku}</strong>
-            </div>
-          )}
-        </div>
       </div>
 
     </div>

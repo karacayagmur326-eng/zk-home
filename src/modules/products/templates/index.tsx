@@ -12,6 +12,7 @@ import { HttpTypes } from "@medusajs/types"
 import { getProductPrice } from "@lib/util/get-product-price"
 import ProductPageStateProvider from "@modules/products/components/product-page-state"
 import ProductSpecifications from "@modules/products/components/product-specifications"
+import ProductAvailability from "@modules/products/components/product-availability"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { categoryPath } from "@lib/seo/category"
@@ -87,7 +88,9 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
             <div className="min-w-0"><ImageGallery images={images} productTitle={product.title} discountBadge={discountBadge} product={product} /></div>
             <div className="min-w-0 flex flex-col">
               <ProductInfo product={product} />
-              <div className="min-w-0 lg:mt-6 lg:border-t lg:border-slate-100 lg:pt-5">
+              <div className="mt-4 min-w-0 space-y-4 rounded-2xl border border-slate-200/80 bg-slate-50/50 p-4 sm:mt-5 sm:p-5" data-testid="product-purchase-panel">
+                <ProductAvailability product={product} />
+                <div className="hidden border-t border-slate-200/70 lg:block" />
                 <ProductOnboardingCta />
                 <Suspense fallback={<ProductActions disabled={true} product={product} region={region} />}><ProductActions product={product} region={region} /></Suspense>
               </div>

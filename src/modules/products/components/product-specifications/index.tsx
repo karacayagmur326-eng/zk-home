@@ -107,8 +107,8 @@ export default function ProductSpecifications({ product }: { product: HttpTypes.
   if (!html && !rows.length && !fallback.length) return null
 
   return (
-    <section ref={sectionRef} id="urun-ozellikleri" aria-labelledby="product-specifications-heading" className="product-features-summary mt-6 scroll-mt-24 border-t border-slate-100 pt-5">
-      <h2 id="product-specifications-heading" className="mb-4 flex items-center gap-3 rounded-xl border border-primary/15 border-l-4 border-l-primary bg-primary/5 px-4 py-3 text-lg font-extrabold tracking-tight text-slate-900">
+    <section ref={sectionRef} id="urun-ozellikleri" aria-labelledby="product-specifications-heading" className="product-features-summary mt-4 scroll-mt-24 rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5">
+      <h2 id="product-specifications-heading" className="mb-4 flex items-center gap-2.5 border-b border-slate-100 pb-3 text-base font-bold tracking-tight text-slate-900 sm:text-lg">
         <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5 shrink-0 text-primary"><path d="m3 6 2 2 3-4M11 6h10M3 13l2 2 3-4M11 13h10M3 20l2 2 3-4M11 20h10" /></svg>
         Ürün Özellikleri
       </h2>
