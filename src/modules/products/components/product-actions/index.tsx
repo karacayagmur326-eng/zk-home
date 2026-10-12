@@ -169,14 +169,14 @@ export default function ProductActions({
         )}
 
         {/* ── INLINE BUY SECTION (HIDDEN ON MOBILE, ONLY VISIBLE ON DESKTOP - lg:flex) ── */}
-        <div className="hidden lg:flex flex-col gap-4">
+        <div className="hidden lg:grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4">
           {/* Main Price Card Display */}
           <div>
             <ProductPrice product={product} variant={selectedVariant} />
           </div>
 
           {/* Quantity Stepper Row */}
-          <div className="flex items-center justify-between pt-1">
+          <div className="flex items-center justify-between gap-3 pt-1">
             <span className="text-xs font-black text-slate-900">Adet</span>
             <div className="flex h-9 items-center rounded-xl border border-slate-200 bg-slate-50 px-2 shrink-0">
               <button
@@ -200,7 +200,7 @@ export default function ProductActions({
           </div>
 
           {/* Action Buttons (Sepete Ekle & Hemen Al) */}
-          <div className="space-y-2.5 pt-1">
+          <div className="col-span-2 grid grid-cols-2 gap-3 pt-1">
             <button
               type="button"
               onClick={handleAddToCart}

@@ -80,12 +80,17 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
           className="space-y-3 sm:space-y-8 bg-white p-0 sm:p-2 lg:space-y-0 lg:overflow-hidden lg:rounded-2xl lg:border lg:border-slate-200/90 lg:p-5 lg:shadow-xs"
           data-testid="product-container"
         >
-          {/* ── MOBILE: Stacked layout | DESKTOP: 3-column grid ── */}
+          {/* Product information and purchasing share the right column. */}
 
-          <div className="space-y-3 sm:space-y-8 lg:grid lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1.4fr)_minmax(240px,0.9fr)] lg:items-stretch lg:gap-0 lg:space-y-0 lg:pb-6">
-            <div className="min-w-0 lg:pr-4"><ImageGallery images={images} productTitle={product.title} discountBadge={discountBadge} product={product} /></div>
-            <div className="min-w-0 flex flex-col lg:px-4"><ProductInfo product={product} /></div>
-            <div className="min-w-0 lg:pl-5"><div className="lg:sticky lg:top-24"><ProductOnboardingCta /><Suspense fallback={<ProductActions disabled={true} product={product} region={region} />}><ProductActions product={product} region={region} /></Suspense></div></div>
+          <div className="space-y-3 sm:space-y-8 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)] lg:items-start lg:gap-8 lg:space-y-0 lg:pb-6">
+            <div className="min-w-0"><ImageGallery images={images} productTitle={product.title} discountBadge={discountBadge} product={product} /></div>
+            <div className="min-w-0 flex flex-col">
+              <ProductInfo product={product} />
+              <div className="min-w-0 lg:mt-6 lg:border-t lg:border-slate-100 lg:pt-5">
+                <ProductOnboardingCta />
+                <Suspense fallback={<ProductActions disabled={true} product={product} region={region} />}><ProductActions product={product} region={region} /></Suspense>
+              </div>
+            </div>
           </div>
 
           {/* Sweet Thin Horizontal Divider Line 1 */}
