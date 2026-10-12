@@ -369,6 +369,7 @@ export default function AdminLayout({
       >
         {/* Logo */}
         <Link
+          prefetch={false}
           href="/"
           target="_blank"
           rel="noopener noreferrer"
