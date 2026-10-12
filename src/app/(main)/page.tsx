@@ -111,8 +111,8 @@ export default async function Home() {
       <div className={`bg-[#f6f7f8] ${mobileSettings.enabled ? "hidden md:block" : "block"}`}>
         <CategoryStrip categories={categories} />
       </div>
-      <HomeBrandIntro />
       <HomeEditorial content={editorialContent} products={initialProducts} region={region} articles={articles} />
+      <HomeBrandIntro />
     </>
   )
 }
