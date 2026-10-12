@@ -44,6 +44,9 @@ export default function ProductSpecifications({ product }: { product: HttpTypes.
     const measure = () => {
       section.querySelectorAll<HTMLElement>(".product-rich-text ul, .product-feature-grid").forEach(grid => {
         const cards = Array.from(grid.children) as HTMLElement[]
+        // Measure at the normal card width before redistributing unused final-row space.
+        cards.forEach(card => { card.style.gridColumn = "span 1" })
+        const columns = getComputedStyle(grid).gridTemplateColumns.split(/\s+/).filter(Boolean).length
         const measured = cards.map((card, index) => {
           const lineCenters: number[] = []
           const walker = document.createTreeWalker(card, NodeFilter.SHOW_TEXT)
@@ -63,7 +66,12 @@ export default function ProductSpecifications({ product }: { product: HttpTypes.
         })
         // Equal-length cards retain the author's order; wrapped cards gather in the final rows.
         measured.sort((a, b) => a.lines - b.lines || a.index - b.index)
-          .forEach(({ card }, order) => { card.style.order = String(order) })
+        measured.forEach(({ card }, order) => { card.style.order = String(order) })
+        const remaining = cards.length % columns
+        if (remaining && columns > 1) {
+          // The longest final card expands into the empty columns instead of wrapping beside a gap.
+          measured[measured.length - 1].card.style.gridColumn = `span ${columns - remaining + 1}`
+        }
       })
     }
     const schedule = () => {
