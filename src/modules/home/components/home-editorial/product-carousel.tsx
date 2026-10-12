@@ -1,10 +1,11 @@
 "use client"
 
-import { Children, useEffect, useRef, useState, type ReactNode } from "react"
+import { Children, useEffect, useId, useRef, useState, type ReactNode } from "react"
 import Link from "next/link"
 import { ArrowLeft, ArrowRight, Pause, Play } from "lucide-react"
 
-export default function EditorialProductCarousel({ intro, children }: { intro: ReactNode; children: ReactNode }) {
+export default function EditorialProductCarousel({ intro, children, label = "Öne çıkan ürünler", linkLabel = "Keşfet" }: { intro: ReactNode; children: ReactNode; label?: string; linkLabel?: string }) {
+  const carouselId = useId()
   const cards = Children.toArray(children)
   const viewport = useRef<HTMLDivElement>(null)
   const section = useRef<HTMLDivElement>(null)
@@ -68,15 +69,15 @@ export default function EditorialProductCarousel({ intro, children }: { intro: R
     <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
       {intro}
       <div className="flex shrink-0 items-center gap-2">
-        <button type="button" className={controlClass} onClick={() => step(-1)} aria-label="Öne çıkan ürünleri sola kaydır" aria-controls="home-featured-products"><ArrowLeft size={16} aria-hidden="true" /></button>
-        <button type="button" className={controlClass} onClick={() => step(1)} aria-label="Öne çıkan ürünleri sağa kaydır" aria-controls="home-featured-products"><ArrowRight size={16} aria-hidden="true" /></button>
+        <button type="button" className={controlClass} onClick={() => step(-1)} aria-label={`${label} sola kaydır`} aria-controls={carouselId}><ArrowLeft size={16} aria-hidden="true" /></button>
+        <button type="button" className={controlClass} onClick={() => step(1)} aria-label={`${label} sağa kaydır`} aria-controls={carouselId}><ArrowRight size={16} aria-hidden="true" /></button>
         <button type="button" className={controlClass} onClick={() => { paused.current = !paused.current; setIsPaused(paused.current) }} aria-label={isPaused ? "Otomatik ürün kaymasını başlat" : "Otomatik ürün kaymasını duraklat"} aria-pressed={isPaused}>
           {isPaused ? <Play size={14} aria-hidden="true" /> : <Pause size={14} aria-hidden="true" />}
         </button>
-        <Link href="/magaza" className="inline-flex items-center gap-1 rounded-full bg-primary px-3.5 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-primary-hover">Keşfet<ArrowRight size={14} aria-hidden="true" /></Link>
+        <Link href="/magaza" className="inline-flex items-center gap-1 rounded-full bg-primary px-3.5 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-primary-hover">{linkLabel}<ArrowRight size={14} aria-hidden="true" /></Link>
       </div>
     </div>
-    <div ref={viewport} id="home-featured-products" role="region" aria-label="Öne çıkan ürünler" aria-roledescription="Ürün kaydırıcısı" className="home-featured-carousel no-scrollbar overflow-x-auto"
+    <div ref={viewport} id={carouselId} role="region" aria-label={label} aria-roledescription="Ürün kaydırıcısı" className="home-featured-carousel no-scrollbar overflow-x-auto"
       onFocusCapture={() => { focused.current = true }} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget)) focused.current = false }} onTouchStart={() => { manualUntil.current = performance.now() + 5000 }}>
       <div className="relative flex items-stretch gap-2 pb-5 sm:gap-4">
         {[0, 1, 2].map(copy => cards.map((card, index) => <div key={`${copy}-${index}`} data-product-card data-product-copy={copy} className="home-featured-carousel-card min-w-0 shrink-0">{card}</div>))}
