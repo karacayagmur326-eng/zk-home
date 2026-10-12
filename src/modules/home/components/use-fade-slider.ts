@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState, type TouchEvent } from "react"
+import { useEffect, useRef, useState, type TouchEvent, type PointerEvent } from "react"
 import useMotionEnabled from "./use-motion-enabled"
 
 export default function useFadeSlider(count: number, autoplay = true, intervalMs = 5000) {
@@ -31,13 +31,15 @@ export default function useFadeSlider(count: number, autoplay = true, intervalMs
 
   const select = (index: number) => { if (count) setActiveIndex((index + count) % count) }
   const gestures = {
-    onMouseEnter: () => setHovered(true),
-    onMouseLeave: () => setHovered(false),
-    onFocusCapture: () => setFocused(true),
+    onPointerEnter: (event: PointerEvent<HTMLElement>) => setHovered(event.pointerType === "mouse"),
+    onPointerLeave: () => setHovered(false),
+    onFocusCapture: (event: React.FocusEvent<HTMLElement>) => setFocused(event.target.matches(":focus-visible")),
     onBlurCapture: (event: React.FocusEvent<HTMLElement>) => {
       if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false)
     },
     onTouchStart: (event: TouchEvent<HTMLElement>) => {
+      setHovered(false)
+      setFocused(false)
       const first = event.touches[0]
       touch.current = first ? { x: first.clientX, y: first.clientY } : null
     },

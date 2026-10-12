@@ -13,7 +13,7 @@ export default function CollectionCarousel({ children, count }: { children: Reac
     return () => media.removeEventListener("change", update)
   }, [])
   const { activeIndex, gestures } = useFadeSlider(count, mobile, 6000)
-  return <div className="collection-carousel" role="region" aria-label="Koleksiyon kartları" aria-roledescription={mobile ? "carousel" : undefined} {...gestures} onMouseEnter={undefined} onMouseLeave={undefined}>
+  return <div className="collection-carousel" role="region" aria-label="Koleksiyon kartları" aria-roledescription={mobile ? "carousel" : undefined} {...gestures}>
     <div className="overflow-hidden">
       <div className="collection-carousel-track" style={{ transform: `translateX(-${activeIndex * 100}%)` }}>
         {Children.map(children, (child, index) => <div className="collection-carousel-item" aria-hidden={mobile && index !== activeIndex ? true : undefined} inert={mobile && index !== activeIndex}>

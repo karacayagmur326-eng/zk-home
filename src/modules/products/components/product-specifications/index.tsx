@@ -45,6 +45,7 @@ export default function ProductSpecifications({ product }: { product: HttpTypes.
       section.querySelectorAll<HTMLElement>(".product-rich-text ul, .product-feature-grid").forEach(grid => {
         const cards = Array.from(grid.children) as HTMLElement[]
         // Measure at the normal card width before redistributing unused final-row space.
+        grid.style.removeProperty("grid-template-columns")
         cards.forEach(card => { card.style.gridColumn = "span 1" })
         const columns = getComputedStyle(grid).gridTemplateColumns.split(/\s+/).filter(Boolean).length
         const measured = cards.map((card, index) => {
@@ -67,10 +68,27 @@ export default function ProductSpecifications({ product }: { product: HttpTypes.
         // Equal-length cards retain the author's order; wrapped cards gather in the final rows.
         measured.sort((a, b) => a.lines - b.lines || a.index - b.index)
         measured.forEach(({ card }, order) => { card.style.order = String(order) })
-        const remaining = cards.length % columns
-        if (remaining && columns > 1) {
-          // The longest final card expands into the empty columns instead of wrapping beside a gap.
-          measured[measured.length - 1].card.style.gridColumn = `span ${columns - remaining + 1}`
+        if (columns > 1) {
+          // A shared multiple lets every row divide evenly, regardless of its card count.
+          let tracks = 1
+          for (let size = 2; size <= columns; size++) {
+            let a = tracks, b = size
+            while (b) { const remainder = a % b; a = b; b = remainder }
+            tracks = tracks * size / a
+          }
+          grid.style.gridTemplateColumns = `repeat(${tracks}, minmax(0, 1fr))`
+          const compact = measured.filter(item => item.lines < 3)
+          const expanded = measured.filter(item => item.lines >= 3)
+          const rowCount = Math.ceil(compact.length / columns)
+          let offset = 0
+          for (let row = 0; row < rowCount; row++) {
+            const size = Math.ceil((compact.length - offset) / (rowCount - row))
+            compact.slice(offset, offset + size).forEach(({ card }) => {
+              card.style.gridColumn = `span ${tracks / size}`
+            })
+            offset += size
+          }
+          expanded.forEach(({ card }) => { card.style.gridColumn = `span ${tracks}` })
         }
       })
     }
