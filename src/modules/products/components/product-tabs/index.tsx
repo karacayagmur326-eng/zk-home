@@ -122,8 +122,8 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
 null
                 )}
                 {usageContent && (
-                  <section aria-labelledby="product-usage-heading" className="mt-6 border-t border-[#eadfda] pt-6">
-                    <h2 id="product-usage-heading" className="mb-3 text-base font-semibold text-slate-900 sm:text-lg">{usageTitle || "Kullanım ve Sunum Önerileri"}</h2>
+                  <section aria-labelledby="product-usage-heading" className="product-usage-section">
+                    <h2 id="product-usage-heading">{usageTitle || "Kullanım ve Sunum Önerileri"}</h2>
                     <div className="product-rich-text prose prose-sm max-w-none text-sm leading-7 text-slate-700 prose-headings:text-slate-900 prose-a:text-[#A95E5E]" dangerouslySetInnerHTML={{ __html: usageContent }} />
                   </section>
                 )}
