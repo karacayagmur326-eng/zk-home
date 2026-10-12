@@ -20,7 +20,7 @@ const LocalizedClientLink = ({
   [x: string]: unknown
 }) => {
   return (
-    <Link href={href} {...props}>
+    <Link href={href} prefetch={false} {...props}>
       {children}
     </Link>
   )

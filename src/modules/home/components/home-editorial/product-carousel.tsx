@@ -78,7 +78,7 @@ export default function EditorialProductCarousel({ intro, children, label = "Ön
         <button type="button" className={controlClass} onClick={() => { paused.current = !paused.current; if (!paused.current) enableSiteMotion(); setIsPaused(paused.current) }} aria-label={isPaused ? "Otomatik ürün kaymasını başlat" : "Otomatik ürün kaymasını duraklat"} aria-pressed={isPaused}>
           {isPaused ? <Play size={14} aria-hidden="true" /> : <Pause size={14} aria-hidden="true" />}
         </button>
-        <Link href="/magaza" className="inline-flex items-center gap-1 rounded-full bg-primary px-3.5 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-primary-hover">{linkLabel}<ArrowRight size={14} aria-hidden="true" /></Link>
+        <Link prefetch={false} href="/magaza" className="inline-flex items-center gap-1 rounded-full bg-primary px-3.5 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-primary-hover">{linkLabel}<ArrowRight size={14} aria-hidden="true" /></Link>
       </div>
     </div>
     <div ref={viewport} id={carouselId} role="region" aria-label={label} aria-roledescription="Ürün kaydırıcısı" className="home-featured-carousel no-scrollbar overflow-x-auto"

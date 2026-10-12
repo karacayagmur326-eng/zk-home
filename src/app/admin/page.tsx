@@ -192,7 +192,7 @@ export default function AdminDashboard() {
       {/* 1. Top 4 KPI Summary Cards (Birebir Tasarım) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Toplam Sipariş */}
-        <Link
+        <Link prefetch={false}
           href="/admin/siparisler"
           className="rounded-3xl bg-white border border-slate-200/80 p-5 shadow-xs flex items-center justify-between hover:shadow-md hover:border-rose-200 transition-all cursor-pointer group"
         >
@@ -211,7 +211,7 @@ export default function AdminDashboard() {
         </Link>
 
         {/* Card 2: Toplam Ürün */}
-        <Link
+        <Link prefetch={false}
           href="/admin/urunler"
           className="rounded-3xl bg-white border border-slate-200/80 p-5 shadow-xs flex items-center justify-between hover:shadow-md hover:border-emerald-200 transition-all cursor-pointer group"
         >
@@ -230,7 +230,7 @@ export default function AdminDashboard() {
         </Link>
 
         {/* Card 3: Müşteri */}
-        <Link
+        <Link prefetch={false}
           href="/admin/kullanicilar"
           className="rounded-3xl bg-white border border-slate-200/80 p-5 shadow-xs flex items-center justify-between hover:shadow-md hover:border-purple-200 transition-all cursor-pointer group"
         >
@@ -249,7 +249,7 @@ export default function AdminDashboard() {
         </Link>
 
         {/* Card 4: Gelir (TL) */}
-        <Link
+        <Link prefetch={false}
           href="/admin/siparisler"
           className="rounded-3xl bg-white border border-slate-200/80 p-5 shadow-xs flex items-center justify-between hover:shadow-md hover:border-rose-200 transition-all cursor-pointer group"
         >
@@ -278,7 +278,7 @@ export default function AdminDashboard() {
           Hızlı İşlemler
         </h3>
         <div className="flex flex-wrap items-center gap-2.5">
-          <Link
+          <Link prefetch={false}
             href="/admin/urunler/yeni"
             className="h-10 px-4 rounded-2xl bg-white border border-slate-200 text-xs font-bold text-[#C98484] hover:bg-rose-50/50 hover:border-rose-200 transition-all flex items-center gap-2 shadow-2xs"
           >
@@ -286,7 +286,7 @@ export default function AdminDashboard() {
             <span>Yeni Ürün Ekle</span>
           </Link>
 
-          <Link
+          <Link prefetch={false}
             href="/admin/siparisler"
             className="h-10 px-4 rounded-2xl bg-white border border-slate-200 text-xs font-bold text-[#C98484] hover:bg-rose-50/50 hover:border-rose-200 transition-all flex items-center gap-2 shadow-2xs"
           >
@@ -294,7 +294,7 @@ export default function AdminDashboard() {
             <span>Siparişler</span>
           </Link>
 
-          <Link
+          <Link prefetch={false}
             href="/admin/kullanicilar"
             className="h-10 px-4 rounded-2xl bg-white border border-slate-200 text-xs font-bold text-[#C98484] hover:bg-rose-50/50 hover:border-rose-200 transition-all flex items-center gap-2 shadow-2xs"
           >
@@ -302,7 +302,7 @@ export default function AdminDashboard() {
             <span>Kullanıcılar</span>
           </Link>
 
-          <Link
+          <Link prefetch={false}
             href="/admin/kategoriler"
             className="h-10 px-4 rounded-2xl bg-white border border-slate-200 text-xs font-bold text-[#C98484] hover:bg-rose-50/50 hover:border-rose-200 transition-all flex items-center gap-2 shadow-2xs"
           >
@@ -310,7 +310,7 @@ export default function AdminDashboard() {
             <span>Kategoriler</span>
           </Link>
 
-          <Link
+          <Link prefetch={false}
             href="/admin/urunler"
             className="h-10 px-4 rounded-2xl bg-white border border-slate-200 text-xs font-bold text-[#C98484] hover:bg-rose-50/50 hover:border-rose-200 transition-all flex items-center gap-2 shadow-2xs"
           >
@@ -318,7 +318,7 @@ export default function AdminDashboard() {
             <span>Tüm Ürünler</span>
           </Link>
 
-          <Link
+          <Link prefetch={false}
             href="/admin/slaytlar"
             className="h-10 px-4 rounded-2xl bg-white border border-slate-200 text-xs font-bold text-[#C98484] hover:bg-rose-50/50 hover:border-rose-200 transition-all flex items-center gap-2 shadow-2xs"
           >
@@ -346,7 +346,7 @@ export default function AdminDashboard() {
                     className="w-full h-9 px-3.5 rounded-xl border border-slate-200 bg-slate-50/60 text-xs font-semibold outline-none focus:border-[#C98484] focus:bg-white"
                   />
                 </div>
-                <Link
+                <Link prefetch={false}
                   href="/admin/siparisler"
                   className="h-9 px-3.5 rounded-xl border border-slate-200 text-xs font-bold text-[#C98484] hover:bg-rose-50 flex items-center gap-1 shrink-0"
                 >
@@ -408,7 +408,7 @@ export default function AdminDashboard() {
                           })()}
                         </td>
                         <td className="p-3 text-right">
-                          <Link
+                          <Link prefetch={false}
                             href={`/admin/siparisler`}
                             className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-900 inline-block transition-colors"
                           >
@@ -610,7 +610,7 @@ export default function AdminDashboard() {
 
             <div className="space-y-3.5 text-xs font-bold">
               {/* Yeni Siparişler */}
-              <Link
+              <Link prefetch={false}
                 href="/admin/siparisler?filter=today"
                 className="flex items-center justify-between p-2.5 rounded-2xl bg-slate-50/80 border border-slate-100 hover:bg-blue-50/50 hover:border-blue-200 transition-all cursor-pointer group"
               >
@@ -636,7 +636,7 @@ export default function AdminDashboard() {
               </Link>
 
               {/* Bekleyen Siparişler */}
-              <Link
+              <Link prefetch={false}
                 href="/admin/siparisler?status=awaiting_payment"
                 className="flex items-center justify-between p-2.5 rounded-2xl bg-slate-50/80 border border-slate-100 hover:bg-amber-50/50 hover:border-amber-200 transition-all cursor-pointer group"
               >
@@ -662,7 +662,7 @@ export default function AdminDashboard() {
               </Link>
 
               {/* Düşük Stok Uyarıları */}
-              <Link
+              <Link prefetch={false}
                 href="/admin/urunler?stock=low"
                 className="flex items-center justify-between p-2.5 rounded-2xl bg-slate-50/80 border border-slate-100 hover:bg-rose-50/50 hover:border-rose-200 transition-all cursor-pointer group"
               >
@@ -688,7 +688,7 @@ export default function AdminDashboard() {
               </Link>
 
               {/* Okunmamış Mesajlar */}
-              <Link
+              <Link prefetch={false}
                 href="/admin/urunler/degerlendirmeler?status=pending"
                 className="flex items-center justify-between p-2.5 rounded-2xl bg-slate-50/80 border border-slate-100 hover:bg-purple-50/50 hover:border-purple-200 transition-all cursor-pointer group"
               >
@@ -719,7 +719,7 @@ export default function AdminDashboard() {
           <div className="rounded-3xl bg-white border border-slate-200/80 p-5 space-y-4 shadow-xs">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="text-sm font-extrabold text-slate-900">Stok Uyarıları</h3>
-              <Link
+              <Link prefetch={false}
                 href="/admin/urunler?stock=low"
                 className="text-xs font-bold text-[#C98484] hover:underline"
               >

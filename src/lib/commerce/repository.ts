@@ -290,8 +290,15 @@ export async function listStoreProducts(filters: ProductFilters = {}) {
   const offset = Math.max(filters.offset || 0, 0)
   const priceOrder = "(SELECT MIN(sv.price) FROM store_variant sv WHERE sv.product_id=p.id)"
   const order = filters.sort === "price_asc" ? priceOrder + " ASC NULLS LAST, p.created_at DESC, p.id" : filters.sort === "price_desc" ? priceOrder + " DESC NULLS LAST, p.created_at DESC, p.id" : "p.created_at DESC, p.id"
+  const productSelect = filters.status === "published"
+    ? PRODUCT_SELECT.replace("SELECT p.*,", `SELECT p.id, p.title, p.handle, p.subtitle, p.description, p.status,
+        p.thumbnail, p.collection_id, p.type_id, p.type_value, p.discountable,
+        p.weight, p.length, p.height, p.width, p.created_at, p.updated_at,
+        (p.metadata - 'seo_history') AS metadata,`)
+      .replace("'metadata', cat.metadata", "'metadata', (cat.metadata - 'seo_history')")
+    : PRODUCT_SELECT
   const rows = await query<any>(
-    `${PRODUCT_SELECT}
+    `${productSelect}
      ${whereSql}
      ORDER BY ${order}
      LIMIT ${add(limit)} OFFSET ${add(offset)}`,

@@ -21,7 +21,7 @@ export function useAdminAutoRefresh(
     let running = false
     const schedule = () => {
       clearTimeout(timer)
-      if (!controller.signal.aborted) timer = setTimeout(run, 10_000)
+      if (!controller.signal.aborted) timer = setTimeout(run, 30_000)
     }
     const run = async () => {
       if (controller.signal.aborted || running) return

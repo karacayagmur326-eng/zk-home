@@ -18,7 +18,7 @@ export function AdminSidebarItem({ icon, label, active, collapsed, badge = 0, hr
     {!collapsed && expanded !== undefined && <span className="admin-nav-chevron" aria-hidden="true">{expanded ? <ChevronDown size={15} /> : <ChevronRight size={15} />}</span>}
   </>
   const className = `admin-nav-btn${collapsed ? " admin-nav-btn--collapsed" : ""}${danger ? " admin-nav-btn--danger" : ""}`
-  return href ? <Link href={href} className={className} aria-current={active ? "page" : undefined} aria-label={collapsed ? label : undefined} title={collapsed ? label : undefined}>{content}</Link>
+  return href ? <Link prefetch={false} href={href} className={className} aria-current={active ? "page" : undefined} aria-label={collapsed ? label : undefined} title={collapsed ? label : undefined}>{content}</Link>
     : <button type="button" className={className} onClick={onClick} disabled={disabled} aria-current={active ? "page" : undefined} aria-expanded={expanded} aria-controls={controls} aria-label={collapsed ? label : undefined} title={collapsed ? label : undefined}>{content}</button>
 }
 
@@ -30,6 +30,6 @@ export function AdminSidebarGroup({ id, icon, label, active, collapsed, expanded
   const selected = items.filter(item => pathname === item.href || pathname.startsWith(`${item.href}/`)).sort((a, b) => b.href.length - a.href.length)[0]?.href
   return <div className="admin-nav-group">
     <AdminSidebarItem icon={icon} label={label} active={active} collapsed={collapsed} expanded={!collapsed && expanded} onClick={onToggle} controls={expanded && !collapsed ? id : undefined} />
-    {expanded && !collapsed && <div id={id} className="admin-nav-submenu">{items.map(item => <Link key={item.href} href={item.href} className="admin-sub-link" aria-current={selected === item.href ? "page" : undefined}>{item.label}</Link>)}</div>}
+    {expanded && !collapsed && <div id={id} className="admin-nav-submenu">{items.map(item => <Link prefetch={false} key={item.href} href={item.href} className="admin-sub-link" aria-current={selected === item.href ? "page" : undefined}>{item.label}</Link>)}</div>}
   </div>
 }

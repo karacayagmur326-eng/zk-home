@@ -26,10 +26,10 @@ function EmphasisHeading({ children }: { children: string }) {
 }
 
 function SectionIntro({ title, description, href, linkText, discover = false }: { title: string; description: string; href?: string; linkText?: string; discover?: boolean }) {
-  if (discover) return <div className="mb-5"><div className="flex items-center justify-between gap-2"><EmphasisHeading>{title}</EmphasisHeading>{href && <Link href={href} className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#C98484] px-3.5 py-2.5 text-xs font-bold text-white shadow-sm transition-colors hover:bg-[#A95E5E]">Keşfet<ArrowRight className="h-3.5 w-3.5" /></Link>}</div><p className="mt-2 text-sm text-[#827b78]">{description}</p></div>
+  if (discover) return <div className="mb-5"><div className="flex items-center justify-between gap-2"><EmphasisHeading>{title}</EmphasisHeading>{href && <Link prefetch={false} href={href} className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#C98484] px-3.5 py-2.5 text-xs font-bold text-white shadow-sm transition-colors hover:bg-[#A95E5E]">Keşfet<ArrowRight className="h-3.5 w-3.5" /></Link>}</div><p className="mt-2 text-sm text-[#827b78]">{description}</p></div>
   return <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
     <div><EmphasisHeading>{title}</EmphasisHeading><p className="mt-1 text-sm text-[#827b78]">{description}</p></div>
-    {href && linkText && <Link href={href} className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#b86f71] hover:underline">{linkText}<ArrowRight className="h-4 w-4" /></Link>}
+    {href && linkText && <Link prefetch={false} href={href} className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#b86f71] hover:underline">{linkText}<ArrowRight className="h-4 w-4" /></Link>}
   </div>
 }
 
@@ -51,7 +51,7 @@ export default function HomeEditorial({
       {content.collections_active && activeCards(content.collection_cards).length > 0 && <section aria-label={content.collections_title}>
         <SectionIntro title={content.collections_title} description={content.collections_description} href={content.collections_link_href} discover />
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {activeCards(content.collection_cards).map((card) => <Link key={card.id} href={card.href} className="group overflow-hidden rounded-[18px] border border-[#eee9e5] bg-[#fbf8f5] transition-shadow hover:shadow-[0_16px_36px_rgba(102,74,65,0.12)]">
+          {activeCards(content.collection_cards).map((card) => <Link prefetch={false} key={card.id} href={card.href} className="group overflow-hidden rounded-[18px] border border-[#eee9e5] bg-[#fbf8f5] transition-shadow hover:shadow-[0_16px_36px_rgba(102,74,65,0.12)]">
             <div className="relative aspect-[16/9] overflow-hidden bg-[#f1ebe6]">
               {card.image && <Image src={card.image} alt={card.title} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.035]" />}
             </div>
@@ -68,7 +68,7 @@ export default function HomeEditorial({
         {products.length > 0 ? <EditorialProductCarousel intro={<div><EmphasisHeading>Öne Çıkan Ürünler</EmphasisHeading><p className="mt-2 text-sm text-[#827b78]">{content.highlights_description}</p></div>}>
           {products.map(product => <FeaturedProductCard key={product.id} product={product} region={region} showSummary />)}
         </EditorialProductCarousel> : <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-          {activeCards(content.highlight_cards).map((card) => <Link key={card.id} href={card.href} className="group overflow-hidden rounded-[18px] border border-[#eee9e5] bg-white transition-shadow hover:shadow-[0_14px_30px_rgba(102,74,65,0.11)]">
+          {activeCards(content.highlight_cards).map((card) => <Link prefetch={false} key={card.id} href={card.href} className="group overflow-hidden rounded-[18px] border border-[#eee9e5] bg-white transition-shadow hover:shadow-[0_14px_30px_rgba(102,74,65,0.11)]">
             <div className="relative aspect-[4/3] overflow-hidden bg-[#f4efea]">{card.image && <Image src={card.image} alt={card.title} fill sizes="(max-width: 640px) 50vw, 25vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.035]" />}</div>
             <div className="px-3.5 py-3"><h3 className="line-clamp-1 text-sm font-semibold">{card.title}</h3><p className="mt-1 line-clamp-1 text-xs text-[#837a76]">{card.description}</p><span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[#b86f71]">Seçkiyi İncele <ArrowRight className="h-3.5 w-3.5" /></span></div>
           </Link>)}
@@ -80,7 +80,7 @@ export default function HomeEditorial({
       <div className="relative isolate flex min-h-[270px] overflow-hidden rounded-[24px] bg-[#eee1d6] p-6 sm:h-[310px] sm:min-h-0 sm:items-center sm:px-10 sm:py-7 lg:h-[330px] lg:px-14 lg:py-8">
         {content.banner_image && <Image src={content.banner_image} alt="Sıcak tonlarda yaşam alanı" fill sizes="100vw" className="-z-20 object-cover object-center" />}
         <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#f3e8dd]/95 via-[#f3e8dd]/65 to-transparent" />
-        <div className="max-w-[280px] sm:max-w-[42%]"><h2 className="text-3xl font-semibold leading-[1.1] tracking-tight sm:text-[36px] lg:text-[42px]">{content.banner_title}<br /><span className="text-[#be777a]">{content.banner_accent}</span></h2><p className="mt-3 text-sm leading-relaxed text-[#665e5a]">{content.banner_description}</p><Link href={content.banner_link_href} className="mt-5 inline-flex items-center gap-2 rounded-lg bg-[#C98484] px-5 py-3 text-xs font-semibold text-white transition-colors hover:bg-[#a95e62]">{content.banner_link_text}<ArrowRight className="h-4 w-4" /></Link></div>
+        <div className="max-w-[280px] sm:max-w-[42%]"><h2 className="text-3xl font-semibold leading-[1.1] tracking-tight sm:text-[36px] lg:text-[42px]">{content.banner_title}<br /><span className="text-[#be777a]">{content.banner_accent}</span></h2><p className="mt-3 text-sm leading-relaxed text-[#665e5a]">{content.banner_description}</p><Link prefetch={false} href={content.banner_link_href} className="mt-5 inline-flex items-center gap-2 rounded-lg bg-[#C98484] px-5 py-3 text-xs font-semibold text-white transition-colors hover:bg-[#a95e62]">{content.banner_link_text}<ArrowRight className="h-4 w-4" /></Link></div>
       </div>
     </section>}
 
@@ -88,7 +88,7 @@ export default function HomeEditorial({
       {content.rooms_active && activeCards(content.room_cards).length > 0 && <section aria-label={content.rooms_title}>
         <SectionIntro title={content.rooms_title} description={content.rooms_description} />
         <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-          {activeCards(content.room_cards).map((card) => <Link key={card.id} href={card.href} className="group relative aspect-[1.65] overflow-hidden rounded-[16px] bg-[#f2ebe5]">
+          {activeCards(content.room_cards).map((card) => <Link prefetch={false} key={card.id} href={card.href} className="group relative aspect-[1.65] overflow-hidden rounded-[16px] bg-[#f2ebe5]">
             {card.image && <Image src={card.image} alt={card.title} fill sizes="(max-width: 640px) 50vw, 25vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.04]" />}
             <span className="absolute bottom-3 left-3 rounded-lg bg-[#fffaf5]/95 px-3 py-1.5 text-xs font-semibold text-[#352f2d] shadow-sm">{card.title}</span>
             <span className="absolute bottom-3 right-3 grid h-8 w-8 place-items-center rounded-full bg-white text-[#9f6265] shadow-sm"><ArrowRight className="h-4 w-4" /></span>
@@ -100,8 +100,8 @@ export default function HomeEditorial({
         <SectionIntro title={content.inspiration_title} description={content.inspiration_description} href="/blog" linkText="Tüm Yazıları Gör" />
         <div className="grid gap-4 md:grid-cols-3">
           {articles.slice(0, 3).map((article) => <article key={article.id} className="group overflow-hidden rounded-[18px] border border-[#eee9e5] bg-white">
-            <Link href={`/blog/${article.slug}`} className="relative block aspect-[16/9] overflow-hidden bg-[#f2ebe5]">{article.image && <Image src={article.image} alt={article.title} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.035]" />}</Link>
-            <div className="p-4"><p className="text-[11px] text-[#a59a95]">{article.published_at && new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "long", year: "numeric" }).format(new Date(article.published_at))}</p><Link href={`/blog/${article.slug}`}><h3 className="mt-1 line-clamp-2 text-[17px] font-semibold leading-snug transition-colors group-hover:text-[#ad6a6d]">{article.title}</h3></Link><p className="mt-2 line-clamp-2 text-xs leading-relaxed text-[#817773]">{article.excerpt}</p><Link href={`/blog/${article.slug}`} className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-[#b86f71] hover:underline">Devamını Oku <ArrowRight className="h-3.5 w-3.5" /></Link></div>
+            <Link prefetch={false} href={`/blog/${article.slug}`} className="relative block aspect-[16/9] overflow-hidden bg-[#f2ebe5]">{article.image && <Image src={article.image} alt={article.title} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.035]" />}</Link>
+            <div className="p-4"><p className="text-[11px] text-[#a59a95]">{article.published_at && new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "long", year: "numeric" }).format(new Date(article.published_at))}</p><Link prefetch={false} href={`/blog/${article.slug}`}><h3 className="mt-1 line-clamp-2 text-[17px] font-semibold leading-snug transition-colors group-hover:text-[#ad6a6d]">{article.title}</h3></Link><p className="mt-2 line-clamp-2 text-xs leading-relaxed text-[#817773]">{article.excerpt}</p><Link prefetch={false} href={`/blog/${article.slug}`} className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-[#b86f71] hover:underline">Devamını Oku <ArrowRight className="h-3.5 w-3.5" /></Link></div>
           </article>)}
         </div>
       </section>}

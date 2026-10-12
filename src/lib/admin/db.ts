@@ -62,9 +62,9 @@ export async function query<T = Record<string, unknown>>(
     const db = getDb()
     const result = await db.query(sql, params)
     
-    // Auto-invalidate memory cache on data modifications
+    // Operational counters and carts do not change public catalog content.
     const isMutation = /\b(INSERT\s+INTO|UPDATE|DELETE\s+FROM|ALTER\s+TABLE|DROP\s+TABLE|TRUNCATE)\b/i.test(sql)
-    if (isMutation && (result.rowCount === null || result.rowCount > 0) && !/^\s*(?:INSERT\s+INTO|UPDATE|DELETE\s+FROM)\s+store_cart(?:_item)?\b/i.test(sql)) {
+    if (isMutation && (result.rowCount === null || result.rowCount > 0) && !/^\s*(?:INSERT\s+INTO|UPDATE|DELETE\s+FROM)\s+(?:store_cart(?:_item)?|api_rate_limits)\b/i.test(sql)) {
       clearMemoryCache()
     }
 
