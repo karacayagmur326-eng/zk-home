@@ -16,6 +16,7 @@ import { serializeJsonLd } from "@lib/security/html"
 import { query } from "@lib/admin/db"
 import { defaultHomeEditorialContent, type HomeEditorialContent } from "@lib/content/home-editorial"
 import HomeEditorial, { type HomeArticle } from "@modules/home/components/home-editorial"
+import HomeBrandIntro from "@modules/home/components/home-brand-intro"
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getThemeSettings()
@@ -74,10 +75,29 @@ export default async function Home() {
   const publicSliders = isStoreReady()
     ? sliders
     : sliders.map(({ top_bar_features: _topBar, ...slider }) => slider)
+  const { siteName, title, description } = getSiteSeoMetadata(await getThemeSettings())
+  const homeUrl = `${getBaseURL()}/`
+  const homeSchema = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite", "@id": `${homeUrl}#website`,
+        name: siteName, alternateName: ["ZK Home", "ZK HOME", "zk-home.com"],
+        url: homeUrl, inLanguage: "tr-TR",
+        publisher: { "@id": `${homeUrl}#organization` },
+      },
+      {
+        "@type": "WebPage", "@id": `${homeUrl}#webpage`,
+        url: homeUrl, name: title, description, inLanguage: "tr-TR",
+        isPartOf: { "@id": `${homeUrl}#website` },
+        about: { "@id": `${homeUrl}#organization` },
+      },
+    ],
+  }
 
   return (
     <>
-      <h1 className="sr-only">{getSiteSeoMetadata(await getThemeSettings()).title}</h1>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(homeSchema) }} />
       {mobileSettings.enabled && (
         <MobileHomeExperience
           prioritizeHero={false}
@@ -91,6 +111,7 @@ export default async function Home() {
       <div className={`bg-[#f6f7f8] ${mobileSettings.enabled ? "hidden md:block" : "block"}`}>
         <CategoryStrip categories={categories} />
       </div>
+      <HomeBrandIntro />
       <HomeEditorial content={editorialContent} products={initialProducts} region={region} articles={articles} />
     </>
   )

@@ -183,6 +183,7 @@ export default async function RootLayout({
   const organizationJsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
+    "@id": `${getBaseURL()}/#organization`,
     name: contact.company_name,
     alternateName: contact.brand_name,
     url: getCanonicalURL(),
@@ -245,7 +246,6 @@ export default async function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: serializeJsonLd(organizationJsonLd) }}
         />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd({ "@context": "https://schema.org", "@type": "WebSite", name: settings.logo_text, url: getCanonicalURL(), inLanguage: "tr" }) }} />
         <ThemeProvider
           attribute="class"
           defaultTheme="light"

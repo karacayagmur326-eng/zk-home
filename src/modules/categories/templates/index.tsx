@@ -18,6 +18,8 @@ import { SortOptions } from "@modules/store/components/refinement-list/sort-prod
 import PaginatedProducts from "@modules/store/templates/paginated-products"
 import { getBaseURL } from "@lib/util/env"
 import { categoryPath } from "@lib/seo/category"
+import { plainText } from "@lib/seo/entity"
+import { paginatedPath } from "@lib/seo/indexing"
 import { turkishTitleCase } from "@lib/util/turkish-title-case"
 
 type DesignItem = {
@@ -300,6 +302,19 @@ export default async function CategoryTemplate({
       { "@type": "ListItem", position: parents.length + 2, name: category.name, item: `${getBaseURL()}${categoryPath(category)}` },
     ],
   }
+  const pageUrl = `${getBaseURL()}${paginatedPath(categoryPath(category), page)}`
+  const collectionJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "@id": `${pageUrl}#webpage`,
+    url: pageUrl,
+    name: category.name,
+    description: plainText(category.description),
+    inLanguage: "tr-TR",
+    isPartOf: { "@id": `${getBaseURL()}/#website` },
+    publisher: { "@id": `${getBaseURL()}/#organization` },
+    breadcrumb: breadcrumbJsonLd,
+  }
 
   const categoryStyle = {
     "--category-hero-height": `${heroHeight}px`,
@@ -313,7 +328,7 @@ export default async function CategoryTemplate({
     <div className="content-container pt-0 pb-4 sm:py-6" style={categoryStyle}>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(collectionJsonLd) }}
       />
       <div>
         <nav
