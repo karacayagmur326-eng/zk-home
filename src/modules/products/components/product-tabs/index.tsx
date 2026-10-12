@@ -101,10 +101,10 @@ const ProductTabs = ({ product, price }: ProductTabsProps) => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
         {/* ── LEFT COLUMN (6 cols): TABS & TAB CONTENT (Açıklama, Özellikler, Taksit) ── */}
         <div className="lg:col-span-6 flex flex-col space-y-4">
-          <div role="tablist" aria-label="Ürün detayları" className="flex items-center gap-2 overflow-x-auto border-b border-slate-200 pb-3 no-scrollbar">
+          <div role="tablist" aria-label="Ürün detayları" className="flex items-center gap-1 overflow-x-auto rounded-t-xl border-b border-slate-200 bg-slate-50/70 px-1 pt-1 no-scrollbar">
             {[["aciklama", "Ürün Açıklaması"], ["ozellikler", "Ürün Özellikleri"], ["taksit", "Taksit Seçenekleri"], ...(faqContent ? [["sss", "Sıkça Sorulan Sorular"]] : [])].map(([key, label]) => (
               <button key={key} id={`product-tab-${key}`} type="button" role="tab" aria-selected={activeTab === key} aria-controls={`product-panel-${key}`} onClick={() => handleTabClick(key)}
-                className={clx("shrink-0 whitespace-nowrap rounded-xl px-3 py-2.5 text-xs font-semibold transition sm:text-sm", activeTab === key ? "bg-primary/10 text-primary" : "text-slate-600 hover:bg-slate-50")}>{label}</button>
+                className={clx("shrink-0 whitespace-nowrap rounded-t-lg border-b-[3px] px-3 py-3 text-sm font-extrabold transition sm:text-[15px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset", activeTab === key ? "border-primary bg-primary/10 text-primary" : "border-transparent text-slate-800 hover:bg-white hover:text-primary")}>{label}</button>
             ))}
           </div>
 
