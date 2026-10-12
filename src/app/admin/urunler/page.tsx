@@ -1,4 +1,5 @@
 "use client"
+import SmartImage from "@components/common/SmartImage"
 import { useUrlState } from "@lib/hooks/use-url-state"
 import AdminTabs from "@components/admin/AdminTabs"
 
@@ -681,9 +682,13 @@ export default function ProductsPage() {
                       {/* Thumbnail */}
                       <td className="px-2 py-3">
                         {p.thumbnail ? (
-                          <img
+                          <SmartImage
                             src={p.thumbnail}
                             alt={p.title}
+                            width={40}
+                            height={40}
+                            quality={50}
+                            loading="lazy"
                             className="w-10 h-10 object-cover rounded-lg border border-slate-200 shadow-2xs"
                           />
                         ) : (

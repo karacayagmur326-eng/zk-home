@@ -1,4 +1,5 @@
 "use client"
+import SmartImage from "@components/common/SmartImage"
 import { AdminSectionHeading } from "@components/admin/AdminContent"
 
 import { useUrlState } from "@lib/hooks/use-url-state"
@@ -710,16 +711,14 @@ export default function MediaLibraryPage() {
                     )}
 
                     {/* Image */}
-                    <img
+                    <SmartImage
                       src={file.url}
                       alt={displayName}
-                      onError={(e) => {
-                        const target = e.currentTarget
-                        if (!target.dataset.retried) {
-                          target.dataset.retried = "true"
-                          target.src = file.url.includes("?") ? `${file.url}&retry=${Date.now()}` : `${file.url}?retry=${Date.now()}`
-                        }
-                      }}
+                      width={320}
+                      height={320}
+                      sizes="(max-width: 640px) 50vw, 220px"
+                      quality={50}
+                      loading="lazy"
                       style={{ width: "100%", height: "100%", objectFit: "cover" }}
                     />
                     
@@ -781,7 +780,7 @@ export default function MediaLibraryPage() {
                         />
                       </td>
                       <td>
-                        <img src={file.url} alt={displayName} title={displayName}
+                        <SmartImage src={file.url} alt={displayName} title={displayName} width={48} height={48} quality={50} loading="lazy"
                           style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 6, border: "1px solid #c3c4c7" }} />
                       </td>
                       <td title={displayName}>
