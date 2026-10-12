@@ -169,7 +169,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
         ) : null}
 
         {/* 5. Stock Status + Stock Code Box (Side-by-Side on Mobile and Desktop) */}
-        <div className="flex items-center gap-2 w-full">
+        <div className="flex flex-wrap items-center gap-2.5 rounded-2xl border border-slate-200/70 bg-slate-50/60 p-2.5 w-full">
           {/* Stock Status Badge */}
           {(() => {
             const variant = product.variants?.[0] as any
@@ -196,8 +196,9 @@ export default function ProductInfo({ product }: ProductInfoProps) {
 
           {/* Stock Code: yalnızca yönetim panelinde girilmiş gerçek değer gösterilir. */}
           {sku && (
-            <div className="rounded-xl bg-[#f8f9fa] border border-slate-200/50 py-2 px-3 sm:px-4 text-xs font-semibold text-slate-600 flex-1 min-w-0 text-left truncate">
-              Stok Kodu: <strong className="font-extrabold text-slate-900 ml-1">{sku}</strong>
+            <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1 rounded-xl border border-primary/15 bg-white py-2 px-3 sm:px-4 text-xs text-left">
+              <span className="font-semibold text-slate-500">Stok Kodu</span>
+              <strong className="break-all font-extrabold tracking-wide text-slate-900">{sku}</strong>
             </div>
           )}
         </div>
