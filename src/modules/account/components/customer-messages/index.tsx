@@ -47,16 +47,19 @@ export default function CustomerMessages({ initialId = "", kind = "messages" }: 
   useEffect(() => {
     const controller = new AbortController()
     loadList(controller.signal)
-    const refresh = () => { if (!document.hidden) loadList(controller.signal) }
-    const timer = window.setInterval(refresh, 30000)
+    let lastFocusRefresh = Date.now()
+    const refresh = () => { if (!document.hidden && navigator.onLine && Date.now() - lastFocusRefresh >= 60_000) { lastFocusRefresh = Date.now(); void loadList(controller.signal) } }
     window.addEventListener("focus", refresh)
-    return () => { controller.abort(); clearInterval(timer); window.removeEventListener("focus", refresh) }
+    return () => { controller.abort(); window.removeEventListener("focus", refresh) }
   }, [loadList])
 
   useEffect(() => {
     if (!selectedId) return
     const controller = new AbortController()
+    let running = false
     const load = async () => {
+      if (running || controller.signal.aborted) return
+      running = true
       const sequence = ++detailRequest.current
       try {
         const response = await fetch(`/api/account/messages?id=${encodeURIComponent(selectedId)}`, { cache: "no-store", signal: controller.signal })
@@ -65,13 +68,13 @@ export default function CustomerMessages({ initialId = "", kind = "messages" }: 
         if (!controller.signal.aborted && sequence === detailRequest.current) setConversation(data.message)
       } catch (err) {
         if (!controller.signal.aborted && sequence === detailRequest.current) setError(err instanceof Error ? err.message : "Yazışma yüklenemedi.")
-      }
+      } finally { running = false }
     }
     load()
-    const refresh = () => { if (!document.hidden) load() }
-    const timer = window.setInterval(refresh, 30000)
+    let lastFocusRefresh = Date.now()
+    const refresh = () => { if (!document.hidden && navigator.onLine && Date.now() - lastFocusRefresh >= 60_000) { lastFocusRefresh = Date.now(); void load() } }
     window.addEventListener("focus", refresh)
-    return () => { controller.abort(); clearInterval(timer); window.removeEventListener("focus", refresh) }
+    return () => { controller.abort(); window.removeEventListener("focus", refresh) }
   }, [selectedId, reload])
 
   const thread = conversation?.id === selectedId ? conversation : null
@@ -88,7 +91,6 @@ export default function CustomerMessages({ initialId = "", kind = "messages" }: 
       setConversation(data.message)
       setDrafts((current) => ({ ...current, [selectedId]: "" }))
       setNotice("Mesajınız destek ekibimize iletildi.")
-      setReload((current) => current + 1)
       loadList()
     } catch (err) { setError(err instanceof Error ? err.message : "Mesaj gönderilemedi.") }
     finally { setSending(false) }
@@ -96,10 +98,10 @@ export default function CustomerMessages({ initialId = "", kind = "messages" }: 
 
   return (
     <section className="space-y-5 py-5 md:py-0 pb-24 md:pb-0">
-      <Link href="/hesabim" className="inline-flex items-center gap-2 text-sm text-slate-500 md:hidden"><ArrowLeft className="h-4 w-4" /> Hesabıma dön</Link>
+      <Link prefetch={false} href="/hesabim" className="inline-flex items-center gap-2 text-sm text-slate-500 md:hidden"><ArrowLeft className="h-4 w-4" /> Hesabıma dön</Link>
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div><h1 className="text-2xl font-bold text-slate-900">{kind === "questions" ? "Ürün Sorularım" : "Mesajlarım"}</h1><p className="mt-1 text-sm text-slate-500">Sorularınızı ve destek ekibimizin yanıtlarını buradan takip edin.</p></div>
-        <Link href={kind === "questions" ? "/magaza" : "/iletisim"} className="inline-flex items-center gap-2 rounded-xl bg-[#C98484] px-4 py-3 text-sm font-bold text-white hover:bg-[#B87272]"><Plus className="h-4 w-4" /> {kind === "questions" ? "Yeni soru sor" : "Yeni mesaj"}</Link>
+        <Link prefetch={false} href={kind === "questions" ? "/magaza" : "/iletisim"} className="inline-flex items-center gap-2 rounded-xl bg-[#C98484] px-4 py-3 text-sm font-bold text-white hover:bg-[#B87272]"><Plus className="h-4 w-4" /> {kind === "questions" ? "Yeni soru sor" : "Yeni mesaj"}</Link>
       </header>
       {error && <p role="alert" className="rounded-xl border border-red-100 bg-red-50 p-3 text-sm text-red-700">{error}</p>}
       {notice && <p role="status" className="rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-sm text-emerald-700">{notice}</p>}
@@ -120,7 +122,7 @@ export default function CustomerMessages({ initialId = "", kind = "messages" }: 
         </aside>
         <div className="min-w-0 p-4 sm:p-6">
           {!selectedId ? <div className="flex min-h-64 flex-col items-center justify-center gap-3 text-center"><MessageSquare className="h-10 w-10 text-[#C98484]" /><h2 className="font-bold text-slate-800">Size nasıl yardımcı olabiliriz?</h2><p className="max-w-sm text-sm text-slate-500">İletişim formundan mesaj gönderin; yanıtları burada görün ve yazışmaya devam edin.</p></div> : !thread ? <p className="py-12 text-center text-sm text-slate-500">Yazışma yükleniyor…</p> : <>
-            <header className="border-b border-slate-100 pb-4"><p className="text-xs font-bold text-[#C98484]">Talep #{thread.id}</p><h2 className="mt-1 text-lg font-bold break-words">{thread.subject || "İletişim talebi"}</h2>{thread.product_handle && <Link href={`/urunler/${thread.product_handle}`} className="mt-2 inline-block text-xs font-semibold text-[#C98484] hover:underline">Ürünü görüntüle</Link>}{thread.order_no && <p className="mt-1 text-xs text-slate-500">Sipariş: {thread.order_no}</p>}</header>
+            <header className="border-b border-slate-100 pb-4"><p className="text-xs font-bold text-[#C98484]">Talep #{thread.id}</p><h2 className="mt-1 text-lg font-bold break-words">{thread.subject || "İletişim talebi"}</h2>{thread.product_handle && <Link prefetch={false} href={`/urunler/${thread.product_handle}`} className="mt-2 inline-block text-xs font-semibold text-[#C98484] hover:underline">Ürünü görüntüle</Link>}{thread.order_no && <p className="mt-1 text-xs text-slate-500">Sipariş: {thread.order_no}</p>}</header>
             <ol aria-label="Yazışma geçmişi" className="my-5 space-y-4">{thread.history.map((entry) => <li key={entry.id}
               className={`rounded-2xl border p-4 ${entry.direction === "incoming" ? "ml-4 border-rose-100 bg-rose-50/50" : "mr-4 border-slate-200 bg-slate-50"}`}>
               <div className="mb-2 flex flex-wrap items-center justify-between gap-2"><strong className="text-xs text-slate-700">{entry.direction === "incoming" ? "Siz" : `${siteContact.brandName} Destek`}</strong><time dateTime={entry.created_at} className="text-[10px] text-slate-400">{formatDate(entry.created_at)}</time></div>

@@ -812,7 +812,7 @@ export default function DiscountsAndCouponsPage() {
               Daha fazla kişiye ulaşmak için kuponlarınızı e-posta kampanyalarınızda ve sosyal medyada paylaşın.
             </p>
 
-            <Link
+            <Link prefetch={false}
               href="/admin/pazarlama/kampanyalar"
               className="w-full py-2.5 px-4 rounded-xl bg-white hover:bg-slate-50 border border-amber-200 text-[#C98484] font-bold text-xs transition-all flex items-center justify-between group cursor-pointer"
             >

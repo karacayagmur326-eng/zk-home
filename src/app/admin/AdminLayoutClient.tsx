@@ -1,5 +1,6 @@
 "use client"
 
+import SmartImage from "@components/common/SmartImage"
 import { useAdminAutoRefresh } from "@lib/hooks/use-admin-auto-refresh"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
@@ -388,7 +389,7 @@ export default function AdminLayout({
         >
           {collapsed ? (
             themeSettings?.mini_logo_url ? (
-              <img
+              <SmartImage width={400} height={400} sizes="400px" quality={50} loading="lazy"
                 src={themeSettings.mini_logo_url}
                 alt="Mini Logo"
                 style={{
@@ -427,7 +428,7 @@ export default function AdminLayout({
               </div>
             )
           ) : (
-            <img
+            <SmartImage width={400} height={400} sizes="400px" quality={50} loading="lazy"
               src={
                 themeSettings?.admin_logo_url || themeSettings?.header_logo_url || "/brand/placeholder.svg"
               }

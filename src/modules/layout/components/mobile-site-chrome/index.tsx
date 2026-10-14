@@ -1,5 +1,7 @@
 "use client"
 
+import { sharedJsonRequest } from "@lib/util/shared-json-request"
+
 import FavoriteCounter from "../favorite-counter"
 
 import { useState, useRef, useEffect } from "react"
@@ -109,8 +111,7 @@ export default function MobileSiteChrome({ settings, logoUrl, initialCart }: { s
   useEffect(() => {
     if (!menuOpen || categoriesLoaded) return
     let cancelled = false
-    fetch("/api/catalog/navigation")
-      .then((r) => (r.ok ? r.json() : {}))
+    sharedJsonRequest("/api/catalog/navigation", 60_000)
       .then((data: any) => {
         if (cancelled) return
         const catList: CategoryItem[] = []
@@ -150,7 +151,7 @@ export default function MobileSiteChrome({ settings, logoUrl, initialCart }: { s
       const expanded = Boolean(openSections[key])
       return <div key={cat.id} className={depth ? "ml-4 border-l border-slate-100 pl-2" : ""}>
         <div className="flex items-center gap-1">
-          <Link href={cat.url} onClick={() => setMenuOpen(false)}
+          <Link prefetch={false} href={cat.url} onClick={() => setMenuOpen(false)}
             className="group flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-2 py-1.5 text-[11.5px] font-bold text-slate-800 hover:bg-rose-50 hover:text-[#C98484]">
             {depth === 0 && <span className="grid h-6 w-6 shrink-0 place-items-center overflow-hidden rounded-full border border-slate-200 bg-slate-100/80">
               <AppIcon name={cat.icon || "Tag"} className="h-3.5 w-3.5 object-contain" />
@@ -202,7 +203,7 @@ export default function MobileSiteChrome({ settings, logoUrl, initialCart }: { s
       {/* Mobile Top Header Chrome */}
       <div className="mobile-only-chrome md:hidden sticky top-0 z-[90]">
         {settings.announcementText && (
-          <Link
+          <Link prefetch={false}
             href={settings.announcementHref || "/"}
             className="block bg-[#C98484] px-4 py-2 text-center text-[10px] font-extrabold tracking-wide text-white"
           >
@@ -221,7 +222,7 @@ export default function MobileSiteChrome({ settings, logoUrl, initialCart }: { s
           </button>
 
           {/* Equal side columns keep the logo centered between unequal action groups. */}
-          <Link href="/" className="relative flex h-10 w-[min(176px,calc(100vw_-_192px))] items-center justify-center">
+          <Link prefetch={false} href="/" className="relative flex h-10 w-[min(176px,calc(100vw_-_192px))] items-center justify-center">
             <Image
               src={logoUrl}
               alt={siteContact.brandName}
@@ -245,7 +246,7 @@ export default function MobileSiteChrome({ settings, logoUrl, initialCart }: { s
             >
               <AppIcon name="Search" className="h-5 w-5" />
             </button>
-            <Link
+            <Link prefetch={false}
               href="/sepet"
               aria-label="Sepetim"
               className="relative grid h-10 w-10 place-items-center text-slate-800 hover:bg-slate-100 rounded-full transition-colors"
@@ -301,7 +302,7 @@ export default function MobileSiteChrome({ settings, logoUrl, initialCart }: { s
           <div className="fixed inset-y-0 left-0 z-[101] flex w-[85%] max-w-[340px] flex-col bg-white shadow-2xl transition-transform duration-300 animate-in slide-in-from-left">
             {/* Drawer Header */}
             <div className="flex h-[56px] items-center justify-between border-b border-slate-100 bg-slate-50 px-3.5">
-              <Link href="/" onClick={() => setMenuOpen(false)} className="relative h-7 w-28 flex items-center justify-center">
+              <Link prefetch={false} href="/" onClick={() => setMenuOpen(false)} className="relative h-7 w-28 flex items-center justify-center">
                 <Image
                   src={logoUrl}
                   alt={siteContact.brandName}
@@ -331,14 +332,14 @@ export default function MobileSiteChrome({ settings, logoUrl, initialCart }: { s
                 </div>
               </div>
               <div className="mt-2.5 grid grid-cols-2 gap-2">
-                <Link
+                <Link prefetch={false}
                   href="/hesabim"
                   onClick={() => setMenuOpen(false)}
                   className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-white/15 py-1.5 text-[11px] font-bold text-white hover:bg-white/25 transition-colors"
                 >
                   <AppIcon name="User" className="h-3 w-3" /> Hesabım
                 </Link>
-                <Link
+                <Link prefetch={false}
                   href="/favorilerim"
                   onClick={() => setMenuOpen(false)}
                   className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-white/15 py-1.5 text-[11px] font-bold text-white hover:bg-white/25 transition-colors"
@@ -356,7 +357,7 @@ export default function MobileSiteChrome({ settings, logoUrl, initialCart }: { s
                   <span className="text-[10.5px] font-extrabold uppercase tracking-wider text-slate-400">
                     Ürün Kategorileri
                   </span>
-                  <Link
+                  <Link prefetch={false}
                     href="/magaza"
                     onClick={() => setMenuOpen(false)}
                     className="text-[10.5px] font-bold text-[#C98484] hover:underline"
@@ -401,7 +402,7 @@ export default function MobileSiteChrome({ settings, logoUrl, initialCart }: { s
                     {isOpen && (
                       <div className="mt-1 space-y-0.5 pl-6 pr-1 animate-in fade-in duration-150">
                         {group.items.map((item, idx) => (
-                          <Link
+                          <Link prefetch={false}
                             key={idx}
                             href={item.url || "#"}
                             onClick={() => setMenuOpen(false)}
@@ -453,7 +454,7 @@ export default function MobileSiteChrome({ settings, logoUrl, initialCart }: { s
               item.label?.toLowerCase().includes("sepet")
 
             return (
-              <Link
+              <Link prefetch={false}
                 key={item.id}
                 href={item.href || "/"}
                 className={`flex min-w-0 flex-col items-center justify-center gap-1 text-[9px] font-bold ${

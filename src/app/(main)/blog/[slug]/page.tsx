@@ -177,7 +177,7 @@ export default async function ArticlePage({ params }: Props) {
         heroImageAlt={article.title}
         topMeta={
           <div className="flex flex-wrap items-center gap-2.5">
-            <Link
+            <Link prefetch={false}
               href="/blog"
               className="inline-flex items-center gap-1 text-xs font-bold text-slate-600 hover:text-[#C98484] transition bg-white/80 backdrop-blur-xs px-3 py-1.5 rounded-lg border border-slate-200 shadow-2xs"
             >
@@ -185,7 +185,7 @@ export default async function ArticlePage({ params }: Props) {
               <span>Tüm Rehberler</span>
             </Link>
             {article.category_name && (
-              <Link
+              <Link prefetch={false}
                 href={`/blog?kategori=${article.category_slug || article.category_id}`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-100/90 text-[#C98484] font-extrabold text-xs hover:bg-rose-200 transition shadow-2xs"
               >
@@ -241,13 +241,13 @@ export default async function ArticlePage({ params }: Props) {
             </div>
 
             <div className="flex items-center gap-2.5">
-              <Link
+              <Link prefetch={false}
                 href="/blog"
                 className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition shadow-2xs"
               >
                 Diğer Makaleler
               </Link>
-              <Link
+              <Link prefetch={false}
                 href="/magaza"
                 className="px-5 py-2.5 bg-[#C98484] hover:bg-[#A95E5E] text-white rounded-xl text-xs font-extrabold transition shadow-sm"
               >
@@ -264,7 +264,7 @@ export default async function ArticlePage({ params }: Props) {
               <h2 className="text-lg font-black text-slate-900">
                 İlginizi Çekebilecek Diğer Rehberler
               </h2>
-              <Link href="/blog" className="text-xs font-bold text-[#C98484] hover:underline">
+              <Link prefetch={false} href="/blog" className="text-xs font-bold text-[#C98484] hover:underline">
                 Tümünü Gör →
               </Link>
             </div>
@@ -276,7 +276,7 @@ export default async function ArticlePage({ params }: Props) {
                   className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs transition hover:-translate-y-1 hover:shadow-lg flex flex-col justify-between"
                 >
                   <div>
-                    <Link href={`/blog/${rel.slug}`} className="relative block aspect-[4/3] overflow-hidden bg-slate-100">
+                    <Link prefetch={false} href={`/blog/${rel.slug}`} className="relative block aspect-[4/3] overflow-hidden bg-slate-100">
                       {rel.image ? (
                         <Image
                           src={rel.image}
@@ -292,7 +292,7 @@ export default async function ArticlePage({ params }: Props) {
                     </Link>
 
                     <div className="p-4">
-                      <Link href={`/blog/${rel.slug}`}>
+                      <Link prefetch={false} href={`/blog/${rel.slug}`}>
                         <h3 className="line-clamp-2 text-xs font-black leading-5 text-slate-900 group-hover:text-[#C98484] transition">
                           {rel.title}
                         </h3>

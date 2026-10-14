@@ -1,4 +1,5 @@
 "use client"
+import SmartImage from "@components/common/SmartImage"
 import { useEffect, useRef, useState } from "react"
 import ConfirmModal from "../components/ConfirmModal"
 import IconPickerModal from "../components/IconPickerModal"
@@ -1939,7 +1940,7 @@ export default function CategoriesPage() {
                     <div className="flex items-center gap-2.5 mb-2.5">
                       <div className="w-10 h-9 rounded-xl bg-white border border-slate-200 overflow-hidden flex items-center justify-center shrink-0 p-1">
                         {design.cardImageUrl ? (
-                          <img
+                          <SmartImage width={400} height={400} sizes="400px" quality={50} loading="lazy"
                             src={design.cardImageUrl}
                             alt=""
                             className="w-full h-full object-contain"
@@ -2115,7 +2116,7 @@ export default function CategoriesPage() {
                           </span>
                           <div className="mt-2 flex h-24 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-white">
                             {imageField.value ? (
-                              <img
+                              <SmartImage width={400} height={400} sizes="400px" quality={50} loading="lazy"
                                 src={imageField.value}
                                 alt=""
                                 className="h-full w-full object-cover"

@@ -986,7 +986,7 @@ function AdminPagesContent() {
             <h1 className="text-2xl font-black text-slate-900">Sayfalar</h1>
             <p className="text-xs text-slate-500 mt-1">Kurumsal sayfaları (Gizlilik, KVKK, vb.) düzenleyin ve yönetin.</p>
           </div>
-          <Link
+          <Link prefetch={false}
             href="/admin/sayfalar?duzenle=yeni"
             className="px-5 py-2.5 rounded-xl bg-[#C98484] text-white font-extrabold text-xs hover:bg-[#A95E5E] transition inline-flex items-center gap-2 shadow-md shadow-rose-500/20 w-fit"
           >
@@ -1109,7 +1109,7 @@ function AdminPagesContent() {
                               {activeTab === "deleted" ? (
                                 <span className="font-bold text-slate-900 text-xs">{title}</span>
                               ) : (
-                                <Link
+                                <Link prefetch={false}
                                   href={`/admin/sayfalar?duzenle=${item.handle}`}
                                   className="font-bold text-slate-900 hover:text-[#C98484] transition text-xs"
                                 >
@@ -1130,11 +1130,11 @@ function AdminPagesContent() {
                                 </>
                               ) : (
                                 <>
-                                  <Link href={`/admin/sayfalar?duzenle=${item.handle}`} className="text-[#C98484] hover:underline">Düzenle</Link>
+                                  <Link prefetch={false} href={`/admin/sayfalar?duzenle=${item.handle}`} className="text-[#C98484] hover:underline">Düzenle</Link>
                                   <span className="text-slate-300">|</span>
                                   <button onClick={() => handleDuplicatePage(item.handle)} className="text-slate-500 hover:text-slate-900 hover:underline cursor-pointer">Çoğalt</button>
                                   <span className="text-slate-300">|</span>
-                                  <Link href={`/${slug}`} target="_blank" className="text-slate-500 hover:text-slate-900 hover:underline">Görüntüle</Link>
+                                  <Link prefetch={false} href={`/${slug}`} target="_blank" className="text-slate-500 hover:text-slate-900 hover:underline">Görüntüle</Link>
                                   <span className="text-slate-300">|</span>
                                   <button onClick={() => handleDeletePages([item.handle])} className="text-rose-600 hover:underline cursor-pointer">Sil</button>
                                 </>
@@ -1180,7 +1180,7 @@ function AdminPagesContent() {
                             ) : (
                               <>
                             {/* ✏️ Düzenle */}
-                            <Link
+                            <Link prefetch={false}
                               href={`/admin/sayfalar?duzenle=${item.handle}`}
                               title="Sayfayı Düzenle"
                               className="p-1.5 text-slate-400 hover:text-[#C98484] hover:bg-rose-50 rounded-lg transition"
@@ -1197,7 +1197,7 @@ function AdminPagesContent() {
                               <Copy className="w-3.5 h-3.5" />
                             </button>
                             {/* 👁️ Görüntüle */}
-                            <Link
+                            <Link prefetch={false}
                               href={`/${slug}`}
                               target="_blank"
                               title="Sayfayı Görüntüle"
@@ -1253,7 +1253,7 @@ function AdminPagesContent() {
       <div style={{ width: "100%" }} className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <Link href="/admin/sayfalar" className="text-xs font-bold text-slate-500 hover:text-slate-900 inline-flex items-center gap-1 mb-1">
+            <Link prefetch={false} href="/admin/sayfalar" className="text-xs font-bold text-slate-500 hover:text-slate-900 inline-flex items-center gap-1 mb-1">
               <ArrowLeft className="w-3.5 h-3.5" /> Sayfalara Dön
             </Link>
             <h2 className="text-lg font-black text-slate-900">Hakkımızda Sayfası İçerik Yönetimi</h2>
@@ -1682,7 +1682,7 @@ function AdminPagesContent() {
                   >
                     Taslak Kaydet
                   </button>
-                  <Link
+                  <Link prefetch={false}
                     href={`/${customSlug || "hakkimizda"}`}
                     target="_blank"
                     className="w-full py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-extrabold rounded-xl transition flex items-center justify-center gap-1.5"
@@ -1725,7 +1725,7 @@ function AdminPagesContent() {
       <div style={{ width: "100%" }} className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <Link href="/admin/sayfalar" className="text-xs font-bold text-slate-500 hover:text-slate-900 inline-flex items-center gap-1 mb-1">
+            <Link prefetch={false} href="/admin/sayfalar" className="text-xs font-bold text-slate-500 hover:text-slate-900 inline-flex items-center gap-1 mb-1">
               <ArrowLeft className="w-3.5 h-3.5" /> Sayfalara Dön
             </Link>
             <h2 className="text-lg font-black text-slate-900">İletişim Sayfası İçerik Yönetimi</h2>
@@ -2014,7 +2014,7 @@ function AdminPagesContent() {
                   >
                     Taslak Kaydet
                   </button>
-                  <Link
+                  <Link prefetch={false}
                     href={`/${customSlug || "iletisim"}`}
                     target="_blank"
                     className="w-full py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-extrabold rounded-xl transition flex items-center justify-center gap-1.5"
@@ -2060,7 +2060,7 @@ function AdminPagesContent() {
       <div style={{ width: "100%" }} className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <Link href="/admin/sayfalar" className="text-xs font-bold text-slate-500 hover:text-slate-900 inline-flex items-center gap-1 mb-1">
+            <Link prefetch={false} href="/admin/sayfalar" className="text-xs font-bold text-slate-500 hover:text-slate-900 inline-flex items-center gap-1 mb-1">
               <ArrowLeft className="w-3.5 h-3.5" /> Sayfalara Dön
             </Link>
             <h2 className="text-lg font-black text-slate-900">Markalarımız Sayfası İçerik Yönetimi</h2>
@@ -2445,7 +2445,7 @@ function AdminPagesContent() {
                   >
                     Taslak Kaydet
                   </button>
-                  <Link
+                  <Link prefetch={false}
                     href={`/${customSlug || "markalar"}`}
                     target="_blank"
                     className="w-full py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-extrabold rounded-xl transition flex items-center justify-center gap-1.5"
@@ -2491,7 +2491,7 @@ function AdminPagesContent() {
       <div style={{ width: "100%" }} className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <Link href="/admin/sayfalar" className="text-xs font-bold text-slate-500 hover:text-slate-900 inline-flex items-center gap-1 mb-1">
+            <Link prefetch={false} href="/admin/sayfalar" className="text-xs font-bold text-slate-500 hover:text-slate-900 inline-flex items-center gap-1 mb-1">
               <ArrowLeft className="w-3.5 h-3.5" /> Sayfalara Dön
             </Link>
             <h2 className="text-lg font-black text-slate-900">Toptan ve Kurumsal Satış Sayfası İçerik Yönetimi</h2>
@@ -2805,7 +2805,7 @@ function AdminPagesContent() {
       <div style={{ width: "100%" }} className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <Link href="/admin/sayfalar" className="text-xs font-bold text-slate-500 hover:text-slate-900 inline-flex items-center gap-1 mb-1">
+            <Link prefetch={false} href="/admin/sayfalar" className="text-xs font-bold text-slate-500 hover:text-slate-900 inline-flex items-center gap-1 mb-1">
               <ArrowLeft className="w-3.5 h-3.5" /> Sayfalara Dön
             </Link>
             <h2 className="text-lg font-black text-slate-900">Teslimat, İptal ve İade Koşulları İçerik Yönetimi</h2>
@@ -3001,7 +3001,7 @@ function AdminPagesContent() {
                   >
                     Taslak Kaydet
                   </button>
-                  <Link
+                  <Link prefetch={false}
                     href={`/${customSlug || "teslimat-ve-iade"}`}
                     target="_blank"
                     className="w-full py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-extrabold rounded-xl transition flex items-center justify-center gap-1.5"
@@ -3278,7 +3278,7 @@ function AdminPagesContent() {
       {/* Sayfalara Dön & Üst Başlık */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/80 pb-4">
         <div>
-          <Link
+          <Link prefetch={false}
             href="/admin/sayfalar"
             className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[#C98484] transition mb-2"
           >
@@ -3440,7 +3440,7 @@ function AdminPagesContent() {
                 >
                   Taslak Kaydet
                 </button>
-                <Link
+                <Link prefetch={false}
                   href={`/${currentSlugDisplay || "sayfa"}`}
                   target="_blank"
                   className="w-full py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-extrabold rounded-xl transition flex items-center justify-center gap-1.5"

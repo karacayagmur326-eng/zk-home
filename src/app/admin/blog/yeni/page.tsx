@@ -1,5 +1,6 @@
 "use client"
 
+import SmartImage from "@components/common/SmartImage"
 import { useEffect, useState, use } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -492,7 +493,7 @@ export default function EditBlogPostPage({ params }: { params: Promise<{ id: str
               {image ? (
                 <div className="space-y-3 w-full text-center group">
                   <div className="h-52 w-full rounded-xl border border-slate-200 overflow-hidden bg-white flex items-center justify-center p-2 relative">
-                    <img src={image} alt="featured" className="max-w-full max-h-full object-contain" />
+                    <SmartImage width={400} height={400} sizes="400px" quality={50} loading="lazy" src={image} alt="featured" className="max-w-full max-h-full object-contain" />
                     {/* Hover Overlay for change */}
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-xl">
                       <button

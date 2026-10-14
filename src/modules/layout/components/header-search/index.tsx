@@ -50,29 +50,32 @@ export default function HeaderSearch() {
   // Live instant search effect as user types
   useEffect(() => {
     const trimmed = query.trim()
-    if (trimmed.length < 2) {
+    if (!open || trimmed.length < 2) {
       setProducts([])
       setTotalResults(0)
       setLoading(false)
       return
     }
 
+    const controller = new AbortController()
     setLoading(true)
     const timer = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(trimmed)}`)
+        const res = await fetch(`/api/search?q=${encodeURIComponent(trimmed)}`, { signal: controller.signal })
+        if (!res.ok) throw new Error("Search request failed")
         const data = await res.json()
+        if (controller.signal.aborted) return
         setProducts(data.products || [])
         setTotalResults(data.total || 0)
       } catch (err) {
-        console.error("Search fetch error:", err)
+        if (!controller.signal.aborted) console.error("Search fetch error:", err)
       } finally {
-        setLoading(false)
+        if (!controller.signal.aborted) setLoading(false)
       }
-    }, 180)
+    }, 350)
 
-    return () => clearTimeout(timer)
-  }, [query])
+    return () => { clearTimeout(timer); controller.abort() }
+  }, [query, open])
 
   const submitSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()

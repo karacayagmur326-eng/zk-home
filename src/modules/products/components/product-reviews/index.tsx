@@ -1,5 +1,7 @@
 "use client"
+import SmartImage from "@components/common/SmartImage"
 import { useSiteContact } from "@components/common/SellerQuestion"
+import { getProductReviews, invalidateProductReviews } from "@lib/util/product-review-request"
 
 import { useUrlState } from "@lib/hooks/use-url-state"
 
@@ -57,9 +59,10 @@ export default function ProductReviews({
   }
 
   useEffect(() => {
-    fetch(`/api/products/${productId}/reviews`)
-      .then((r) => (r.ok ? r.json() : null))
+    let current = true
+    getProductReviews(productId)
       .then((data) => {
+        if (!current) return
         if (data?.reviews) setReviews(data.reviews)
         if (data?.questions) setQuestions(data.questions)
       })
@@ -78,6 +81,7 @@ export default function ProductReviews({
     window.addEventListener("hashchange", handleHash)
     window.addEventListener("product:section", handleHash)
     return () => {
+      current = false
       window.removeEventListener("hashchange", handleHash)
       window.removeEventListener("product:section", handleHash)
     }
@@ -161,6 +165,7 @@ export default function ProductReviews({
       const data = await res.json()
 
       if (res.ok && data.item) {
+        invalidateProductReviews(productId)
         if (formType === "question") {
           selectMode("question")
         } else {
@@ -466,7 +471,7 @@ export default function ProductReviews({
                   {/* Photo Attachment */}
                   {r.image_url && (
                     <div className="pt-1">
-                      <img
+                      <SmartImage width={80} height={80} sizes="80px" quality={50} loading="lazy"
                         src={r.image_url}
                         alt="Yorum görseli"
                         className="w-20 h-20 object-cover rounded-xl border border-slate-200 shadow-2xs hover:scale-105 transition-transform cursor-pointer"

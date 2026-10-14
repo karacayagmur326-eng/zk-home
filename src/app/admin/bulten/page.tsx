@@ -30,8 +30,8 @@ export default async function NewsletterSubscribers({ searchParams }: { searchPa
     <div className="admin-content-toolbar">
       <NewsletterAutoRefresh />
       <div className="admin-content-actions">
-        <Link href="/admin/anasayfa-vitrini" className="admin-btn admin-btn-secondary"><Mail size={15} aria-hidden="true" />Abonelik kutusu ayarları</Link>
-        <Link href="/admin/tema-ayarlari" className="admin-btn admin-btn-secondary"><Settings size={15} aria-hidden="true" />Footer ve sosyal medya</Link>
+        <Link prefetch={false} href="/admin/anasayfa-vitrini" className="admin-btn admin-btn-secondary"><Mail size={15} aria-hidden="true" />Abonelik kutusu ayarları</Link>
+        <Link prefetch={false} href="/admin/tema-ayarlari" className="admin-btn admin-btn-secondary"><Settings size={15} aria-hidden="true" />Footer ve sosyal medya</Link>
       </div>
     </div>
     <div className="admin-metrics-grid">
@@ -44,10 +44,10 @@ export default async function NewsletterSubscribers({ searchParams }: { searchPa
       <form method="get" action="/admin/bulten" className="admin-content-toolbar admin-panel-filters">
         <label className="admin-search-field"><Search size={16} aria-hidden="true" /><input key={search} name="q" defaultValue={search} maxLength={200} placeholder="E-posta adresi ara..." aria-label="Abonelerde ara" className="admin-input" /></label>
         <button type="submit" className="admin-btn admin-btn-primary">Ara</button>
-        {search && <Link href="/admin/bulten" className="admin-btn admin-btn-secondary">Sıfırla</Link>}
+        {search && <Link prefetch={false} href="/admin/bulten" className="admin-btn admin-btn-secondary">Sıfırla</Link>}
       </form>
       {subscribers.length ? <div className="admin-table-scroll"><table className="admin-table admin-table--embedded"><thead><tr><th scope="col">Abone</th><th scope="col">Kayıt tarihi</th></tr></thead><tbody>{subscribers.map(subscriber => <tr key={subscriber.email}><td><div className="admin-subscriber-cell"><span className="admin-section-icon"><Mail size={16} aria-hidden="true" /></span><span>{subscriber.email}</span></div></td><td className="whitespace-nowrap">{date(subscriber.created_at)}</td></tr>)}</tbody></table></div> : <AdminEmptyState title={search ? "Aramanızla eşleşen abone bulunamadı" : "Henüz bülten abonesi yok"} description={search ? "Başka bir e-posta adresi arayın veya filtreyi sıfırlayın." : "Müşterileriniz bültene abone olduğunda kayıtları burada görünecek."} icon={<Mail size={20} />} />}
-      <div className="admin-pagination-bar"><span>{count ? `${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, count)} / ${count} abone` : "0 abone"}</span><nav aria-label="Abone sayfaları" className="admin-content-actions">{page > 1 && <Link href={pageHref(page - 1)} className="admin-btn admin-btn-secondary"><ChevronLeft size={14} aria-hidden="true" />Önceki</Link>}<span>Sayfa {page} / {pages}</span>{page < pages && <Link href={pageHref(page + 1)} className="admin-btn admin-btn-secondary">Sonraki<ChevronRight size={14} aria-hidden="true" /></Link>}</nav></div>
+      <div className="admin-pagination-bar"><span>{count ? `${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, count)} / ${count} abone` : "0 abone"}</span><nav aria-label="Abone sayfaları" className="admin-content-actions">{page > 1 && <Link prefetch={false} href={pageHref(page - 1)} className="admin-btn admin-btn-secondary"><ChevronLeft size={14} aria-hidden="true" />Önceki</Link>}<span>Sayfa {page} / {pages}</span>{page < pages && <Link prefetch={false} href={pageHref(page + 1)} className="admin-btn admin-btn-secondary">Sonraki<ChevronRight size={14} aria-hidden="true" /></Link>}</nav></div>
     </section>
   </div>
 }

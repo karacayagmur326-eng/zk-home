@@ -899,7 +899,7 @@ export default function MediaLibraryPage() {
 
             {/* Main Preview Image */}
             <div style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center", maxHeight: "72vh", minWidth: 0 }}>
-              <img
+              <SmartImage width={1200} height={900} sizes="(max-width: 1200px) 90vw, 1200px" quality={75} loading="lazy"
                 src={lightboxFile.url}
                 alt={getDisplayName(lightboxFile)}
                 style={{

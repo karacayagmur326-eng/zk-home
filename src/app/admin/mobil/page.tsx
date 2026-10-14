@@ -1,4 +1,5 @@
 "use client"
+import SmartImage from "@components/common/SmartImage"
 import AdminTabs from "@components/admin/AdminTabs"
 
 import { useUrlState } from "@lib/hooks/use-url-state"
@@ -52,7 +53,7 @@ function IconField({
         <div className="relative grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-xl border border-rose-200 bg-rose-50 text-[#C98484] shadow-2xs">
           {hasImage ? (
             <>
-              <img src={image} alt="" className="h-full w-full object-contain p-1" />
+              <SmartImage width={40} height={40} sizes="40px" quality={50} loading="lazy" src={image!} alt="" className="h-full w-full object-contain p-1" />
               <button
                 type="button"
                 onClick={onRemoveImage}

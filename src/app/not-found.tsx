@@ -15,7 +15,7 @@ export default function NotFound() {
       <p className="text-small-regular text-ui-fg-base">
         The page you tried to access does not exist.
       </p>
-      <Link className="flex gap-x-1 items-center group" href="/">
+      <Link prefetch={false} className="flex gap-x-1 items-center group" href="/">
         <Text className="text-ui-fg-interactive">Ana sayfaya dön</Text>
         <ArrowUpRightMini
           className="group-hover:rotate-45 ease-in-out duration-150"

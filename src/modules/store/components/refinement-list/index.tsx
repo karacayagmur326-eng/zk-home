@@ -1,4 +1,6 @@
 "use client"
+
+import { sharedJsonRequest } from "@lib/util/shared-json-request"
 import Link from "next/link"
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
@@ -197,7 +199,7 @@ const RefinementList = ({
             isActive && "bg-rose-50 text-[#C98484]"
           )}
         >
-          <Link href={item.url && item.url !== "#" ? item.url : "#"}
+          <Link prefetch={false} href={item.url && item.url !== "#" ? item.url : "#"}
             onClick={(event) => {
               if (!item.url || item.url === "#") { event.preventDefault(); if (hasChildren) setOpenCategoryGroups(current => ({ ...current, [itemKey]: !current[itemKey] })) }
               else setMobileFiltersOpen(false)
@@ -287,8 +289,7 @@ const RefinementList = ({
       return
     }
 
-    fetch("/api/catalog/navigation")
-      .then((response) => response.json())
+    sharedJsonRequest("/api/catalog/navigation", 60_000)
       .then((res) => {
         if (res.sidebarMenu) {
           setCustomSidebarMenu((prev: any) => prev || res.sidebarMenu)

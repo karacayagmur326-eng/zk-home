@@ -49,7 +49,7 @@ export default async function DeliveryAndReturnsPage() {
           <div className="rounded-2xl bg-[#f5eae7] p-7">
             <h2 className="text-xl font-bold text-slate-900">İade için bize ulaşın</h2>
             <p className="mt-3 text-sm leading-relaxed text-slate-700">Sipariş numaranızı ve varsa görselleri paylaşın. Size gönderim bilgisi veya başka bir çözüm için dönüş yapalım.</p>
-            <Link href="/iletisim#contact-form" className="mt-6 inline-block rounded-full bg-[#bd8585] px-6 py-3 text-sm font-semibold text-white">İletişim formu</Link>
+            <Link prefetch={false} href="/iletisim#contact-form" className="mt-6 inline-block rounded-full bg-[#bd8585] px-6 py-3 text-sm font-semibold text-white">İletişim formu</Link>
           </div>
         </aside>
       </div>

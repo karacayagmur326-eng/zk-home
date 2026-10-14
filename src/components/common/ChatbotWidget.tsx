@@ -1,5 +1,6 @@
 "use client"
 
+import SmartImage from "@components/common/SmartImage"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Bot, ExternalLink, MessageCircle, MessagesSquare, Send, X } from "lucide-react"
@@ -165,21 +166,21 @@ export default function ChatbotWidget({
                     ? <ChatbotRichText>{message.text}</ChatbotRichText>
                     : <p className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{message.text}</p>}
                   {message.linkUrl && (
-                    <Link href={message.linkUrl} className="mt-2.5 inline-flex items-center gap-1 font-extrabold" style={{ color: settings.accent_color }} onClick={() => { if (isMobileViewport) setOpen(false) }}>
+                    <Link prefetch={false} href={message.linkUrl} className="mt-2.5 inline-flex items-center gap-1 font-extrabold" style={{ color: settings.accent_color }} onClick={() => { if (isMobileViewport) setOpen(false) }}>
                       {message.linkText || "İncele"}<ExternalLink className="h-3.5 w-3.5" />
                     </Link>
                   )}
                   {message.products && message.products.length > 0 && (
                     <div className="mt-3 space-y-2">
                       {message.products.map((product) => (
-                        <Link
+                        <Link prefetch={false}
                           key={product.url}
                           href={product.url}
                           onClick={() => { if (isMobileViewport) setOpen(false) }}
                           className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50 p-2 transition hover:border-rose-300 hover:bg-rose-50"
                         >
                           {product.thumbnail ? (
-                            <img src={product.thumbnail} alt="" className="h-11 w-11 flex-none rounded-lg border border-slate-200 bg-white object-contain" />
+                            <SmartImage width={44} height={44} sizes="44px" quality={50} loading="lazy" src={product.thumbnail} alt="" className="h-11 w-11 flex-none rounded-lg border border-slate-200 bg-white object-contain" />
                           ) : (
                             <span className="flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-white text-lg">🛠️</span>
                           )}

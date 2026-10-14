@@ -1,5 +1,6 @@
 "use client"
 
+import SmartImage from "@components/common/SmartImage"
 import React, { useState } from "react"
 import { useCartState } from "@lib/util/cart-state"
 import FeedbackPopup from "@modules/common/components/feedback-popup"
@@ -120,7 +121,7 @@ export default function CartTemplate({
             <article key={item.id} className="p-4 bg-white space-y-3">
               <div className="flex gap-3">
                 <LocalizedClientLink href={`/urunler/${item.handle || item.product_handle}`} className="grid aspect-[4/5] w-20 place-items-center rounded-xl bg-slate-50 border border-slate-100 p-1.5 shrink-0">
-                  {item.thumbnail ? <img src={item.thumbnail} alt={item.title || item.product_title} className="h-full w-full object-contain" /> : <ShoppingBag className="h-8 w-8 text-slate-300" />}
+                  {item.thumbnail ? <SmartImage width={96} height={120} sizes="96px" quality={50} loading="lazy" src={item.thumbnail} alt={item.title || item.product_title} className="h-full w-full object-contain" /> : <ShoppingBag className="h-8 w-8 text-slate-300" />}
                 </LocalizedClientLink>
                 <div className="min-w-0 flex-1">
                   <LocalizedClientLink href={`/urunler/${item.handle || item.product_handle}`} className="line-clamp-2 text-xs font-bold text-slate-900 leading-snug hover:text-[#C98484] transition-colors">
@@ -258,7 +259,7 @@ export default function CartTemplate({
                         className="w-20 aspect-[4/5] bg-slate-50/70 border border-slate-100 rounded-2xl shrink-0 flex items-center justify-center p-2 overflow-hidden group"
                       >
                         {item.thumbnail ? (
-                          <img
+                          <SmartImage width={96} height={120} sizes="96px" quality={50} loading="lazy"
                             src={item.thumbnail}
                             alt={item.title || item.product_title}
                             className="h-full w-full object-contain group-hover:scale-105 transition-transform"

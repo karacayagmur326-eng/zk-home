@@ -1,5 +1,6 @@
 "use client"
 
+import SmartImage from "@components/common/SmartImage"
 import LocalDeliveryNotice from "@modules/order/components/local-delivery-notice"
 import React, { useState } from "react"
 import EcommerceEvent from "@components/common/EcommerceEvent"
@@ -338,7 +339,7 @@ export default function OrderCompletedTemplate({
                       <div className="flex items-center gap-3.5 min-w-0">
                         <div className="w-16 aspect-[4/5] bg-slate-50 border border-slate-100 rounded-2xl p-1.5 shrink-0 flex items-center justify-center overflow-hidden">
                           {item.thumbnail ? (
-                            <img
+                            <SmartImage width={64} height={80} sizes="64px" quality={50} loading="lazy"
                               src={item.thumbnail}
                               alt={item.title}
                               className="h-full w-full object-contain"

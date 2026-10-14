@@ -428,7 +428,7 @@ export default function ContactManagement({ settingsSection }: { settingsSection
           <Settings className="w-4 h-4" />
           {saving ? "Kaydediliyor..." : "Ayarları Kaydet"}
         </button>
-        <Link
+        <Link prefetch={false}
           href="/iletisim"
           target="_blank"
           className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-extrabold text-slate-700 shadow-sm transition hover:border-rose-200 hover:text-[#C98484]"
@@ -636,7 +636,7 @@ export default function ContactManagement({ settingsSection }: { settingsSection
                           </td>
                           <td className="py-3 px-3">
                             <span className={`inline-flex whitespace-nowrap rounded-lg border px-2 py-1 text-[10px] font-bold ${CONTACT_SOURCES[contactSource(m)].badge}`}>{CONTACT_SOURCES[contactSource(m)].label}</span>
-                            <div className="mt-1 text-[10px] text-slate-500">{m.product_handle ? <Link href={`/urunler/${m.product_handle}`} target="_blank" className="inline-flex items-center gap-1 hover:text-[#C98484]"><ExternalLink className="h-3 w-3" />Ürün sayfası</Link> : m.order_no ? `Sipariş #${m.order_no}` : contactSource(m) === "gifts" ? "Toptan ve kurumsal satış" : "İletişim sayfası"}</div>
+                            <div className="mt-1 text-[10px] text-slate-500">{m.product_handle ? <Link prefetch={false} href={`/urunler/${m.product_handle}`} target="_blank" className="inline-flex items-center gap-1 hover:text-[#C98484]"><ExternalLink className="h-3 w-3" />Ürün sayfası</Link> : m.order_no ? `Sipariş #${m.order_no}` : contactSource(m) === "gifts" ? "Toptan ve kurumsal satış" : "İletişim sayfası"}</div>
                           </td>
                           <td className="py-3 px-3">{statusBadge(m.status)}</td>
                           <td className="py-3 px-3 text-slate-400 font-medium whitespace-nowrap">
@@ -1392,7 +1392,7 @@ export default function ContactManagement({ settingsSection }: { settingsSection
                 <span className="inline-block px-3 py-1 bg-slate-100 text-slate-800 font-extrabold rounded-lg">
                   {selectedMessage.subject || "Genel İletişim"}
                 </span>
-                {selectedMessage.product_handle && <Link href={`/urunler/${selectedMessage.product_handle}`} target="_blank" className="ml-3 inline-flex items-center gap-1 font-bold text-[#C98484]"><ExternalLink className="h-3.5 w-3.5" />Ürünü Gör</Link>}
+                {selectedMessage.product_handle && <Link prefetch={false} href={`/urunler/${selectedMessage.product_handle}`} target="_blank" className="ml-3 inline-flex items-center gap-1 font-bold text-[#C98484]"><ExternalLink className="h-3.5 w-3.5" />Ürünü Gör</Link>}
               </div>
 
               <section aria-label="Yazışma geçmişi" className="space-y-3">

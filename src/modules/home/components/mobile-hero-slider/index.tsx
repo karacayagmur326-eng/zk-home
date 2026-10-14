@@ -38,7 +38,7 @@ export default function MobileHeroSlider({ slides, prioritize = true }: { slides
             aria-roledescription="slide"
             aria-label={`${idx + 1} / ${slides.length}`}
           >
-            {slide.image && (
+            {slide.image && idx === activeIndex && (
               <SliderImage
                 src={slide.image}
                 alt={slide.title || "Mobil slider"}

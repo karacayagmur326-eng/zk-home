@@ -1,4 +1,5 @@
 "use client"
+import SmartImage from "@components/common/SmartImage"
 import { useUrlState } from "@lib/hooks/use-url-state"
 import AdminTabs from "@components/admin/AdminTabs"
 
@@ -288,7 +289,7 @@ export default function AdminBlogPage() {
         </div>
 
         <div className="flex items-center gap-2.5">
-          <Link
+          <Link prefetch={false}
             href="/blog"
             target="_blank"
             className="px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 font-bold text-xs hover:bg-slate-50 hover:border-slate-300 transition-all flex items-center gap-1.5 shadow-2xs"
@@ -297,7 +298,7 @@ export default function AdminBlogPage() {
             <span>Blogu Sitede Gör</span>
           </Link>
 
-          <Link
+          <Link prefetch={false}
             href="/admin/blog/yeni"
             className="px-4 py-2.5 rounded-xl bg-[#C98484] text-white font-bold text-xs hover:bg-[#A95E5E] transition-all flex items-center gap-1.5 shadow-md shadow-rose-500/20 cursor-pointer"
           >
@@ -389,7 +390,7 @@ export default function AdminBlogPage() {
                 <p className="text-xs text-slate-400 max-w-sm mx-auto">
                   Arama kriterlerinize uygun makale bulunamadı veya henüz hiç makale eklenmedi.
                 </p>
-                <Link
+                <Link prefetch={false}
                   href="/admin/blog/yeni"
                   className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#C98484] text-white text-xs font-bold hover:bg-[#A95E5E] transition cursor-pointer"
                 >
@@ -422,7 +423,7 @@ export default function AdminBlogPage() {
                         <td className="py-3 px-4 w-16">
                           <div className="w-12 h-10 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden relative shrink-0 flex items-center justify-center">
                             {post.image ? (
-                              <img
+                              <SmartImage width={400} height={400} sizes="400px" quality={50} loading="lazy"
                                 src={post.image}
                                 alt={post.title}
                                 className="max-w-full max-h-full object-contain"
@@ -435,7 +436,7 @@ export default function AdminBlogPage() {
 
                         <td className="py-3.5 px-4">
                           <div className="space-y-0.5 max-w-md">
-                            <Link
+                            <Link prefetch={false}
                               href={`/admin/blog/${post.id}`}
                               className="font-bold text-slate-900 hover:text-[#C98484] transition line-clamp-1 block text-xs"
                             >
@@ -511,7 +512,7 @@ export default function AdminBlogPage() {
 
                         <td className="py-3.5 px-4 text-right">
                           <div className="flex items-center justify-end gap-1.5">
-                            <Link
+                            <Link prefetch={false}
                               href={`/blog/${post.slug}`}
                               target="_blank"
                               className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 hover:text-[#C98484] transition"
@@ -529,7 +530,7 @@ export default function AdminBlogPage() {
                               <Copy className="w-3.5 h-3.5" />
                             </button>
 
-                            <Link
+                            <Link prefetch={false}
                               href={`/admin/blog/${post.id}`}
                               className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-[#2271b1] transition"
                               title="Düzenle"
@@ -794,7 +795,7 @@ export default function AdminBlogPage() {
                   {settings.hero_image ? (
                     <div className="space-y-3 w-full text-center group">
                       <div className="h-44 w-full rounded-xl border border-slate-200 overflow-hidden bg-white flex items-center justify-center p-2 relative">
-                        <img src={settings.hero_image} alt="Hero" className="max-w-full max-h-full object-contain" />
+                        <SmartImage width={400} height={400} sizes="400px" quality={50} loading="lazy" src={settings.hero_image} alt="Hero" className="max-w-full max-h-full object-contain" />
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-xl">
                           <button
                             type="button"
@@ -931,7 +932,7 @@ export default function AdminBlogPage() {
                   {settings.banner_image ? (
                     <div className="space-y-3 w-full text-center group">
                       <div className="h-40 w-full rounded-xl border border-slate-200 overflow-hidden bg-slate-900 flex items-center justify-center p-2 relative">
-                        <img src={settings.banner_image} alt="Banner" className="max-w-full max-h-full object-cover opacity-60" />
+                        <SmartImage width={400} height={400} sizes="400px" quality={50} loading="lazy" src={settings.banner_image} alt="Banner" className="max-w-full max-h-full object-cover opacity-60" />
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-xl">
                           <button
                             type="button"

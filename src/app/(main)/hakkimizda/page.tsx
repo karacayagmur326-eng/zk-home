@@ -239,7 +239,7 @@ export default async function AboutPage({ searchParams }: AboutPageProps) {
 
               {contentData.aboutDetailCtaText && (
                 <div className="pt-2">
-                  <Link
+                  <Link prefetch={false}
                     href={contentData.aboutDetailCtaHref}
                     className="inline-flex items-center gap-2 border border-slate-300 hover:border-slate-800 text-slate-900 font-bold text-sm px-6 py-3 rounded-full hover:bg-slate-900 hover:text-white transition-all shadow-sm"
                   >

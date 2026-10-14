@@ -1,3 +1,4 @@
+import SmartImage from "@components/common/SmartImage"
 import { contentPageMetadata, contentPageSeo } from "@lib/seo/content-page"
 import { query } from "@lib/admin/db"
 import { Metadata } from "next"
@@ -159,7 +160,7 @@ export default async function BrandsListingPage({ searchParams }: BrandsPageProp
             <h2 className="font-extrabold text-2xl text-slate-900 tracking-tight">
               {info.main_title || "Ana Markalarımız"}
             </h2>
-            <Link
+            <Link prefetch={false}
               href={info.main_cta_href || "/magaza"}
               className="inline-flex items-center gap-1.5 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:text-[#C98484] hover:border-rose-300 transition shadow-2xs"
             >
@@ -185,7 +186,7 @@ export default async function BrandsListingPage({ searchParams }: BrandsPageProp
                     {/* Brand Logo / Styled Name */}
                     <div className="h-16 flex items-center justify-center border-b border-slate-100 pb-3">
                       {brand.metadata?.logo_url ? (
-                        <img
+                        <SmartImage width={400} height={400} sizes="400px" quality={50} loading="lazy"
                           src={brand.metadata.logo_url}
                           alt={brand.title}
                           className="max-h-12 object-contain group-hover:scale-105 transition-transform"
@@ -205,7 +206,7 @@ export default async function BrandsListingPage({ searchParams }: BrandsPageProp
 
                   {/* Action Link */}
                   <div className="pt-2 w-full">
-                    <Link
+                    <Link prefetch={false}
                       href={`/markalar/${brand.handle}`}
                       className="inline-flex items-center justify-center gap-1.5 text-xs font-bold text-[#C98484] hover:text-[#A95E5E] transition group/btn"
                     >
@@ -241,13 +242,13 @@ export default async function BrandsListingPage({ searchParams }: BrandsPageProp
           </div>
 
           <div className="flex flex-wrap items-center gap-3 shrink-0 w-full sm:w-auto">
-            <Link
+            <Link prefetch={false}
               href={info.cta_btn1_href || "/toptan-ve-kurumsal-satis"}
               className="px-5 py-3 rounded-xl border border-[#C98484] text-[#C98484] font-extrabold text-xs hover:bg-rose-50 transition text-center w-full sm:w-auto"
             >
               {info.cta_btn1_text || "Teklif Talebi Oluştur"}
             </Link>
-            <Link
+            <Link prefetch={false}
               href={info.cta_btn2_href || "/iletisim"}
               className="px-6 py-3 rounded-xl bg-[#C98484] hover:bg-[#A95E5E] text-white font-extrabold text-xs transition flex items-center justify-center gap-2 shadow-md shadow-rose-500/20 w-full sm:w-auto"
             >

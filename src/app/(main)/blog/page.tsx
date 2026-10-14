@@ -96,7 +96,7 @@ export default async function BlogPage({
               {pageContent.categories_title || "Kategorilere Göre Keşfedin"}
             </h2>
             {kategori && (
-              <Link href="/blog" className="text-xs font-bold text-[#C98484] hover:underline">
+              <Link prefetch={false} href="/blog" className="text-xs font-bold text-[#C98484] hover:underline">
                 Tümünü Göster ✕
               </Link>
             )}
@@ -106,7 +106,7 @@ export default async function BlogPage({
             {categories.map((category: any) => {
               const isSelected = category.slug === kategori || category.id === kategori
               return (
-                <Link
+                <Link prefetch={false}
                   key={category.id}
                   href={isSelected ? "/blog" : `/blog?kategori=${category.slug}`}
                   className={`shrink-0 min-w-[110px] sm:min-w-0 flex flex-col items-center justify-center gap-2 rounded-2xl border p-3 text-center transition-all ${
@@ -137,7 +137,7 @@ export default async function BlogPage({
           {articles.length === 0 ? (
             <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center space-y-2">
               <p className="text-sm font-bold text-slate-700">Bu kategoride henüz makale bulunmuyor.</p>
-              <Link href="/blog" className="text-xs text-[#C98484] font-bold hover:underline block">
+              <Link prefetch={false} href="/blog" className="text-xs text-[#C98484] font-bold hover:underline block">
                 Tüm makaleleri görüntüleyin →
               </Link>
             </div>
@@ -162,7 +162,7 @@ export default async function BlogPage({
             </h2>
             <div className="mt-3 divide-y divide-slate-100">
               {categories.slice(0, 6).map((category: any) => (
-                <Link
+                <Link prefetch={false}
                   key={category.id}
                   href={`/blog?kategori=${category.slug}`}
                   className="flex items-center justify-between py-2.5 text-xs font-semibold text-slate-600 hover:text-[#C98484] transition"
@@ -189,7 +189,7 @@ export default async function BlogPage({
               <p className="mt-3 text-xs leading-6 text-white/75">
                 {pageContent.banner_description || "Ürünlerinizden en iyi performansı almanız için hazırladığımız rehberler ve ipuçlarıyla işinizi kolaylaştırıyoruz."}
               </p>
-              <Link
+              <Link prefetch={false}
                 href={pageContent.banner_button_href || "/blog"}
                 className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#C98484] px-4 py-3 text-xs font-extrabold hover:bg-[#A95E5E] transition"
               >
@@ -236,7 +236,7 @@ function ArticleCard({ article, category }: { article: any; category: string }) 
   return (
     <article className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs transition hover:-translate-y-1 hover:shadow-lg flex flex-col justify-between">
       <div>
-        <Link href={`/blog/${article.slug}`} className="relative block aspect-[4/3] overflow-hidden bg-slate-100">
+        <Link prefetch={false} href={`/blog/${article.slug}`} className="relative block aspect-[4/3] overflow-hidden bg-slate-100">
           {article.image ? (
             <Image
               src={article.image}
@@ -255,7 +255,7 @@ function ArticleCard({ article, category }: { article: any; category: string }) 
         </Link>
 
         <div className="p-4">
-          <Link href={`/blog/${article.slug}`}>
+          <Link prefetch={false} href={`/blog/${article.slug}`}>
             <h3 className="line-clamp-2 text-sm font-black leading-5 text-slate-900 group-hover:text-[#C98484] transition">
               {article.title}
             </h3>

@@ -108,11 +108,11 @@ export default function ServicePageEditor() {
     <div className="w-full space-y-4 pb-10">
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
         <div>
-          <Link href="/admin/sayfalar" className="mb-1 inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 hover:text-[#C98484]"><ArrowLeft className="h-3.5 w-3.5" /> Sayfalara Dön</Link>
+          <Link prefetch={false} href="/admin/sayfalar" className="mb-1 inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 hover:text-[#C98484]"><ArrowLeft className="h-3.5 w-3.5" /> Sayfalara Dön</Link>
           <h1 className="text-lg font-black text-slate-900">Garanti ve Teknik Servis Sayfası</h1>
         </div>
         <div className="flex gap-2">
-          <Link href="/garanti-ve-teknik-servis" target="_blank" className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-[11px] font-bold text-slate-700">Sayfayı Gör</Link>
+          <Link prefetch={false} href="/garanti-ve-teknik-servis" target="_blank" className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-[11px] font-bold text-slate-700">Sayfayı Gör</Link>
           <button type="button" onClick={save} disabled={saving} className="inline-flex items-center gap-1.5 rounded-lg bg-[#C98484] px-4 py-2 text-[11px] font-black text-white disabled:opacity-60"><Save className="h-3.5 w-3.5" /> {saving ? "Kaydediliyor..." : "Değişiklikleri Kaydet"}</button>
         </div>
       </div>
@@ -157,7 +157,7 @@ export default function ServicePageEditor() {
       <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <div className="mb-3 flex items-center justify-between border-b border-slate-100 pb-3">
           <h2 className="text-sm font-black text-slate-900">İletişim Formu Ayarları</h2>
-          <Link href="/admin/iletisim" className="text-[11px] font-bold text-[#C98484] hover:underline">Ana formu düzenle</Link>
+          <Link prefetch={false} href="/admin/iletisim" className="text-[11px] font-bold text-[#C98484] hover:underline">Ana formu düzenle</Link>
         </div>
         <div className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
           <div>

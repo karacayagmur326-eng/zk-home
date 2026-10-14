@@ -1,5 +1,6 @@
 "use client"
 
+import SmartImage from "@components/common/SmartImage"
 import { Heart, ShoppingBag } from "@lib/icons"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import {
@@ -67,7 +68,7 @@ export default function FavoritesPage() {
                       className="block aspect-square bg-slate-50/50 rounded-xl p-2 mb-2"
                     >
                       {product.thumbnail ? (
-                        <img
+                        <SmartImage width={256} height={256} sizes="256px" quality={50} loading="lazy"
                           src={product.thumbnail}
                           alt={product.title}
                           className="h-full w-full object-contain"
@@ -125,7 +126,7 @@ export default function FavoritesPage() {
                     className="block aspect-square bg-slate-50/50 rounded-xl p-4 mb-3"
                   >
                     {product.thumbnail ? (
-                      <img
+                      <SmartImage width={256} height={256} sizes="256px" quality={50} loading="lazy"
                         src={product.thumbnail}
                         alt={product.title}
                         className="h-full w-full object-contain"

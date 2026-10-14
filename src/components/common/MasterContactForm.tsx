@@ -272,7 +272,7 @@ export default function MasterContactForm({
             />
             <label htmlFor={kvkkCheckboxId} className="text-xs text-slate-600 font-semibold cursor-pointer">
               Kişisel verilerinizin işlenmesine ilişkin{" "}
-              <Link href={kvkkUrl} target="_blank" className="text-[#C98484] font-bold underline hover:text-[#A95E5E]">
+              <Link prefetch={false} href={kvkkUrl} target="_blank" className="text-[#C98484] font-bold underline hover:text-[#A95E5E]">
                 KVKK Aydınlatma Metni
               </Link>
               'ni okudum ve kabul ediyorum.

@@ -24,6 +24,7 @@ export default function CustomerNotifications({ customerId }: { customerId: stri
   const trigger = useRef<HTMLButtonElement>(null)
   const panel = useRef<HTMLDivElement>(null)
   const requestSequence = useRef(0)
+  const lastLoadedAt = useRef(0)
 
   const load = useCallback(async (signal?: AbortSignal) => {
     const sequence = ++requestSequence.current
@@ -36,6 +37,7 @@ export default function CustomerNotifications({ customerId }: { customerId: stri
       if (signal?.aborted || sequence !== requestSequence.current) return
       setItems(data.notifications || [])
       setUnread(data.unreadCount || 0)
+      lastLoadedAt.current = Date.now()
       setError("")
     } catch {
       if (!signal?.aborted && sequence === requestSequence.current) setError("Bildirimler yüklenemedi. Tekrar deneyebilirsiniz.")
@@ -50,6 +52,12 @@ export default function CustomerNotifications({ customerId }: { customerId: stri
     return () => { controller.abort(); requestSequence.current++ }
   }, [customerId, load])
   useAdminAutoRefresh(load, { enabled: authenticated && !loading && !saving, refreshKey: customerId })
+  useEffect(() => {
+    if (!open || !authenticated || loading || saving || Date.now() - lastLoadedAt.current < 60_000) return
+    const controller = new AbortController()
+    void load(controller.signal)
+    return () => controller.abort()
+  }, [open, authenticated, loading, saving, load])
 
   useEffect(() => {
     if (!open) return

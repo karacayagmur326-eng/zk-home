@@ -82,7 +82,7 @@ export default async function PageHero({
 
             {/* Breadcrumb Navigation */}
             <nav className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs font-semibold text-slate-500 mb-4">
-              <Link href="/" className="flex items-center gap-1 hover:text-[#C98484] transition-colors whitespace-nowrap shrink-0">
+              <Link prefetch={false} href="/" className="flex items-center gap-1 hover:text-[#C98484] transition-colors whitespace-nowrap shrink-0">
                 <Home className="w-3.5 h-3.5 text-slate-400" />
                 <span>Ana Sayfa</span>
               </Link>
@@ -92,7 +92,7 @@ export default async function PageHero({
                   <div key={idx} className="flex items-center gap-1.5 sm:gap-2">
                     <ChevronRight className="w-3.5 h-3.5 text-slate-300 shrink-0" />
                     {item.href && !isLast ? (
-                      <Link href={item.href} className="hover:text-[#C98484] transition-colors whitespace-nowrap">
+                      <Link prefetch={false} href={item.href} className="hover:text-[#C98484] transition-colors whitespace-nowrap">
                         {item.title}
                       </Link>
                     ) : (
@@ -161,7 +161,7 @@ export default async function PageHero({
               {(ctaText || secondaryCtaText) && (
                 <div className="pt-3 flex flex-wrap items-center gap-3">
                   {ctaText && (
-                    <Link
+                    <Link prefetch={false}
                       href={ctaHref}
                       className="inline-flex items-center gap-2 bg-[#C98484] hover:bg-[#d94e00] text-white font-bold text-xs sm:text-sm px-6 py-3 rounded-xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5"
                     >
@@ -171,7 +171,7 @@ export default async function PageHero({
                   )}
 
                   {secondaryCtaText && (
-                    <Link
+                    <Link prefetch={false}
                       href={secondaryCtaHref || "/iletisim"}
                       className="inline-flex items-center gap-2 bg-white/90 hover:bg-white text-slate-800 border border-slate-200/80 font-bold text-xs sm:text-sm px-6 py-3 rounded-xl shadow-xs hover:shadow-md transition-all transform hover:-translate-y-0.5"
                     >

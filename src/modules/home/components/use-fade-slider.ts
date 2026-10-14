@@ -10,8 +10,17 @@ export default function useFadeSlider(count: number, autoplay = true, intervalMs
   const [focused, setFocused] = useState(false)
   const motionEnabled = useMotionEnabled()
   const [visible, setVisible] = useState(true)
+  const [element, setElement] = useState<HTMLElement | null>(null)
+  const [inView, setInView] = useState(true)
   const touch = useRef<{ x: number; y: number } | null>(null)
-  const isPlaying = autoplay && count > 1 && !paused && !hovered && !focused && motionEnabled && visible
+  const isPlaying = autoplay && count > 1 && !paused && !hovered && !focused && motionEnabled && visible && inView
+
+  useEffect(() => {
+    if (!element || typeof IntersectionObserver === "undefined") return
+    const observer = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), { threshold: 0.05 })
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [element])
 
   useEffect(() => {
     const updateVisibility = () => setVisible(document.visibilityState === "visible")
@@ -31,6 +40,7 @@ export default function useFadeSlider(count: number, autoplay = true, intervalMs
 
   const select = (index: number) => { if (count) setActiveIndex((index + count) % count) }
   const gestures = {
+    ref: setElement,
     onPointerEnter: (event: PointerEvent<HTMLElement>) => setHovered(event.pointerType === "mouse"),
     onPointerLeave: () => setHovered(false),
     onFocusCapture: (event: React.FocusEvent<HTMLElement>) => setFocused(event.target.matches(":focus-visible")),

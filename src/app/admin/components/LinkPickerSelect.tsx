@@ -1,5 +1,7 @@
 "use client"
 
+import { sharedJsonRequest } from "@lib/util/shared-json-request"
+
 import React, { useEffect, useState } from "react"
 import { RefreshCw } from "@lib/icons"
 import { categoryPath } from "@lib/seo/category"
@@ -53,9 +55,9 @@ export default function LinkPickerSelect({
   useEffect(() => {
     let isMounted = true
     Promise.all([
-      fetch("/api/admin/categories").then((r) => (r.ok ? r.json() : { categories: [] })),
-      fetch("/api/catalog/navigation").then((r) => (r.ok ? r.json() : {})),
-      fetch("/api/admin/brands-settings").then((r) => (r.ok ? r.json() : {})),
+      sharedJsonRequest("/api/admin/categories"),
+      sharedJsonRequest("/api/catalog/navigation", 60_000),
+      sharedJsonRequest("/api/admin/brands-settings"),
     ])
       .then(([catRes, navRes, brandRes]) => {
         if (!isMounted) return

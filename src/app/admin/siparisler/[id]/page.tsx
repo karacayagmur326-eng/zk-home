@@ -1,5 +1,6 @@
 "use client"
 
+import SmartImage from "@components/common/SmartImage"
 import LocalDeliveryFields from "../../components/LocalDeliveryFields"
 import CustomerMessageButton from "../../components/CustomerMessageButton"
 import { DeliveryPlan, validateDeliveryPlan, ZK_HOME_DELIVERY } from "@lib/util/local-delivery"
@@ -407,7 +408,7 @@ export default function AdminOrderDetailPage({
   if (errorMsg && !detail) {
     return (
       <div className="p-8 max-w-7xl mx-auto space-y-4">
-        <Link href="/admin/siparisler" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-slate-900">
+        <Link prefetch={false} href="/admin/siparisler" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-slate-900">
           <ArrowLeft className="w-4 h-4" /> Siparişlere Dön
         </Link>
         <div className="p-6 bg-red-50 border border-red-200 rounded-2xl text-red-700 font-medium">
@@ -486,7 +487,7 @@ export default function AdminOrderDetailPage({
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-5 mb-6">
           <div>
             <div className="flex items-center gap-2 text-xs font-bold text-slate-400 mb-1">
-              <Link href="/admin/siparisler" className="hover:text-slate-700">Siparişler</Link>
+              <Link prefetch={false} href="/admin/siparisler" className="hover:text-slate-700">Siparişler</Link>
               <ChevronRight className="w-3 h-3" />
               <span className="text-slate-600">Sipariş #{displayCode}</span>
             </div>
@@ -863,7 +864,7 @@ export default function AdminOrderDetailPage({
                         <td className="py-4 pr-4">
                           <div className="flex items-center gap-3">
                             {item.thumbnail ? (
-                              <img
+                              <SmartImage width={48} height={48} sizes="48px" quality={50} loading="lazy"
                                 src={item.thumbnail}
                                 alt={item.title}
                                 className="w-12 h-12 rounded-xl border border-slate-200 object-cover shrink-0"

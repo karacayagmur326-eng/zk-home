@@ -473,7 +473,7 @@ export default function MenusPage() {
                     <FileText className="w-3.5 h-3.5 text-slate-500" />
                     Sayfa İçerik Yönetimi ({item.label}):
                   </span>
-                  <Link
+                  <Link prefetch={false}
                     href={`/admin/sayfalar?duzenle=${item.url.replace(/^\//, '') || 'yeni'}`}
                     target="_blank"
                     className="px-3 py-1 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 font-bold rounded-lg text-xs transition flex items-center gap-1 shadow-2xs"

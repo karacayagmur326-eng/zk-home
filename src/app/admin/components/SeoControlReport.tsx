@@ -269,7 +269,7 @@ export default function SeoControlReport() {
             onChange={(event) => importFile(event.target.files?.[0])}
           />
         </label>
-        <Link
+        <Link prefetch={false}
           className="admin-btn admin-btn-secondary"
           href="/admin/ayarlar?tab=google"
         >
@@ -560,7 +560,7 @@ export default function SeoControlReport() {
             >
               Kapat
             </button>
-            <Link
+            <Link prefetch={false}
               href={selected.editUrl}
               className="admin-btn admin-btn-secondary"
             >

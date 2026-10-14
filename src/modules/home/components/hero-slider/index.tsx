@@ -1,5 +1,6 @@
 "use client"
 
+import SmartImage from "@components/common/SmartImage"
 import React, { useEffect, useState } from "react"
 import SliderImage from "../slider-image"
 import useFadeSlider from "../use-fade-slider"
@@ -767,6 +768,7 @@ export default function HeroSlider({
         <div className="relative h-full w-full touch-pan-y">
           {sliders.map((slider, index) => {
             const isActive = index === selectedIndex
+            if (!isActive) return null
             const HeadingTag = "h2"
             const showSecondaryButton = Boolean(
               slider.button2_link && slider.button2_text
@@ -962,7 +964,7 @@ export default function HeroSlider({
                                     {iconVal &&
                                     (iconVal.startsWith("http") ||
                                       iconVal.startsWith("/")) ? (
-                                      <img
+                                      <SmartImage sizes="400px" quality={50} loading="lazy"
                                         src={iconVal}
                                         alt=""
                                         width={20}
@@ -1073,7 +1075,7 @@ export default function HeroSlider({
                               {rf.icon &&
                               (rf.icon.startsWith("http") ||
                                 rf.icon.startsWith("/")) ? (
-                                <img
+                                <SmartImage sizes="24px" quality={50} loading="lazy"
                                   src={rf.icon}
                                   alt=""
                                   width={24}

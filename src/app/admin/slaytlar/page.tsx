@@ -1,4 +1,5 @@
 "use client"
+import SmartImage from "@components/common/SmartImage"
 import React, { useState, useEffect, useRef } from "react"
 import { createPortal } from "react-dom"
 import { Pipette } from "lucide-react"
@@ -1094,7 +1095,7 @@ export default function SlidersPage() {
 
                 <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-xl border border-gray-200/80">
                   {formData.image_url ? (
-                    <img
+                    <SmartImage width={96} height={96} sizes="96px" quality={50} loading="lazy"
                       src={formData.image_url}
                       alt="Slider Görseli"
                       className="h-14 w-24 object-cover rounded-lg border border-gray-200 shrink-0 bg-white"
@@ -1672,7 +1673,7 @@ export default function SlidersPage() {
                         }`}
                       >
                         {feat.icon && (feat.icon.startsWith("http") || feat.icon.startsWith("/")) ? (
-                          <img src={feat.icon} className="w-3.5 h-3.5 object-contain" />
+                          <SmartImage width={14} height={14} sizes="14px" quality={50} loading="lazy" src={feat.icon} alt="" className="w-3.5 h-3.5 object-contain" />
                         ) : (
                           <DynamicIcon name={feat.icon} className="w-3.5 h-3.5" />
                         )}
@@ -1724,7 +1725,7 @@ export default function SlidersPage() {
                     <div className="flex gap-2 items-center">
                       <div className="flex items-center justify-between px-2 py-1 border border-gray-200 rounded text-xs bg-gray-50 h-[30px] flex-1">
                         {newFeatureIcon.startsWith("http") || newFeatureIcon.startsWith("/") ? (
-                          <img src={newFeatureIcon} className="w-4 h-4 object-contain" />
+                          <SmartImage width={16} height={16} sizes="16px" quality={50} loading="lazy" src={newFeatureIcon} alt="" className="w-4 h-4 object-contain" />
                         ) : (
                           <DynamicIcon name={newFeatureIcon} className="w-4 h-4" />
                         )}
@@ -1879,7 +1880,7 @@ export default function SlidersPage() {
                   className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:border-rose-200 hover:shadow-md"
                 >
                   <div className="relative aspect-[16/7] overflow-hidden bg-gray-100">
-                    <img
+                    <SmartImage width={400} height={400} sizes="400px" quality={50} loading="lazy"
                       src={slider.image_url || "https://images.unsplash.com/photo-1504148455328-c376907d081c?q=80&w=2000"}
                       alt={slider.title || `Slider ${index + 1}`}
                       className="h-full w-full object-cover"

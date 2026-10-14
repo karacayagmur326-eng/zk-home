@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { listCategories } from "@lib/data/categories"
-import { query } from "@lib/admin/db"
+import { cachedQuery } from "@lib/admin/db"
 import { ensureCommerceSchema } from "@lib/commerce/schema"
 import { getMenu } from "@lib/data/menus"
 
@@ -10,12 +10,12 @@ export async function GET() {
   ensureCommerceSchema().catch(() => null)
   const [categories, collections, kurumsalMenu, musteriMenu, yasalMenu, sidebarMenu, themeSettings] = await Promise.all([
     listCategories().catch(() => []),
-    query(`SELECT id,title,handle,metadata FROM store_collection ORDER BY title`).catch(() => []),
+    cachedQuery("navigation-collections", `SELECT id,title,handle,metadata - 'seo_history' AS metadata FROM store_collection ORDER BY title`).catch(() => []),
     getMenu("footer-kurumsal").catch(() => null),
     getMenu("footer-musteri-hizmetleri").catch(() => null),
     getMenu("footer-yasal").catch(() => null),
     getMenu("category-sidebar").catch(() => null).then(async (m) => m || await getMenu("ikincil-menu").catch(() => null)),
-    query<Record<string, unknown>>("SELECT * FROM theme_settings WHERE id = 1")
+    cachedQuery<Record<string, unknown>>("navigation-footer-titles", "SELECT footer_col2_title,footer_col3_title,footer_col4_title FROM theme_settings WHERE id = 1")
       .then((r) => r[0] || null)
       .catch(() => null),
   ])

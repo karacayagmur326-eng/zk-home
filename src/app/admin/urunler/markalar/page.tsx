@@ -1,5 +1,6 @@
 "use client"
 
+import SmartImage from "@components/common/SmartImage"
 import React, { useEffect, useState } from "react"
 import ConfirmModal from "../../components/ConfirmModal"
 import ImagePickerField from "../../components/ImagePickerField"
@@ -469,7 +470,7 @@ export default function BrandsPage() {
                           <div className="flex items-center gap-3">
                             {b.metadata?.logo_url ? (
                               <div className="h-9 w-14 rounded-lg border border-slate-200 bg-white p-1 flex items-center justify-center shrink-0">
-                                <img src={b.metadata.logo_url} alt="" className="max-h-full max-w-full object-contain" />
+                                <SmartImage width={400} height={400} sizes="400px" quality={50} loading="lazy" src={b.metadata.logo_url} alt="" className="max-h-full max-w-full object-contain" />
                               </div>
                             ) : (
                               <div

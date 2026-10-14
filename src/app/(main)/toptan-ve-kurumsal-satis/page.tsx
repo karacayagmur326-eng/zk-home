@@ -1,3 +1,4 @@
+import SmartImage from "@components/common/SmartImage"
 import { contentPageMetadata, contentPageSeo } from "@lib/seo/content-page"
 import type { Metadata } from "next"
 import Link from "next/link"
@@ -30,7 +31,7 @@ export default async function CorporateGiftsPage() {
         <div className="grid gap-5 md:grid-cols-3">
           {examples.map((example) => (
             <a key={example.title} href={example.url} target="_blank" rel="noopener noreferrer" className="group overflow-hidden rounded-2xl border border-rose-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
-              <img src={example.image} alt={`${example.title} için temsili hediye görseli`} width={960} height={720} loading="lazy" className="aspect-[4/3] w-full object-cover" />
+              <SmartImage sizes="(max-width: 768px) 90vw, 400px" quality={50} src={example.image} alt={`${example.title} için temsili hediye görseli`} width={960} height={720} loading="lazy" className="aspect-[4/3] w-full object-cover" />
               <div className="p-6">
               <span className="text-xs font-semibold uppercase tracking-wide text-[#bd8585]">Temsili görsel · Instagram örneği ↗</span>
               <h3 className="mt-3 text-xl font-semibold text-slate-900">{example.title}</h3>
@@ -48,7 +49,7 @@ export default async function CorporateGiftsPage() {
             <h2 className="mt-4 text-3xl font-bold text-slate-900">Birlikte hazırlayalım</h2>
             <p className="mt-5 leading-relaxed text-slate-700">Etkinlik türünü, tahmini adedi, bütçe aralığını ve düşündüğünüz ürünleri yazmanız yeterli. Ekibimiz uygun seçenekleri değerlendirip sizinle iletişime geçer.</p>
             <p className="mt-5 text-sm text-slate-600">Bu form bir sipariş veya ödeme işlemi oluşturmaz.</p>
-            <Link href="/iletisim" className="mt-8 inline-block text-sm font-semibold text-[#a96d6d] underline">Genel iletişim sayfası</Link>
+            <Link prefetch={false} href="/iletisim" className="mt-8 inline-block text-sm font-semibold text-[#a96d6d] underline">Genel iletişim sayfası</Link>
           </div>
           <div className="p-8 sm:p-12"><GiftInquiryForm /></div>
         </div>

@@ -1,4 +1,5 @@
 "use client"
+import SmartImage from "@components/common/SmartImage"
 import { DEFAULT_SEO_TEMPLATES, getSiteSeoMetadata, renderSeoTemplate, type SeoTokens } from "@lib/seo/templates"
 import { AdminSectionHeading } from "@components/admin/AdminContent"
 import AdminTabs from "@components/admin/AdminTabs"
@@ -713,7 +714,7 @@ export default function ThemeSettingsPage(props: any = {}) {
                   }}
                 >
                   {headerLogoUrl ? (
-                    <img
+                    <SmartImage width={400} height={400} sizes="400px" quality={50} loading="lazy"
                       src={headerLogoUrl}
                       alt="Header Logo"
                       style={{
@@ -842,7 +843,7 @@ export default function ThemeSettingsPage(props: any = {}) {
                   }}
                 >
                   {footerLogoUrl ? (
-                    <img
+                    <SmartImage width={400} height={400} sizes="400px" quality={50} loading="lazy"
                       src={footerLogoUrl}
                       alt="Footer Logo"
                       style={{
@@ -971,7 +972,7 @@ export default function ThemeSettingsPage(props: any = {}) {
                   }}
                 >
                   {faviconUrl ? (
-                    <img
+                    <SmartImage width={400} height={400} sizes="400px" quality={50} loading="lazy"
                       src={faviconUrl}
                       alt="Favicon"
                       style={{
@@ -1084,7 +1085,7 @@ export default function ThemeSettingsPage(props: any = {}) {
                   }}
                 >
                   {adminLogoUrl ? (
-                    <img
+                    <SmartImage width={400} height={400} sizes="400px" quality={50} loading="lazy"
                       src={adminLogoUrl}
                       alt="Admin Logo"
                       style={{
@@ -1213,7 +1214,7 @@ export default function ThemeSettingsPage(props: any = {}) {
                   }}
                 >
                   {miniLogoUrl ? (
-                    <img
+                    <SmartImage width={400} height={400} sizes="400px" quality={50} loading="lazy"
                       src={miniLogoUrl}
                       alt="Mini Logo"
                       style={{
@@ -2330,7 +2331,7 @@ export default function ThemeSettingsPage(props: any = {}) {
                 }}
               >
                 {seoOgImageUrl ? (
-                  <img
+                  <SmartImage width={400} height={400} sizes="400px" quality={50} loading="lazy"
                     src={seoOgImageUrl}
                     alt="OG Image"
                     style={{
@@ -2617,7 +2618,7 @@ export default function ThemeSettingsPage(props: any = {}) {
                         overflow: "hidden",
                       }}
                     >
-                      <img
+                      <SmartImage width={400} height={400} sizes="400px" quality={50} loading="lazy"
                         src={item.url}
                         alt={item.label}
                         style={{
@@ -2914,7 +2915,7 @@ export default function ThemeSettingsPage(props: any = {}) {
                   }}
                 >
                   {footerLogoDarkUrl || footerLogoUrl ? (
-                    <img
+                    <SmartImage width={400} height={400} sizes="400px" quality={50} loading="lazy"
                       src={footerLogoDarkUrl || footerLogoUrl}
                       alt="Footer Logo"
                       style={{ maxHeight: "100%", maxWidth: "100%", objectFit: "contain", padding: 6 }}
@@ -3447,7 +3448,7 @@ export default function ThemeSettingsPage(props: any = {}) {
               <div style={{ display: "flex", flexDirection: "column", gap: 8, background: "#f8fafc", padding: 14, borderRadius: 10, border: "1px solid #e2e8f0" }}>
                 <label style={{ fontSize: 11, fontWeight: 800, color: "#475569" }}>1. İYZİCO LOGOSU</label>
                 <div style={{ height: 52, display: "flex", alignItems: "center", justifyContent: "center", background: "#ffffff", border: "1px solid #cbd5e1", borderRadius: 8, padding: 6 }}>
-                  <img src={paymentLogoIyzico} alt="iyzico" style={{ maxHeight: "100%", maxWidth: "100%", objectFit: "contain" }} />
+                  <SmartImage width={128} height={64} sizes="128px" quality={50} loading="lazy" src={paymentLogoIyzico} alt="iyzico" style={{ maxHeight: "100%", maxWidth: "100%", objectFit: "contain" }} />
                 </div>
                 <button type="button" onClick={() => setModalTarget("payment_iyzico")} className="admin-btn admin-btn-secondary" style={{ padding: "6px 10px", fontSize: 11, fontWeight: 700, borderRadius: 6 }}>
                   🖼️ Logoyu Değiştir
@@ -3459,7 +3460,7 @@ export default function ThemeSettingsPage(props: any = {}) {
               <div style={{ display: "flex", flexDirection: "column", gap: 8, background: "#f8fafc", padding: 14, borderRadius: 10, border: "1px solid #e2e8f0" }}>
                 <label style={{ fontSize: 11, fontWeight: 800, color: "#475569" }}>2. MASTERCARD LOGOSU</label>
                 <div style={{ height: 52, display: "flex", alignItems: "center", justifyContent: "center", background: "#ffffff", border: "1px solid #cbd5e1", borderRadius: 8, padding: 6 }}>
-                  <img src={paymentLogoMastercard} alt="mastercard" style={{ maxHeight: "100%", maxWidth: "100%", objectFit: "contain" }} />
+                  <SmartImage width={128} height={64} sizes="128px" quality={50} loading="lazy" src={paymentLogoMastercard} alt="mastercard" style={{ maxHeight: "100%", maxWidth: "100%", objectFit: "contain" }} />
                 </div>
                 <button type="button" onClick={() => setModalTarget("payment_mastercard")} className="admin-btn admin-btn-secondary" style={{ padding: "6px 10px", fontSize: 11, fontWeight: 700, borderRadius: 6 }}>
                   🖼️ Logoyu Değiştir
@@ -3471,7 +3472,7 @@ export default function ThemeSettingsPage(props: any = {}) {
               <div style={{ display: "flex", flexDirection: "column", gap: 8, background: "#f8fafc", padding: 14, borderRadius: 10, border: "1px solid #e2e8f0" }}>
                 <label style={{ fontSize: 11, fontWeight: 800, color: "#475569" }}>3. VISA LOGOSU</label>
                 <div style={{ height: 52, display: "flex", alignItems: "center", justifyContent: "center", background: "#ffffff", border: "1px solid #cbd5e1", borderRadius: 8, padding: 6 }}>
-                  <img src={paymentLogoVisa} alt="visa" style={{ maxHeight: "100%", maxWidth: "100%", objectFit: "contain" }} />
+                  <SmartImage width={128} height={64} sizes="128px" quality={50} loading="lazy" src={paymentLogoVisa} alt="visa" style={{ maxHeight: "100%", maxWidth: "100%", objectFit: "contain" }} />
                 </div>
                 <button type="button" onClick={() => setModalTarget("payment_visa")} className="admin-btn admin-btn-secondary" style={{ padding: "6px 10px", fontSize: 11, fontWeight: 700, borderRadius: 6 }}>
                   🖼️ Logoyu Değiştir
@@ -3483,7 +3484,7 @@ export default function ThemeSettingsPage(props: any = {}) {
               <div style={{ display: "flex", flexDirection: "column", gap: 8, background: "#f8fafc", padding: 14, borderRadius: 10, border: "1px solid #e2e8f0" }}>
                 <label style={{ fontSize: 11, fontWeight: 800, color: "#475569" }}>4. AMEX LOGOSU</label>
                 <div style={{ height: 52, display: "flex", alignItems: "center", justifyContent: "center", background: "#ffffff", border: "1px solid #cbd5e1", borderRadius: 8, padding: 6 }}>
-                  <img src={paymentLogoAmex} alt="amex" style={{ maxHeight: "100%", maxWidth: "100%", objectFit: "contain" }} />
+                  <SmartImage width={128} height={64} sizes="128px" quality={50} loading="lazy" src={paymentLogoAmex} alt="amex" style={{ maxHeight: "100%", maxWidth: "100%", objectFit: "contain" }} />
                 </div>
                 <button type="button" onClick={() => setModalTarget("payment_amex")} className="admin-btn admin-btn-secondary" style={{ padding: "6px 10px", fontSize: 11, fontWeight: 700, borderRadius: 6 }}>
                   🖼️ Logoyu Değiştir
@@ -3495,7 +3496,7 @@ export default function ThemeSettingsPage(props: any = {}) {
               <div style={{ display: "flex", flexDirection: "column", gap: 8, background: "#f8fafc", padding: 14, borderRadius: 10, border: "1px solid #e2e8f0" }}>
                 <label style={{ fontSize: 11, fontWeight: 800, color: "#475569" }}>5. TROY LOGOSU</label>
                 <div style={{ height: 52, display: "flex", alignItems: "center", justifyContent: "center", background: "#ffffff", border: "1px solid #cbd5e1", borderRadius: 8, padding: 6 }}>
-                  <img src={paymentLogoTroy} alt="troy" style={{ maxHeight: "100%", maxWidth: "100%", objectFit: "contain" }} />
+                  <SmartImage width={128} height={64} sizes="128px" quality={50} loading="lazy" src={paymentLogoTroy} alt="troy" style={{ maxHeight: "100%", maxWidth: "100%", objectFit: "contain" }} />
                 </div>
                 <button type="button" onClick={() => setModalTarget("payment_troy")} className="admin-btn admin-btn-secondary" style={{ padding: "6px 10px", fontSize: 11, fontWeight: 700, borderRadius: 6 }}>
                   🖼️ Logoyu Değiştir

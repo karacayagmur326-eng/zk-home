@@ -1,4 +1,5 @@
 "use client"
+import SmartImage from "@components/common/SmartImage"
 import { useSiteContact } from "@components/common/SellerQuestion"
 
 import { useParams, usePathname } from "next/navigation"
@@ -89,7 +90,7 @@ const AccountNav = ({
       {/* Storefront brand mark */}
       <div className="mb-6 pb-6 border-b border-slate-100">
         <LocalizedClientLink href="/" aria-label={`${siteContact.brandName} ana sayfa`} className="flex h-12 items-center justify-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C98484]">
-          <img src={logoUrl} alt={siteContact.brandName} width={220} height={44} className="max-h-11 max-w-[205px] object-contain" />
+          <SmartImage sizes="220px" quality={50} loading="lazy" src={logoUrl} alt={siteContact.brandName} width={220} height={44} className="max-h-11 max-w-[205px] object-contain" />
         </LocalizedClientLink>
       </div>
 

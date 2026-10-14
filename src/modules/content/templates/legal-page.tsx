@@ -250,7 +250,7 @@ export default async function LegalPage({ handle, fallbackTitle, fallbackDescrip
                     <span className="truncate">{asideEmail}</span>
                   </a>
                 </div>
-                <Link href="/iletisim" className="mt-4 flex items-center justify-center gap-2 rounded-lg border border-rose-200 bg-white px-3 py-2.5 text-xs font-extrabold text-[#C98484]">İletişim Sayfasına Git <ArrowRight className="h-3.5 w-3.5" /></Link>
+                <Link prefetch={false} href="/iletisim" className="mt-4 flex items-center justify-center gap-2 rounded-lg border border-rose-200 bg-white px-3 py-2.5 text-xs font-extrabold text-[#C98484]">İletişim Sayfasına Git <ArrowRight className="h-3.5 w-3.5" /></Link>
               </div>
             )}
             {aside === "cookie" && (
@@ -287,7 +287,7 @@ export default async function LegalPage({ handle, fallbackTitle, fallbackDescrip
             <div className="m-4 flex flex-col gap-3 rounded-xl border border-rose-100 bg-rose-50/60 p-4 sm:m-5 sm:flex-row sm:items-center">
               <Info className="h-7 w-7 shrink-0 text-[#C98484]" />
               <p className="flex-1 text-xs font-medium leading-5 text-slate-700">{note}</p>
-              {actionLabel && actionHref && <Link href={actionHref} className="inline-flex items-center justify-center gap-2 rounded-lg border border-rose-200 bg-white px-4 py-2.5 text-xs font-extrabold text-[#C98484]">{actionLabel}<ArrowRight className="h-3.5 w-3.5" /></Link>}
+              {actionLabel && actionHref && <Link prefetch={false} href={actionHref} className="inline-flex items-center justify-center gap-2 rounded-lg border border-rose-200 bg-white px-4 py-2.5 text-xs font-extrabold text-[#C98484]">{actionLabel}<ArrowRight className="h-3.5 w-3.5" /></Link>}
             </div>
           </article>
         </div>

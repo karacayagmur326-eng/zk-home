@@ -310,7 +310,7 @@ export default function OrdersPage() {
             <Download className="w-3.5 h-3.5 text-slate-500" />
             Dışa Aktar
           </button>
-          <Link
+          <Link prefetch={false}
             href="/admin/urunler"
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#C98484] hover:bg-[#A95E5E] transition-all shadow-xs cursor-pointer"
           >
@@ -525,7 +525,7 @@ export default function OrdersPage() {
                           />
                         </td>
                         <td className="p-3">
-                          <Link
+                          <Link prefetch={false}
                             href={`/admin/siparisler/${order.id}`}
                             className="font-black text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-xs"
                           >
@@ -588,14 +588,14 @@ export default function OrdersPage() {
                         <td className="p-3 text-right">
                           <div className="inline-flex items-center gap-1.5 text-slate-400">
                             <CustomerMessageButton compact orderId={order.id} orderNumber={order.display_id} label={order.email}/>
-                            <Link
+                            <Link prefetch={false}
                               href={`/admin/siparisler/${order.id}`}
                               className="p-1 hover:text-slate-700 transition-colors cursor-pointer"
                               title="Görüntüle"
                             >
                               <Eye className="w-4 h-4" />
                             </Link>
-                            <Link
+                            <Link prefetch={false}
                               href={`/admin/siparisler/${order.id}`}
                               className="p-1 hover:text-slate-700 transition-colors cursor-pointer"
                               title="Düzenle"

@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { getProductReviews } from "@lib/util/product-review-request"
 import { HttpTypes } from "@medusajs/types"
 import { Star } from "@lib/icons"
 import { sanitizeRichTextHtml } from "@modules/common/components/rich-text-editor"
@@ -18,10 +19,12 @@ export default function ProductInfo({ product }: ProductInfoProps) {
   const md = (product.metadata as Record<string, any>) || {}
   const brandName = (md.brand_name as string) || product.collection?.title || (md.brand as string) || ""
   useEffect(() => {
+    let current = true
+    setReviewsData({ count: 0, avg: 0 })
     // Fetch real reviews for this product
-    fetch(`/api/products/${product.id}/reviews`)
-      .then((r) => (r.ok ? r.json() : null))
+    getProductReviews(product.id)
       .then((data) => {
+        if (!current) return
         if (data?.reviews && Array.isArray(data.reviews) && data.reviews.length > 0) {
           const revs = data.reviews
           const count = revs.length
@@ -30,6 +33,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
         }
       })
       .catch(() => {})
+    return () => { current = false }
   }, [product.id])
 
   const scrollToReviews = (targetHash: string) => {

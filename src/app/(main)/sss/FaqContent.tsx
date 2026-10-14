@@ -189,7 +189,7 @@ export default function FaqContent({ content }: { content: Record<string, any> }
                         <span>Satıcıya Sor →</span>
                       </SellerQuestionButton>
                     ) : (
-                      <Link
+                      <Link prefetch={false}
                         href={item.linkUrl || "/magaza"}
                         className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-rose-50 px-3.5 py-2.5 sm:py-2 text-xs font-extrabold text-[#C98484] transition hover:bg-[#C98484] hover:text-white text-center"
                       >
@@ -247,7 +247,7 @@ export default function FaqContent({ content }: { content: Record<string, any> }
           </p>
 
           <div className="mt-4">
-            <Link href="/iletisim" className="flex items-center justify-center gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm font-bold text-[#C98484] transition hover:bg-rose-100">
+            <Link prefetch={false} href="/iletisim" className="flex items-center justify-center gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm font-bold text-[#C98484] transition hover:bg-rose-100">
               <Mail className="h-5 w-5" /> İletişim formuna git
             </Link>
           </div>
@@ -260,7 +260,7 @@ export default function FaqContent({ content }: { content: Record<string, any> }
             <h2 className="text-base font-black text-slate-900">{content.tracking_title || "Sipariş Takibi"}</h2>
           </div>
           <p className="mt-2 text-xs text-slate-500">{content.tracking_description || "Siparişinizi kolayca takip edin."}</p>
-          <Link
+          <Link prefetch={false}
             href="/siparis-takibi"
             className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#C98484] px-4 py-3 text-xs font-extrabold text-white transition hover:bg-[#A95E5E]"
           >

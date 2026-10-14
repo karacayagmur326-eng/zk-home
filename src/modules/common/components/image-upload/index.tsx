@@ -1,5 +1,6 @@
 "use client"
 
+import SmartImage from "@components/common/SmartImage"
 import FileUpload from "@modules/common/components/file-upload"
 import { useEffect, useState } from "react"
 
@@ -48,7 +49,7 @@ export default function ImageUpload({
               key={`${preview.file.name}-${preview.file.lastModified}`}
               className="overflow-hidden rounded-rounded border border-border bg-card"
             >
-              <img
+              <SmartImage width={400} height={400} sizes="400px" quality={50} loading="lazy"
                 src={preview.url}
                 alt={preview.file.name}
                 className="aspect-square w-full object-cover"

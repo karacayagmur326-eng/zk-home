@@ -1,5 +1,6 @@
 "use client"
 
+import SmartImage from "@components/common/SmartImage"
 import React, { useState } from "react"
 import { useCartState } from "@lib/util/cart-state"
 import { updateLineItem } from "@lib/util/cart-feedback"
@@ -128,7 +129,7 @@ export default function CheckoutSummary({
                 {/* Thumbnail */}
                 <LocalizedClientLink href={`/urunler/${item.product_handle || item.product?.handle}`} className="w-20 aspect-[4/5] bg-white border border-slate-100 rounded-xl p-1 shrink-0 flex items-center justify-center overflow-hidden" aria-label={`${item.title || item.product_title} ürününü incele`}>
                   {item.thumbnail ? (
-                    <img
+                    <SmartImage width={80} height={100} sizes="80px" quality={50} loading="lazy"
                       src={item.thumbnail}
                       alt={item.title || item.product_title}
                       className="h-full w-full object-contain"

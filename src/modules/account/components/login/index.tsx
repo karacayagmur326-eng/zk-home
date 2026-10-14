@@ -107,7 +107,7 @@ const Login = ({ setCurrentView }: Props) => {
             <span>Beni hatırla</span>
           </label>
 
-          <Link
+          <Link prefetch={false}
             href="/sifremi-unuttum"
             className="text-xs font-bold text-[#C98484] hover:text-rose-700 transition-colors"
           >

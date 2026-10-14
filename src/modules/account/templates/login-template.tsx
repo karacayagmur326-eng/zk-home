@@ -95,7 +95,7 @@ const LoginTemplate = () => {
 
         {/* Form Area - Full Width on Mobile, Right 8-Cols on Desktop */}
         <div className="relative w-full lg:col-span-8 p-4 pt-14 sm:p-10 lg:p-12 flex flex-col justify-center">
-          <Link
+          <Link prefetch={false}
             href="/"
             aria-label="Giriş ve üyelik ekranını kapat"
             title="Kapat"

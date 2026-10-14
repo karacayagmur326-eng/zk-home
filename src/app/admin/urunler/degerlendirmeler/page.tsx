@@ -650,7 +650,7 @@ export default function AdminReviewsPage() {
 
                         {/* Ürün */}
                         <td className="py-3.5 px-4">
-                          <Link
+                          <Link prefetch={false}
                             href={`/admin/urunler/${r.product_id}`}
                             className="font-bold text-blue-600 hover:text-blue-800 hover:underline block truncate max-w-[200px]"
                             title={r.product_title || r.product_id}

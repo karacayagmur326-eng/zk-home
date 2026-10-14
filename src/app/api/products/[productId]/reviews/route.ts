@@ -1,4 +1,4 @@
-import { query, withTransaction } from "@lib/admin/db"
+import { query, cachedQuery, withTransaction } from "@lib/admin/db"
 import { ensureContactHistory } from "@lib/email/contact-history"
 import { ensureProductQuestions } from "@lib/commerce/product-questions"
 import { processNotificationOutbox } from "@lib/notifications/outbox"
@@ -18,7 +18,7 @@ export async function GET(
     const { productId } = await context.params
     await ensureTable()
 
-    const reviews = await query<{
+    const reviewsRequest = cachedQuery<{
       id: string
       author: string
       rating: number
@@ -27,6 +27,7 @@ export async function GET(
       image_url?: string
       type: string
     }>(
+      `public-product-reviews:${productId}`,
       `SELECT id, author, rating, comment, image_url, type,
               TO_CHAR(created_at AT TIME ZONE 'Europe/Istanbul', 'DD.MM.YYYY') AS date
        FROM product_reviews
@@ -35,13 +36,14 @@ export async function GET(
       [productId],
     )
 
-    const questions = await query<{
+    const questionsRequest = cachedQuery<{
       id: string
       author: string
       comment: string
       answer?: string
       date: string
     }>(
+      `public-product-questions:${productId}`,
       `SELECT id, author, comment, answer,
               TO_CHAR(created_at AT TIME ZONE 'Europe/Istanbul', 'DD.MM.YYYY') AS date
        FROM product_reviews
@@ -50,6 +52,7 @@ export async function GET(
       [productId],
     )
 
+    const [reviews, questions] = await Promise.all([reviewsRequest, questionsRequest])
     return NextResponse.json({
       reviews,
       questions,
