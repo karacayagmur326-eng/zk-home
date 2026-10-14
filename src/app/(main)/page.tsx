@@ -11,6 +11,7 @@ import MobileHomeExperience from "@modules/home/components/mobile-home-experienc
 import { compactProductsForCards } from "@lib/util/product-card"
 import { Metadata } from "next"
 import { getBaseURL } from "@lib/util/env"
+import { socialImageUrl } from "@lib/seo/entity"
 import { getThemeSettings } from "@lib/content/theme-settings"
 import { serializeJsonLd } from "@lib/security/html"
 import { query } from "@lib/admin/db"
@@ -26,7 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: { canonical: getBaseURL() },
     openGraph: {
       title, description, url: getBaseURL(), siteName, locale: "tr_TR", type: "website",
-      images: [{ url: settings?.seo_og_image_url || "/opengraph-image", alt: siteName }],
+      images: [{ url: socialImageUrl(settings?.seo_og_image_url || "/opengraph-image"), alt: siteName }],
     },
   }
 }

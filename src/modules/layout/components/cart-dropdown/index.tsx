@@ -1,5 +1,6 @@
 "use client"
 
+import SmartImage from "@components/common/SmartImage"
 import { Fragment, useRef, useState, useTransition } from "react"
 import { Transition } from "@headlessui/react"
 import { HttpTypes } from "@medusajs/types"
@@ -181,7 +182,7 @@ const CartDropdown = ({
                           href={`/urunler/${item.product_handle}`}
                           className="flex aspect-[4/5] w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-100 bg-slate-50/50 p-1"
                         >
-                          <img
+                          <SmartImage width={96} height={120} sizes="96px" quality={50} loading="lazy"
                             src={item.thumbnail || "/images/placeholder.svg"}
                             alt={item.title}
                             className="h-full w-full object-contain transform group-hover:scale-105 transition-transform duration-300"

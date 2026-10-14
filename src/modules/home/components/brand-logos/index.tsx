@@ -1,3 +1,4 @@
+import SmartImage from "@components/common/SmartImage"
 import { HttpTypes } from "@medusajs/types"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -44,7 +45,7 @@ export default function BrandLogos({
                   className="group flex h-24 w-44 shrink-0 snap-start items-center justify-center rounded-rounded border border-border bg-background px-5 shadow-soft transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-auto"
                 >
                   {logo ? (
-                    <img
+                    <SmartImage width={220} height={60} sizes="220px" quality={50} loading="lazy"
                       src={logo}
                       alt={brand.title}
                       className="max-h-12 max-w-full object-contain opacity-75 grayscale transition-all group-hover:opacity-100 group-hover:grayscale-0"

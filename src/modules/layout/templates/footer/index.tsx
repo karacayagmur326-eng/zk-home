@@ -1,3 +1,4 @@
+import SmartImage from "@components/common/SmartImage"
 import { getMenu } from "@lib/data/menus"
 import { cleanContactValue, getContactInfo } from "@lib/content/contact-info"
 import { getThemeSettings } from "@lib/content/theme-settings"
@@ -209,7 +210,7 @@ export default async function Footer() {
             <div className="flex flex-col space-y-3">
               <LocalizedClientLink href="/" aria-label="Ana Sayfa" className="inline-block">
                 {lightLogo ? (
-                  <img
+                  <SmartImage sizes="220px" quality={50} loading="lazy"
                     src={lightLogo}
                     alt={logoAlt}
                     width={180}
@@ -328,7 +329,7 @@ export default async function Footer() {
             <div className="flex flex-col space-y-4 lg:col-span-1">
               <LocalizedClientLink href="/" aria-label="Ana Sayfa" className="inline-block">
                 {lightLogo ? (
-                  <img
+                  <SmartImage sizes="220px" quality={50} loading="lazy"
                     src={lightLogo}
                     alt={logoAlt}
                     width={220}
@@ -543,7 +544,7 @@ export default async function Footer() {
 
           {showPaymentBadges && paymentLogos.length > 0 && (
             <div className="zk-payment-logos" role="group" aria-label="Ödeme logoları">
-              {paymentLogos.map((logo) => <span key={logo.key} className="zk-payment-logo-item"><img src={logo.src} alt={logo.name} className="zk-payment-logo" loading="lazy" /></span>)}
+              {paymentLogos.map((logo) => <span key={logo.key} className="zk-payment-logo-item"><SmartImage width={128} height={64} sizes="96px" quality={50} src={logo.src} alt={logo.name} className="zk-payment-logo" loading="lazy" /></span>)}
             </div>
           )}
         </div>

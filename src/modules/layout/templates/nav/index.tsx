@@ -1,3 +1,4 @@
+import SmartImage from "@components/common/SmartImage"
 import { Suspense } from "react"
 import { listLocales } from "@lib/data/locales"
 import { getLocale } from "@lib/data/locale-actions"
@@ -188,7 +189,7 @@ export default async function Nav() {
               >
                 {feat.icon &&
                 (feat.icon.startsWith("http") || feat.icon.startsWith("/")) ? (
-                  <img
+                  <SmartImage sizes="16px" quality={50}
                     src={feat.icon}
                     alt=""
                     width={16}
@@ -230,7 +231,7 @@ export default async function Nav() {
               className="hover:opacity-80 transition-opacity flex items-center gap-3 shrink-0"
               data-testid="nav-store-link"
             >
-              <img
+              <SmartImage sizes="220px" quality={50} loading="eager"
                 src={brandLogoUrl}
                 alt={themeSettings?.footer_logo_alt || themeSettings?.logo_text || "Mağaza"}
                 width={220}

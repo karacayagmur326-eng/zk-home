@@ -1,5 +1,6 @@
 "use client"
 
+import SmartImage from "@components/common/SmartImage"
 import { useEffect, useMemo, useState, useRef, useTransition } from "react"
 import { usePathname } from "next/navigation"
 import { HttpTypes } from "@medusajs/types"
@@ -175,7 +176,7 @@ export default function DesktopCartSidebar({
                   href={`/urunler/${item.product_handle}`}
                   className="block aspect-[4/5] w-16 shrink-0 relative overflow-hidden rounded-lg bg-slate-50 border border-slate-100"
                 >
-                  <img
+                  <SmartImage width={64} height={80} sizes="64px" quality={50} loading="lazy"
                     src={item.thumbnail || "/images/placeholder.svg"}
                     alt={item.title}
                     className="w-full h-full object-contain p-0.5"

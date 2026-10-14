@@ -1,5 +1,6 @@
 "use client"
 
+import SmartImage from "@components/common/SmartImage"
 import { useState } from "react"
 import { ArrowRight, AppIcon, LayoutGrid } from "@lib/icons"
 import type { NavigationItem } from "@lib/types/navigation"
@@ -49,10 +50,10 @@ export default function MegaMenu({ item, themeSettings, onNavigate }: MegaMenuPr
               <LocalizedClientLink href={child.url || "#"} onClick={onNavigate} className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C98484]">
               <div className={`flex items-center justify-center rounded-xl bg-[#f8f3ef] ${groupSize === 4 ? "h-[140px]" : "h-[165px]"}`}>
                 {child.imageUrl ? (
-                  <img
+                  <SmartImage width={320} height={180} sizes="320px" quality={50}
                     src={child.imageUrl}
                     alt=""
-                    loading="eager"
+                    loading="lazy"
                     className="h-full w-full object-contain object-center p-1"
                   />
                 ) : (
@@ -132,10 +133,10 @@ export default function MegaMenu({ item, themeSettings, onNavigate }: MegaMenuPr
           className="group/promo relative isolate flex min-h-[340px] overflow-hidden rounded-[18px] bg-[#efe3db] p-8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C98484]"
         >
           {promoImage ? (
-            <img
+            <SmartImage width={280} height={400} sizes="280px" quality={50}
               src={promoImage}
               alt=""
-              loading="eager"
+              loading="lazy"
               className="absolute bottom-0 right-0 -z-20 h-full w-[50%] object-contain object-right-bottom p-4"
             />
           ) : (
