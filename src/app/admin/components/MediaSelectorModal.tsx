@@ -1,5 +1,6 @@
 "use client"
 import AdminTabs from "@components/admin/AdminTabs"
+import SmartImage from "@components/common/SmartImage"
 import React, { useEffect, useState } from "react"
 import { uploadMediaFiles } from "@lib/admin/upload-media"
 import {
@@ -43,6 +44,8 @@ export default function MediaSelectorModal({
   const [uploadProgress, setUploadProgress] = useState("")
   const [uploadErrors, setUploadErrors] = useState<string[]>([])
   const [search, setSearch] = useState("")
+  const [visibleCount, setVisibleCount] = useState(60)
+
   const [selectedUrls, setSelectedUrls] = useState<string[]>([])
   const [sortBy, setSortBy] = useState<string>(() => {
     if (typeof window !== "undefined") {
@@ -50,6 +53,8 @@ export default function MediaSelectorModal({
     }
     return "date_desc"
   })
+
+  useEffect(() => setVisibleCount(60), [search, sortBy, isOpen])
 
   function handleSortChange(newSort: string) {
     setSortBy(newSort)
@@ -416,7 +421,7 @@ export default function MediaSelectorModal({
                   display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))",
                   gap: 14, paddingBottom: 10
                 }}>
-                  {filteredMedia.map((file) => {
+                  {filteredMedia.slice(0, visibleCount).map((file) => {
                     const isSelected = selectedUrls.includes(file.url)
                     const isAdded = addedUrls.includes(file.url)
                     const displayName = getDisplayName(file)
@@ -450,16 +455,10 @@ export default function MediaSelectorModal({
                           background: "#f8fafc", borderRadius: 10, overflow: "hidden",
                           display: "flex", alignItems: "center", justifyContent: "center", padding: 6
                         }}>
-                          <img
+                          <SmartImage
                             src={file.url}
                             alt={displayName}
-                            onError={(e) => {
-                              const target = e.currentTarget
-                              if (!target.dataset.retried) {
-                                target.dataset.retried = "true"
-                                target.src = file.url.includes("?") ? `${file.url}&retry=${Date.now()}` : `${file.url}?retry=${Date.now()}`
-                              }
-                            }}
+                            width={160} height={160} sizes="160px" quality={50} loading="lazy"
                             className="media-modal-img"
                             style={{
                               maxWidth: "100%", maxHeight: "100%", objectFit: "contain",
@@ -497,6 +496,7 @@ export default function MediaSelectorModal({
                       </div>
                     )
                   })}
+                  {visibleCount < filteredMedia.length && <button type="button" onClick={() => setVisibleCount(count => count + 60)} className="col-span-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700">Daha fazla görsel göster ({Math.min(visibleCount, filteredMedia.length)} / {filteredMedia.length})</button>}
                 </div>
               )}
             </div>

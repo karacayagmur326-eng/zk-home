@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
+import SmartImage from "@components/common/SmartImage"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { Search, X, Loader2, ChevronRight, Tag, Lightbulb } from "@lib/icons"
 
@@ -195,7 +196,12 @@ export default function HeaderSearch() {
                       >
                         {/* Product Thumbnail */}
                         <div className="flex aspect-[4/5] w-14 shrink-0 items-center justify-center rounded-lg border border-slate-200/80 bg-white p-1 overflow-hidden shadow-2xs">
-                          <img
+                          <SmartImage
+                            width={56}
+                            height={70}
+                            sizes="56px"
+                            quality={50}
+                            loading="lazy"
                             src={product.thumbnail}
                             alt={product.title}
                             className="h-full w-full object-contain transform group-hover:scale-105 transition-transform duration-300"
