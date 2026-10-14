@@ -13,6 +13,7 @@ import { useEffect, useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import MediaSelectorModal from "../../components/MediaSelectorModal"
 import ProductCategoryPicker from "../../components/ProductCategoryPicker"
+import ProductTagPicker from "../../components/ProductTagPicker"
 import RichTextEditorField from "../../components/RichTextEditorField"
 import ProductUsageFields from "../../components/ProductUsageFields"
 import { formatTryPriceInput, parseTryPriceInput } from "@lib/util/money"
@@ -731,80 +732,7 @@ export default function NewProductPage() {
           </div>
 
           {/* Card 5: Ürün Etiketleri */}
-          <div className="rounded-2xl bg-white border border-[#EADBD4]/70 p-4 shadow-sm space-y-3">
-            <h3 className="text-sm font-extrabold text-slate-900 border-b border-slate-100 pb-3">
-              Ürün Etiketleri
-            </h3>
-
-            {/* Selected Tag Badges */}
-            {selectedTagIds.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 pb-2 border-b border-slate-100">
-                {selectedTagIds.map((id) => {
-                  const tag = allTags.find((t) => t.id === id)
-                  return tag ? (
-                    <span
-                      key={id}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-rose-50 border border-rose-200 text-xs font-bold text-rose-700"
-                    >
-                      <span>{tag.value}</span>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedTagIds((s) => s.filter((x) => x !== id))}
-                        className="hover:text-red-600 font-black text-sm"
-                      >
-                        ×
-                      </button>
-                    </span>
-                  ) : null
-                })}
-              </div>
-            )}
-
-            {/* Available Tags to Add */}
-            {allTags.filter((t) => !selectedTagIds.includes(t.id)).length > 0 && (
-              <div className="pt-2">
-                <p className="text-[11px] font-medium text-slate-500 mb-2">Tüm etiketler — eklemek için tıklayın</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {allTags
-                    .filter((t) => !selectedTagIds.includes(t.id))
-                    .map((tag) => (
-                      <button
-                        key={tag.id}
-                        type="button"
-                        onClick={() => setSelectedTagIds((s) => [...s, tag.id])}
-                        className="inline-flex items-center px-2 py-1 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-700 transition-colors cursor-pointer"
-                      >
-                        + {tag.value}
-                      </button>
-                    ))}
-                </div>
-              </div>
-            )}
-
-            {/* Quick Add Tag Input */}
-            <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
-              <input
-                type="text"
-                placeholder="Etiketleri virgülle ayırarak ekleyin..."
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault()
-                    addTag()
-                  }
-                }}
-                className="flex-1 h-9 px-3 rounded-xl border border-slate-200 text-xs outline-none focus:border-[#C98484]"
-              />
-              <button
-                type="button"
-                onClick={addTag}
-                className="h-9 px-3 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold text-slate-700 hover:bg-slate-100 shrink-0"
-              >
-                + Oluştur
-              </button>
-            </div>
-          </div>
+          <ProductTagPicker tags={allTags} selectedIds={selectedTagIds} onChange={setSelectedTagIds} input={tagInput} onInputChange={setTagInput} onCreate={addTag} />
 
           {/* Card 6: Marka */}
           <div className="rounded-2xl bg-white border border-[#EADBD4]/70 p-4 shadow-sm space-y-3">

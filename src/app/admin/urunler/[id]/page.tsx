@@ -13,6 +13,7 @@ import { useEffect, useState, useRef } from "react"
 import { useRouter, useParams } from "next/navigation"
 import MediaSelectorModal from "../../components/MediaSelectorModal"
 import ProductCategoryPicker from "../../components/ProductCategoryPicker"
+import ProductTagPicker from "../../components/ProductTagPicker"
 import RichTextEditorField from "../../components/RichTextEditorField"
 import { splitProductFaq } from "@lib/util/product-faq"
 import ProductUsageFields from "../../components/ProductUsageFields"
@@ -826,95 +827,7 @@ export default function EditProductPage() {
           </div>
 
           {/* Card 5: Ürün Etiketleri */}
-          <div className="rounded-3xl bg-white border border-slate-200/80 p-5 shadow-xs space-y-3">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="text-sm font-extrabold text-slate-900">
-                Ürün Etiketleri
-              </h3>
-              {allTags.length > 0 && (
-                <span className="text-[11px] font-bold text-slate-400">
-                  {selectedTags.length}/{allTags.length} seçili
-                </span>
-              )}
-            </div>
-
-            {selectedTags.length > 0 && (
-              <div>
-                <p className="text-[11px] font-semibold text-slate-500 mb-2">Seçili Etiketler</p>
-                <div className="flex flex-wrap gap-1.5 pb-2 border-b border-slate-100">
-                  {selectedTags.map((id) => {
-                    const tag = allTags.find((t) => t.id === id)
-                    const label = tag ? (tag.value.includes("-") ? tag.value.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ") : tag.value) : id
-                    return (
-                      <span
-                        key={id}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-rose-50 border border-rose-200/80 text-xs font-bold text-rose-700 shadow-2xs transition-all hover:bg-rose-100/80"
-                      >
-                        <span>{label}</span>
-                        <button
-                          type="button"
-                          onClick={() => setSelectedTags((s) => s.filter((x) => x !== id))}
-                          className="hover:text-red-600 font-black text-xs leading-none transition-colors cursor-pointer"
-                          title="Etiketi kaldır"
-                        >
-                          ✕
-                        </button>
-                      </span>
-                    )
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Available Tags to Add */}
-            {allTags.filter((t) => !selectedTags.includes(t.id)).length > 0 && (
-              <div className="pt-1">
-                <p className="text-[11px] font-semibold text-slate-500 mb-2">Tüm Etiketler</p>
-                <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto pr-1">
-                  {allTags
-                    .filter((t) => !selectedTags.includes(t.id))
-                    .map((tag) => {
-                      const label = tag.value.includes("-") ? tag.value.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ") : tag.value
-                      return (
-                        <button
-                          key={tag.id}
-                          type="button"
-                          onClick={() => setSelectedTags((s) => [...s, tag.id])}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-50 hover:bg-rose-50 hover:border-rose-200 border border-slate-200 text-xs font-medium text-slate-700 hover:text-rose-700 transition-all cursor-pointer"
-                        >
-                          <span className="text-slate-400 font-bold text-[10px]">+</span>
-                          <span>{label}</span>
-                        </button>
-                      )
-                    })}
-                </div>
-              </div>
-            )}
-
-            {/* Quick Add Tag Input */}
-            <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
-              <input
-                type="text"
-                placeholder="Etiketleri virgülle ayırarak ekleyin..."
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault()
-                    addTag()
-                  }
-                }}
-                className="flex-1 h-9 px-3 rounded-xl border border-slate-200 text-xs outline-none focus:border-[#C98484] bg-slate-50/50 focus:bg-white transition-colors"
-              />
-              <button
-                type="button"
-                onClick={addTag}
-                className="h-9 px-3 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold text-slate-700 hover:bg-slate-100 shrink-0 cursor-pointer"
-              >
-                + Ekle
-              </button>
-            </div>
-          </div>
+          <ProductTagPicker tags={allTags} selectedIds={selectedTags} onChange={setSelectedTags} input={tagInput} onInputChange={setTagInput} onCreate={addTag} />
 
           {/* Card 6: Marka */}
           <div className="rounded-3xl bg-white border border-slate-200/80 p-5 shadow-xs space-y-3">
