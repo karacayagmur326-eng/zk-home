@@ -2,6 +2,27 @@ import { rangeShippingAmount } from "@lib/commerce/shipping"
 import { validGtin } from "./gtin"
 import { absoluteUrl, plainText } from "./entity"
 
+function shippingDayRange(value: unknown) {
+  const match = String(value || "").match(/\b(\d+)\s*[-–—]\s*(\d+)\s*(?:iş\s*)?gün/i)
+  if (!match) return undefined
+  const minValue = Number(match[1])
+  const maxValue = Number(match[2])
+  if (maxValue < minValue) return undefined
+  return { "@type": "QuantitativeValue", minValue, maxValue, unitCode: "DAY" }
+}
+
+export function shippingDeliveryTime(commerce: any) {
+  // A country-wide offer must not borrow the speed of a regional/express service.
+  const methods = (commerce?.shipping_methods || []).filter(
+    (method: any) => method.active && method.icon !== "store" && method.coverage === "Tüm Türkiye"
+  )
+  if (methods.length !== 1 || !/kargoya teslim/i.test(commerce?.shipping_info || "")) return undefined
+  const handlingTime = shippingDayRange(commerce.shipping_info)
+  const transitTime = shippingDayRange(methods[0].estimatedDays)
+  if (!handlingTime || !transitTime) return undefined
+  return { "@type": "ShippingDeliveryTime", handlingTime, transitTime }
+}
+
 export function productStructuredData(
   product: any,
   settings: any = {},
@@ -56,6 +77,11 @@ export function productStructuredData(
             },
           }
         : undefined)
+    const deliveryTime = shipping?.deliveryTime || (
+      available && (!variant.manage_inventory || Number(variant.inventory_quantity) > 0)
+        ? shippingDeliveryTime(settings.commerce)
+        : undefined
+    )
     const returns = md.return_policy_schema || {
       applicableCountry: "TR",
       returnPolicyCategory:
@@ -122,6 +148,7 @@ export function productStructuredData(
                     shippingDetails: {
                       ...shipping,
                       "@type": "OfferShippingDetails",
+                      ...(deliveryTime ? { deliveryTime } : {}),
                     },
                   }
                 : {}),
