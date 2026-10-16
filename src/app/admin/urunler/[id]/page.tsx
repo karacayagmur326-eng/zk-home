@@ -69,7 +69,7 @@ export default function EditProductPage() {
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [saved, setSaved] = useState(false)
-  const [activeTab, setActiveTab] = useUrlState<string>("general", "tab", ["general", "metadata", "stock", "shipping"])
+  const [activeTab, setActiveTab] = useUrlState<string>("general", "tab", ["general", "metadata", "shipping"])
 
   // Form fields
   const [title, setTitle] = useState("")
@@ -284,7 +284,7 @@ export default function EditProductPage() {
       return
     }
     if (!String(sku || "").trim()) {
-      setActiveTab("stock")
+      setActiveTab("general")
       setError("Stok kodu (SKU) kullanıcı tarafından girilmelidir.")
       return
     }
@@ -410,7 +410,6 @@ export default function EditProductPage() {
   const tabs = [
     { key: "general", label: "Genel" },
     { key: "metadata", label: "Özellikler" },
-    { key: "stock", label: "Stok" },
     { key: "shipping", label: "Gönderim" },
   ]
 
@@ -618,22 +617,6 @@ export default function EditProductPage() {
                     </div>
                   </div>
 
-                  <div tabIndex={-1} {...fieldProps("description")}>
-                    <RichTextEditorField
-                      boldColonLabels
-                      label="Ürün Açıklaması *"
-                      value={description}
-                      onChange={setDescription}
-                      placeholder="Ürün hakkında detaylı açıklama..."
-                      minHeight={250}
-                      rows={10}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* STOK TAB */}
-              {activeTab === "stock" && (
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
@@ -691,6 +674,19 @@ export default function EditProductPage() {
                     />
                     <span>Stok takibini etkinleştir</span>
                   </label>
+                </div>
+
+                  <div tabIndex={-1} {...fieldProps("description")}>
+                    <RichTextEditorField
+                      boldColonLabels
+                      label="Ürün Açıklaması *"
+                      value={description}
+                      onChange={setDescription}
+                      placeholder="Ürün hakkında detaylı açıklama..."
+                      minHeight={250}
+                      rows={10}
+                    />
+                  </div>
                 </div>
               )}
 

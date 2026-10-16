@@ -1,4 +1,4 @@
-import Image from "next/image"
+import Image from "@components/common/SmartImage"
 import Link from "next/link"
 import type { HttpTypes } from "@medusajs/types"
 import { ArrowRight } from "@lib/icons"

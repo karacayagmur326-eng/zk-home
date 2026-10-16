@@ -21,7 +21,7 @@ export function useProductFormError(activeTab: string, setActiveTab: (tab: strin
 
   useEffect(() => {
     if (!error) return
-    const requiredTab = ["sku", "stock"].includes(errorField) ? "stock" : /price/.test(errorField) || errorField === "description" ? "general" : null
+    const requiredTab = ["sku", "stock", "description"].includes(errorField) || /price/.test(errorField) ? "general" : null
     if (requiredTab && activeTab !== requiredTab) {
       setActiveTab(requiredTab)
       return

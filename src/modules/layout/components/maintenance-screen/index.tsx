@@ -1,4 +1,4 @@
-import Image from "next/image"
+import Image from "@components/common/SmartImage"
 import Link from "next/link"
 import { getContactInfo } from "@lib/content/contact-info"
 
