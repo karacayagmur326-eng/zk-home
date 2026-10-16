@@ -35,8 +35,8 @@ export default function ProductSpecifications({ product }: { product: HttpTypes.
   if (!html && !rows.length && !fallback.length) return null
 
   return (
-    <section id="urun-ozellikleri" aria-labelledby="product-specifications-heading" className="product-features-summary mt-4 scroll-mt-24 border-t border-slate-200/80 pt-3">
-      <h2 id="product-specifications-heading" className="mb-2 text-sm font-semibold text-slate-800">
+    <section id="urun-ozellikleri" aria-labelledby="product-specifications-heading" className="product-features-summary mt-3 scroll-mt-24 rounded-xl border border-[#C98484]/25 bg-[#C98484]/5 p-3 sm:p-4">
+      <h2 id="product-specifications-heading" className="mb-2 border-l-[3px] border-[#C98484] pl-2 text-sm font-bold text-slate-900">
         Ürün Özellikleri
       </h2>
       {html && <div className="product-rich-text text-sm leading-5 text-slate-600" dangerouslySetInnerHTML={{ __html: html }} />}

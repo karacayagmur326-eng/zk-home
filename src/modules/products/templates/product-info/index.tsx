@@ -54,8 +54,8 @@ export default function ProductInfo({ product }: ProductInfoProps) {
       : ""
 
   return (
-    <div id="product-info" className="flex flex-col gap-y-3.5 relative font-sans h-full justify-between">
-      <div className="space-y-3.5">
+    <div id="product-info" className="flex flex-col gap-y-2 relative font-sans">
+      <div className="space-y-2">
         {/* 1. Brand Tag & Main Title */}
         <div>
           <h1 className="text-sm sm:text-xl lg:text-[22px] font-black text-slate-900 leading-snug tracking-tight" data-testid="product-title">

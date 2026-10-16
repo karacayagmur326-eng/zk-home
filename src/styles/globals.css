@@ -478,6 +478,29 @@ textarea {
   margin-bottom: 0 !important;
 }
 
+@media (min-width: 1024px) {
+  [data-ui-scope="storefront"] .product-overview-details {
+    height: var(--product-gallery-height, auto);
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+
+  [data-ui-scope="storefront"] .product-overview-details #product-info {
+    flex-shrink: 0;
+    max-height: 40%;
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+
+  [data-ui-scope="storefront"] .product-overview-details .product-features-summary {
+    flex: 1 1 auto;
+    min-height: 96px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+}
+
 [data-ui-scope="storefront"] .product-features-summary .product-rich-text {
   font-size: .8125rem !important;
   line-height: 1.5;
@@ -486,8 +509,8 @@ textarea {
 [data-ui-scope="storefront"] .product-features-summary .product-rich-text ul,
 [data-ui-scope="storefront"] .product-feature-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
-  gap: 0 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: .4rem;
   margin: 0 !important;
   padding: 0 !important;
   min-width: 0;
@@ -497,13 +520,38 @@ textarea {
 [data-ui-scope="storefront"] .product-feature-card {
   min-width: 0;
   margin: 0 !important;
-  padding: .35rem 0 !important;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
+  padding: .5rem .65rem !important;
+  border: 1px solid rgb(var(--color-primary) / .12);
+  border-radius: .625rem;
+  background: rgb(255 255 255 / .85);
   font-size: .8125rem;
   line-height: 1.5;
   overflow-wrap: anywhere;
+  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+[data-ui-scope="storefront"] .product-feature-card dt,
+[data-ui-scope="storefront"] .product-features-summary .product-rich-text li :where(strong, b):first-child {
+  color: #334155;
+  font-weight: 600;
+}
+
+@media (hover: hover) {
+  [data-ui-scope="storefront"] .product-features-summary .product-rich-text ul > li:hover,
+  [data-ui-scope="storefront"] .product-feature-card:hover {
+    border-color: rgb(var(--color-primary) / .45);
+    background: #fff;
+    box-shadow: 0 3px 10px rgb(var(--color-primary) / .1);
+    transform: translateY(-1px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-ui-scope="storefront"] .product-features-summary .product-rich-text ul > li,
+  [data-ui-scope="storefront"] .product-feature-card {
+    transition: none;
+    transform: none;
+  }
 }
 
 [data-ui-scope="storefront"] .product-features-summary .product-rich-text ul > li::before {

@@ -13,6 +13,7 @@ import { getProductPrice } from "@lib/util/get-product-price"
 import ProductPageStateProvider from "@modules/products/components/product-page-state"
 import ProductSpecifications from "@modules/products/components/product-specifications"
 import ProductAvailability from "@modules/products/components/product-availability"
+import ProductOverview from "@modules/products/components/product-overview"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { categoryPath } from "@lib/seo/category"
@@ -84,19 +85,16 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
         >
           {/* Product information and purchasing share the right column. */}
 
-          <div className="space-y-3 sm:space-y-8 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)] lg:items-start lg:gap-8 lg:space-y-0 lg:pb-6">
-            <div className="min-w-0"><ImageGallery images={images} productTitle={product.title} discountBadge={discountBadge} product={product} /></div>
-            <div className="min-w-0 flex flex-col">
+          <ProductOverview gallery={<ImageGallery images={images} productTitle={product.title} discountBadge={discountBadge} product={product} />}>
               <ProductInfo product={product} />
-              <div className="mt-4 min-w-0 space-y-4 rounded-2xl border border-slate-200/80 bg-slate-50/50 p-4 sm:mt-5 sm:p-5" data-testid="product-purchase-panel">
+              <div className="product-overview-purchase mt-3 min-w-0 shrink-0 space-y-3 rounded-xl border border-slate-200/80 bg-slate-50/50 p-3 sm:p-4" data-testid="product-purchase-panel">
                 <ProductAvailability product={product} />
                 <div className="hidden border-t border-slate-200/70 lg:block" />
                 <ProductOnboardingCta />
                 <Suspense fallback={<ProductActions disabled={true} product={product} region={region} />}><ProductActions product={product} region={region} /></Suspense>
               </div>
               <ProductSpecifications product={product} />
-            </div>
-          </div>
+          </ProductOverview>
 
           {/* Sweet Thin Horizontal Divider Line 1 */}
           <div className="border-t border-slate-100 pt-2 sm:pt-6 lg:py-6">
