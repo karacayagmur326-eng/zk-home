@@ -438,7 +438,7 @@ export default function NewProductPage() {
               {/* GENEL TAB */}
               {activeTab === "general" && (
                 <div className="space-y-4">
-                  <div className="grid min-w-0 grid-cols-1 gap-2.5 xl:grid-cols-3">
+                  <div className="grid min-w-0 grid-cols-1 gap-2.5 min-[1800px]:grid-cols-3">
                   <fieldset className="min-w-0 rounded-xl border border-[#EAD8D5] bg-[#FBF6F5] p-2.5">
                     <legend className="px-1 text-xs font-bold text-[#956C68]">Fiyatlandırma</legend>
                   <div className="grid grid-cols-1 gap-2.5">
