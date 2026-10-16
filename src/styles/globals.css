@@ -478,29 +478,6 @@ textarea {
   margin-bottom: 0 !important;
 }
 
-@media (min-width: 1024px) {
-  [data-ui-scope="storefront"] .product-overview-details {
-    height: var(--product-gallery-height, auto);
-    min-height: 0;
-    overflow-y: auto;
-    scrollbar-width: thin;
-  }
-
-  [data-ui-scope="storefront"] .product-overview-details #product-info {
-    flex-shrink: 0;
-    max-height: 40%;
-    overflow-y: auto;
-    scrollbar-width: thin;
-  }
-
-  [data-ui-scope="storefront"] .product-overview-details .product-features-summary {
-    flex: 1 1 auto;
-    min-height: 96px;
-    overflow-y: auto;
-    scrollbar-width: thin;
-  }
-}
-
 [data-ui-scope="storefront"] .product-features-summary .product-rich-text {
   font-size: .8125rem !important;
   line-height: 1.5;
