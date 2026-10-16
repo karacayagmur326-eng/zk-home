@@ -489,8 +489,6 @@ export default function NewProductPage() {
                       rows={10}
                     />
                   </div>
-                  <ProductUsageFields title={usageTitle} content={usageContent} onTitleChange={setUsageTitle} onContentChange={setUsageContent} />
-                  <RichTextEditorField label="Sıkça Sorulan Sorular" value={faqContent} onChange={setFaqContent} rows={6} helpText="Her soruyu Başlık 3, yanıtını altındaki paragraf olarak yazın. Sitede ayrı SSS sekmesinde gösterilir." />
                 </div>
               )}
 
@@ -649,6 +647,11 @@ export default function NewProductPage() {
               )}
             </div>
             </div>
+          </div>
+
+          <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs space-y-5">
+            <ProductUsageFields title={usageTitle} content={usageContent} onTitleChange={setUsageTitle} onContentChange={setUsageContent} />
+            <RichTextEditorField label="Sıkça Sorulan Sorular" value={faqContent} onChange={setFaqContent} rows={6} helpText="Her soruyu Başlık 3, yanıtını altındaki paragraf olarak yazın. Sitede ayrı SSS sekmesinde gösterilir." />
           </div>
         </div>
 

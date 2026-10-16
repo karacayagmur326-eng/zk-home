@@ -24,22 +24,13 @@ export default function ProductCategoryPicker({ categories, selected, onToggle }
   categories.filter(category => !category.parent_category_id || !byId.has(category.parent_category_id))
     .forEach(category => visit(category, 0, []))
   categories.forEach(category => visit(category, 0, []))
-  const selectedRows = rows.filter(row => selected.includes(row.category.id))
   const query = search.trim().toLocaleLowerCase("tr-TR")
-  const visibleRows = rows.filter(row => `${row.path} ${row.category.name}`.toLocaleLowerCase("tr-TR").includes(query))
+  const visibleRows = rows
+    .filter(row => `${row.path} ${row.category.name}`.toLocaleLowerCase("tr-TR").includes(query))
+    .sort((a, b) => Number(selected.includes(b.category.id)) - Number(selected.includes(a.category.id)))
 
   return (
     <div className="space-y-3">
-      <div className="rounded-xl border border-rose-100 bg-rose-50/40 p-3">
-        <p className="mb-2 text-[11px] font-semibold text-slate-600">Seçili kategoriler · {selectedRows.length}</p>
-        {!selectedRows.length && <p className="text-xs text-slate-400">Henüz kategori seçilmedi.</p>}
-        <div className="space-y-1">
-          {selectedRows.map(({ category, path }) => <label key={category.id} className="flex cursor-pointer items-start gap-2 py-1.5">
-            <input type="checkbox" checked onChange={() => onToggle(category.id)} className="mt-0.5 h-4 w-4 shrink-0 accent-[#C98484]" />
-            <span className="min-w-0 text-xs font-semibold text-slate-800">{category.name}{path && <span className="mt-0.5 block text-[10px] font-normal text-slate-500">{path}</span>}</span>
-          </label>)}
-        </div>
-      </div>
       <label htmlFor={searchId} className="sr-only">Kategori ara</label>
       <input id={searchId} type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Kategori ara…" className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 text-xs outline-none focus:border-[#C98484] focus:bg-white" />
       <div className="max-h-64 overflow-y-auto space-y-1 pr-1" aria-label="Ürün kategori ağacı">
