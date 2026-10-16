@@ -14,6 +14,7 @@ import ProductCategoryPicker from "../../components/ProductCategoryPicker"
 import ProductTagPicker from "../../components/ProductTagPicker"
 import RichTextEditorField from "../../components/RichTextEditorField"
 import ProductUsageFields from "../../components/ProductUsageFields"
+import ProductDimensionsFields from "../../components/ProductDimensionsFields"
 import { formatTryPriceInput, parseTryPriceInput } from "@lib/util/money"
 import { useProductFormError } from "@lib/admin/use-product-form-error"
 import {
@@ -57,7 +58,7 @@ interface Tag {
 export default function NewProductPage() {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
-  const [activeTab, setActiveTab] = useUrlState<string>("general", "tab", ["general", "metadata", "shipping"])
+  const [activeTab, setActiveTab] = useUrlState<string>("general", "tab", ["general", "metadata"])
 
   // Form state
   const [title, setTitle] = useState("")
@@ -312,7 +313,6 @@ export default function NewProductPage() {
   const tabs = [
     { key: "general", label: "Genel" },
     { key: "metadata", label: "Özellikler" },
-    { key: "shipping", label: "Gönderim" },
   ]
 
   return (
@@ -438,6 +438,8 @@ export default function NewProductPage() {
               {/* GENEL TAB */}
               {activeTab === "general" && (
                 <div className="space-y-4">
+                  <fieldset className="min-w-0 rounded-xl border border-slate-200/80 p-4">
+                    <legend className="px-1 text-xs font-bold text-slate-700">Fiyatlandırma</legend>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1.5">
@@ -477,7 +479,9 @@ export default function NewProductPage() {
                     </div>
                   </div>
 
-                <div className="space-y-4">
+                  </fieldset>
+                <fieldset className="min-w-0 space-y-4 rounded-xl border border-slate-200/80 p-4">
+                  <legend className="px-1 text-xs font-bold text-slate-700">Stok bilgileri</legend>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1.5">
@@ -562,7 +566,9 @@ export default function NewProductPage() {
                       ))}
                     </div>
                   </div>
-                </div>
+                </fieldset>
+
+                  <ProductDimensionsFields weight={weight} length={length} width={width} height={height} onWeightChange={setWeight} onLengthChange={setLength} onWidthChange={setWidth} onHeightChange={setHeight} />
 
                   <div tabIndex={-1} {...fieldProps("description")}>
                     <RichTextEditorField
@@ -574,56 +580,6 @@ export default function NewProductPage() {
                       minHeight={250}
                       rows={10}
                     />
-                  </div>
-                </div>
-              )}
-
-              {/* GÖNDERİM TAB */}
-              {activeTab === "shipping" && (
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                      Ağırlık (kg)
-                    </label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      value={weight}
-                      onChange={(e) => setWeight(e.target.value)}
-                      placeholder="0"
-                      className="w-48 h-10 px-3.5 rounded-xl border border-slate-200 bg-slate-50/40 text-xs font-bold text-slate-900 outline-none focus:bg-white focus:border-[#C98484]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                      Boyutlar (cm)
-                    </label>
-                    <div className="flex items-center gap-2 max-w-md">
-                      <input
-                        type="number"
-                        placeholder="Uzunluk"
-                        value={length}
-                        onChange={(e) => setLength(e.target.value)}
-                        className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-slate-50/40 text-xs font-bold outline-none"
-                      />
-                      <span className="text-slate-400 font-bold">×</span>
-                      <input
-                        type="number"
-                        placeholder="Genişlik"
-                        value={width}
-                        onChange={(e) => setWidth(e.target.value)}
-                        className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-slate-50/40 text-xs font-bold outline-none"
-                      />
-                      <span className="text-slate-400 font-bold">×</span>
-                      <input
-                        type="number"
-                        placeholder="Yükseklik"
-                        value={height}
-                        onChange={(e) => setHeight(e.target.value)}
-                        className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-slate-50/40 text-xs font-bold outline-none"
-                      />
-                    </div>
                   </div>
                 </div>
               )}
