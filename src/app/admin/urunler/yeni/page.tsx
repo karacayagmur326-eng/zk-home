@@ -241,6 +241,7 @@ export default function NewProductPage() {
       status: finalStatus,
       metadata: {
           ...seoMetadata,
+          image_alt_texts: Object.fromEntries([thumbnail, ...images].filter(Boolean).map(url => [url, title.trim()])),
         product_summary: shortDesc.trim(),
         usage_title: usageTitle.trim(),
         usage_content: usageContent.trim(),
@@ -698,7 +699,7 @@ export default function NewProductPage() {
             </button>
           </div>
 
-          <div tabIndex={-1} {...fieldProps("image")}><ProductMediaEditor thumbnail={thumbnail} images={images} onCoverChange={setThumbnail} onImagesChange={setImages} title={title} imageAltTexts={seoMetadata.image_alt_texts || {}} onImageAltChange={(url, text) => setSeoMetadata(previous => ({ ...previous, image_alt_texts: { ...previous.image_alt_texts, [url]: text } }))}
+          <div tabIndex={-1} {...fieldProps("image")}><ProductMediaEditor thumbnail={thumbnail} images={images} onCoverChange={setThumbnail} onImagesChange={setImages} title={title}
             onUploadCover={() => setIsThumbModalOpen(true)} onUploadGallery={() => setIsGalleryModalOpen(true)} /></div>
 
           {/* Card 4: Ürün Kategorileri */}
