@@ -1,7 +1,5 @@
 "use client"
-import SeoFields from "../../components/SeoFields"
 import { productFieldIssues } from "@lib/commerce/product-validation"
-import { plainText } from "@lib/seo/entity"
 import AdminTabs from "@components/admin/AdminTabs"
 
 import { useUrlState } from "@lib/hooks/use-url-state"
@@ -873,7 +871,6 @@ export default function EditProductPage() {
         </div>
       </div>
 
-      <SeoFields value={seoMetadata} onChange={setSeoMetadata} title={title} description={plainText(shortDesc)} />
 
       <MediaSelectorModal
         isOpen={isThumbModalOpen}
