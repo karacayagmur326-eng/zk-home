@@ -28,19 +28,9 @@ export function absoluteUrl(value: unknown, fallback = ""): string {
 }
 
 export function socialImageUrl(value: unknown): string {
-  const source = absoluteUrl(value)
-  if (!source) return ""
-  const url = new URL(source)
-  // Only static public Storage images use the site's existing image cache.
-  // Keep other providers and animated/vector assets at their original URL.
-  if (!url.hostname.endsWith(".supabase.co") ||
-      !url.pathname.startsWith("/storage/v1/object/public/") ||
-      !/\.(?:png|jpe?g|webp|avif)$/i.test(url.pathname)) return source
-  const preview = new URL("/_next/image", getBaseURL())
-  preview.searchParams.set("url", source)
-  preview.searchParams.set("w", "1200")
-  preview.searchParams.set("q", "75")
-  return preview.href
+  // Social crawlers cannot run the browser image-error fallback.
+  // Use the public source so optimizer quotas cannot break link previews.
+  return absoluteUrl(value)
 }
 
 export function entityMetadata({
