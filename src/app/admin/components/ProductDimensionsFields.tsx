@@ -19,9 +19,9 @@ export default function ProductDimensionsFields(props: Props) {
     { label: "Yükseklik (cm)", value: props.height, change: props.onHeightChange },
   ]
 
-  return <fieldset className="min-w-0 rounded-xl border border-slate-200/80 bg-slate-50/30 p-4">
-    <legend className="px-1 text-xs font-bold text-slate-700">Ağırlık ve boyutlar</legend>
-    <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+  return <fieldset className="h-full min-w-0 rounded-xl border border-[#DBE4EE] bg-[#F4F7FA] p-3">
+    <legend className="px-1 text-xs font-bold text-[#627B96]">Ağırlık ve boyutlar</legend>
+    <div className="grid grid-cols-2 gap-3">
       {fields.map(field => <label key={field.label} className="min-w-0 space-y-1.5 text-xs font-semibold text-slate-600">
         <span className="block">{field.label}</span>
         <input type="number" min="0" step="any" inputMode="decimal" value={field.value} onChange={event => field.change(event.target.value)} placeholder="0" className="h-10 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-900 outline-none focus:border-[#C98484]" />

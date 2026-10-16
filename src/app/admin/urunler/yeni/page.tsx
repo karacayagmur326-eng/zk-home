@@ -438,9 +438,10 @@ export default function NewProductPage() {
               {/* GENEL TAB */}
               {activeTab === "general" && (
                 <div className="space-y-4">
-                  <fieldset className="min-w-0 rounded-xl border border-slate-200/80 p-4">
-                    <legend className="px-1 text-xs font-bold text-slate-700">Fiyatlandırma</legend>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid min-w-0 grid-cols-1 gap-3 xl:grid-cols-3">
+                  <fieldset className="h-full min-w-0 rounded-xl border border-[#EAD8D5] bg-[#FBF6F5] p-3">
+                    <legend className="px-1 text-xs font-bold text-[#956C68]">Fiyatlandırma</legend>
+                  <div className="grid grid-cols-1 gap-3">
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1.5">
                         Normal Fiyat (TL){" "}
@@ -480,9 +481,9 @@ export default function NewProductPage() {
                   </div>
 
                   </fieldset>
-                <fieldset className="min-w-0 space-y-4 rounded-xl border border-slate-200/80 p-4">
-                  <legend className="px-1 text-xs font-bold text-slate-700">Stok bilgileri</legend>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <fieldset className="h-full min-w-0 space-y-3 rounded-xl border border-[#DCE7DD] bg-[#F5F8F5] p-3">
+                  <legend className="px-1 text-xs font-bold text-[#607D66]">Stok bilgileri</legend>
+                  <div className="grid grid-cols-1 gap-3">
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1.5">
                         Stok kodu (SKU) <span className="text-red-500">*</span>
@@ -569,6 +570,7 @@ export default function NewProductPage() {
                 </fieldset>
 
                   <ProductDimensionsFields weight={weight} length={length} width={width} height={height} onWeightChange={setWeight} onLengthChange={setLength} onWidthChange={setWidth} onHeightChange={setHeight} />
+                  </div>
 
                   <div tabIndex={-1} {...fieldProps("description")}>
                     <RichTextEditorField
