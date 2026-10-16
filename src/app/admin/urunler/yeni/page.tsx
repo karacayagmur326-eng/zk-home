@@ -438,12 +438,12 @@ export default function NewProductPage() {
               {/* GENEL TAB */}
               {activeTab === "general" && (
                 <div className="space-y-4">
-                  <div className="grid min-w-0 grid-cols-1 gap-3 xl:grid-cols-3">
-                  <fieldset className="h-full min-w-0 rounded-xl border border-[#EAD8D5] bg-[#FBF6F5] p-3">
+                  <div className="grid min-w-0 grid-cols-1 gap-2.5 xl:grid-cols-3">
+                  <fieldset className="min-w-0 rounded-xl border border-[#EAD8D5] bg-[#FBF6F5] p-2.5">
                     <legend className="px-1 text-xs font-bold text-[#956C68]">Fiyatlandırma</legend>
-                  <div className="grid grid-cols-1 gap-3">
+                  <div className="grid grid-cols-1 gap-2.5">
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
                         Normal Fiyat (TL){" "}
                         {!hasDiscountPrice && <span className="text-[#C98484]">*Geçerli Fiyat</span>}
                       </label>
@@ -456,12 +456,12 @@ export default function NewProductPage() {
                         onBlur={() => comparePrice && setComparePrice(formatTryPriceInput(comparePrice))}
                         inputMode="decimal"
                         placeholder="0,00"
-                        className="w-full h-10 px-3.5 rounded-xl border border-slate-200 bg-slate-50/40 text-xs font-bold text-slate-900 outline-none focus:bg-white focus:border-[#C98484]"
+                        className="w-full h-9 px-3.5 rounded-xl border border-slate-200 bg-slate-50/40 text-xs font-bold text-slate-900 outline-none focus:bg-white focus:border-[#C98484]"
                       />
                       {errorField === "normal-price" && <p id="product-normal-price-error" className="mt-2 text-xs text-red-700">{error}</p>}
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
                         İndirimli Fiyat (TL){" "}
                         {hasDiscountPrice && <span className="text-[#C98484]">*Geçerli Fiyat</span>}
                       </label>
@@ -474,18 +474,18 @@ export default function NewProductPage() {
                         onBlur={() => price && setPrice(formatTryPriceInput(price))}
                         inputMode="decimal"
                         placeholder="0,00"
-                        className="w-full h-10 px-3.5 rounded-xl border border-slate-200 bg-slate-50/40 text-xs font-bold text-slate-900 outline-none focus:bg-white focus:border-[#C98484]"
+                        className="w-full h-9 px-3.5 rounded-xl border border-slate-200 bg-slate-50/40 text-xs font-bold text-slate-900 outline-none focus:bg-white focus:border-[#C98484]"
                       />
                       {errorField === "price" && <p id="product-price-error" className="mt-2 text-xs text-red-700">{error}</p>}
                     </div>
                   </div>
 
                   </fieldset>
-                <fieldset className="h-full min-w-0 space-y-3 rounded-xl border border-[#DCE7DD] bg-[#F5F8F5] p-3">
+                <fieldset className="min-w-0 space-y-2 rounded-xl border border-[#DCE7DD] bg-[#F5F8F5] p-2.5">
                   <legend className="px-1 text-xs font-bold text-[#607D66]">Stok bilgileri</legend>
-                  <div className="grid grid-cols-1 gap-3">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                  <div className="grid grid-cols-3 items-end gap-2">
+                    <div className="min-w-0">
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
                         Stok kodu (SKU) <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -497,40 +497,42 @@ export default function NewProductPage() {
                         required
                         autoComplete="off"
                         placeholder="Stok kodunu girin"
-                        className="w-full h-10 px-3.5 rounded-xl border border-slate-200 bg-slate-50/40 text-xs font-bold text-slate-900 outline-none focus:bg-white focus:border-[#C98484]"
+                        className="min-w-0 w-full h-9 px-2 rounded-xl border border-slate-200 bg-slate-50/40 text-xs font-bold text-slate-900 outline-none focus:bg-white focus:border-[#C98484]"
                       />
                       {errorField === "sku" && <p id="product-sku-error" className="mt-2 text-xs text-red-700">{error}</p>}
                     </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                        GTIN / UPC / EAN / Barkod
+                    <div className="min-w-0">
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                        Barkod
                       </label>
                       <input
                         type="text"
+                        aria-label="Barkod"
                         value={barcode}
                         onChange={(e) => setBarcode(e.target.value)}
-                        className="w-full h-10 px-3.5 rounded-xl border border-slate-200 bg-slate-50/40 text-xs font-bold text-slate-900 outline-none focus:bg-white focus:border-[#C98484]"
+                        className="min-w-0 w-full h-9 px-2 rounded-xl border border-slate-200 bg-slate-50/40 text-xs font-bold text-slate-900 outline-none focus:bg-white focus:border-[#C98484]"
                       />
                     </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                    <div className="min-w-0">
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
                         Stok adedi
                       </label>
                       <input
                         type="number"
                         min="0"
+                        aria-label="Stok adedi"
                         value={inventoryQty} {...fieldProps("stock")}
                         onChange={(e) => {
                           setInventoryQty(e.target.value)
                           if (e.target.value) setManageInventory(true)
                         }}
                         placeholder="Sınırsız..."
-                        className="w-full h-10 px-3.5 rounded-xl border border-slate-200 bg-slate-50/40 text-xs font-bold text-slate-900 outline-none focus:bg-white focus:border-[#C98484]"
+                        className="min-w-0 w-full h-9 px-2 rounded-xl border border-slate-200 bg-slate-50/40 text-xs font-bold text-slate-900 outline-none focus:bg-white focus:border-[#C98484]"
                       />
                     </div>
                   </div>
 
-                  <label className="flex items-center gap-2.5 text-xs font-bold text-slate-800 cursor-pointer pt-1 mb-2">
+                  <label className="flex items-center gap-2.5 text-xs font-bold text-slate-800 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={manageInventory}
@@ -540,33 +542,14 @@ export default function NewProductPage() {
                     <span>Stok takibini etkinleştir</span>
                   </label>
 
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-2">
-                      Stok durumu
-                    </label>
-                    <div className="space-y-2 text-xs font-semibold text-slate-700">
-                      {[
-                        { value: "in_stock", label: "Stokta" },
-                        { value: "out_of_stock", label: "Stokta yok" },
-                        { value: "on_backorder", label: "Ön Siparişte" },
-                      ].map((opt) => (
-                        <label
-                          key={opt.value}
-                          className="flex items-center gap-2 cursor-pointer"
-                        >
-                          <input
-                            type="radio"
-                            name="stock_status"
-                            value={opt.value}
-                            checked={stockStatus === opt.value}
-                            onChange={() => setStockStatus(opt.value)}
-                            className="accent-[#C98484]"
-                          />
-                          <span>{opt.label}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
+                  <label className="block space-y-1 text-xs font-semibold text-slate-700">
+                    <span>Stok durumu</span>
+                    <select value={stockStatus} onChange={event => setStockStatus(event.target.value)} className="h-9 w-full rounded-lg border border-slate-200 bg-white px-2 text-xs" >
+                      <option value="in_stock">Stokta</option>
+                      <option value="out_of_stock">Stokta yok</option>
+                      <option value="on_backorder">Ön Siparişte</option>
+                    </select>
+                  </label>
                 </fieldset>
 
                   <ProductDimensionsFields weight={weight} length={length} width={width} height={height} onWeightChange={setWeight} onLengthChange={setLength} onWidthChange={setWidth} onHeightChange={setHeight} />
