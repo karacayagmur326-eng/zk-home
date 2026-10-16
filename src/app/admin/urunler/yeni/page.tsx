@@ -441,8 +441,8 @@ export default function NewProductPage() {
                   <div className="grid min-w-0 grid-cols-1 gap-2.5 min-[1800px]:grid-cols-3">
                   <fieldset className="min-w-0 rounded-xl border border-[#EAD8D5] bg-[#FBF6F5] p-2.5">
                     <legend className="px-1 text-xs font-bold text-[#956C68]">Fiyatlandırma</legend>
-                  <div className="grid grid-cols-1 gap-2.5">
-                    <div>
+                  <div className="grid grid-cols-2 items-end gap-2.5">
+                    <div className="min-w-0">
                       <label className="block text-xs font-bold text-slate-700 mb-1">
                         Normal Fiyat (TL){" "}
                         {!hasDiscountPrice && <span className="text-[#C98484]">*Geçerli Fiyat</span>}
@@ -456,11 +456,11 @@ export default function NewProductPage() {
                         onBlur={() => comparePrice && setComparePrice(formatTryPriceInput(comparePrice))}
                         inputMode="decimal"
                         placeholder="0,00"
-                        className="w-full h-9 px-3.5 rounded-xl border border-slate-200 bg-slate-50/40 text-xs font-bold text-slate-900 outline-none focus:bg-white focus:border-[#C98484]"
+                        className="min-w-0 w-full h-9 px-2 rounded-xl border border-slate-200 bg-slate-50/40 text-xs font-bold text-slate-900 outline-none focus:bg-white focus:border-[#C98484]"
                       />
                       {errorField === "normal-price" && <p id="product-normal-price-error" className="mt-2 text-xs text-red-700">{error}</p>}
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <label className="block text-xs font-bold text-slate-700 mb-1">
                         İndirimli Fiyat (TL){" "}
                         {hasDiscountPrice && <span className="text-[#C98484]">*Geçerli Fiyat</span>}
@@ -474,7 +474,7 @@ export default function NewProductPage() {
                         onBlur={() => price && setPrice(formatTryPriceInput(price))}
                         inputMode="decimal"
                         placeholder="0,00"
-                        className="w-full h-9 px-3.5 rounded-xl border border-slate-200 bg-slate-50/40 text-xs font-bold text-slate-900 outline-none focus:bg-white focus:border-[#C98484]"
+                        className="min-w-0 w-full h-9 px-2 rounded-xl border border-slate-200 bg-slate-50/40 text-xs font-bold text-slate-900 outline-none focus:bg-white focus:border-[#C98484]"
                       />
                       {errorField === "price" && <p id="product-price-error" className="mt-2 text-xs text-red-700">{error}</p>}
                     </div>
