@@ -567,14 +567,15 @@ export default function EditProductPage() {
           <div className="rounded-3xl bg-white border border-slate-200/80 p-6 shadow-xs space-y-5">
             <h3 className="text-sm font-extrabold text-slate-900">Ürün verisi</h3>
 
+            <div className="grid min-w-0 gap-5 md:grid-cols-[144px_minmax(0,1fr)] md:items-start">
             {/* Tabs Header Bar */}
-            <AdminTabs label="Ürün bilgileri"
+            <AdminTabs label="Ürün bilgileri" verticalOnDesktop
               value={activeTab}
               onChange={setActiveTab}
               items={tabs.map(({ key, label }) => ({ value: key, label }))}/>
 
             {/* Tab Contents */}
-            <div className="pt-2">
+            <div className="min-w-0 pt-2 md:pt-0">
               {/* GENEL TAB */}
               {activeTab === "general" && (
                 <div className="space-y-4">
@@ -758,6 +759,7 @@ export default function EditProductPage() {
                   />
                 </div>
               )}
+            </div>
             </div>
           </div>
         </div>
