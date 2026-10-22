@@ -1,5 +1,5 @@
 import { getSiteSeoMetadata } from "@lib/seo/templates"
-import { HeroSlider, CategoryStrip } from "@modules/home/components/desktop-home-components"
+import { CategoryStrip } from "@modules/home/components/desktop-home-components"
 import { getRegion } from "@lib/data/regions"
 import { listCategories } from "@lib/data/categories"
 import { listProducts } from "@lib/data/products"
@@ -18,6 +18,7 @@ import { query } from "@lib/admin/db"
 import { defaultHomeEditorialContent, type HomeEditorialContent } from "@lib/content/home-editorial"
 import HomeEditorial, { type HomeArticle } from "@modules/home/components/home-editorial"
 import HomeBrandIntro from "@modules/home/components/home-brand-intro"
+import ProductStageSlider from "@modules/home/components/product-stage-slider"
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getThemeSettings()
@@ -107,7 +108,7 @@ export default async function Home() {
         />
       )}
       <div className={mobileSettings.enabled ? "hidden md:block" : "block"}>
-        <HeroSlider initialSliders={publicSliders} />
+        <ProductStageSlider slide={publicSliders[0]} />
       </div>
       <div className={`bg-[#f6f7f8] ${mobileSettings.enabled ? "hidden md:block" : "block"}`}>
         <CategoryStrip categories={categories} />
