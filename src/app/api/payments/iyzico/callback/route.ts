@@ -7,23 +7,9 @@ import { getBaseURL } from "@lib/util/env"
 
 export const dynamic = "force-dynamic"
 
-export async function POST(req: NextRequest) {
+async function processIyzicoCallback(token: string) {
   const baseUrl = getBaseURL()
   await ensureCommerceSchema()
-
-  let token = ""
-  try {
-    const contentType = req.headers.get("content-type") || ""
-    if (contentType.includes("application/json")) {
-      const jsonBody = await req.json().catch(() => null)
-      token = String(jsonBody?.token || "")
-    } else {
-      const formData = await req.formData().catch(() => null)
-      token = String(formData?.get("token") || "")
-    }
-  } catch {
-    token = ""
-  }
 
   if (!token || token.length > 250) {
     return NextResponse.redirect(
@@ -88,12 +74,45 @@ export async function POST(req: NextRequest) {
   return NextResponse.redirect(new URL("/sepet", baseUrl), 303)
 }
 
+export async function POST(req: NextRequest) {
+  let token = ""
+  try {
+    const contentType = req.headers.get("content-type") || ""
+    if (contentType.includes("application/json")) {
+      const jsonBody = await req.json().catch(() => null)
+      token = String(jsonBody?.token || "")
+    } else {
+      const formData = await req.formData().catch(() => null)
+      token = String(formData?.get("token") || "")
+    }
+  } catch {
+    token = ""
+  }
+
+  return processIyzicoCallback(token)
+}
+
 export async function GET(req: NextRequest) {
-  // Support GET redirect callbacks as well
   const baseUrl = getBaseURL()
-  const token = req.nextUrl.searchParams.get("token")
+  let token = req.nextUrl.searchParams.get("token")
+  const cartId =
+    req.nextUrl.searchParams.get("cart_id") ||
+    req.nextUrl.searchParams.get("conversation_id")
+
+  if (!token && cartId) {
+    await ensureCommerceSchema()
+    const rows = await query<{ token: string }>(
+      `SELECT metadata->'payment_data'->>'token' AS token FROM store_cart
+       WHERE id = $1 LIMIT 1`,
+      [cartId.trim()]
+    )
+    if (rows[0]?.token) {
+      token = rows[0].token
+    }
+  }
+
   if (!token) {
     return NextResponse.redirect(new URL("/sepet", baseUrl), 303)
   }
-  return POST(req)
+  return processIyzicoCallback(token)
 }

@@ -241,6 +241,24 @@ export default function AdminKullanicilarPage() {
     }
   }
 
+  async function handleToggleVerified(c: Customer) {
+    try {
+      const res = await fetch("/api/admin/customers", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: c.id, email_verified: !c.email_verified }),
+      })
+      if (res.ok) {
+        showToast(c.email_verified ? "Doğrulama kaldırıldı." : "E-posta başarıyla doğrulandı.")
+        loadData(true)
+      } else {
+        showToast("İşlem başarısız.", "error")
+      }
+    } catch {
+      showToast("Sunucu hatası oluştu.", "error")
+    }
+  }
+
   // Delete Selected Users
   async function handleDelete(ids: string[]) {
     if (!ids.length) return
@@ -642,17 +660,24 @@ export default function AdminKullanicilarPage() {
 
                         {/* Doğrulama */}
                         <td className="p-4">
-                          {c.email_verified ? (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 rounded-xl">
-                              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-                              <span>Doğrulandı</span>
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-600 bg-amber-50 border border-amber-200/80 px-2.5 py-1 rounded-xl">
-                              <Clock className="h-3.5 w-3.5 text-amber-600 shrink-0" />
-                              <span>Doğrulanmadı</span>
-                            </span>
-                          )}
+                          <button
+                            type="button"
+                            onClick={() => handleToggleVerified(c)}
+                            title={c.email_verified ? "Doğrulamayı kaldırmak için tıklayın" : "Tek tıkla e-postayı doğrulamak için tıklayın"}
+                            className="inline-flex cursor-pointer transition-transform hover:scale-105"
+                          >
+                            {c.email_verified ? (
+                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 rounded-xl">
+                                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                                <span>Doğrulandı</span>
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-600 bg-amber-50 border border-amber-200/80 px-2.5 py-1 rounded-xl hover:bg-amber-100">
+                                <Clock className="h-3.5 w-3.5 text-amber-600 shrink-0" />
+                                <span>Doğrula (Bekliyor)</span>
+                              </span>
+                            )}
+                          </button>
                         </td>
 
                         {/* Sipariş */}
