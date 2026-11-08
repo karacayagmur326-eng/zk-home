@@ -22,11 +22,11 @@ function smtpConnectionOptions(settings: { host: string; port?: string | number;
     host: settings.host,
     port,
     secure,
-    requireTLS: !secure,
-    tls: { rejectUnauthorized: true, minVersion: "TLSv1.2" as const },
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 20000,
+    requireTLS: false,
+    tls: { rejectUnauthorized: false },
+    connectionTimeout: 15000,
+    greetingTimeout: 15000,
+    socketTimeout: 30000,
   }
 }
 

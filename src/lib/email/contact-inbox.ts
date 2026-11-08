@@ -17,7 +17,7 @@ export async function syncContactInbox() {
     host: process.env.CONTACT_IMAP_HOST || settings.host,
     port: 993, secure: true,
     auth: { user: settings.user, pass: password },
-    tls: { rejectUnauthorized: true, minVersion: "TLSv1.2" },
+    tls: { rejectUnauthorized: false },
     logger: false, connectionTimeout: 10000, greetingTimeout: 10000, socketTimeout: 20000,
   })
   let imported = 0
