@@ -206,6 +206,12 @@ export async function initializeIyzicoCheckout(input: {
   if (!config) throw new Error("iyzico entegrasyonu etkin ve eksiksiz değil.")
 
   const cart = input.cart
+  if (!cart.email || !String(cart.email).trim()) {
+    throw new Error("iyzico ödemesi başlatılabilmesi için geçerli bir müşteri e-posta adresi zorunludur.")
+  }
+  if (!cart.shipping_address?.address_1 || !String(cart.shipping_address.address_1).trim()) {
+    throw new Error("iyzico ödemesi başlatılabilmesi için teslimat adresi zorunludur.")
+  }
   if (input.taxNumber && !/^\d{10,11}$/.test(input.taxNumber)) {
     throw new Error("Kurumsal fatura için geçerli VKN bilgisi (10 veya 11 hane) gereklidir.")
   }

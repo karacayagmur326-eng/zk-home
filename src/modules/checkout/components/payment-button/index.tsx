@@ -25,7 +25,8 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
   providerId,
   "data-testid": dataTestId,
 }) => {
-  const notReady = !cart || !termsAccepted || !providerId
+  const hasValidAddress = Boolean(cart?.shipping_address?.address_1 && cart?.email)
+  const notReady = !cart || !termsAccepted || !providerId || !hasValidAddress
 
   const paymentSession = cart?.payment_collection?.payment_sessions?.[0]
 
@@ -34,6 +35,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
       <StripePaymentButton
         cart={cart}
         notReady={notReady}
+        hasValidAddress={hasValidAddress}
         data-testid={dataTestId}
       />
     )
@@ -44,6 +46,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
       cart={cart}
       providerId={providerId || ""}
       notReady={notReady}
+      hasValidAddress={hasValidAddress}
       data-testid={dataTestId}
     />
   )
@@ -53,17 +56,23 @@ const ConfiguredPaymentButton = ({
   cart,
   providerId,
   notReady,
+  hasValidAddress = true,
   "data-testid": dataTestId,
 }: {
   cart: HttpTypes.StoreCart
   providerId: string
   notReady: boolean
+  hasValidAddress?: boolean
   "data-testid"?: string
 }) => {
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const handlePayment = async () => {
+    if (!cart?.email || !cart?.shipping_address?.address_1) {
+      setErrorMessage("Ödeme başlatılmadan önce lütfen teslimat adresinizi ve e-postanızı kaydedin.")
+      return
+    }
     setSubmitting(true)
     setErrorMessage(null)
 
@@ -107,6 +116,11 @@ const ConfiguredPaymentButton = ({
             ? "Kapıda Ödeme ile Siparişi Tamamla"
             : "Öde ve Siparişi Tamamla"}
       </Button>
+      {!hasValidAddress && (
+        <p className="mt-2 text-center text-xs font-medium text-amber-700 bg-amber-50 rounded-xl py-2 px-3 border border-amber-200">
+          Ödeme yapabilmek için lütfen yukarıdaki teslimat adresinizi kaydedin.
+        </p>
+      )}
       <ErrorMessage
         error={errorMessage}
         data-testid="payment-error-message"
@@ -118,10 +132,12 @@ const ConfiguredPaymentButton = ({
 const StripePaymentButton = ({
   cart,
   notReady,
+  hasValidAddress = true,
   "data-testid": dataTestId,
 }: {
   cart: HttpTypes.StoreCart
   notReady: boolean
+  hasValidAddress?: boolean
   "data-testid"?: string
 }) => {
   const [submitting, setSubmitting] = useState(false)
