@@ -9,6 +9,7 @@ import { useEffect, useState, use } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { convertToLocale } from "@lib/util/money"
+import { formatAddressLocality } from "@lib/util/address-locality"
 import {
   ArrowLeft,
   Printer,
@@ -57,6 +58,7 @@ interface Address {
   address_1?: string
   address_2?: string
   city?: string
+  province?: string
   postal_code?: string
   country_code?: string
   phone?: string
@@ -426,22 +428,26 @@ export default function AdminOrderDetailPage({
   const rawBilling = order.billing_address || {}
   
   const shippingAddr = {
+    ...rawShipping,
     first_name: rawShipping.first_name || rawBilling.first_name || "",
     last_name: rawShipping.last_name || rawBilling.last_name || "",
     company: rawShipping.company || rawBilling.company || "",
     address_1: rawShipping.address_1 || rawBilling.address_1 || "",
     address_2: rawShipping.address_2 || rawBilling.address_2 || "",
     city: rawShipping.city || rawBilling.city || "",
+    province: rawShipping.province || "",
     postal_code: rawShipping.postal_code || rawBilling.postal_code || "",
     phone: rawShipping.phone || rawBilling.phone || "",
   }
   const billingAddr = {
+    ...rawBilling,
     first_name: rawBilling.first_name || rawShipping.first_name || "",
     last_name: rawBilling.last_name || rawShipping.last_name || "",
     company: rawBilling.company || rawShipping.company || "",
     address_1: rawBilling.address_1 || rawShipping.address_1 || "",
     address_2: rawBilling.address_2 || rawShipping.address_2 || "",
     city: rawBilling.city || rawShipping.city || "",
+    province: rawBilling.province || "",
     postal_code: rawBilling.postal_code || rawShipping.postal_code || "",
     phone: rawBilling.phone || rawShipping.phone || "",
   }
@@ -725,7 +731,7 @@ export default function AdminOrderDetailPage({
                   {billingAddr.company && <p className="text-slate-500 font-semibold">{billingAddr.company}</p>}
                   <p>{billingAddr.address_1 || "Adres satırı belirtilmemiş"}</p>
                   {billingAddr.address_2 && <p>{billingAddr.address_2}</p>}
-                  <p>{billingAddr.postal_code || "07200"} {billingAddr.city || "Muratpaşa"} / Antalya</p>
+                  <p>{formatAddressLocality(billingAddr)}</p>
 
                   <div className="pt-2 border-t border-slate-100 space-y-1">
                     <div className="flex items-center gap-1.5 text-blue-600">
@@ -769,7 +775,7 @@ export default function AdminOrderDetailPage({
                   {shippingAddr.company && <p className="text-slate-500 font-semibold">{shippingAddr.company}</p>}
                   <p>{shippingAddr.address_1 || "Adres satırı belirtilmemiş"}</p>
                   {shippingAddr.address_2 && <p>{shippingAddr.address_2}</p>}
-                  <p>{shippingAddr.postal_code || "07200"} {shippingAddr.city || "Muratpaşa"} / Antalya</p>
+                  <p>{formatAddressLocality(shippingAddr)}</p>
 
                   <div className="pt-2 border-t border-slate-100 space-y-1">
                     <div className="flex items-center gap-1.5 text-blue-600">
@@ -1210,6 +1216,16 @@ export default function AdminOrderDetailPage({
                   type="text"
                   value={addressForm.city || ""}
                   onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 font-bold focus:outline-none focus:border-[#C98484]"
+                />
+              </div>
+              <div>
+                <label htmlFor="order-address-district" className="block font-semibold text-slate-500 mb-1">İlçe</label>
+                <input
+                  id="order-address-district"
+                  type="text"
+                  value={addressForm.province || ""}
+                  onChange={(e) => setAddressForm({ ...addressForm, province: e.target.value })}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 font-bold focus:outline-none focus:border-[#C98484]"
                 />
               </div>
