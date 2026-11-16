@@ -15,6 +15,10 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS image_reveal_end INTEGER DEFAULT 65")
     await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS image_reveal_enabled BOOLEAN DEFAULT TRUE")
     await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS image_reveal_settings JSONB")
+    await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS product_title TEXT")
+    await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS product_detail TEXT")
+    await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS product_url TEXT")
+    await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS theme TEXT DEFAULT 'warm'")
     const body = await req.json()
     const {
       title,
@@ -41,6 +45,10 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       top_bar_color,
       is_active,
       order_index,
+      product_title,
+      product_detail,
+      product_url,
+      theme,
     } = body
 
     const persistedImageUrl = await persistInlineImageUrl(
@@ -60,7 +68,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         title=$1, image_url=$2, image_url_light=NULL, heading=$3, subheading=$4, description=$5, badge_text=$6, 
         badge_color=$7, bg_color=$8, button_text=$9, button_link=$10, button_color=$11, 
         button2_text=$12, button2_link=$13, button2_color=$14, text_color=$15, 
-        features=$16, right_features=$17, top_bar_features=$18, top_bar_color=$19, is_active=$20, order_index=$21, updated_at=NOW(), image_reveal_end=$23, image_reveal_enabled=COALESCE($24, image_reveal_enabled, TRUE), image_reveal_settings=COALESCE($25::jsonb, image_reveal_settings)
+        features=$16, right_features=$17, top_bar_features=$18, top_bar_color=$19, is_active=$20, order_index=$21, updated_at=NOW(), image_reveal_end=$23, image_reveal_enabled=COALESCE($24, image_reveal_enabled, TRUE), image_reveal_settings=COALESCE($25::jsonb, image_reveal_settings),
+        product_title=$26, product_detail=$27, product_url=$28, theme=$29
        WHERE id=$22 RETURNING *`,
       [
         title || heading || "İsimsiz Slider",
@@ -88,6 +97,10 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         sliderRevealEnd(image_reveal_end),
         typeof image_reveal_enabled === "boolean" ? image_reveal_enabled : null,
         image_reveal_settings == null ? null : JSON.stringify(sliderTransitions(image_reveal_settings, image_reveal_end)),
+        product_title || null,
+        product_detail || null,
+        product_url || null,
+        theme || "warm",
       ]
     )
 

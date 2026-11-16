@@ -108,7 +108,7 @@ export default async function Home() {
         />
       )}
       <div className={mobileSettings.enabled ? "hidden md:block" : "block"}>
-        <ProductStageSlider slide={publicSliders[0]} />
+        <ProductStageSlider slides={publicSliders} />
       </div>
       <div className={`bg-[#f6f7f8] ${mobileSettings.enabled ? "hidden md:block" : "block"}`}>
         <CategoryStrip categories={categories} />

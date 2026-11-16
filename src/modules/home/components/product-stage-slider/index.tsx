@@ -8,105 +8,274 @@ import useFadeSlider from "../use-fade-slider"
 import { RotateCcw } from "lucide-react"
 import styles from "./stage.module.css"
 
-const PRODUCT_URL = "/urunler/agac-dali-desenli-ince-agizli-vazo-buyuk-boy"
-const VISUALS = [
-  { src: "/hero/vase-room-complete-v1.webp", alt: "Ağaç Dalı vazolar, sehpa, çiçekler ve aynayla birlikte doğal ışık alan mermer zeminli mekânda" },
-  { src: "/hero/gold-table-panorama-v1.webp", alt: "Siyah mermer üzerinde altın aynalı tepsi, şamdanlar, kristal objeler ve çiçekli vazo" },
-  { src: "/hero/butterfly-room-panorama-v1.webp", alt: "Gün ışığı alan ahşap konsolda pastel kelebek detaylı seramik vazolar ve mavi beyaz çiçek aranjmanı" },
-]
-
-type SlideCopy = {
+export type SlideItem = {
+  id?: string
+  title?: string
+  image_url?: string
   heading?: string
   subheading?: string
+  description?: string
   badge_text?: string
   button_text?: string
   button_link?: string
   button2_text?: string
   button2_link?: string
+  product_title?: string
+  product_detail?: string
+  product_url?: string
+  theme?: "warm" | "gold" | "butterfly" | string
 }
+
+const DEFAULT_SCENES: SlideItem[] = [
+  {
+    image_url: "/hero/vase-room-complete-v1.webp",
+    badge_text: "ZK HOME",
+    heading: "Evinize\nİyi Gelen\nDokunuşlar",
+    subheading: "Dekorasyon, sofra ve ev tekstili için ilham veren kategorileri keşfedin.",
+    button_text: "Dekorasyonu Keşfet",
+    button_link: "/dekorasyon",
+    button2_text: "Mutfak & Sofra",
+    button2_link: "/mutfak-sofra",
+    product_title: "Ağaç Dalı Vazo Serisi",
+    product_detail: "İki boy, birbiriyle uyumlu bir sunum.",
+    product_url: "/urunler/agac-dali-desenli-ince-agizli-vazo-buyuk-boy",
+    theme: "warm",
+  },
+  {
+    image_url: "/hero/gold-table-panorama-v1.webp",
+    badge_text: "SİYAH & ALTIN",
+    heading: "Zarafetin\nAltın\nYansıması.",
+    subheading: "Altın tonları, aynalı yüzeyler ve özenli detaylarla yaşam alanınızda etkileyici bir sunum oluşturun.",
+    button_text: "Sunumu Keşfet",
+    button_link: "/dekorasyon",
+    button2_text: "Dekoratif Objeler",
+    button2_link: "/dekorasyon/dekoratif-objeler",
+    product_title: "Siyah & Altın Sunum",
+    product_detail: "Aynalı yüzeyler, özenli detaylar.",
+    product_url: "/dekorasyon/dekoratif-objeler",
+    theme: "gold",
+  },
+  {
+    image_url: "/hero/butterfly-room-panorama-v1.webp",
+    badge_text: "KELEBEK DOKUNUŞU",
+    heading: "Baharın\nEn Zarif\nHali.",
+    subheading: "Pastel kelebekler, zarif seramikler ve çiçeklerin uyumu. Yaşam alanınıza baharın hafifliğini taşıyan detayları keşfedin.",
+    button_text: "Koleksiyonu Keşfet",
+    button_link: "/dekorasyon/dekoratif-objeler",
+    button2_text: "Çiçekleri Keşfet",
+    button2_link: "/yapay-cicek-bitki/yapay-cicekler",
+    product_title: "Kelebek Dokunuşu",
+    product_detail: "Pastel renklerle zarif bir birliktelik.",
+    product_url: "/dekorasyon/dekoratif-objeler",
+    theme: "butterfly",
+  },
+]
 
 function plainCopy(value: string | undefined) {
   return (value || "").split("|")[0].replace(/\*\*/g, "").trim()
 }
 
-export default function ProductStageSlider({ slide }: { slide?: SlideCopy }) {
+export default function ProductStageSlider({
+  slides,
+  slide,
+  forceIndex,
+  autoplay = true,
+}: {
+  slides?: SlideItem[]
+  slide?: SlideItem
+  forceIndex?: number
+  autoplay?: boolean
+}) {
+  const activeSlides: SlideItem[] =
+    slides && slides.length > 0
+      ? slides
+      : slide
+        ? [slide]
+        : DEFAULT_SCENES
+
+  const count = activeSlides.length
   const [scene, setScene] = useState(0)
   const [loadedImages, setLoadedImages] = useState(0)
-  const { activeIndex, select, paused, toggle, gestures } = useFadeSlider(VISUALS.length, loadedImages === (1 << VISUALS.length) - 1, 11000)
-  const originalTitle = (slide?.heading || "Evinize\nİyi Gelen\nDokunuşlar")
-    .split("\n").map(plainCopy).filter(Boolean)
-  const gold = activeIndex === 1
-  const butterfly = activeIndex === 2
-  const title = butterfly ? ["Baharın", "En Zarif", "Hali."] : gold ? ["Zarafetin", "Altın", "Yansıması."] : originalTitle
-  const content = butterfly ? {
-    badge: "KELEBEK DOKUNUŞU",
-    description: "Pastel kelebekler, zarif seramikler ve çiçeklerin uyumu. Yaşam alanınıza baharın hafifliğini taşıyan detayları keşfedin.",
-    primaryText: "Koleksiyonu Keşfet", primaryHref: "/dekorasyon/dekoratif-objeler",
-    secondaryText: "Çiçekleri Keşfet", secondaryHref: "/yapay-cicek-bitki/yapay-cicekler",
-    productTitle: "Kelebek Dokunuşu", productDetail: "Pastel renklerle zarif bir birliktelik.", productHref: "/dekorasyon/dekoratif-objeler",
-  } : gold ? {
-    badge: "SİYAH & ALTIN",
-    description: "Altın tonları, aynalı yüzeyler ve özenli detaylarla yaşam alanınızda etkileyici bir sunum oluşturun.",
-    primaryText: "Sunumu Keşfet", primaryHref: "/dekorasyon",
-    secondaryText: "Dekoratif Objeler", secondaryHref: "/dekorasyon/dekoratif-objeler",
-    productTitle: "Siyah & Altın Sunum", productDetail: "Aynalı yüzeyler, özenli detaylar.", productHref: "/dekorasyon/dekoratif-objeler",
-  } : {
-    badge: plainCopy(slide?.badge_text) || "ZK HOME",
-    description: plainCopy(slide?.subheading) || "Dekorasyon, sofra ve ev tekstili için ilham veren kategorileri keşfedin.",
-    primaryText: plainCopy(slide?.button_text) || "Dekorasyonu Keşfet", primaryHref: slide?.button_link || "/dekorasyon",
-    secondaryText: plainCopy(slide?.button2_text) || "Mutfak & Sofra", secondaryHref: slide?.button2_link || "/mutfak-sofra",
-    productTitle: "Ağaç Dalı Vazo Serisi", productDetail: "İki boy, birbiriyle uyumlu bir sunum.", productHref: PRODUCT_URL,
-  }
+  const fadeAutoplay = autoplay && forceIndex === undefined
+  const { activeIndex: rawActiveIndex, select, paused, toggle, gestures } = useFadeSlider(
+    count,
+    fadeAutoplay && loadedImages === (1 << count) - 1,
+    11000
+  )
+
+  const activeIndex = forceIndex !== undefined ? Math.max(0, Math.min(forceIndex, count - 1)) : rawActiveIndex
+  const currentSlide = activeSlides[activeIndex] || activeSlides[0] || DEFAULT_SCENES[0]
+  const fallback = DEFAULT_SCENES[activeIndex % DEFAULT_SCENES.length] || DEFAULT_SCENES[0]
+
+  const badge = plainCopy(currentSlide.badge_text) || fallback.badge_text || "ZK HOME"
+  const rawTitle = currentSlide.heading || fallback.heading || "Evinize\nİyi Gelen\nDokunuşlar"
+  const title = rawTitle.split("\n").map(plainCopy).filter(Boolean)
+  const description =
+    plainCopy(currentSlide.subheading) ||
+    plainCopy(currentSlide.description) ||
+    fallback.subheading ||
+    ""
+
+  const primaryText = plainCopy(currentSlide.button_text) || fallback.button_text || "Keşfet"
+  const primaryHref = currentSlide.button_link || fallback.button_link || "/dekorasyon"
+  const secondaryText = plainCopy(currentSlide.button2_text)
+  const secondaryHref = currentSlide.button2_link || ""
+
+  const productTitle = currentSlide.product_title || fallback.product_title || "Öne Çıkan Seri"
+  const productDetail = currentSlide.product_detail || fallback.product_detail || "Özenle seçilmiş yaşam alanı detayları."
+  const productHref = currentSlide.product_url || fallback.product_url || "/dekorasyon"
+
+  const theme =
+    currentSlide.theme === "gold" || currentSlide.theme === "butterfly" || currentSlide.theme === "warm"
+      ? currentSlide.theme
+      : fallback.theme || "warm"
 
   return (
-    <section className={styles.hero} aria-label="ZK Home koleksiyon vitrini" data-theme={butterfly ? "butterfly" : gold ? "gold" : "warm"} data-paused={paused} {...gestures}>
+    <section
+      className={styles.hero}
+      aria-label="ZK Home koleksiyon vitrini"
+      data-theme={theme}
+      data-paused={paused}
+      {...gestures}
+    >
       <div className={styles.backdrop}>
-        {VISUALS.map((visual, index) => (
-          <div key={visual.src} className={styles.photoLayer} data-active={index === activeIndex} aria-hidden={index !== activeIndex}>
-            <SmartImage src={visual.src} alt={visual.alt} fill sizes="100vw" priority={index === 0} loading={index === 0 ? undefined : "eager"} onLoad={() => setLoadedImages(value => value | (1 << index))} className={styles.roomImage} />
-          </div>
-        ))}
+        {activeSlides.map((item, index) => {
+          const itemSrc = item.image_url || DEFAULT_SCENES[index % DEFAULT_SCENES.length].image_url || ""
+          const itemAlt = plainCopy(item.heading) || plainCopy(item.title) || "ZK Home Vitrini"
+          return (
+            <div
+              key={item.id || itemSrc + index}
+              className={styles.photoLayer}
+              data-active={index === activeIndex}
+              aria-hidden={index !== activeIndex}
+            >
+              <SmartImage
+                src={itemSrc}
+                alt={itemAlt}
+                fill
+                sizes="100vw"
+                priority={index === 0}
+                loading={index === 0 ? undefined : "eager"}
+                onLoad={() => setLoadedImages((value) => value | (1 << index))}
+                className={styles.roomImage}
+              />
+            </div>
+          )
+        })}
         <span className={styles.copyShade} aria-hidden="true" />
       </div>
-      <div className={styles.scene} key={scene + ":" + activeIndex} data-ready={Boolean(loadedImages & (1 << activeIndex))}>
+
+      <div
+        className={styles.scene}
+        key={scene + ":" + activeIndex}
+        data-ready={Boolean(loadedImages & (1 << activeIndex))}
+      >
         <div className={styles.copy}>
-          <span className={styles.badge}>{content.badge}</span>
+          <span className={styles.badge}>{badge}</span>
           <h2 className={styles.heading} aria-label={title.join(" ")}>
             {title.map((line, lineIndex) => (
-              <span key={lineIndex} className={styles.titleLine + (lineIndex === 1 ? " " + styles.highlight : "")} aria-hidden="true">
+              <span
+                key={lineIndex}
+                className={
+                  styles.titleLine + (lineIndex === 1 ? " " + styles.highlight : "")
+                }
+                aria-hidden="true"
+              >
                 {line.split(/\s+/).map((word, wordIndex) => (
-                  <span key={wordIndex} className={styles.titleWord} style={{ "--reveal-delay": (lineIndex * .16 + wordIndex * .075) + "s" } as CSSProperties}>
-                    {word}{wordIndex < line.split(/\s+/).length - 1 ? "\u00a0" : ""}
+                  <span
+                    key={wordIndex}
+                    className={styles.titleWord}
+                    style={
+                      {
+                        "--reveal-delay":
+                          lineIndex * 0.16 + wordIndex * 0.075 + "s",
+                      } as CSSProperties
+                    }
+                  >
+                    {word}
+                    {wordIndex < line.split(/\s+/).length - 1 ? "\u00a0" : ""}
                   </span>
                 ))}
               </span>
             ))}
           </h2>
-          <p className={styles.description}>{content.description}</p>
+          {description && <p className={styles.description}>{description}</p>}
           <div className={styles.buttons}>
-            <LocalizedClientLink href={content.primaryHref} className={styles.primary}>
-              {content.primaryText}<ArrowRight size={17} aria-hidden="true" />
+            <LocalizedClientLink href={primaryHref} className={styles.primary}>
+              {primaryText}
+              <ArrowRight size={17} aria-hidden="true" />
             </LocalizedClientLink>
-            <LocalizedClientLink href={content.secondaryHref} className={styles.secondary}>
-              {content.secondaryText}
-            </LocalizedClientLink>
+            {secondaryText && secondaryHref && (
+              <LocalizedClientLink href={secondaryHref} className={styles.secondary}>
+                {secondaryText}
+              </LocalizedClientLink>
+            )}
           </div>
-          <LocalizedClientLink href={content.productHref} className={styles.productLink}>
-            <span className={styles.productRule} aria-hidden="true" />
-            <span><strong>{content.productTitle}</strong><small>{content.productDetail}</small></span>
-            <ArrowRight size={18} aria-hidden="true" />
-          </LocalizedClientLink>
+          {productTitle && (
+            <LocalizedClientLink href={productHref} className={styles.productLink}>
+              <span className={styles.productRule} aria-hidden="true" />
+              <span>
+                <strong>{productTitle}</strong>
+                {productDetail && <small>{productDetail}</small>}
+              </span>
+              <ArrowRight size={18} aria-hidden="true" />
+            </LocalizedClientLink>
+          )}
         </div>
         <div className={styles.products} aria-hidden="true" />
       </div>
+
       <div className={styles.footer}>
         <div className={styles.navigation} aria-label="Slider kontrolleri">
-          <button type="button" aria-label="Önceki sunum" onClick={() => select(activeIndex - 1)}><ArrowLeft size={16} aria-hidden="true" /></button>
-          {VISUALS.map((_, index) => <button key={index} type="button" className={styles.dot} aria-label={(index + 1) + ". sunuma git"} aria-current={index === activeIndex ? "true" : undefined} onClick={() => select(index)} />)}
-          <button type="button" aria-label="Sonraki sunum" onClick={() => select(activeIndex + 1)}><ArrowRight size={16} aria-hidden="true" /></button>
-          <button type="button" aria-label={paused ? "Sunumu oynat" : "Sunumu duraklat"} onClick={toggle}>{paused ? <Play size={13} aria-hidden="true" /> : <Pause size={13} aria-hidden="true" />}</button>
+          <button
+            type="button"
+            aria-label="Önceki sunum"
+            onClick={() => select(activeIndex - 1)}
+          >
+            <ArrowLeft size={16} aria-hidden="true" />
+          </button>
+          {activeSlides.map((_, index) => (
+            <button
+              key={index}
+              type="button"
+              className={styles.dot}
+              aria-label={index + 1 + ". sunuma git"}
+              aria-current={index === activeIndex ? "true" : undefined}
+              onClick={() => select(index)}
+            />
+          ))}
+          <button
+            type="button"
+            aria-label="Sonraki sunum"
+            onClick={() => select(activeIndex + 1)}
+          >
+            <ArrowRight size={16} aria-hidden="true" />
+          </button>
+          {count > 1 && (
+            <button
+              type="button"
+              aria-label={paused ? "Sunumu oynat" : "Sunumu duraklat"}
+              onClick={toggle}
+            >
+              {paused ? (
+                <Play size={13} aria-hidden="true" />
+              ) : (
+                <Pause size={13} aria-hidden="true" />
+              )}
+            </button>
+          )}
         </div>
-        <button type="button" onClick={() => { if (paused) toggle(); setScene(value => value + 1) }} className={styles.replay} aria-label="Slider animasyonunu yeniden oynat"><RotateCcw size={15} aria-hidden="true" /> Yeniden izle</button>
+        <button
+          type="button"
+          onClick={() => {
+            if (paused) toggle()
+            setScene((value) => value + 1)
+          }}
+          className={styles.replay}
+          aria-label="Slider animasyonunu yeniden oynat"
+        >
+          <RotateCcw size={15} aria-hidden="true" /> Yeniden izle
+        </button>
       </div>
     </section>
   )
