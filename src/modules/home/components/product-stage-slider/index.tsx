@@ -80,11 +80,13 @@ export default function ProductStageSlider({
   slide,
   forceIndex,
   autoplay = true,
+  onFieldClick,
 }: {
   slides?: SlideItem[]
   slide?: SlideItem
   forceIndex?: number
   autoplay?: boolean
+  onFieldClick?: (field: string) => void
 }) {
   const activeSlides: SlideItem[] =
     slides && slides.length > 0
@@ -136,9 +138,14 @@ export default function ProductStageSlider({
       aria-label="ZK Home koleksiyon vitrini"
       data-theme={theme}
       data-paused={paused}
+      data-interactive={Boolean(onFieldClick)}
       {...gestures}
     >
-      <div className={styles.backdrop}>
+      <div
+        className={styles.backdrop}
+        onClick={onFieldClick ? () => onFieldClick("image_url") : undefined}
+        title={onFieldClick ? "Arka plan görselini veya temasını değiştirmek için tıkla ✎" : undefined}
+      >
         {activeSlides.map((item, index) => {
           const itemSrc = item.image_url || DEFAULT_SCENES[index % DEFAULT_SCENES.length].image_url || ""
           const itemAlt = plainCopy(item.heading) || plainCopy(item.title) || "ZK Home Vitrini"
@@ -171,55 +178,113 @@ export default function ProductStageSlider({
         data-ready={Boolean(loadedImages & (1 << activeIndex))}
       >
         <div className={styles.copy}>
-          <span className={styles.badge}>{badge}</span>
+          <span
+            className={styles.badge}
+            onClick={onFieldClick ? (e) => { e.stopPropagation(); onFieldClick("badge_text") } : undefined}
+            title={onFieldClick ? "Rozet metnini düzenlemek için tıkla ✎" : undefined}
+          >
+            {badge}
+          </span>
           <h2 className={styles.heading} aria-label={title.join(" ")}>
-            {title.map((line, lineIndex) => (
-              <span
-                key={lineIndex}
-                className={
-                  styles.titleLine + (lineIndex === 1 ? " " + styles.highlight : "")
-                }
-                aria-hidden="true"
-              >
-                {line.split(/\s+/).map((word, wordIndex) => (
-                  <span
-                    key={wordIndex}
-                    className={styles.titleWord}
-                    style={
-                      {
-                        "--reveal-delay":
-                          lineIndex * 0.16 + wordIndex * 0.075 + "s",
-                      } as CSSProperties
-                    }
-                  >
-                    {word}
-                    {wordIndex < line.split(/\s+/).length - 1 ? "\u00a0" : ""}
-                  </span>
-                ))}
-              </span>
-            ))}
+            {title.map((line, lineIndex) => {
+              const fieldKey = lineIndex === 0 ? "heading_line1" : lineIndex === 1 ? "heading_line2" : "heading_line3"
+              return (
+                <span
+                  key={lineIndex}
+                  onClick={onFieldClick ? (e) => { e.stopPropagation(); onFieldClick(fieldKey) } : undefined}
+                  title={onFieldClick ? `${lineIndex + 1}. satır başlığı düzenlemek için tıkla ✎` : undefined}
+                  className={
+                    styles.titleLine + (lineIndex === 1 ? " " + styles.highlight : "")
+                  }
+                  aria-hidden="true"
+                >
+                  {line.split(/\s+/).map((word, wordIndex) => (
+                    <span
+                      key={wordIndex}
+                      className={styles.titleWord}
+                      style={
+                        {
+                          "--reveal-delay":
+                            lineIndex * 0.16 + wordIndex * 0.075 + "s",
+                        } as CSSProperties
+                      }
+                    >
+                      {word}
+                      {wordIndex < line.split(/\s+/).length - 1 ? "\u00a0" : ""}
+                    </span>
+                  ))}
+                </span>
+              )
+            })}
           </h2>
-          {description && <p className={styles.description}>{description}</p>}
+          {description && (
+            <p
+              className={styles.description}
+              onClick={onFieldClick ? (e) => { e.stopPropagation(); onFieldClick("subheading") } : undefined}
+              title={onFieldClick ? "Açıklama metnini düzenlemek için tıkla ✎" : undefined}
+            >
+              {description}
+            </p>
+          )}
           <div className={styles.buttons}>
-            <LocalizedClientLink href={primaryHref} className={styles.primary}>
-              {primaryText}
-              <ArrowRight size={17} aria-hidden="true" />
-            </LocalizedClientLink>
-            {secondaryText && secondaryHref && (
-              <LocalizedClientLink href={secondaryHref} className={styles.secondary}>
-                {secondaryText}
+            {onFieldClick ? (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); onFieldClick("button_text") }}
+                className={styles.primary}
+                title="1. butonu düzenlemek için tıkla ✎"
+              >
+                {primaryText}
+                <ArrowRight size={17} aria-hidden="true" />
+              </button>
+            ) : (
+              <LocalizedClientLink href={primaryHref} className={styles.primary}>
+                {primaryText}
+                <ArrowRight size={17} aria-hidden="true" />
               </LocalizedClientLink>
+            )}
+
+            {secondaryText && (
+              onFieldClick ? (
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); onFieldClick("button2_text") }}
+                  className={styles.secondary}
+                  title="2. butonu düzenlemek için tıkla ✎"
+                >
+                  {secondaryText}
+                </button>
+              ) : secondaryHref ? (
+                <LocalizedClientLink href={secondaryHref} className={styles.secondary}>
+                  {secondaryText}
+                </LocalizedClientLink>
+              ) : null
             )}
           </div>
           {productTitle && (
-            <LocalizedClientLink href={productHref} className={styles.productLink}>
-              <span className={styles.productRule} aria-hidden="true" />
-              <span>
-                <strong>{productTitle}</strong>
-                {productDetail && <small>{productDetail}</small>}
-              </span>
-              <ArrowRight size={18} aria-hidden="true" />
-            </LocalizedClientLink>
+            onFieldClick ? (
+              <div
+                onClick={(e) => { e.stopPropagation(); onFieldClick("product_title") }}
+                className={styles.productLink}
+                title="Öne çıkan ürün kartını düzenlemek için tıkla ✎"
+              >
+                <span className={styles.productRule} aria-hidden="true" />
+                <span>
+                  <strong>{productTitle}</strong>
+                  {productDetail && <small>{productDetail}</small>}
+                </span>
+                <ArrowRight size={18} aria-hidden="true" />
+              </div>
+            ) : (
+              <LocalizedClientLink href={productHref} className={styles.productLink}>
+                <span className={styles.productRule} aria-hidden="true" />
+                <span>
+                  <strong>{productTitle}</strong>
+                  {productDetail && <small>{productDetail}</small>}
+                </span>
+                <ArrowRight size={18} aria-hidden="true" />
+              </LocalizedClientLink>
+            )
           )}
         </div>
         <div className={styles.products} aria-hidden="true" />

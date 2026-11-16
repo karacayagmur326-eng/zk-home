@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import SmartImage from "@components/common/SmartImage"
 import ConfirmModal from "../components/ConfirmModal"
@@ -11,17 +11,18 @@ import {
   Trash2,
   Copy,
   Save,
-  Pencil,
   Eye,
   EyeOff,
   ChevronUp,
   ChevronDown,
   Sparkles,
-  ExternalLink,
   Layers,
   Image as ImageIcon,
-  ArrowRight,
   Check,
+  Type,
+  MousePointerClick,
+  Sliders,
+  Settings,
 } from "@lib/icons"
 import { Loader2 } from "lucide-react"
 import { categoryPath } from "@lib/seo/category"
@@ -64,6 +65,27 @@ const THEMES = [
   },
 ]
 
+type TabType = "text" | "media" | "buttons" | "product" | "settings"
+
+const FIELD_TAB_MAP: Record<string, TabType> = {
+  badge_text: "text",
+  heading_line1: "text",
+  heading_line2: "text",
+  heading_line3: "text",
+  subheading: "text",
+  button_text: "buttons",
+  button_link: "buttons",
+  button2_text: "buttons",
+  button2_link: "buttons",
+  product_title: "product",
+  product_detail: "product",
+  product_url: "product",
+  image_url: "media",
+  theme: "media",
+  title: "settings",
+  order_index: "settings",
+}
+
 function plainCopy(value: string | undefined) {
   return (value || "").split("|")[0].replace(/\*\*/g, "").trim()
 }
@@ -75,6 +97,12 @@ export default function SlidersAdminPage() {
   const [saving, setSaving] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null)
+
+  // Layout View Mode: "tabs" (Kompakt) or "all" (Tümü Açık)
+  const [viewMode, setViewMode] = useState<"tabs" | "all">("tabs")
+  const [activeTab, setActiveTab] = useState<TabType>("text")
+  const [highlightedField, setHighlightedField] = useState<string | null>(null)
+  const highlightTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Selector data
   const [categories, setCategories] = useState<any[]>([])
@@ -240,6 +268,35 @@ export default function SlidersAdminPage() {
       is_active: true,
       order_index: sliders.length + 1,
     })
+    setActiveTab("text")
+  }
+
+  // Click on visual preview text to jump to input
+  const handleFieldClick = (field: string) => {
+    const targetTab = FIELD_TAB_MAP[field] || "text"
+    if (viewMode === "tabs" && activeTab !== targetTab) {
+      setActiveTab(targetTab)
+    }
+
+    if (highlightTimeoutRef.current) {
+      clearTimeout(highlightTimeoutRef.current)
+    }
+    setHighlightedField(field)
+
+    setTimeout(() => {
+      const el = document.getElementById(`field-${field}`)
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" })
+        el.focus()
+        if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+          el.select?.()
+        }
+      }
+    }, 80)
+
+    highlightTimeoutRef.current = setTimeout(() => {
+      setHighlightedField(null)
+    }, 2500)
   }
 
   async function handleFormSubmit(e: React.FormEvent) {
@@ -271,7 +328,6 @@ export default function SlidersAdminPage() {
       theme: formData.theme || "warm",
       is_active: formData.is_active !== false,
       order_index: Number(formData.order_index) || 1,
-      // Default fallbacks for safety
       button_color: "#44382f",
       button2_color: "#ffffff38",
       text_color: "#332c27",
@@ -397,8 +453,16 @@ export default function SlidersAdminPage() {
     theme: formData.theme,
   }
 
+  // Helper for input highlighting on click-to-edit
+  const getFieldHighlightClass = (fieldName: string) => {
+    if (highlightedField === fieldName) {
+      return "ring-4 ring-rose-400/80 border-[#C98484] bg-rose-50/50 shadow-md transition-all duration-300"
+    }
+    return "border-slate-300 bg-white focus:border-[#C98484] transition-all"
+  }
+
   return (
-    <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-8 font-sans">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 font-sans">
       {/* Toast Notification */}
       {toast && (
         <div
@@ -415,63 +479,64 @@ export default function SlidersAdminPage() {
         </div>
       )}
 
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/80 pb-6">
+      {/* Top Header Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/80 pb-5">
         <div>
           <div className="flex items-center gap-2.5">
             <span className="p-2 rounded-xl bg-rose-50 text-[#C98484] border border-rose-100">
               <Layers className="w-5 h-5" />
             </span>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
               Ana Sayfa Slider Vitrini
             </h1>
           </div>
-          <p className="mt-1 text-xs sm:text-sm text-slate-500 font-medium">
-            Ana sayfadaki editoryal sahne vitrinini, arka plan görsellerini, rozetleri, vurgulu başlıkları ve ürün kartlarını buradan yönetin.
+          <p className="mt-1 text-xs text-slate-500 font-medium">
+            Önizleme üzerindeki başlıklara ve butonlara tıklayarak doğrudan düzenleme alanına ulaşabilirsiniz.
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={handleAddNew}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#C98484] hover:bg-rose-600 text-white font-extrabold text-xs sm:text-sm shadow-md shadow-rose-500/20 transition-all cursor-pointer transform hover:-translate-y-0.5"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Yeni Slayt Ekle</span>
-        </button>
+        <div className="flex items-center gap-2.5">
+          <button
+            type="button"
+            onClick={handleAddNew}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#C98484] hover:bg-rose-600 text-white font-extrabold text-xs shadow-sm transition-all cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Yeni Slayt Ekle</span>
+          </button>
+        </div>
       </div>
 
-      {/* Grid: Left List (1 col) + Right Editor & Preview (2 cols) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* LEFT COLUMN: SLIDE LIST (4 cols) */}
-        <div className="lg:col-span-4 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
+      {/* Grid: Left Slide List (4 cols) + Right Preview & Editor (8 cols) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* LEFT COLUMN: SLIDE LIST (4 cols, sticky) */}
+        <div className="lg:col-span-4 space-y-3 lg:sticky lg:top-4">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
               Yayındaki Slaytlar ({sliders.length})
             </h2>
-            <span className="text-[11px] text-slate-400">Sıralama ana sayfaya yansır</span>
+            <span className="text-[10px] text-slate-400">Sıralama ana sayfaya yansır</span>
           </div>
 
           {loading ? (
-            <div className="p-12 text-center rounded-3xl border border-slate-200 bg-white">
-              <Loader2 className="w-6 h-6 animate-spin text-[#C98484] mx-auto" />
+            <div className="p-8 text-center rounded-2xl border border-slate-200 bg-white">
+              <Loader2 className="w-5 h-5 animate-spin text-[#C98484] mx-auto" />
               <p className="mt-2 text-xs font-medium text-slate-500">Slaytlar yükleniyor...</p>
             </div>
           ) : sliders.length === 0 ? (
-            <div className="p-8 text-center rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50/50">
-              <ImageIcon className="w-8 h-8 text-slate-300 mx-auto" />
+            <div className="p-6 text-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50">
+              <ImageIcon className="w-6 h-6 text-slate-300 mx-auto" />
               <p className="mt-2 text-xs font-bold text-slate-700">Henüz slayt eklenmemiş.</p>
-              <p className="text-[11px] text-slate-400 mt-0.5">Varsayılan 3 editoryal sahne gösteriliyor.</p>
               <button
                 type="button"
                 onClick={handleAddNew}
-                className="mt-4 px-4 py-2 bg-[#C98484] text-white rounded-xl text-xs font-bold"
+                className="mt-3 px-3 py-1.5 bg-[#C98484] text-white rounded-lg text-xs font-bold"
               >
                 İlk Slaytı Ekle
               </button>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2.5 max-h-[calc(100vh-140px)] overflow-y-auto pr-1">
               {sliders.map((s, idx) => {
                 const isSelected = selectedId === s.id
                 const lines = (s.heading || "").split("\n").map(plainCopy)
@@ -482,29 +547,29 @@ export default function SlidersAdminPage() {
                   <div
                     key={s.id}
                     onClick={() => handleEdit(s)}
-                    className={`group relative rounded-3xl border p-4 transition-all cursor-pointer bg-white ${
+                    className={`group relative rounded-2xl border p-3 transition-all cursor-pointer bg-white ${
                       isSelected
                         ? "border-[#C98484] shadow-md ring-2 ring-rose-200/50"
-                        : "border-slate-200/80 hover:border-slate-300 hover:shadow-xs"
+                        : "border-slate-200/80 hover:border-slate-300 hover:shadow-2xs"
                     }`}
                   >
-                    <div className="flex items-start gap-3.5">
+                    <div className="flex items-start gap-3">
                       {/* Thumbnail */}
-                      <div className="relative w-20 h-20 rounded-2xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200/60">
+                      <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200/60">
                         {s.image_url ? (
                           <SmartImage
                             src={s.image_url}
                             alt=""
                             fill
-                            sizes="80px"
+                            sizes="64px"
                             className="object-cover"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-slate-300">
-                            <ImageIcon className="w-6 h-6" />
+                            <ImageIcon className="w-5 h-5" />
                           </div>
                         )}
-                        <span className="absolute bottom-1 right-1 text-[9px] font-black bg-slate-900/80 text-white px-1.5 py-0.5 rounded-md">
+                        <span className="absolute bottom-1 right-1 text-[8px] font-black bg-slate-900/80 text-white px-1 py-0.5 rounded">
                           #{idx + 1}
                         </span>
                       </div>
@@ -513,7 +578,7 @@ export default function SlidersAdminPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5">
                           <span
-                            className="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider"
+                            className="px-1.5 py-0.5 rounded-full text-[8px] font-extrabold uppercase tracking-wider"
                             style={{
                               backgroundColor: `${activeTheme.accent}20`,
                               color: activeTheme.accent,
@@ -521,38 +586,38 @@ export default function SlidersAdminPage() {
                           >
                             {plainCopy(s.badge_text) || "ZK HOME"}
                           </span>
-                          <span className="text-[10px] text-slate-400 font-medium capitalize">
+                          <span className="text-[9px] text-slate-400 font-medium">
                             • {activeTheme.name.split(" ")[0]}
                           </span>
                         </div>
 
-                        <h3 className="mt-1 text-xs font-bold text-slate-900 truncate">
+                        <h3 className="mt-0.5 text-xs font-bold text-slate-900 truncate">
                           {displayHeading}
                         </h3>
 
-                        <p className="mt-0.5 text-[11px] text-slate-500 truncate">
+                        <p className="text-[10px] text-slate-400 truncate">
                           {s.product_title ? `Ürün: ${s.product_title}` : s.title}
                         </p>
 
                         {/* Status bar */}
-                        <div className="mt-2.5 flex items-center justify-between gap-2 border-t border-slate-100 pt-2">
+                        <div className="mt-2 flex items-center justify-between gap-1 border-t border-slate-100 pt-1.5">
                           <button
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation()
                               handleToggleActive(s)
                             }}
-                            className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md transition-colors ${
+                            className={`inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded transition-colors ${
                               s.is_active
                                 ? "text-emerald-700 bg-emerald-50 hover:bg-emerald-100"
                                 : "text-slate-400 bg-slate-100 hover:bg-slate-200"
                             }`}
                           >
-                            {s.is_active ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                            {s.is_active ? <Eye className="w-2.5 h-2.5" /> : <EyeOff className="w-2.5 h-2.5" />}
                             <span>{s.is_active ? "Yayında" : "Gizli"}</span>
                           </button>
 
-                          <div className="flex items-center gap-1">
+                          <div className="flex items-center gap-0.5">
                             {idx > 0 && (
                               <button
                                 type="button"
@@ -561,9 +626,9 @@ export default function SlidersAdminPage() {
                                   e.stopPropagation()
                                   handleMoveOrder(s, "up")
                                 }}
-                                className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+                                className="p-1 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100"
                               >
-                                <ChevronUp className="w-3.5 h-3.5" />
+                                <ChevronUp className="w-3 h-3" />
                               </button>
                             )}
                             {idx < sliders.length - 1 && (
@@ -574,9 +639,9 @@ export default function SlidersAdminPage() {
                                   e.stopPropagation()
                                   handleMoveOrder(s, "down")
                                 }}
-                                className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+                                className="p-1 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100"
                               >
-                                <ChevronDown className="w-3.5 h-3.5" />
+                                <ChevronDown className="w-3 h-3" />
                               </button>
                             )}
                             <button
@@ -586,9 +651,9 @@ export default function SlidersAdminPage() {
                                 e.stopPropagation()
                                 handleClone(s)
                               }}
-                              className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+                              className="p-1 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100"
                             >
-                              <Copy className="w-3.5 h-3.5" />
+                              <Copy className="w-3 h-3" />
                             </button>
                             <button
                               type="button"
@@ -597,9 +662,9 @@ export default function SlidersAdminPage() {
                                 e.stopPropagation()
                                 setConfirmDeleteId(s.id)
                               }}
-                              className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50"
+                              className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50"
                             >
-                              <Trash2 className="w-3.5 h-3.5" />
+                              <Trash2 className="w-3 h-3" />
                             </button>
                           </div>
                         </div>
@@ -612,421 +677,559 @@ export default function SlidersAdminPage() {
           )}
         </div>
 
-        {/* RIGHT COLUMN: EDITOR & LIVE PREVIEW (8 cols) */}
-        <div className="lg:col-span-8 space-y-6">
-          {/* 1. Live Preview Section */}
-          <div className="rounded-3xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-soft space-y-3">
-            <div className="flex items-center justify-between">
+        {/* RIGHT COLUMN: PREVIEW & COMPACT FORM (8 cols) */}
+        <div className="lg:col-span-8 space-y-4">
+          {/* 1. Live Interactive Preview Card */}
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-3.5 sm:p-5 shadow-xs space-y-2">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
                   Canlı Masaüstü Önizleme
                 </h3>
               </div>
-              <span className="text-[11px] font-medium text-slate-400">
-                Ana sayfadaki gerçek editoryal sahne görünümü
-              </span>
+              <div className="flex items-center gap-1.5 text-[11px] font-semibold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-full border border-rose-100/80">
+                <MousePointerClick className="w-3.5 h-3.5 animate-bounce" />
+                <span>Yazıya tıklayarak düzenleme alanına atlayabilirsiniz</span>
+              </div>
             </div>
 
-            <SliderPreview slider={livePreviewSlide} />
+            <SliderPreview slider={livePreviewSlide} onFieldClick={handleFieldClick} />
           </div>
 
-          {/* 2. Slide Edit Form */}
+          {/* 2. Slide Edit Form (Compact & Tabbed) */}
           <form
             onSubmit={handleFormSubmit}
-            className="rounded-3xl border border-slate-200/80 bg-white p-6 sm:p-8 shadow-soft space-y-8"
+            className="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-xs space-y-5"
           >
-            {/* Header of Form */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-5">
+            {/* Top Bar inside Form: Slide Name, Active status & Save button */}
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
               <div>
-                <h2 className="text-lg font-black text-slate-900">
-                  {selectedId ? "Slaytı Düzenle" : "Yeni Slayt Oluştur"}
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#C98484]">
+                  {selectedId ? "Slayt Düzenleniyor" : "Yeni Slayt"}
+                </span>
+                <h2 className="text-base font-black text-slate-900 leading-tight">
+                  {formData.title || "İsimsiz Slayt"}
                 </h2>
-                <p className="text-xs text-slate-400 font-medium">
-                  {formData.title || "Bu slaytın görsel, metin, link ve tema ayarları"}
-                </p>
               </div>
 
-              <div className="flex items-center gap-3">
-                <label className="flex items-center gap-2 cursor-pointer bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl">
+              <div className="flex items-center gap-2.5">
+                <label className="flex items-center gap-1.5 cursor-pointer bg-slate-50 border border-slate-200 px-2.5 py-1.5 rounded-xl text-xs font-bold text-slate-700">
                   <input
                     type="checkbox"
                     checked={formData.is_active}
                     onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
                     className="accent-[#C98484] rounded"
                   />
-                  <span className="text-xs font-bold text-slate-700">Yayında</span>
+                  <span>Yayında</span>
                 </label>
 
                 <button
                   type="submit"
                   disabled={saving}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#C98484] hover:bg-rose-600 text-white font-extrabold text-xs sm:text-sm shadow-md shadow-rose-500/20 transition-all cursor-pointer disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#C98484] hover:bg-rose-600 text-white font-extrabold text-xs shadow-sm transition-all cursor-pointer disabled:opacity-50"
                 >
-                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                  <span>{saving ? "Kaydediliyor..." : "Değişiklikleri Kaydet"}</span>
+                  {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                  <span>{saving ? "Kaydediliyor..." : "Kaydet"}</span>
                 </button>
               </div>
             </div>
 
-            {/* BÖLÜM 1: GÖRSEL VE TEMA */}
-            <div className="space-y-5">
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-900 uppercase tracking-wider">
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-rose-50 text-[#C98484] text-[10px] font-black">
-                  1
-                </span>
-                <span>Arka Plan Sahne Görseli & Atmosfer Teması</span>
+            {/* TAB NAVIGATION BAR */}
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2">
+              {/* Tab Pills */}
+              <div className="flex items-center gap-1 overflow-x-auto py-0.5">
+                {[
+                  { id: "text", label: "Rozet & Başlık", icon: Type },
+                  { id: "media", label: "Görsel & Tema", icon: ImageIcon },
+                  { id: "buttons", label: "Butonlar", icon: Sliders },
+                  { id: "product", label: "Öne Çıkan Ürün", icon: Sparkles },
+                  { id: "settings", label: "Yayın & Sıra", icon: Settings },
+                ].map((tab) => {
+                  const Icon = tab.icon
+                  const isActive = viewMode === "tabs" && activeTab === tab.id
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => {
+                        setViewMode("tabs")
+                        setActiveTab(tab.id as TabType)
+                      }}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        isActive
+                          ? "bg-rose-50 text-[#C98484] border border-rose-200/80 shadow-2xs"
+                          : "text-slate-500 hover:text-slate-800 hover:bg-slate-50 border border-transparent"
+                      }`}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                      <span>{tab.label}</span>
+                    </button>
+                  )
+                })}
               </div>
 
-              {/* Görsel Seçimi */}
-              <div className="rounded-2xl border border-slate-200/80 p-4 bg-slate-50/50 space-y-3">
-                <label className="block text-xs font-bold text-slate-700">
-                  Arka Plan Sahne Fotoğrafı
-                </label>
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                  <input
-                    type="text"
-                    value={formData.image_url || ""}
-                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                    placeholder="/hero/vase-room-complete-v1.webp veya https://..."
-                    className="flex-1 px-3.5 py-2 text-xs border border-slate-300 rounded-xl bg-white font-medium focus:border-[#C98484] focus:outline-none"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowMediaModal(true)}
-                    className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0"
-                  >
-                    <ImageIcon className="w-3.5 h-3.5" />
-                    <span>Medya Kütüphanesinden Seç</span>
-                  </button>
-                </div>
-                <p className="text-[11px] text-slate-400">
-                  Tavsiye: 1440 × 720 px veya 1920 × 960 px oranında yüksek kaliteli mekân fotoğrafı.
-                </p>
-              </div>
-
-              {/* Atmosfer / Tema Seçimi */}
-              <div className="space-y-2">
-                <label className="block text-xs font-bold text-slate-700">
-                  Atmosfer Teması (Renk ve Vurgu Stili)
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {THEMES.map((theme) => {
-                    const isSelected = formData.theme === theme.id
-                    return (
-                      <div
-                        key={theme.id}
-                        onClick={() => setFormData({ ...formData, theme: theme.id })}
-                        className={`p-3.5 rounded-2xl border-2 cursor-pointer transition-all ${
-                          isSelected
-                            ? "border-[#C98484] bg-rose-50/20 shadow-xs"
-                            : "border-slate-200 hover:border-slate-300 bg-white"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span
-                            className="h-3.5 w-3.5 rounded-full border border-black/10 shrink-0"
-                            style={{ backgroundColor: theme.accent }}
-                          />
-                          {isSelected && <Check className="w-4 h-4 text-[#C98484]" />}
-                        </div>
-                        <h4 className="mt-2 text-xs font-bold text-slate-900">{theme.name}</h4>
-                        <p className="mt-0.5 text-[10px] text-slate-500 leading-relaxed">
-                          {theme.desc}
-                        </p>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
+              {/* View Toggle (Kompakt / Tümü) */}
+              <button
+                type="button"
+                onClick={() => setViewMode(viewMode === "tabs" ? "all" : "tabs")}
+                className="text-[11px] font-bold text-slate-400 hover:text-slate-700 px-2 py-1 rounded-lg hover:bg-slate-100 transition-colors shrink-0"
+              >
+                {viewMode === "tabs" ? "Tümünü Genişlet ⤢" : "Sekmeli Görünüm (Kompakt) ⤡"}
+              </button>
             </div>
 
-            {/* BÖLÜM 2: METİNLER & BAŞLIK */}
-            <div className="space-y-5 border-t border-slate-100 pt-6">
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-900 uppercase tracking-wider">
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-rose-50 text-[#C98484] text-[10px] font-black">
-                  2
-                </span>
-                <span>Rozet, Başlık ve Açıklama</span>
-              </div>
+            {/* TAB 1: ROZET VE BAŞLIK */}
+            {(viewMode === "all" || activeTab === "text") && (
+              <div className="space-y-4 pt-1 animate-in fade-in duration-200">
+                {viewMode === "all" && (
+                  <div className="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wider pb-1 border-b border-slate-100">
+                    <Type className="w-4 h-4 text-[#C98484]" />
+                    <span>Rozet, Başlık ve Açıklama</span>
+                  </div>
+                )}
 
-              {/* Slayt Yönetim Adı & Rozet */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Rozet */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Yönetim Adı (Sadece panelde görünür)
-                  </label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-bold text-slate-700">
+                      Üst Rozet Metni (Badge)
+                    </label>
+                    <span className="text-[10px] text-slate-400">Sliderın en üstündeki hap etiket</span>
+                  </div>
                   <input
-                    type="text"
-                    value={formData.title || ""}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    placeholder="Örn: Ağaç Dalı Vazo Vitrini"
-                    className="w-full px-3.5 py-2 text-xs border border-slate-300 rounded-xl bg-white font-medium focus:border-[#C98484] focus:outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Üst Rozet Metni (Badge)
-                  </label>
-                  <input
+                    id="field-badge_text"
                     type="text"
                     value={formData.badge_text || ""}
                     onChange={(e) => setFormData({ ...formData, badge_text: e.target.value })}
                     placeholder="Örn: ZK HOME veya SİYAH & ALTIN"
-                    className="w-full px-3.5 py-2 text-xs border border-slate-300 rounded-xl bg-white font-medium focus:border-[#C98484] focus:outline-none uppercase"
+                    className={`w-full px-3 py-2 text-xs border rounded-xl font-semibold uppercase ${getFieldHighlightClass("badge_text")}`}
+                  />
+                </div>
+
+                {/* 3 Satırlı Başlık */}
+                <div className="rounded-xl border border-slate-200/80 p-3 bg-slate-50/60 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-slate-800">
+                      Editoryal Başlık (3 Satır)
+                    </label>
+                    <span className="text-[10px] text-[#C98484] font-bold">
+                      ★ 2. Satır otomatik vurgu rengi ve animasyonlu alt çizgi alır
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    <div>
+                      <span className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">
+                        1. Satır (Giriş)
+                      </span>
+                      <input
+                        id="field-heading_line1"
+                        type="text"
+                        value={formData.heading_line1 || ""}
+                        onChange={(e) => setFormData({ ...formData, heading_line1: e.target.value })}
+                        placeholder="Evinize"
+                        className={`w-full px-3 py-1.5 text-xs border rounded-xl font-semibold ${getFieldHighlightClass("heading_line1")}`}
+                      />
+                    </div>
+
+                    <div>
+                      <span className="block text-[10px] font-bold text-[#C98484] mb-1 uppercase">
+                        2. Satır (★ Vurgulu Satır)
+                      </span>
+                      <input
+                        id="field-heading_line2"
+                        type="text"
+                        value={formData.heading_line2 || ""}
+                        onChange={(e) => setFormData({ ...formData, heading_line2: e.target.value })}
+                        placeholder="İyi Gelen"
+                        className={`w-full px-3 py-1.5 text-xs border-2 border-rose-300 rounded-xl font-black text-slate-900 ${getFieldHighlightClass("heading_line2")}`}
+                      />
+                    </div>
+
+                    <div>
+                      <span className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">
+                        3. Satır (Bitiş)
+                      </span>
+                      <input
+                        id="field-heading_line3"
+                        type="text"
+                        value={formData.heading_line3 || ""}
+                        onChange={(e) => setFormData({ ...formData, heading_line3: e.target.value })}
+                        placeholder="Dokunuşlar"
+                        className={`w-full px-3 py-1.5 text-xs border rounded-xl font-semibold ${getFieldHighlightClass("heading_line3")}`}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Açıklama */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Açıklama Metni (Alt Başlık)
+                  </label>
+                  <textarea
+                    id="field-subheading"
+                    rows={2}
+                    value={formData.subheading || ""}
+                    onChange={(e) => setFormData({ ...formData, subheading: e.target.value })}
+                    placeholder="Dekorasyon, sofra ve ev tekstili için ilham veren kategorileri keşfedin."
+                    className={`w-full px-3 py-2 text-xs border rounded-xl font-medium leading-relaxed ${getFieldHighlightClass("subheading")}`}
                   />
                 </div>
               </div>
+            )}
 
-              {/* 3 Satırlı Başlık */}
-              <div className="rounded-2xl border border-slate-200/80 p-4 bg-slate-50/50 space-y-3">
-                <div className="flex items-center justify-between">
-                  <label className="block text-xs font-bold text-slate-800">
-                    Editoryal Başlık (3 Satır)
+            {/* TAB 2: GÖRSEL VE TEMA */}
+            {(viewMode === "all" || activeTab === "media") && (
+              <div className="space-y-4 pt-1 animate-in fade-in duration-200">
+                {viewMode === "all" && (
+                  <div className="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wider pb-1 border-b border-slate-100 pt-2">
+                    <ImageIcon className="w-4 h-4 text-[#C98484]" />
+                    <span>Arka Plan Sahne Görseli & Tema</span>
+                  </div>
+                )}
+
+                {/* Görsel */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Arka Plan Sahne Fotoğrafı
                   </label>
-                  <span className="text-[11px] text-[#C98484] font-bold">
-                    ★ 2. Satır otomatik olarak vurgulu renk ve alt çizgi animasyonu alır
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div>
-                    <span className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">
-                      1. Satır (Giriş)
-                    </span>
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                     <input
+                      id="field-image_url"
                       type="text"
-                      value={formData.heading_line1 || ""}
-                      onChange={(e) => setFormData({ ...formData, heading_line1: e.target.value })}
-                      placeholder="Evinize"
-                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white font-semibold focus:border-[#C98484] focus:outline-none"
+                      value={formData.image_url || ""}
+                      onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                      placeholder="/hero/vase-room-complete-v1.webp veya https://..."
+                      className={`flex-1 px-3 py-1.5 text-xs border rounded-xl font-medium ${getFieldHighlightClass("image_url")}`}
                     />
-                  </div>
-
-                  <div>
-                    <span className="block text-[10px] font-bold text-[#C98484] mb-1 uppercase">
-                      2. Satır (Vurgulu & Renkli)
-                    </span>
-                    <input
-                      type="text"
-                      value={formData.heading_line2 || ""}
-                      onChange={(e) => setFormData({ ...formData, heading_line2: e.target.value })}
-                      placeholder="İyi Gelen"
-                      className="w-full px-3 py-2 text-xs border-2 border-rose-300 rounded-xl bg-rose-50/30 font-bold text-slate-900 focus:border-[#C98484] focus:outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <span className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">
-                      3. Satır (Bitiş)
-                    </span>
-                    <input
-                      type="text"
-                      value={formData.heading_line3 || ""}
-                      onChange={(e) => setFormData({ ...formData, heading_line3: e.target.value })}
-                      placeholder="Dokunuşlar"
-                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white font-semibold focus:border-[#C98484] focus:outline-none"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Açıklama Metni */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Açıklama Metni (Alt Başlık)
-                </label>
-                <textarea
-                  rows={2}
-                  value={formData.subheading || ""}
-                  onChange={(e) => setFormData({ ...formData, subheading: e.target.value })}
-                  placeholder="Dekorasyon, sofra ve ev tekstili için ilham veren kategorileri keşfedin."
-                  className="w-full px-3.5 py-2 text-xs border border-slate-300 rounded-xl bg-white font-medium focus:border-[#C98484] focus:outline-none leading-relaxed"
-                />
-              </div>
-            </div>
-
-            {/* BÖLÜM 3: EYLEM BUTONLARI */}
-            <div className="space-y-5 border-t border-slate-100 pt-6">
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-900 uppercase tracking-wider">
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-rose-50 text-[#C98484] text-[10px] font-black">
-                  3
-                </span>
-                <span>Eylem Butonları (CTA)</span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                {/* 1. Buton */}
-                <div className="rounded-2xl border border-slate-200/80 p-4 bg-slate-50/40 space-y-3">
-                  <span className="text-xs font-extrabold text-slate-800 block">
-                    1. Buton (Birincil / Dolgulu Buton)
-                  </span>
-                  <div>
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
-                      Buton Metni
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.button_text || ""}
-                      onChange={(e) => setFormData({ ...formData, button_text: e.target.value })}
-                      placeholder="Dekorasyonu Keşfet"
-                      className="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-xl bg-white font-medium focus:border-[#C98484] focus:outline-none"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="col-span-1">
-                      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
-                        Tür
-                      </label>
-                      <select
-                        value={linkType1}
-                        onChange={(e) => {
-                          setLinkType1(e.target.value)
-                          setFormData({ ...formData, button_link: "" })
-                        }}
-                        className="w-full px-2 py-1.5 text-xs border border-slate-300 rounded-xl bg-white font-bold"
-                      >
-                        <option value="page">Sayfa</option>
-                        <option value="category">Kategori</option>
-                        <option value="product">Ürün</option>
-                        <option value="custom">Özel URL</option>
-                      </select>
-                    </div>
-
-                    <div className="col-span-2">
-                      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
-                        Hedef Bağlantı
-                      </label>
-                      {linkType1 === "page" ? (
-                        <select
-                          value={formData.button_link || ""}
-                          onChange={(e) => setFormData({ ...formData, button_link: e.target.value })}
-                          className="w-full px-2 py-1.5 text-xs border border-slate-300 rounded-xl bg-white font-medium"
-                        >
-                          <option value="">Sayfa seçin...</option>
-                          {pages.map((p) => (
-                            <option key={p.url} value={p.url}>
-                              {p.title}
-                            </option>
-                          ))}
-                        </select>
-                      ) : linkType1 === "category" ? (
-                        <select
-                          value={formData.button_link || ""}
-                          onChange={(e) => setFormData({ ...formData, button_link: e.target.value })}
-                          className="w-full px-2 py-1.5 text-xs border border-slate-300 rounded-xl bg-white font-medium"
-                        >
-                          <option value="">Kategori seçin...</option>
-                          {categories.map((c) => (
-                            <option key={c.id} value={categoryPath(c)}>
-                              {c.name}
-                            </option>
-                          ))}
-                        </select>
-                      ) : linkType1 === "product" ? (
-                        <select
-                          value={formData.button_link || ""}
-                          onChange={(e) => setFormData({ ...formData, button_link: e.target.value })}
-                          className="w-full px-2 py-1.5 text-xs border border-slate-300 rounded-xl bg-white font-medium"
-                        >
-                          <option value="">Ürün seçin...</option>
-                          {products.map((p) => (
-                            <option key={p.id} value={`/urunler/${p.handle}`}>
-                              {p.title}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        <input
-                          type="text"
-                          value={formData.button_link || ""}
-                          onChange={(e) => setFormData({ ...formData, button_link: e.target.value })}
-                          placeholder="/dekorasyon"
-                          className="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-xl bg-white font-medium"
-                        />
-                      )}
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowMediaModal(true)}
+                      className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0"
+                    >
+                      <ImageIcon className="w-3.5 h-3.5" />
+                      <span>Medya Kütüphanesi</span>
+                    </button>
                   </div>
                 </div>
 
-                {/* 2. Buton */}
-                <div className="rounded-2xl border border-slate-200/80 p-4 bg-slate-50/40 space-y-3">
-                  <div className="flex items-center justify-between">
+                {/* Tema Kartları */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                    Atmosfer Teması (Renk ve Vurgu Stili)
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    {THEMES.map((theme) => {
+                      const isSelected = formData.theme === theme.id
+                      return (
+                        <div
+                          key={theme.id}
+                          onClick={() => setFormData({ ...formData, theme: theme.id })}
+                          className={`p-3 rounded-xl border-2 cursor-pointer transition-all ${
+                            isSelected
+                              ? "border-[#C98484] bg-rose-50/25 shadow-2xs"
+                              : "border-slate-200 hover:border-slate-300 bg-white"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span
+                              className="h-3 w-3 rounded-full border border-black/10 shrink-0"
+                              style={{ backgroundColor: theme.accent }}
+                            />
+                            {isSelected && <Check className="w-3.5 h-3.5 text-[#C98484]" />}
+                          </div>
+                          <h4 className="mt-1 text-xs font-bold text-slate-900">{theme.name}</h4>
+                          <p className="mt-0.5 text-[9px] text-slate-500 leading-snug">
+                            {theme.desc}
+                          </p>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 3: EYLEM BUTONLARI */}
+            {(viewMode === "all" || activeTab === "buttons") && (
+              <div className="space-y-4 pt-1 animate-in fade-in duration-200">
+                {viewMode === "all" && (
+                  <div className="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wider pb-1 border-b border-slate-100 pt-2">
+                    <Sliders className="w-4 h-4 text-[#C98484]" />
+                    <span>Eylem Butonları (CTA)</span>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* 1. Buton */}
+                  <div className="rounded-xl border border-slate-200/80 p-3 bg-slate-50/40 space-y-2.5">
                     <span className="text-xs font-extrabold text-slate-800 block">
-                      2. Buton (İkincil / Saydam Buton)
+                      1. Buton (Birincil / Dolgulu)
                     </span>
-                    <span className="text-[10px] text-slate-400">İsteğe bağlı</span>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
+                        Buton Metni
+                      </label>
+                      <input
+                        id="field-button_text"
+                        type="text"
+                        value={formData.button_text || ""}
+                        onChange={(e) => setFormData({ ...formData, button_text: e.target.value })}
+                        placeholder="Dekorasyonu Keşfet"
+                        className={`w-full px-3 py-1.5 text-xs border rounded-xl font-medium ${getFieldHighlightClass("button_text")}`}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="col-span-1">
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
+                          Tür
+                        </label>
+                        <select
+                          value={linkType1}
+                          onChange={(e) => {
+                            setLinkType1(e.target.value)
+                            setFormData({ ...formData, button_link: "" })
+                          }}
+                          className="w-full px-2 py-1.5 text-xs border border-slate-300 rounded-xl bg-white font-bold"
+                        >
+                          <option value="page">Sayfa</option>
+                          <option value="category">Kategori</option>
+                          <option value="product">Ürün</option>
+                          <option value="custom">Özel</option>
+                        </select>
+                      </div>
+
+                      <div className="col-span-2">
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
+                          Hedef Bağlantı
+                        </label>
+                        {linkType1 === "page" ? (
+                          <select
+                            value={formData.button_link || ""}
+                            onChange={(e) => setFormData({ ...formData, button_link: e.target.value })}
+                            className="w-full px-2 py-1.5 text-xs border border-slate-300 rounded-xl bg-white font-medium"
+                          >
+                            <option value="">Sayfa seçin...</option>
+                            {pages.map((p) => (
+                              <option key={p.url} value={p.url}>
+                                {p.title}
+                              </option>
+                            ))}
+                          </select>
+                        ) : linkType1 === "category" ? (
+                          <select
+                            value={formData.button_link || ""}
+                            onChange={(e) => setFormData({ ...formData, button_link: e.target.value })}
+                            className="w-full px-2 py-1.5 text-xs border border-slate-300 rounded-xl bg-white font-medium"
+                          >
+                            <option value="">Kategori seçin...</option>
+                            {categories.map((c) => (
+                              <option key={c.id} value={categoryPath(c)}>
+                                {c.name}
+                              </option>
+                            ))}
+                          </select>
+                        ) : linkType1 === "product" ? (
+                          <select
+                            value={formData.button_link || ""}
+                            onChange={(e) => setFormData({ ...formData, button_link: e.target.value })}
+                            className="w-full px-2 py-1.5 text-xs border border-slate-300 rounded-xl bg-white font-medium"
+                          >
+                            <option value="">Ürün seçin...</option>
+                            {products.map((p) => (
+                              <option key={p.id} value={`/urunler/${p.handle}`}>
+                                {p.title}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <input
+                            type="text"
+                            value={formData.button_link || ""}
+                            onChange={(e) => setFormData({ ...formData, button_link: e.target.value })}
+                            placeholder="/dekorasyon"
+                            className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-xl bg-white font-medium"
+                          />
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
-                      Buton Metni (Boş bırakılırsa gizlenir)
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.button2_text || ""}
-                      onChange={(e) => setFormData({ ...formData, button2_text: e.target.value })}
-                      placeholder="Mutfak & Sofra"
-                      className="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-xl bg-white font-medium focus:border-[#C98484] focus:outline-none"
-                    />
+
+                  {/* 2. Buton */}
+                  <div className="rounded-xl border border-slate-200/80 p-3 bg-slate-50/40 space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-extrabold text-slate-800 block">
+                        2. Buton (İkincil / Saydam)
+                      </span>
+                      <span className="text-[9px] text-slate-400">İsteğe bağlı</span>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
+                        Buton Metni (Boş bırakılırsa gizlenir)
+                      </label>
+                      <input
+                        id="field-button2_text"
+                        type="text"
+                        value={formData.button2_text || ""}
+                        onChange={(e) => setFormData({ ...formData, button2_text: e.target.value })}
+                        placeholder="Mutfak & Sofra"
+                        className={`w-full px-3 py-1.5 text-xs border rounded-xl font-medium ${getFieldHighlightClass("button2_text")}`}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="col-span-1">
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
+                          Tür
+                        </label>
+                        <select
+                          value={linkType2}
+                          onChange={(e) => {
+                            setLinkType2(e.target.value)
+                            setFormData({ ...formData, button2_link: "" })
+                          }}
+                          className="w-full px-2 py-1.5 text-xs border border-slate-300 rounded-xl bg-white font-bold"
+                        >
+                          <option value="page">Sayfa</option>
+                          <option value="category">Kategori</option>
+                          <option value="product">Ürün</option>
+                          <option value="custom">Özel</option>
+                        </select>
+                      </div>
+
+                      <div className="col-span-2">
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
+                          Hedef Bağlantı
+                        </label>
+                        {linkType2 === "page" ? (
+                          <select
+                            value={formData.button2_link || ""}
+                            onChange={(e) => setFormData({ ...formData, button2_link: e.target.value })}
+                            className="w-full px-2 py-1.5 text-xs border border-slate-300 rounded-xl bg-white font-medium"
+                          >
+                            <option value="">Sayfa seçin...</option>
+                            {pages.map((p) => (
+                              <option key={p.url} value={p.url}>
+                                {p.title}
+                              </option>
+                            ))}
+                          </select>
+                        ) : linkType2 === "category" ? (
+                          <select
+                            value={formData.button2_link || ""}
+                            onChange={(e) => setFormData({ ...formData, button2_link: e.target.value })}
+                            className="w-full px-2 py-1.5 text-xs border border-slate-300 rounded-xl bg-white font-medium"
+                          >
+                            <option value="">Kategori seçin...</option>
+                            {categories.map((c) => (
+                              <option key={c.id} value={categoryPath(c)}>
+                                {c.name}
+                              </option>
+                            ))}
+                          </select>
+                        ) : linkType2 === "product" ? (
+                          <select
+                            value={formData.button2_link || ""}
+                            onChange={(e) => setFormData({ ...formData, button2_link: e.target.value })}
+                            className="w-full px-2 py-1.5 text-xs border border-slate-300 rounded-xl bg-white font-medium"
+                          >
+                            <option value="">Ürün seçin...</option>
+                            {products.map((p) => (
+                              <option key={p.id} value={`/urunler/${p.handle}`}>
+                                {p.title}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <input
+                            type="text"
+                            value={formData.button2_link || ""}
+                            onChange={(e) => setFormData({ ...formData, button2_link: e.target.value })}
+                            placeholder="/mutfak-sofra"
+                            className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-xl bg-white font-medium"
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 4: ÖNE ÇIKARILAN ÜRÜN KARTI */}
+            {(viewMode === "all" || activeTab === "product") && (
+              <div className="space-y-4 pt-1 animate-in fade-in duration-200">
+                {viewMode === "all" && (
+                  <div className="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wider pb-1 border-b border-slate-100 pt-2">
+                    <Sparkles className="w-4 h-4 text-[#C98484]" />
+                    <span>Öne Çıkarılan Ürün / Koleksiyon Çubuğu</span>
+                  </div>
+                )}
+
+                <div className="rounded-xl border border-slate-200/80 p-3 bg-slate-50/50 space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                        Ürün / Koleksiyon Başlığı
+                      </label>
+                      <input
+                        id="field-product_title"
+                        type="text"
+                        value={formData.product_title || ""}
+                        onChange={(e) => setFormData({ ...formData, product_title: e.target.value })}
+                        placeholder="Örn: Ağaç Dalı Vazo Serisi"
+                        className={`w-full px-3 py-1.5 text-xs border rounded-xl font-bold ${getFieldHighlightClass("product_title")}`}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                        Alt Detay / Vurgu Metni
+                      </label>
+                      <input
+                        id="field-product_detail"
+                        type="text"
+                        value={formData.product_detail || ""}
+                        onChange={(e) => setFormData({ ...formData, product_detail: e.target.value })}
+                        placeholder="Örn: İki boy, birbiriyle uyumlu bir sunum."
+                        className={`w-full px-3 py-1.5 text-xs border rounded-xl font-medium ${getFieldHighlightClass("product_detail")}`}
+                      />
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-3 gap-2">
                     <div className="col-span-1">
                       <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
-                        Tür
+                        Bağlantı Türü
                       </label>
                       <select
-                        value={linkType2}
+                        value={linkTypeProduct}
                         onChange={(e) => {
-                          setLinkType2(e.target.value)
-                          setFormData({ ...formData, button2_link: "" })
+                          setLinkTypeProduct(e.target.value)
+                          setFormData({ ...formData, product_url: "" })
                         }}
                         className="w-full px-2 py-1.5 text-xs border border-slate-300 rounded-xl bg-white font-bold"
                       >
-                        <option value="page">Sayfa</option>
-                        <option value="category">Kategori</option>
                         <option value="product">Ürün</option>
-                        <option value="custom">Özel URL</option>
+                        <option value="category">Kategori</option>
+                        <option value="page">Sayfa</option>
+                        <option value="custom">Özel</option>
                       </select>
                     </div>
 
                     <div className="col-span-2">
                       <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
-                        Hedef Bağlantı
+                        Ürün Bağlantısı (URL)
                       </label>
-                      {linkType2 === "page" ? (
+                      {linkTypeProduct === "product" ? (
                         <select
-                          value={formData.button2_link || ""}
-                          onChange={(e) => setFormData({ ...formData, button2_link: e.target.value })}
-                          className="w-full px-2 py-1.5 text-xs border border-slate-300 rounded-xl bg-white font-medium"
-                        >
-                          <option value="">Sayfa seçin...</option>
-                          {pages.map((p) => (
-                            <option key={p.url} value={p.url}>
-                              {p.title}
-                            </option>
-                          ))}
-                        </select>
-                      ) : linkType2 === "category" ? (
-                        <select
-                          value={formData.button2_link || ""}
-                          onChange={(e) => setFormData({ ...formData, button2_link: e.target.value })}
-                          className="w-full px-2 py-1.5 text-xs border border-slate-300 rounded-xl bg-white font-medium"
-                        >
-                          <option value="">Kategori seçin...</option>
-                          {categories.map((c) => (
-                            <option key={c.id} value={categoryPath(c)}>
-                              {c.name}
-                            </option>
-                          ))}
-                        </select>
-                      ) : linkType2 === "product" ? (
-                        <select
-                          value={formData.button2_link || ""}
-                          onChange={(e) => setFormData({ ...formData, button2_link: e.target.value })}
-                          className="w-full px-2 py-1.5 text-xs border border-slate-300 rounded-xl bg-white font-medium"
+                          id="field-product_url"
+                          value={formData.product_url || ""}
+                          onChange={(e) => setFormData({ ...formData, product_url: e.target.value })}
+                          className={`w-full px-2 py-1.5 text-xs border rounded-xl font-medium ${getFieldHighlightClass("product_url")}`}
                         >
                           <option value="">Ürün seçin...</option>
                           {products.map((p) => (
@@ -1035,173 +1238,113 @@ export default function SlidersAdminPage() {
                             </option>
                           ))}
                         </select>
+                      ) : linkTypeProduct === "category" ? (
+                        <select
+                          id="field-product_url"
+                          value={formData.product_url || ""}
+                          onChange={(e) => setFormData({ ...formData, product_url: e.target.value })}
+                          className={`w-full px-2 py-1.5 text-xs border rounded-xl font-medium ${getFieldHighlightClass("product_url")}`}
+                        >
+                          <option value="">Kategori seçin...</option>
+                          {categories.map((c) => (
+                            <option key={c.id} value={categoryPath(c)}>
+                              {c.name}
+                            </option>
+                          ))}
+                        </select>
+                      ) : linkTypeProduct === "page" ? (
+                        <select
+                          id="field-product_url"
+                          value={formData.product_url || ""}
+                          onChange={(e) => setFormData({ ...formData, product_url: e.target.value })}
+                          className={`w-full px-2 py-1.5 text-xs border rounded-xl font-medium ${getFieldHighlightClass("product_url")}`}
+                        >
+                          <option value="">Sayfa seçin...</option>
+                          {pages.map((p) => (
+                            <option key={p.url} value={p.url}>
+                              {p.title}
+                            </option>
+                          ))}
+                        </select>
                       ) : (
                         <input
+                          id="field-product_url"
                           type="text"
-                          value={formData.button2_link || ""}
-                          onChange={(e) => setFormData({ ...formData, button2_link: e.target.value })}
-                          placeholder="/mutfak-sofra"
-                          className="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-xl bg-white font-medium"
+                          value={formData.product_url || ""}
+                          onChange={(e) => setFormData({ ...formData, product_url: e.target.value })}
+                          placeholder="/urunler/agac-dali-desenli-ince-agizli-vazo-buyuk-boy"
+                          className={`w-full px-2.5 py-1.5 text-xs border rounded-xl font-medium ${getFieldHighlightClass("product_url")}`}
                         />
                       )}
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* BÖLÜM 4: SOL ALT ÖNE ÇIKARILAN ÜRÜN KARTI */}
-            <div className="space-y-4 border-t border-slate-100 pt-6">
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-900 uppercase tracking-wider">
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-rose-50 text-[#C98484] text-[10px] font-black">
-                  4
-                </span>
-                <span>Öne Çıkarılan Ürün / Koleksiyon Çubuğu</span>
-              </div>
-              <p className="text-[11px] text-slate-400">
-                Sliderın sol altında dikey çizgiyle ayrılan şık ürün veya koleksiyon bağlantısı.
-              </p>
+            {/* TAB 5: YAYIN VE SIRALAMA */}
+            {(viewMode === "all" || activeTab === "settings") && (
+              <div className="space-y-4 pt-1 animate-in fade-in duration-200">
+                {viewMode === "all" && (
+                  <div className="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wider pb-1 border-b border-slate-100 pt-2">
+                    <Settings className="w-4 h-4 text-[#C98484]" />
+                    <span>Yayın & Sıralama Ayarları</span>
+                  </div>
+                )}
 
-              <div className="rounded-2xl border border-slate-200/80 p-4 bg-slate-50/50 space-y-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Ürün / Koleksiyon Başlığı
+                      Yönetim Adı (Sadece panelde liste için görünür)
                     </label>
                     <input
+                      id="field-title"
                       type="text"
-                      value={formData.product_title || ""}
-                      onChange={(e) => setFormData({ ...formData, product_title: e.target.value })}
-                      placeholder="Örn: Ağaç Dalı Vazo Serisi"
-                      className="w-full px-3.5 py-2 text-xs border border-slate-300 rounded-xl bg-white font-semibold focus:border-[#C98484] focus:outline-none"
+                      value={formData.title || ""}
+                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      placeholder="Örn: Ağaç Dalı Vazo Vitrini"
+                      className={`w-full px-3 py-1.5 text-xs border rounded-xl font-medium ${getFieldHighlightClass("title")}`}
                     />
                   </div>
 
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Alt Detay / Vurgu Metni
+                      Sıralama İndeksi (Küçükten büyüğe)
                     </label>
                     <input
-                      type="text"
-                      value={formData.product_detail || ""}
-                      onChange={(e) => setFormData({ ...formData, product_detail: e.target.value })}
-                      placeholder="Örn: İki boy, birbiriyle uyumlu bir sunum."
-                      className="w-full px-3.5 py-2 text-xs border border-slate-300 rounded-xl bg-white font-medium focus:border-[#C98484] focus:outline-none"
+                      id="field-order_index"
+                      type="number"
+                      min={1}
+                      max={99}
+                      value={formData.order_index}
+                      onChange={(e) =>
+                        setFormData({ ...formData, order_index: Number(e.target.value) || 1 })
+                      }
+                      className={`w-24 px-3 py-1.5 text-xs border rounded-xl font-bold text-center ${getFieldHighlightClass("order_index")}`}
                     />
                   </div>
                 </div>
-
-                <div className="grid grid-cols-3 gap-2 pt-1">
-                  <div className="col-span-1">
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
-                      Bağlantı Türü
-                    </label>
-                    <select
-                      value={linkTypeProduct}
-                      onChange={(e) => {
-                        setLinkTypeProduct(e.target.value)
-                        setFormData({ ...formData, product_url: "" })
-                      }}
-                      className="w-full px-2 py-1.5 text-xs border border-slate-300 rounded-xl bg-white font-bold"
-                    >
-                      <option value="product">Ürün</option>
-                      <option value="category">Kategori</option>
-                      <option value="page">Sayfa</option>
-                      <option value="custom">Özel URL</option>
-                    </select>
-                  </div>
-
-                  <div className="col-span-2">
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
-                      Ürün Bağlantısı (URL)
-                    </label>
-                    {linkTypeProduct === "product" ? (
-                      <select
-                        value={formData.product_url || ""}
-                        onChange={(e) => setFormData({ ...formData, product_url: e.target.value })}
-                        className="w-full px-2 py-1.5 text-xs border border-slate-300 rounded-xl bg-white font-medium"
-                      >
-                        <option value="">Ürün seçin...</option>
-                        {products.map((p) => (
-                          <option key={p.id} value={`/urunler/${p.handle}`}>
-                            {p.title}
-                          </option>
-                        ))}
-                      </select>
-                    ) : linkTypeProduct === "category" ? (
-                      <select
-                        value={formData.product_url || ""}
-                        onChange={(e) => setFormData({ ...formData, product_url: e.target.value })}
-                        className="w-full px-2 py-1.5 text-xs border border-slate-300 rounded-xl bg-white font-medium"
-                      >
-                        <option value="">Kategori seçin...</option>
-                        {categories.map((c) => (
-                          <option key={c.id} value={categoryPath(c)}>
-                            {c.name}
-                          </option>
-                        ))}
-                      </select>
-                    ) : linkTypeProduct === "page" ? (
-                      <select
-                        value={formData.product_url || ""}
-                        onChange={(e) => setFormData({ ...formData, product_url: e.target.value })}
-                        className="w-full px-2 py-1.5 text-xs border border-slate-300 rounded-xl bg-white font-medium"
-                      >
-                        <option value="">Sayfa seçin...</option>
-                        {pages.map((p) => (
-                          <option key={p.url} value={p.url}>
-                            {p.title}
-                          </option>
-                        ))}
-                      </select>
-                    ) : (
-                      <input
-                        type="text"
-                        value={formData.product_url || ""}
-                        onChange={(e) => setFormData({ ...formData, product_url: e.target.value })}
-                        placeholder="/urunler/agac-dali-desenli-ince-agizli-vazo-buyuk-boy"
-                        className="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-xl bg-white font-medium"
-                      />
-                    )}
-                  </div>
-                </div>
               </div>
-            </div>
+            )}
 
-            {/* BÖLÜM 5: SIRALAMA VE KAYDET */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-slate-100 pt-6">
-              <div className="flex items-center gap-3">
-                <label className="text-xs font-bold text-slate-700">Sıralama İndeksi:</label>
-                <input
-                  type="number"
-                  min={1}
-                  max={99}
-                  value={formData.order_index}
-                  onChange={(e) =>
-                    setFormData({ ...formData, order_index: Number(e.target.value) || 1 })
-                  }
-                  className="w-20 px-3 py-1.5 text-xs border border-slate-300 rounded-xl bg-white font-bold text-center"
-                />
-              </div>
+            {/* Bottom Action Footer */}
+            <div className="flex items-center justify-between border-t border-slate-100 pt-4">
+              <button
+                type="button"
+                onClick={handleAddNew}
+                className="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-bold text-xs transition-colors"
+              >
+                Yeni Form Aç
+              </button>
 
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={handleAddNew}
-                  className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-bold text-xs transition-colors"
-                >
-                  Vazgeç / Yeni
-                </button>
-
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#C98484] hover:bg-rose-600 text-white font-extrabold text-xs sm:text-sm shadow-md shadow-rose-500/20 transition-all cursor-pointer disabled:opacity-50"
-                >
-                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                  <span>{saving ? "Kaydediliyor..." : "Değişiklikleri Kaydet"}</span>
-                </button>
-              </div>
+              <button
+                type="submit"
+                disabled={saving}
+                className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-[#C98484] hover:bg-rose-600 text-white font-extrabold text-xs shadow-sm transition-all cursor-pointer disabled:opacity-50"
+              >
+                {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                <span>{saving ? "Kaydediliyor..." : "Değişiklikleri Kaydet"}</span>
+              </button>
             </div>
           </form>
         </div>

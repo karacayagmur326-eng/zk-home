@@ -84,6 +84,20 @@
 
 @media (max-width: 1100px) { .scene { padding: 0 35px; gap: 10px; min-height: 650px; } .products { min-height: 650px; } .heading { font-size: 54px; } .footer { padding-left: 35px; padding-right: 35px; } }
 @media (max-width: 767px) { .roomImage { object-position: 80% top; } .copyShade { background: linear-gradient(0deg, #f1e6d8 0%, #f1e6d8f5 49%, #f1e6d800 78%); } .scene { display: flex; flex-direction: column; padding: 0; gap: 0; } .products { order: 0; width: 100%; min-height: 500px; max-width: 440px; align-self: center; } .copy { order: 1; width: 100%; padding: 18px 25px 25px; max-width: 460px; margin: 0 auto; } .badge { margin-bottom: 14px; font-size: 9px; } .heading { font-size: 44px; line-height: 1.02; } .description { margin: 17px 0 21px; font-size: 13px; line-height: 1.75; } .primary, .secondary { font-size: 11px; padding: 0 18px; min-height: 44px; gap: 12px; } .productLink { margin-top: 23px; } .footer { margin: 0 auto; padding: 0 25px 18px; } }
+.hero[data-interactive="true"] .badge:hover,
+.hero[data-interactive="true"] .titleLine:hover,
+.hero[data-interactive="true"] .description:hover,
+.hero[data-interactive="true"] .primary:hover,
+.hero[data-interactive="true"] .secondary:hover,
+.hero[data-interactive="true"] .productLink:hover {
+  outline: 2px dashed #C98484;
+  outline-offset: 3px;
+  border-radius: 6px;
+  background-color: rgba(201, 132, 132, 0.12);
+  cursor: pointer;
+  transition: outline 0.15s ease, background-color 0.15s ease;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .photoLayer { transition: none; }
   .titleWord, .badge, .description, .primary, .secondary, .productLink, .highlight::after { animation: none; opacity: 1; transform: none; filter: none; }

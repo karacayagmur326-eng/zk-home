@@ -7,9 +7,11 @@ import ProductStageSlider from "@modules/home/components/product-stage-slider"
 export default function SliderPreview({
   slider,
   onImageAreaSize,
+  onFieldClick,
 }: {
   slider: any
   onImageAreaSize?: (size: { width: number; height: number }) => void
+  onFieldClick?: (field: string) => void
 }) {
   const frameRef = useRef<HTMLDivElement>(null)
   const hostRef = useRef<HTMLDivElement>(null)
@@ -71,16 +73,24 @@ export default function SliderPreview({
     <>
       <div
         ref={frameRef}
-        className="relative w-full overflow-hidden rounded-2xl border border-slate-200/80 shadow-md bg-[#f5eadc]"
+        className="relative w-full overflow-hidden rounded-2xl border border-slate-200/80 shadow-md bg-[#f5eadc] group select-none"
       >
         <div
           ref={hostRef}
-          style={{ transformOrigin: "top left", pointerEvents: "none" }}
+          style={{
+            transformOrigin: "top left",
+            pointerEvents: onFieldClick ? "auto" : "none",
+          }}
         >
           {root &&
             createPortal(
               <div data-ui-scope="storefront">
-                <ProductStageSlider slide={slider} autoplay={false} forceIndex={0} />
+                <ProductStageSlider
+                  slide={slider}
+                  autoplay={false}
+                  forceIndex={0}
+                  onFieldClick={onFieldClick}
+                />
               </div>,
               root
             )}
