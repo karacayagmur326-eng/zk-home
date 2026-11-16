@@ -90,6 +90,27 @@ function plainCopy(value: string | undefined) {
   return (value || "").split("|")[0].replace(/\*\*/g, "").trim()
 }
 
+// Form State Default
+const EMPTY_SLIDER_FORM = {
+  title: "",
+  badge_text: "",
+  heading_line1: "",
+  heading_line2: "",
+  heading_line3: "",
+  subheading: "",
+  image_url: "",
+  button_text: "",
+  button_link: "",
+  button2_text: "",
+  button2_link: "",
+  product_title: "",
+  product_detail: "",
+  product_url: "",
+  theme: "warm",
+  is_active: true,
+  order_index: 1,
+}
+
 export default function SlidersAdminPage() {
   const router = useRouter()
   const [sliders, setSliders] = useState<any[]>([])
@@ -113,26 +134,8 @@ export default function SlidersAdminPage() {
   const [showMediaModal, setShowMediaModal] = useState(false)
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
 
-  // Form State
-  const [formData, setFormData] = useState<any>({
-    title: "",
-    badge_text: "ZK HOME",
-    heading_line1: "Evinize",
-    heading_line2: "İyi Gelen",
-    heading_line3: "Dokunuşlar",
-    subheading: "Dekorasyon, sofra ve ev tekstili için ilham veren kategorileri keşfedin.",
-    image_url: "/hero/vase-room-complete-v1.webp",
-    button_text: "Dekorasyonu Keşfet",
-    button_link: "/dekorasyon",
-    button2_text: "Mutfak & Sofra",
-    button2_link: "/mutfak-sofra",
-    product_title: "Ağaç Dalı Vazo Serisi",
-    product_detail: "İki boy, birbiriyle uyumlu bir sunum.",
-    product_url: "/urunler/agac-dali-desenli-ince-agizli-vazo-buyuk-boy",
-    theme: "warm",
-    is_active: true,
-    order_index: 1,
-  })
+  // Form State - Starts completely blank
+  const [formData, setFormData] = useState<any>(EMPTY_SLIDER_FORM)
 
   // Link pickers state
   const [linkType1, setLinkType1] = useState<string>("page")
@@ -209,7 +212,7 @@ export default function SlidersAdminPage() {
 
     setFormData({
       title: slider.title || "",
-      badge_text: plainCopy(slider.badge_text) || "ZK HOME",
+      badge_text: plainCopy(slider.badge_text) || "",
       heading_line1: line1,
       heading_line2: line2,
       heading_line3: line3,
@@ -250,24 +253,12 @@ export default function SlidersAdminPage() {
   const handleAddNew = () => {
     setSelectedId(null)
     setFormData({
-      title: `Yeni Slayt ${sliders.length + 1}`,
-      badge_text: "YENİ KOLEKSİYON",
-      heading_line1: "Yaşam Alanınıza",
-      heading_line2: "Zarif",
-      heading_line3: "Dokunuşlar",
-      subheading: "Evinize şıklık ve huzur katan yeni koleksiyonumuzu hemen keşfedin.",
-      image_url: "/hero/vase-room-complete-v1.webp",
-      button_text: "Koleksiyonu Keşfet",
-      button_link: "/magaza",
-      button2_text: "",
-      button2_link: "",
-      product_title: "Öne Çıkan Seri",
-      product_detail: "Özel tasarım detaylar.",
-      product_url: "/magaza",
-      theme: "warm",
-      is_active: true,
+      ...EMPTY_SLIDER_FORM,
       order_index: sliders.length + 1,
     })
+    setLinkType1("custom")
+    setLinkType2("custom")
+    setLinkTypeProduct("custom")
     setActiveTab("text")
   }
 
@@ -313,7 +304,7 @@ export default function SlidersAdminPage() {
 
     const payload = {
       title: formData.title?.trim() || formData.heading_line1 || "İsimsiz Slayt",
-      badge_text: formData.badge_text?.trim() || "ZK HOME",
+      badge_text: formData.badge_text?.trim() || null,
       heading: combinedHeading,
       subheading: formData.subheading?.trim() || null,
       description: formData.subheading?.trim() || null,
@@ -1329,13 +1320,29 @@ export default function SlidersAdminPage() {
 
             {/* Bottom Action Footer */}
             <div className="flex items-center justify-between border-t border-slate-100 pt-4">
-              <button
-                type="button"
-                onClick={handleAddNew}
-                className="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-bold text-xs transition-colors"
-              >
-                Yeni Form Aç
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleAddNew}
+                  className="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold text-xs transition-colors"
+                >
+                  Yeni Boş Slayt Aç
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFormData({
+                      ...EMPTY_SLIDER_FORM,
+                      order_index: formData.order_index || sliders.length + 1,
+                    })
+                    showToast("Formdaki tüm alanlar temizlendi.", "info")
+                  }}
+                  className="px-3 py-1.5 rounded-xl border border-dashed border-rose-200 text-rose-600 hover:bg-rose-50 font-bold text-xs transition-colors"
+                  title="Formdaki tüm yazıları ve görselleri sıfırlar"
+                >
+                  Formu Temizle
+                </button>
+              </div>
 
               <button
                 type="submit"

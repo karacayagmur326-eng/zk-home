@@ -107,30 +107,48 @@ export default function ProductStageSlider({
 
   const activeIndex = forceIndex !== undefined ? Math.max(0, Math.min(forceIndex, count - 1)) : rawActiveIndex
   const currentSlide = activeSlides[activeIndex] || activeSlides[0] || DEFAULT_SCENES[0]
-  const fallback = DEFAULT_SCENES[activeIndex % DEFAULT_SCENES.length] || DEFAULT_SCENES[0]
 
-  const badge = plainCopy(currentSlide.badge_text) || fallback.badge_text || "ZK HOME"
-  const rawTitle = currentSlide.heading || fallback.heading || "Evinize\nİyi Gelen\nDokunuşlar"
-  const title = rawTitle.split("\n").map(plainCopy).filter(Boolean)
-  const description =
+  const isPreview = Boolean(onFieldClick || slide)
+  const isUsingDefaultScenes = !slides && !slide
+  const fallback = isUsingDefaultScenes
+    ? (DEFAULT_SCENES[activeIndex % DEFAULT_SCENES.length] || DEFAULT_SCENES[0])
+    : null
+
+  const rawBadge = plainCopy(currentSlide.badge_text)
+  const badge = rawBadge || (isPreview ? "+ Rozet Ekle" : (fallback?.badge_text || ""))
+
+  const rawHeading = currentSlide.heading || ""
+  const titleLines = rawHeading.split("\n").map(plainCopy).filter(Boolean)
+  const isHeadingBlank = titleLines.length === 0
+  const title = !isHeadingBlank
+    ? titleLines
+    : isPreview
+      ? ["+ 1. Satır Başlık", "+ 2. Satır Vurgulu Başlık", "+ 3. Satır Başlık"]
+      : (fallback?.heading ? fallback.heading.split("\n").map(plainCopy).filter(Boolean) : [])
+
+  const rawDescription =
     plainCopy(currentSlide.subheading) ||
     plainCopy(currentSlide.description) ||
-    fallback.subheading ||
     ""
+  const description = rawDescription || (isPreview ? "+ Açıklama metni eklemek için tıklayın..." : (fallback?.subheading || ""))
 
-  const primaryText = plainCopy(currentSlide.button_text) || fallback.button_text || "Keşfet"
-  const primaryHref = currentSlide.button_link || fallback.button_link || "/dekorasyon"
-  const secondaryText = plainCopy(currentSlide.button2_text)
+  const rawPrimaryText = plainCopy(currentSlide.button_text)
+  const primaryText = rawPrimaryText || (isPreview ? "+ 1. Buton Ekle" : (fallback?.button_text || ""))
+  const primaryHref = currentSlide.button_link || fallback?.button_link || "/dekorasyon"
+
+  const rawSecondaryText = plainCopy(currentSlide.button2_text)
+  const secondaryText = rawSecondaryText || (isPreview ? "+ 2. Buton Ekle" : "")
   const secondaryHref = currentSlide.button2_link || ""
 
-  const productTitle = currentSlide.product_title || fallback.product_title || "Öne Çıkan Seri"
-  const productDetail = currentSlide.product_detail || fallback.product_detail || "Özenle seçilmiş yaşam alanı detayları."
-  const productHref = currentSlide.product_url || fallback.product_url || "/dekorasyon"
+  const rawProductTitle = currentSlide.product_title || ""
+  const productTitle = rawProductTitle || (isPreview ? "+ Öne Çıkan Ürün Kartı Ekle" : (fallback?.product_title || ""))
+  const productDetail = currentSlide.product_detail || (fallback?.product_detail || "")
+  const productHref = currentSlide.product_url || fallback?.product_url || "/dekorasyon"
 
   const theme =
     currentSlide.theme === "gold" || currentSlide.theme === "butterfly" || currentSlide.theme === "warm"
       ? currentSlide.theme
-      : fallback.theme || "warm"
+      : fallback?.theme || "warm"
 
   return (
     <section
@@ -147,25 +165,41 @@ export default function ProductStageSlider({
         title={onFieldClick ? "Arka plan görselini veya temasını değiştirmek için tıkla ✎" : undefined}
       >
         {activeSlides.map((item, index) => {
-          const itemSrc = item.image_url || DEFAULT_SCENES[index % DEFAULT_SCENES.length].image_url || ""
+          const itemSrc = item.image_url || fallback?.image_url || ""
           const itemAlt = plainCopy(item.heading) || plainCopy(item.title) || "ZK Home Vitrini"
           return (
             <div
-              key={item.id || itemSrc + index}
+              key={item.id || (itemSrc || "empty-slide") + index}
               className={styles.photoLayer}
               data-active={index === activeIndex}
               aria-hidden={index !== activeIndex}
             >
-              <SmartImage
-                src={itemSrc}
-                alt={itemAlt}
-                fill
-                sizes="100vw"
-                priority={index === 0}
-                loading={index === 0 ? undefined : "eager"}
-                onLoad={() => setLoadedImages((value) => value | (1 << index))}
-                className={styles.roomImage}
-              />
+              {itemSrc ? (
+                <SmartImage
+                  src={itemSrc}
+                  alt={itemAlt}
+                  fill
+                  sizes="100vw"
+                  priority={index === 0}
+                  loading={index === 0 ? undefined : "eager"}
+                  onLoad={() => setLoadedImages((value) => value | (1 << index))}
+                  className={styles.roomImage}
+                />
+              ) : isPreview ? (
+                <div
+                  onClick={onFieldClick ? () => onFieldClick("image_url") : undefined}
+                  className="w-full h-full flex flex-col items-center justify-center cursor-pointer select-none bg-stone-900/40 text-stone-300 p-8 text-center"
+                  title="Arka plan sahne fotoğrafı seçmek veya yüklemek için tıkla"
+                >
+                  <div className="w-14 h-14 rounded-2xl bg-black/20 border border-white/20 flex items-center justify-center mb-2.5 text-white shadow-sm">
+                    <span className="text-2xl">🖼️</span>
+                  </div>
+                  <p className="text-sm font-extrabold text-white">Sahne Fotoğrafı Seçilmedi</p>
+                  <p className="text-xs text-white/70 mt-1 max-w-xs">
+                    Görsel yüklemek veya medya kütüphanesinden seçmek için tıklayın
+                  </p>
+                </div>
+              ) : null}
             </div>
           )
         })}
@@ -175,16 +209,19 @@ export default function ProductStageSlider({
       <div
         className={styles.scene}
         key={scene + ":" + activeIndex}
-        data-ready={Boolean(loadedImages & (1 << activeIndex))}
+        data-ready={Boolean(!activeSlides[activeIndex]?.image_url || (loadedImages & (1 << activeIndex)))}
       >
         <div className={styles.copy}>
-          <span
-            className={styles.badge}
-            onClick={onFieldClick ? (e) => { e.stopPropagation(); onFieldClick("badge_text") } : undefined}
-            title={onFieldClick ? "Rozet metnini düzenlemek için tıkla ✎" : undefined}
-          >
-            {badge}
-          </span>
+          {(rawBadge || isPreview) && (
+            <span
+              className={styles.badge}
+              onClick={onFieldClick ? (e) => { e.stopPropagation(); onFieldClick("badge_text") } : undefined}
+              title={onFieldClick ? "Rozet metnini düzenlemek için tıkla ✎" : undefined}
+              style={!rawBadge && isPreview ? { opacity: 0.65, borderStyle: "dashed" } : undefined}
+            >
+              {badge}
+            </span>
+          )}
           <h2 className={styles.heading} aria-label={title.join(" ")}>
             {title.map((line, lineIndex) => {
               const fieldKey = lineIndex === 0 ? "heading_line1" : lineIndex === 1 ? "heading_line2" : "heading_line3"
@@ -196,6 +233,7 @@ export default function ProductStageSlider({
                   className={
                     styles.titleLine + (lineIndex === 1 ? " " + styles.highlight : "")
                   }
+                  style={isHeadingBlank && isPreview ? { opacity: 0.5, fontStyle: "italic" } : undefined}
                   aria-hidden="true"
                 >
                   {line.split(/\s+/).map((word, wordIndex) => (
@@ -217,56 +255,62 @@ export default function ProductStageSlider({
               )
             })}
           </h2>
-          {description && (
+          {(rawDescription || isPreview) && (
             <p
               className={styles.description}
               onClick={onFieldClick ? (e) => { e.stopPropagation(); onFieldClick("subheading") } : undefined}
               title={onFieldClick ? "Açıklama metnini düzenlemek için tıkla ✎" : undefined}
+              style={!rawDescription && isPreview ? { opacity: 0.5, fontStyle: "italic", cursor: "pointer" } : undefined}
             >
               {description}
             </p>
           )}
           <div className={styles.buttons}>
-            {onFieldClick ? (
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); onFieldClick("button_text") }}
-                className={styles.primary}
-                title="1. butonu düzenlemek için tıkla ✎"
-              >
-                {primaryText}
-                <ArrowRight size={17} aria-hidden="true" />
-              </button>
-            ) : (
-              <LocalizedClientLink href={primaryHref} className={styles.primary}>
-                {primaryText}
-                <ArrowRight size={17} aria-hidden="true" />
-              </LocalizedClientLink>
+            {(rawPrimaryText || isPreview) && (
+              onFieldClick ? (
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); onFieldClick("button_text") }}
+                  className={styles.primary}
+                  title="1. butonu düzenlemek için tıkla ✎"
+                  style={!rawPrimaryText && isPreview ? { opacity: 0.6, borderStyle: "dashed" } : undefined}
+                >
+                  {primaryText}
+                  <ArrowRight size={17} aria-hidden="true" />
+                </button>
+              ) : (
+                <LocalizedClientLink href={primaryHref} className={styles.primary}>
+                  {primaryText}
+                  <ArrowRight size={17} aria-hidden="true" />
+                </LocalizedClientLink>
+              )
             )}
 
-            {secondaryText && (
+            {(rawSecondaryText || isPreview) && (
               onFieldClick ? (
                 <button
                   type="button"
                   onClick={(e) => { e.stopPropagation(); onFieldClick("button2_text") }}
                   className={styles.secondary}
                   title="2. butonu düzenlemek için tıkla ✎"
+                  style={!rawSecondaryText && isPreview ? { opacity: 0.5, borderStyle: "dashed" } : undefined}
                 >
                   {secondaryText}
                 </button>
-              ) : secondaryHref ? (
+              ) : secondaryHref && rawSecondaryText ? (
                 <LocalizedClientLink href={secondaryHref} className={styles.secondary}>
                   {secondaryText}
                 </LocalizedClientLink>
               ) : null
             )}
           </div>
-          {productTitle && (
+          {(rawProductTitle || isPreview) && (
             onFieldClick ? (
               <div
                 onClick={(e) => { e.stopPropagation(); onFieldClick("product_title") }}
                 className={styles.productLink}
                 title="Öne çıkan ürün kartını düzenlemek için tıkla ✎"
+                style={!rawProductTitle && isPreview ? { opacity: 0.55, borderStyle: "dashed" } : undefined}
               >
                 <span className={styles.productRule} aria-hidden="true" />
                 <span>
