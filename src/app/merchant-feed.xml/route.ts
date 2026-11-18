@@ -1,3 +1,4 @@
+import { cachedPublicResponse } from "@lib/seo/cached-response"
 import { NextResponse } from "next/server"
 import { listStoreProducts } from "@lib/commerce/repository"
 import { getThemeSettings } from "@lib/content/theme-settings"
@@ -8,7 +9,7 @@ import { getCommerceSettings } from "@lib/commerce/settings"
 import { rangeShippingAmount } from "@lib/commerce/shipping"
 
 export const dynamic = "force-dynamic"
-export async function GET() {
+async function generateResponse() {
   try {
     const products: any[] = []
     for (let offset = 0; ; offset += 500) {
@@ -155,4 +156,8 @@ export async function GET() {
       headers: { "Retry-After": "300", "Cache-Control": "no-store" },
     })
   }
+}
+
+export async function GET() {
+  return cachedPublicResponse("merchant-feed.xml", generateResponse)
 }

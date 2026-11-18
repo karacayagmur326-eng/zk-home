@@ -63,8 +63,10 @@ export default function ProductActions({
   const countryCode = (useParams()?.countryCode as string) || "tr"
 
   useEffect(() => {
-    if (product.variants?.length === 1) {
-      const variantOptions = optionsAsKeymap(product.variants[0].options)
+    const requestedId = new URL(window.location.href).searchParams.get("v_id")
+    const variant = product.variants?.length === 1 ? product.variants[0] : product.variants?.find(item => item.id === requestedId)
+    if (variant) {
+      const variantOptions = optionsAsKeymap(variant.options)
       setOptions(variantOptions ?? {})
     }
   }, [product.variants])

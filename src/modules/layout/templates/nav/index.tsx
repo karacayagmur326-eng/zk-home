@@ -1,7 +1,7 @@
 import SmartImage from "@components/common/SmartImage"
 import { Suspense } from "react"
 import { listLocales } from "@lib/data/locales"
-import { getLocale } from "@lib/data/locale-actions"
+import HeaderAccount from "@modules/layout/components/header-account"
 import { listRegions } from "@lib/data/regions"
 import { StoreProductCategory, StoreRegion } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -18,7 +18,7 @@ import { isStoreReady, sanitizePublicSettings } from "@lib/security/store-readin
 
 import { User, Heart, ShoppingCart, AppIcon } from "@lib/icons"
 import { getThemeSettings } from "@lib/content/theme-settings"
-import { retrieveCustomer } from "@lib/data/customer"
+
 
 export default async function Nav() {
   const [
@@ -29,13 +29,12 @@ export default async function Nav() {
     themeSettings,
     activeSlider,
     activeCategories,
-    customer,
   ] = await Promise.all([
     listRegions()
       .then((regions: StoreRegion[]) => regions)
       .catch(() => []),
     listLocales().catch(() => []),
-    getLocale().catch(() => "tr"),
+    Promise.resolve("tr"),
     getMenu("header-menu").catch(() => null),
     getThemeSettings(),
     cachedQuery<any>(
@@ -47,18 +46,10 @@ export default async function Nav() {
       .then((r) => r[0] || null)
       .catch(() => null),
     listCategories().catch(() => []),
-    retrieveCustomer().catch(() => null),
+
   ])
   const publicThemeSettings = sanitizePublicSettings(themeSettings)
   const brandLogoUrl = themeSettings?.footer_logo_url || "/brand/placeholder.svg"
-  const isAdminCustomer = (customer as { role?: string } | null)?.role === "Admin"
-  const accountLabel = isAdminCustomer ? "Admin" : customer?.first_name || "Hesabım"
-  const accountTitle = isAdminCustomer
-    ? "Admin hesabı"
-    : customer?.first_name
-      ? `${customer.first_name} ${customer.last_name || ""}`.trim()
-      : customer?.email || "Hesabım"
-
   const activeCategoryHandles = new Set<string>()
   const collectHandles = (categories: typeof activeCategories) => {
     for (const category of categories) {
@@ -269,39 +260,13 @@ export default async function Nav() {
             </div>
 
             <div className="hidden h-full items-center gap-0.5 sm:gap-1 lg:flex">
-              {customer ? (
-                <LocalizedClientLink
-                  aria-label={`Hesabım (${accountTitle})`}
-                  title={`Hesabım: ${accountTitle}`}
-                  className="flex items-center gap-1.5 pl-1 pr-2.5 h-8 xl:h-9 rounded-full bg-[#C98484] text-white shadow-sm hover:bg-[#A95E5E] transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
-                  href="/hesabim"
-                  data-testid="nav-account-link"
-                >
-                  <div className="flex h-6 w-6 xl:h-7 xl:w-7 items-center justify-center rounded-full bg-white/20 text-white font-extrabold text-[11px]">
-                    {accountLabel ? accountLabel.charAt(0).toUpperCase() : <User className="w-3.5 h-3.5 text-white" />}
-                  </div>
-                  <span className="text-xs font-extrabold max-w-[90px] truncate hidden 2xl:inline">
-                    {accountLabel}
-                  </span>
-                </LocalizedClientLink>
-              ) : (
-                <LocalizedClientLink
-                  aria-label="Giriş Yap / Hesabım"
-                  title="Giriş Yap / Hesabım"
-                  className="flex h-9 w-9 xl:h-10 xl:w-10 items-center justify-center rounded-circle text-muted transition-colors hover:bg-subtle hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  href="/hesabim"
-                  data-testid="nav-account-link"
-                >
-                  <User aria-hidden="true" className="w-4 h-4 xl:w-[21px] xl:h-[21px]" />
-                </LocalizedClientLink>
-              )}
-
+              <HeaderAccount />
 
               <ThemeToggle />
             </div>
 
             <FavoriteCounter />
-            {customer && <CustomerNotifications key={customer.id} customerId={customer.id} />}
+            <HeaderAccount notifications />
             <Suspense
               fallback={
                 <LocalizedClientLink

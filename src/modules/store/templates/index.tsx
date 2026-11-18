@@ -6,7 +6,7 @@ import RefinementList from "@modules/store/components/refinement-list"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import { getMenu } from "@lib/data/menus"
 import { listCategories } from "@lib/data/categories"
-import { query } from "@lib/admin/db"
+import { cachedQuery } from "@lib/admin/db"
 
 import PaginatedProducts from "./paginated-products"
 
@@ -40,7 +40,8 @@ const StoreTemplate = async ({
   const [sidebarMenu, navigationCategories, navigationCollections] = await Promise.all([
     getMenu("category-sidebar").catch(() => null).then(async (m) => m || await getMenu("ikincil-menu").catch(() => null)),
     listCategories().catch(() => []),
-    query<{ id: string; title: string; handle: string }>(
+    cachedQuery<{ id: string; title: string; handle: string }>(
+      "store-navigation-collections",
       `SELECT id,title,handle FROM store_collection ORDER BY title`,
     ).catch(() => []),
   ])

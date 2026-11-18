@@ -1,3 +1,4 @@
+import { cachedPublicResponse } from "@lib/seo/cached-response"
 import { sitemapEnabled } from "@lib/seo/sitemap-settings"
 import { sitemapKinds } from "@lib/seo/google-settings"
 import { escapeXml } from "@lib/seo/indexing"
@@ -8,7 +9,7 @@ import { NextResponse } from "next/server"
 
 export const dynamic = "force-dynamic"
 
-export async function GET() {
+async function generateResponse() {
   const baseUrl = getBaseURL()
   const settings = await getThemeSettings()
   if (!sitemapEnabled(settings)) return new NextResponse('<?xml version="1.0"?><sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"/>', { headers: { "Content-Type": "application/xml" } })
@@ -30,4 +31,8 @@ export async function GET() {
       "Cache-Control": "public, max-age=60, s-maxage=60, stale-while-revalidate=60",
     },
   })
+}
+
+export async function GET() {
+  return cachedPublicResponse("sitemap.xml", generateResponse)
 }

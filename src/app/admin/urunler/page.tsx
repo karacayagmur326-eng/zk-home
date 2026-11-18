@@ -770,7 +770,7 @@ export default function ProductsPage() {
                                 <Copy className="w-4 h-4" />
                               </button>
                               <Link prefetch={false}
-                                href={`/urunler/${p.handle}`}
+                                href={`/urunler/${p.handle}?preview=1`}
                                 target="_blank"
                                 title="Görüntüle"
                                 className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-colors"

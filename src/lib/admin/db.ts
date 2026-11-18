@@ -1,5 +1,6 @@
 import { Pool, PoolClient } from "pg"
 import { getCached, clearMemoryCache } from "@lib/cache"
+import { shouldInvalidateCatalog } from "@lib/cache-mutation"
 
 const CONFIGURED_DATABASE_URL = process.env.ZK_SUPABASE_POSTGRES_URL || process.env.DATABASE_URL
 const DATABASE_URL =
@@ -62,12 +63,7 @@ export async function query<T = Record<string, unknown>>(
     const db = getDb()
     const result = await db.query(sql, params)
     
-    // Operational counters and carts do not change public catalog content.
-    const isMutation = /\b(INSERT\s+INTO|UPDATE|DELETE\s+FROM|ALTER\s+TABLE|DROP\s+TABLE|TRUNCATE)\b/i.test(sql)
-    const mutationTables = [...sql.matchAll(/\b(?:INSERT\s+INTO|UPDATE|DELETE\s+FROM)\s+([a-z_][a-z0-9_]*)\b/gi)].map(match => match[1].toLowerCase())
-    const operationalTables = new Set(["store_cart", "store_cart_item", "api_rate_limits", "notification_outbox", "customer_notification_read"])
-    const operationalOnly = mutationTables.length > 0 && mutationTables.every(table => operationalTables.has(table)) && !/\b(?:ALTER|DROP|TRUNCATE)\s+TABLE\b/i.test(sql)
-    if (isMutation && (result.rowCount === null || result.rowCount > 0) && !operationalOnly) {
+    if (shouldInvalidateCatalog(sql, result.rowCount)) {
       clearMemoryCache()
     }
 

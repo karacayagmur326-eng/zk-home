@@ -3,6 +3,7 @@ import { getThemeSettings } from "@lib/content/theme-settings"
 // TODO: Re-add Toaster component when needed
 import AccountLayout from "@modules/account/templates/account-layout"
 import { Metadata } from "next"
+import { StorefrontSessionSync } from "@modules/layout/components/storefront-session"
 
 export const metadata: Metadata = {
   title: "Hesabım",
@@ -32,6 +33,7 @@ export default async function AccountPageLayout({
 
   return (
     <AccountLayout customer={customer} logoUrl={themeSettings?.footer_logo_url || "/brand/placeholder.svg"}>
+      <StorefrontSessionSync identity={customer?.id || "guest"} />
       {customer ? dashboard : login}
       {/* TODO: Re-add Toaster component when needed */}
     </AccountLayout>

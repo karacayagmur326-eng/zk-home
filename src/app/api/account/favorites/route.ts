@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
           [customerId, favorite.productId, favorite.variantId]
         )
       }
-    })
+    }, { invalidateCatalog: false })
   }
 
   return NextResponse.json({ favorites: await listFavorites(customerId) })

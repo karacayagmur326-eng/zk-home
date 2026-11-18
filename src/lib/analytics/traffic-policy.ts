@@ -28,6 +28,7 @@ export function analyticsHostAllowed(hostname: string, productionHostname: strin
 export function browserAnalyticsAllowed(): boolean {
   if (typeof window === "undefined") return false
   return document.body?.dataset.analyticsEnabled === "true" &&
+    analyticsHostAllowed(window.location.hostname, document.body.dataset.analyticsHost || window.location.hostname) &&
     !isLocalAnalyticsHost(window.location.hostname) &&
     !isAdminAnalyticsPath(window.location.pathname) &&
     !isAnalyticsDebugTraffic(new URLSearchParams(window.location.search), document.referrer) &&

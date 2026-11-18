@@ -19,7 +19,7 @@ import { serializeJsonLd } from "@lib/security/html"
 import { omitStandardGa4Snippet } from "@lib/util/analytics-snippet"
 import { normalizeGoogleVerification } from "@lib/seo/google-settings"
 import { indexingEnabled } from "@lib/seo/indexing"
-import { headers } from "next/headers"
+import AnalyticsRuntime from "@modules/layout/components/analytics-runtime"
 
 
 const inter = Inter({
@@ -165,7 +165,7 @@ export default async function RootLayout({
     : undefined
   const gtmId = /^GTM-[A-Z0-9]+$/i.test(settings.seo_gtm_id || "")
     ? settings.seo_gtm_id : undefined
-  const analyticsEnabled = (await headers()).get("x-zk-analytics-enabled") === "true"
+  const analyticsEnabled = process.env.NODE_ENV === "production" && process.env.VERCEL_ENV !== "preview"
   // Older settings stored the same standard GA4 tag as raw HTML. Route that
   // exact snippet through the consent-aware loader too; preserve custom code.
   const customHeadScripts = omitStandardGa4Snippet(settings.custom_head_scripts, ga4Id)
@@ -218,6 +218,7 @@ export default async function RootLayout({
       </head>
       <body
         data-analytics-enabled={String(analyticsEnabled)}
+        data-analytics-host={new URL(getBaseURL()).hostname}
         className="antialiased overflow-x-hidden max-w-full"
         style={{
           fontFamily:
@@ -227,20 +228,9 @@ export default async function RootLayout({
         {/* Raw admin snippets may contain complete script tags. Rendering their
             wrapper inside <head> creates invalid HTML and a hydration mismatch;
             scripts still execute correctly at the beginning of <body>. */}
-        {analyticsEnabled && customHeadScripts && (
-          <div
-            style={{ display: "contents" }}
-            dangerouslySetInnerHTML={{ __html: customHeadScripts }}
-          />
-        )}
+        <AnalyticsRuntime head={customHeadScripts} body={customBodyScripts} insights={process.env.VERCEL === "1" && Boolean(process.env.VERCEL_URL)} />
 
         {/* Dynamic Custom Body Scripts (e.g. GTM Noscript, Live Chat) */}
-        {analyticsEnabled && customBodyScripts && (
-          <div
-            style={{ display: "contents" }}
-            dangerouslySetInnerHTML={{ __html: customBodyScripts }}
-          />
-        )}
 
         <script
           type="application/ld+json"
@@ -289,7 +279,6 @@ export default async function RootLayout({
                   ? undefined
                   : ga4Id
               } />
-              {analyticsEnabled && process.env.VERCEL === "1" && Boolean(process.env.VERCEL_URL) && <SpeedInsights />}
             </SellerQuestionProvider>
           </ToastProvider>
         </ThemeProvider>

@@ -13,6 +13,9 @@ const crossSitePostAllowlist = [
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
   const privatePage = isPrivatePath(pathname)
+  // Only these cookie-independent GET endpoints are public catalog responses.
+  const publicCatalog = (request.method === "GET" || request.method === "HEAD") &&
+    ["/api/catalog/navigation", "/api/catalog/sliders", "/api/catalog/featured-section"].includes(pathname)
   const debugTraffic = isAnalyticsDebugTraffic(request.nextUrl.searchParams, request.headers.get("referer") || "")
   const internalTraffic = debugTraffic || isAdminAnalyticsPath(pathname) || request.cookies.has("zkhome_admin_token") || request.cookies.get(INTERNAL_TRAFFIC_COOKIE)?.value === "1"
   // A standalone installation can use its own public request host without a
@@ -33,7 +36,7 @@ export function middleware(request: NextRequest) {
     } else if (debugTraffic || isSearchOrFilterPage(pathname, request.nextUrl.searchParams)) {
       response.headers.set("X-Robots-Tag", "noindex, follow")
     }
-    if (privatePage || internalTraffic) {
+    if ((privatePage && !publicCatalog) || internalTraffic) {
       response.headers.set("Cache-Control", "private, no-store, max-age=0")
       response.headers.set("Vary", "Cookie")
     }
@@ -58,9 +61,22 @@ export function middleware(request: NextRequest) {
     }
   }
 
+  const product = pathname.match(/^\/urunler\/([^/]+)$/)
+  if (product && (request.cookies.has("zkhome_admin_token") || request.nextUrl.searchParams.get("preview") === "1")) {
+    // Draft previews have their own authenticated, uncached renderer. A draft
+    // or a private cookie can never enter the public product ISR entry.
+    const url = request.nextUrl.clone()
+    url.pathname = `/product-preview/${product[1]}`
+    const response = finish(NextResponse.rewrite(url, { request: { headers: requestHeaders } }))
+    response.headers.set("Cache-Control", "private, no-store, max-age=0")
+    response.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive")
+    return response
+  }
   return finish(NextResponse.next({ request: { headers: requestHeaders } }))
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  // Exclude actual static directories, rather than all dotted paths: API and
+  // payment/source validation must still run even if a URL has an extension.
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|brand/|hero/|category-images/|category-icons/|editorial/).*)"],
 }

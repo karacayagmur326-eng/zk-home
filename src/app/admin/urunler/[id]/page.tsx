@@ -430,7 +430,7 @@ export default function EditProductPage() {
         <div className="flex items-center gap-2">
           {handle && (
             <a
-              href={`/urunler/${handle}`}
+              href={`/urunler/${handle}?preview=1`}
               target="_blank"
               rel="noreferrer"
               className="h-10 px-4 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-1.5 shadow-2xs"

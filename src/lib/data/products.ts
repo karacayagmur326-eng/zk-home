@@ -3,6 +3,7 @@
 import { OptionValueIds } from "@lib/util/product-option-filters"
 import { HttpTypes } from "@medusajs/types"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
+import { productPagination } from "@lib/util/product-pagination"
 import {
   getStoreProduct,
   listStoreProducts,
@@ -46,12 +47,7 @@ export const listProducts = async ({
     }
   }
 
-  const limit = Number(queryParams?.limit || 12)
-  const page = Math.max(pageParam, 1)
-  const offset =
-    queryParams?.offset !== undefined
-      ? Number(queryParams.offset)
-      : (page - 1) * limit
+  const { limit, page, offset } = productPagination(queryParams?.limit, pageParam, queryParams?.offset)
   const categoryVals = values(queryParams?.category_id)
   const categorySingle = categoryVals?.length === 1 ? categoryVals[0] : undefined
   const categoryMultiple = categoryVals && categoryVals.length > 1 ? categoryVals : undefined

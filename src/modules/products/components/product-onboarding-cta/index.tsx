@@ -1,10 +1,10 @@
+"use client"
+
 import { Button, Container, Text } from "@modules/common/components/ui"
-import { cookies as nextCookies } from "next/headers"
+import { useStorefrontSession } from "@modules/layout/components/storefront-session"
 
-async function ProductOnboardingCta() {
-  const cookies = await nextCookies()
-
-  const isOnboarding = cookies.get("_zkhome_onboarding")?.value === "true"
+function ProductOnboardingCta() {
+  const { onboarding: isOnboarding } = useStorefrontSession()
 
   if (!isOnboarding) {
     return null

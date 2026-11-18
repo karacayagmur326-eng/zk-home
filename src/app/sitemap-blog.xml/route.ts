@@ -1,3 +1,4 @@
+import { cachedPublicResponse } from "@lib/seo/cached-response"
 import { ensureBlogSeoSchema } from "@lib/seo/blog"
 import { sitemapEnabled, sitemapEntryOptions } from "@lib/seo/sitemap-settings"
 import { normalizeSitemapSettings } from "@lib/seo/google-settings"
@@ -10,7 +11,7 @@ import { escapeXml, lastModifiedXml } from "@lib/seo/indexing"
 
 export const dynamic = "force-dynamic"
 
-export async function GET() {
+async function generateResponse() {
   try {
   const settings = await getThemeSettings()
   if (!sitemapEnabled(settings, "blog")) return emptySitemap()
@@ -63,4 +64,8 @@ ${postXmlRows.join("\n")}
     // Report temporary data outages explicitly so crawlers retry later.
     return emptySitemap(503)
   }
+}
+
+export async function GET() {
+  return cachedPublicResponse("sitemap-blog.xml", generateResponse)
 }

@@ -4,7 +4,7 @@ import { MetadataRoute } from "next"
 import { getThemeSettings } from "@lib/content/theme-settings"
 import { sitemapEnabled } from "@lib/seo/sitemap-settings"
 
-export const dynamic = "force-dynamic"
+export const revalidate = 3600
 
 export default async function robots(): Promise<MetadataRoute.Robots> {
   const baseUrl = getBaseURL()

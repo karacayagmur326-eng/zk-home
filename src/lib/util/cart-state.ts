@@ -21,6 +21,17 @@ function publish() {
   }))
 }
 
+export const cartMutationVersion = () => nextId
+
+export function hydrateCartState(cart: Cart, version = nextId) {
+  if (pending.size || version !== nextId) return
+  // Do not replace a newer mutation result with an older session response.
+  if (confirmed && cart && confirmed.id === cart.id &&
+      new Date(confirmed.updated_at ?? 0).getTime() > new Date(cart.updated_at ?? 0).getTime()) return
+  confirmed = cart
+  publish()
+}
+
 export function useCartState(initial?: Cart) {
   const state = useSyncExternalStore(
     (listener) => { listeners.add(listener); return () => { listeners.delete(listener) } },
