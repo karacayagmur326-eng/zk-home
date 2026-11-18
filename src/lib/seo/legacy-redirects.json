@@ -1,1 +1,17 @@
-[]
+[
+  {
+    "source": "/urunler/krem-gold-kelebekli-vazo-25x25cm-p068-125186",
+    "destination": "/urunler/krem-gold-kelebekli-vazo-25x25cm",
+    "permanent": true
+  },
+  {
+    "source": "/marka/lamedore",
+    "destination": "/markalar/la-medore",
+    "permanent": true
+  },
+  {
+    "source": "/markalar/lamedore",
+    "destination": "/markalar/la-medore",
+    "permanent": true
+  }
+]

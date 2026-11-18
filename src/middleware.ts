@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { isPrivatePath, isSearchOrFilterPage } from "./lib/seo/indexing"
 import { INTERNAL_TRAFFIC_COOKIE, isAdminAnalyticsPath, isAnalyticsDebugTraffic, isLocalAnalyticsHost } from "./lib/analytics/traffic-policy"
-import { catalogRouteKind, hasCatalogFilters, validCatalogFilters } from "./lib/commerce/catalog-routing"
+import { catalogRouteKind, hasCatalogFilters, validCatalogFilters, cleanCatalogSearch } from "./lib/commerce/catalog-routing"
 
 const unsafeMethods = new Set(["POST", "PUT", "PATCH", "DELETE"])
 const crossSitePostAllowlist = [
@@ -50,6 +50,15 @@ export function middleware(request: NextRequest) {
         { error: "İstek kaynağı doğrulanamadı." },
         { status: 403 },
       ))
+    }
+  }
+
+  if ((request.method === "GET" || request.method === "HEAD") && catalogRouteKind(pathname)) {
+    const clean = cleanCatalogSearch(request.nextUrl.searchParams)
+    if (clean) {
+      const url = request.nextUrl.clone()
+      url.search = clean.toString()
+      return finish(NextResponse.redirect(url, 308))
     }
   }
 

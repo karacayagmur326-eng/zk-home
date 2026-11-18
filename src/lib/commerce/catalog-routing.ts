@@ -23,6 +23,20 @@ export function hasCatalogFilters(params: URLSearchParams) {
   return [...params.keys()].some(key => filterKeys.has(key) || key.startsWith("option_"))
 }
 
+/** Empty search/filter submissions have the same content as their clean URL.
+ * Preserve real filters, pagination and campaign parameters while consolidating
+ * duplicate URLs such as /magaza?q=&page=2 into /magaza?page=2. */
+export function cleanCatalogSearch(params: URLSearchParams): URLSearchParams | null {
+  const clean = new URLSearchParams()
+  let changed = false
+  for (const [key, value] of params) {
+    if ((filterKeys.has(key) || key.startsWith("option_")) && !value.trim()) {
+      changed = true
+    } else clean.append(key, value)
+  }
+  return changed ? clean : null
+}
+
 export function validCatalogFilters(params: URLSearchParams) {
   if (params.toString().length > 4096 || [...params].length > 128) return false
   for (const key of filterKeys) {
