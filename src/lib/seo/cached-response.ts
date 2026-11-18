@@ -15,7 +15,7 @@ export async function cachedPublicResponse(key: string, generate: () => Promise<
       const value: Snapshot = { body: await response.text(), status: response.status, headers: [...response.headers.entries()] }
       if (!response.ok || /no-store|private/i.test(response.headers.get("cache-control") || "")) throw new UncachedResponse(value)
       return value
-    }, ttl)
+    }, ttl, ["store_product", "store_variant", "store_product_image", "store_product_category", "store_category", "store_collection", "store_product_tag", "store_tag", "theme_settings", "store_setting", "store_settings", "blog_posts", "blog_categories", "content_pages"])
   } catch (error) {
     if (!(error instanceof UncachedResponse)) throw error
     snapshot = error.snapshot

@@ -1,3 +1,4 @@
+import { ensureSliderSchema } from "@lib/content/slider-schema"
 import { NextRequest, NextResponse } from "next/server"
 import { getAdminSession } from "@lib/admin/auth"
 import { query } from "@lib/admin/db"
@@ -11,13 +12,7 @@ export async function GET() {
   if (!session) return NextResponse.json({ error: "Yetkisiz işlem." }, { status: 401 })
 
   try {
-    await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS image_reveal_end INTEGER DEFAULT 65")
-    await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS image_reveal_enabled BOOLEAN DEFAULT TRUE")
-    await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS image_reveal_settings JSONB")
-    await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS product_title TEXT")
-    await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS product_detail TEXT")
-    await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS product_url TEXT")
-    await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS theme TEXT DEFAULT 'warm'")
+    await ensureSliderSchema()
     const rows = await query<any>(
       `SELECT * FROM slider WHERE deleted_at IS NULL ORDER BY order_index ASC, created_at DESC`
     )
@@ -36,13 +31,7 @@ export async function POST(req: NextRequest) {
   if (!session) return NextResponse.json({ error: "Yetkisiz işlem." }, { status: 401 })
 
   try {
-    await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS image_reveal_end INTEGER DEFAULT 65")
-    await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS image_reveal_enabled BOOLEAN DEFAULT TRUE")
-    await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS image_reveal_settings JSONB")
-    await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS product_title TEXT")
-    await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS product_detail TEXT")
-    await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS product_url TEXT")
-    await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS theme TEXT DEFAULT 'warm'")
+    await ensureSliderSchema()
     const body = await req.json()
     const {
       title,

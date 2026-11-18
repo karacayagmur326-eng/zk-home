@@ -16,6 +16,7 @@ async function generateResponse() {
       const catalog = await listStoreProducts({
         status: "published",
         limit: 500,
+        includeCounts: false,
         offset,
       })
       products.push(...catalog.products)

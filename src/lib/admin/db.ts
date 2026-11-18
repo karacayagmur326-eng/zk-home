@@ -1,6 +1,6 @@
 import { Pool, PoolClient } from "pg"
-import { getCached, clearMemoryCache } from "@lib/cache"
-import { shouldInvalidateCatalog } from "@lib/cache-mutation"
+import { getCached, clearMemoryCache, invalidateTables } from "@lib/cache"
+import { shouldInvalidateCatalog, mutationTables, readTables } from "@lib/cache-mutation"
 
 const CONFIGURED_DATABASE_URL = process.env.ZK_SUPABASE_POSTGRES_URL || process.env.DATABASE_URL
 const DATABASE_URL =
@@ -64,7 +64,9 @@ export async function query<T = Record<string, unknown>>(
     const result = await db.query(sql, params)
     
     if (shouldInvalidateCatalog(sql, result.rowCount)) {
-      clearMemoryCache()
+      const tables = mutationTables(sql)
+      if (tables.length && !/\bTRUNCATE\b/i.test(sql)) invalidateTables(tables)
+      else clearMemoryCache()
     }
 
     return result.rows as T[]
@@ -90,7 +92,8 @@ export async function cachedQuery<T = Record<string, unknown>>(
       const result = await db.query(sql, params)
       return result.rows as T[]
     },
-    ttlSeconds
+    ttlSeconds,
+    readTables(sql),
   )
 }
 
@@ -99,11 +102,44 @@ export async function withTransaction<T>(
   options: { invalidateCatalog?: boolean } = {}
 ): Promise<T> {
   const client = await getDb().connect()
+  const changed = new Set<string>()
+  let unknownMutation = false
+  // Track actual writes, including no-op/rollback behavior, rather than flush
+  // every public page whenever a private transaction successfully commits.
+  const tracked = options.invalidateCatalog === false ? client : new Proxy(client, {
+    get(target, property) {
+      if (property !== "query") {
+        const value = Reflect.get(target, property, target)
+        return typeof value === "function" ? value.bind(target) : value
+      }
+      return (...args: any[]) => {
+        const sql = typeof args[0] === "string" ? args[0] : args[0]?.text || ""
+        const track = (result: any) => {
+          const results = Array.isArray(result) ? result : [result]
+          if (results.some(item => shouldInvalidateCatalog(sql, item?.rowCount ?? null))) {
+            const tables = mutationTables(sql)
+            if (!tables.length || /\bTRUNCATE\b/i.test(sql)) unknownMutation = true
+            tables.forEach(table => changed.add(table))
+          }
+          return result
+        }
+        const result = (target.query as (...input: any[]) => any).apply(target, args)
+        if (result && typeof result.then === "function") return result.then(track)
+        // Non-promise pg overloads are not used by our transactions; retain
+        // conservative invalidation if one is introduced later.
+        if (shouldInvalidateCatalog(sql, null)) unknownMutation = true
+        return result
+      }
+    },
+  })
   try {
     await client.query("BEGIN")
-    const result = await work(client)
+    const result = await work(tracked)
     await client.query("COMMIT")
-    if (options.invalidateCatalog !== false) clearMemoryCache()
+    if (options.invalidateCatalog !== false) {
+      if (unknownMutation) clearMemoryCache()
+      else invalidateTables([...changed])
+    }
     return result
   } catch (error) {
     await client.query("ROLLBACK")

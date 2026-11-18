@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { isPrivatePath, isSearchOrFilterPage } from "./lib/seo/indexing"
-import { analyticsHostAllowed, INTERNAL_TRAFFIC_COOKIE, isAdminAnalyticsPath, isAnalyticsDebugTraffic, isLocalAnalyticsHost } from "./lib/analytics/traffic-policy"
-import { getBaseURL } from "./lib/util/env"
+import { INTERNAL_TRAFFIC_COOKIE, isAdminAnalyticsPath, isAnalyticsDebugTraffic, isLocalAnalyticsHost } from "./lib/analytics/traffic-policy"
+import { catalogRouteKind, hasCatalogFilters, validCatalogFilters } from "./lib/commerce/catalog-routing"
 
 const unsafeMethods = new Set(["POST", "PUT", "PATCH", "DELETE"])
 const crossSitePostAllowlist = [
@@ -15,17 +15,9 @@ export function middleware(request: NextRequest) {
   const privatePage = isPrivatePath(pathname)
   // Only these cookie-independent GET endpoints are public catalog responses.
   const publicCatalog = (request.method === "GET" || request.method === "HEAD") &&
-    ["/api/catalog/navigation", "/api/catalog/sliders", "/api/catalog/featured-section"].includes(pathname)
+    (["/api/catalog/navigation", "/api/catalog/sliders", "/api/catalog/featured-section", "/api/search"].includes(pathname) || /^\/api\/products\/[^/]+\/reviews$/.test(pathname))
   const debugTraffic = isAnalyticsDebugTraffic(request.nextUrl.searchParams, request.headers.get("referer") || "")
   const internalTraffic = debugTraffic || isAdminAnalyticsPath(pathname) || request.cookies.has("zkhome_admin_token") || request.cookies.get(INTERNAL_TRAFFIC_COOKIE)?.value === "1"
-  // A standalone installation can use its own public request host without a
-  // Vercel-specific variable or a domain embedded in the theme.
-  const configuredHost = new URL(getBaseURL()).hostname
-  const productionHost = isLocalAnalyticsHost(configuredHost) ? request.nextUrl.hostname : configuredHost
-  const analyticsEnabled = process.env.NODE_ENV === "production" && process.env.VERCEL_ENV !== "preview" &&
-    analyticsHostAllowed(request.nextUrl.hostname, productionHost) && !internalTraffic
-  const requestHeaders = new Headers(request.headers)
-  requestHeaders.set("x-zk-analytics-enabled", String(analyticsEnabled))
   const finish = (response: NextResponse) => {
     const prefetch = request.headers.get("next-router-prefetch") === "1" || request.headers.get("purpose") === "prefetch" || request.headers.get("sec-purpose")?.includes("prefetch")
     if (internalTraffic && !prefetch && request.cookies.get(INTERNAL_TRAFFIC_COOKIE)?.value !== "1") {
@@ -61,18 +53,35 @@ export function middleware(request: NextRequest) {
     }
   }
 
+  if (pathname === "/catalog-view" || pathname.startsWith("/catalog-view/")) {
+    // Localhost rewrites can traverse middleware a second time. The renderer
+    // serves public catalog data only and supplies the original canonical URL.
+    const publicPath = pathname.slice("/catalog-view".length)
+    if (!catalogRouteKind(publicPath)) return finish(NextResponse.json({ error: "Sayfa bulunamadı." }, { status: 404 }))
+    if (!validCatalogFilters(request.nextUrl.searchParams)) return finish(NextResponse.json({ error: "Geçersiz ürün filtreleri." }, { status: 400 }))
+    return finish(NextResponse.next())
+  }
+  if ((request.method === "GET" || request.method === "HEAD") && catalogRouteKind(pathname) && hasCatalogFilters(request.nextUrl.searchParams)) {
+    if (!validCatalogFilters(request.nextUrl.searchParams)) {
+      return finish(NextResponse.json({ error: "Geçersiz ürün filtreleri." }, { status: 400, headers: { "Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollow" } }))
+    }
+    const url = request.nextUrl.clone()
+    url.pathname = `/catalog-view${pathname}`
+    return finish(NextResponse.rewrite(url))
+  }
+
   const product = pathname.match(/^\/urunler\/([^/]+)$/)
   if (product && (request.cookies.has("zkhome_admin_token") || request.nextUrl.searchParams.get("preview") === "1")) {
     // Draft previews have their own authenticated, uncached renderer. A draft
     // or a private cookie can never enter the public product ISR entry.
     const url = request.nextUrl.clone()
     url.pathname = `/product-preview/${product[1]}`
-    const response = finish(NextResponse.rewrite(url, { request: { headers: requestHeaders } }))
+    const response = finish(NextResponse.rewrite(url))
     response.headers.set("Cache-Control", "private, no-store, max-age=0")
     response.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive")
     return response
   }
-  return finish(NextResponse.next({ request: { headers: requestHeaders } }))
+  return finish(NextResponse.next())
 }
 
 export const config = {

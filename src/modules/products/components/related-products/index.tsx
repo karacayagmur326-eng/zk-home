@@ -3,6 +3,7 @@ import { getRegion } from "@lib/data/regions"
 import { cachedQuery } from "@lib/admin/db"
 import { HttpTypes } from "@medusajs/types"
 import RelatedProductsCarousel from "./carousel"
+import { compactProductsForCards } from "@lib/util/product-card"
 
 export default async function RelatedProducts({ product, countryCode }: { product: HttpTypes.StoreProduct; countryCode: string }) {
   const md = product.metadata as Record<string, any> || {}
@@ -18,12 +19,12 @@ export default async function RelatedProducts({ product, countryCode }: { produc
   const discounted = newest.filter(item => item.variants?.some(variant => Number(variant.calculated_price?.original_amount) > Number(variant.calculated_price?.calculated_amount) && Number(variant.calculated_price?.calculated_amount) > 0)).slice(0,8)
   const currencyCode = region?.currency_code || "TRY"
   return <div className="w-full space-y-10">
-    <RelatedProductsCarousel products={related} currencyCode={currencyCode} title="BENZER ÜRÜNLER" subtitle="Aynı kategorideki diğer ürünleri keşfedin." />
-    <RelatedProductsCarousel products={complementary} currencyCode={currencyCode} title="TAMAMLAYICI ÜRÜNLER" subtitle="Bu ürünle birlikte değerlendirebileceğiniz seçenekler." />
+    <RelatedProductsCarousel products={compactProductsForCards(related)} currencyCode={currencyCode} title="BENZER ÜRÜNLER" subtitle="Aynı kategorideki diğer ürünleri keşfedin." />
+    <RelatedProductsCarousel products={compactProductsForCards(complementary)} currencyCode={currencyCode} title="TAMAMLAYICI ÜRÜNLER" subtitle="Bu ürünle birlikte değerlendirebileceğiniz seçenekler." />
     <div className="block sm:hidden space-y-10 pt-4">
-      <RelatedProductsCarousel products={bestSellers} currencyCode={currencyCode} title="ÇOK SATAN ÜRÜNLER" subtitle="Tamamlanan satışlarda en çok tercih edilen ürünler." />
-      <RelatedProductsCarousel products={newest.slice(0,8)} currencyCode={currencyCode} title="YENİ ÜRÜNLER" subtitle="Mağazaya yeni eklenen ürünleri inceleyin." />
-      <RelatedProductsCarousel products={discounted} currencyCode={currencyCode} title="KAMPANYALI ÜRÜNLER" subtitle="Güncel indirimli ürün seçenekleri." />
+      <RelatedProductsCarousel products={compactProductsForCards(bestSellers)} currencyCode={currencyCode} title="ÇOK SATAN ÜRÜNLER" subtitle="Tamamlanan satışlarda en çok tercih edilen ürünler." />
+      <RelatedProductsCarousel products={compactProductsForCards(newest.slice(0,8))} currencyCode={currencyCode} title="YENİ ÜRÜNLER" subtitle="Mağazaya yeni eklenen ürünleri inceleyin." />
+      <RelatedProductsCarousel products={compactProductsForCards(discounted)} currencyCode={currencyCode} title="KAMPANYALI ÜRÜNLER" subtitle="Güncel indirimli ürün seçenekleri." />
     </div>
   </div>
 }

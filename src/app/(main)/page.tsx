@@ -14,7 +14,7 @@ import { getBaseURL } from "@lib/util/env"
 import { socialImageUrl } from "@lib/seo/entity"
 import { getThemeSettings } from "@lib/content/theme-settings"
 import { serializeJsonLd } from "@lib/security/html"
-import { query } from "@lib/admin/db"
+import { cachedQuery } from "@lib/admin/db"
 import { defaultHomeEditorialContent, type HomeEditorialContent } from "@lib/content/home-editorial"
 import HomeEditorial, { type HomeArticle } from "@modules/home/components/home-editorial"
 import HomeBrandIntro from "@modules/home/components/home-brand-intro"
@@ -40,10 +40,12 @@ export default async function Home() {
   const regionPromise = getRegion(countryCode).catch(() => null)
   const mobileSettingsPromise = getMobileSettings()
   const categoriesPromise = listCategories().catch(() => [])
-  const editorialPromise = query<{ content: Partial<HomeEditorialContent> }>(
+  const editorialPromise = cachedQuery<{ content: Partial<HomeEditorialContent> }>(
+    "homepage-editorial",
     "SELECT content FROM homepage_editorial WHERE id = 'main' LIMIT 1"
   ).then((rows) => ({ ...defaultHomeEditorialContent, ...(rows[0]?.content || {}) })).catch(() => defaultHomeEditorialContent)
-  const articlesPromise = query<HomeArticle>(
+  const articlesPromise = cachedQuery<HomeArticle>(
+    "homepage-articles",
     "SELECT id, title, slug, excerpt, image, published_at FROM blog_posts WHERE status = 'published' ORDER BY featured DESC, published_at DESC, created_at DESC LIMIT 3"
   ).catch(() => [])
   // Render both variants so a resized mobile browser can reveal the desktop hero.

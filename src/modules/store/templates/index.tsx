@@ -1,3 +1,5 @@
+import CatalogQueryProvider from "@modules/store/components/catalog-query"
+import { catalogQueryString } from "@lib/util/catalog-query"
 import { Suspense } from "react"
 
 import { OptionValueIds } from "@lib/util/product-option-filters"
@@ -10,7 +12,7 @@ import { cachedQuery } from "@lib/admin/db"
 
 import PaginatedProducts from "./paginated-products"
 
-const StoreTemplate = async ({
+const StoreContent = async ({
   sortBy,
   page,
   countryCode,
@@ -36,6 +38,7 @@ const StoreTemplate = async ({
   viewMode?: string
   title?: string
   fixedCollectionId?: string
+  publicPath?: string
 }) => {
   const [sidebarMenu, navigationCategories, navigationCollections] = await Promise.all([
     getMenu("category-sidebar").catch(() => null).then(async (m) => m || await getMenu("ikincil-menu").catch(() => null)),
@@ -84,4 +87,6 @@ const StoreTemplate = async ({
   )
 }
 
-export default StoreTemplate
+export default function StoreTemplate(props: Parameters<typeof StoreContent>[0]) {
+  return <CatalogQueryProvider pathname={props.publicPath || "/magaza"} query={catalogQueryString(props)}><StoreContent {...props} /></CatalogQueryProvider>
+}

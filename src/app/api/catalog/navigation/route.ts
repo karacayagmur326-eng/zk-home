@@ -4,7 +4,7 @@ import { cachedQuery } from "@lib/admin/db"
 import { ensureCommerceSchema } from "@lib/commerce/schema"
 import { getMenu } from "@lib/data/menus"
 
-export const revalidate = 60
+export const revalidate = 300
 
 export async function GET() {
   ensureCommerceSchema().catch(() => null)

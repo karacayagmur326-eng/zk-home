@@ -23,7 +23,7 @@ type ProductListQueryParams = (HttpTypes.FindParams &
 
 function values(value: unknown) {
   if (!value) return undefined
-  return Array.isArray(value) ? value.map(String) : [String(value)]
+  return Array.isArray(value) ? value.slice(0, 100).map(String) : [String(value)]
 }
 
 export const listProducts = async ({
@@ -61,11 +61,11 @@ export const listProducts = async ({
     : undefined
 
   const { products, count } = await listStoreProducts({
-    q: queryParams?.q,
+    q: typeof queryParams?.q === "string" ? queryParams.q.trim().slice(0, 100) : undefined,
     sort: queryParams?.sort,
     includeCounts: false,
     stock: queryParams?.hide_out_of_stock === "true" ? "available" : undefined,
-    status: String(queryParams?.status || "published"),
+    status: "published",
     categoryId: categorySingle || (categoryVals?.length === 1 ? categoryVals[0] : categoryVals?.[0]),
     categoryIds: categoryMultiple,
     collectionIds: values(queryParams?.collection_id),
@@ -88,9 +88,8 @@ export async function retrieveProduct(idOrHandle: string) {
   if (process.env.NODE_ENV === "production" && !process.env.ZK_SUPABASE_POSTGRES_URL && !process.env.DATABASE_URL) {
     return null
   }
-  return (await getStoreProduct(idOrHandle)) as
-    | HttpTypes.StoreProduct
-    | null
+  const product = await getStoreProduct(idOrHandle)
+  return (product?.status === "published" ? product : null) as HttpTypes.StoreProduct | null
 }
 
 export const listProductsWithSort = async ({

@@ -147,6 +147,7 @@ export async function getMenu(
         return null
       }
     },
-    300
+    900,
+    ["navigation_menu", "store_category"],
   )
 }

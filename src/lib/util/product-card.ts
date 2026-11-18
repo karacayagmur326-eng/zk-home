@@ -11,6 +11,7 @@ const CARD_METADATA_KEYS = [
   "is_sale",
   "on_sale",
   "discount_percentage",
+  "brand", "rating", "review_count", "voltage", "battery_capacity", "max_torque", "speed",
 ] as const
 
 export function compactProductForCard(
@@ -30,6 +31,7 @@ export function compactProductForCard(
     handle: product.handle,
     thumbnail: product.thumbnail,
     created_at: product.created_at,
+    tags: product.tags?.map(tag => ({ id: tag.id, value: tag.value })),
     collection: product.collection
       ? { id: product.collection.id, title: product.collection.title }
       : null,
@@ -41,6 +43,9 @@ export function compactProductForCard(
       id: variant.id,
       sku: variant.sku,
       title: variant.title,
+      manage_inventory: variant.manage_inventory,
+      allow_backorder: variant.allow_backorder,
+      inventory_quantity: variant.inventory_quantity,
       calculated_price: variant.calculated_price,
       prices: (variant as any).prices?.map((price: any) => ({
         amount: price.amount,

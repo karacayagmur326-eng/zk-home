@@ -1,12 +1,13 @@
 import "server-only"
 
-import { query } from "@lib/admin/db"
+import { cachedQuery } from "@lib/admin/db"
 import { CHATBOT_DEFAULTS, ChatbotSettings } from "./config"
 import { correctLikelyTypos, normalizeQuery } from "./understanding"
 
 export async function getChatbotSettings(): Promise<ChatbotSettings> {
   try {
-    const rows = await query<{ value: Partial<ChatbotSettings> }>(
+    const rows = await cachedQuery<{ value: Partial<ChatbotSettings> }>(
+      "public-chatbot-settings",
       `SELECT value FROM store_settings WHERE key='chatbot_settings' LIMIT 1`
     )
     const value = rows[0]?.value

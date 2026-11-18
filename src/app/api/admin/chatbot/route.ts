@@ -1,3 +1,4 @@
+import { ensureStoreSettingsSchema } from "@lib/admin/schema-check"
 import { NextResponse } from "next/server"
 import { getAdminSession } from "@lib/admin/auth"
 import { query } from "@lib/admin/db"
@@ -64,13 +65,7 @@ export async function POST(request: Request) {
       questions,
     }
 
-    await query(`
-      CREATE TABLE IF NOT EXISTS store_settings (
-        key TEXT PRIMARY KEY,
-        value JSONB NOT NULL,
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      )
-    `)
+    await ensureStoreSettingsSchema()
     await query(
       `INSERT INTO store_settings (key,value,updated_at) VALUES ('chatbot_settings',$1,NOW())
        ON CONFLICT (key) DO UPDATE SET value=EXCLUDED.value,updated_at=NOW()`,

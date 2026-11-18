@@ -1,3 +1,4 @@
+import { ensureStoreSettingsSchema } from "@lib/admin/schema-check"
 import { getAdminSession } from "@lib/admin/auth"
 import { query } from "@lib/admin/db"
 import { NextResponse } from "next/server"
@@ -47,13 +48,7 @@ export async function GET() {
   if (!session) return NextResponse.json({ error: "Yetkisiz işlem." }, { status: 401 })
 
   try {
-    await query(`
-      CREATE TABLE IF NOT EXISTS store_settings (
-        key TEXT PRIMARY KEY,
-        value JSONB NOT NULL,
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      )
-    `)
+    await ensureStoreSettingsSchema()
 
     const rows = await query<{ value: typeof defaultBrandsPageInfo }>(
       `SELECT value FROM store_settings WHERE key = 'brands_page_info' LIMIT 1`
@@ -82,13 +77,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Geçersiz veri biçimi." }, { status: 400 })
     }
 
-    await query(`
-      CREATE TABLE IF NOT EXISTS store_settings (
-        key TEXT PRIMARY KEY,
-        value JSONB NOT NULL,
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      )
-    `)
+    await ensureStoreSettingsSchema()
 
     const cleanBrandsInfo = withoutPartnerSection(brands_info)
 

@@ -3,7 +3,8 @@
 import { sharedJsonRequest } from "@lib/util/shared-json-request"
 import Link from "next/link"
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
+import { useCatalogQuery } from "../catalog-query"
 import { useCallback, useMemo, useEffect, useRef, useState } from "react"
 import clx from "clsx"
 import {
@@ -57,8 +58,7 @@ const RefinementList = ({
   "data-testid": dataTestId,
 }: RefinementListProps) => {
   const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
+  const { pathname, searchParams } = useCatalogQuery()
 
   const [customSidebarMenu, setCustomSidebarMenu] = useState<any>(
     () => sidebarMenu || secondaryMenu || null

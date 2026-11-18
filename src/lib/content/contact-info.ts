@@ -11,7 +11,8 @@ import { getBaseURL } from "@lib/util/env"
  *   const contact = await getContactInfo()
  */
 
-import { query } from "@lib/admin/db"
+import { cachedQuery } from "@lib/admin/db"
+import { invalidateTables } from "@lib/cache"
 import { normalizeWhatsAppPhone } from "@lib/content/whatsapp"
 
 /** Varsayılan (fallback) iletişim bilgileri - adminden değiştirilene kadar geçerli */
@@ -68,9 +69,6 @@ export function cleanContactValue(value: unknown): string {
 
 export type ContactInfo = typeof CONTACT_DEFAULTS
 
-let _cachedContactInfo: ContactInfo | null = null
-let _cacheTime = 0
-const CACHE_TTL_MS = 60 * 1000 // 1 dakika cache
 
 /**
  * Admin panelinden yönetilen iletişim bilgilerini döndürür.
@@ -78,15 +76,11 @@ const CACHE_TTL_MS = 60 * 1000 // 1 dakika cache
  * Sunucu taraflı çağrılmalıdır (Server Component / API Route).
  */
 export async function getContactInfo(): Promise<ContactInfo> {
-  const now = Date.now()
-  if (_cachedContactInfo && now - _cacheTime < CACHE_TTL_MS) {
-    return _cachedContactInfo
-  }
-
   const theme = await getThemeSettings()
   const defaults = { ...CONTACT_DEFAULTS, brand_name: theme?.logo_text || "", company_name: theme?.logo_text || "", website: getBaseURL() }
   try {
-    const rows = await query<{ value: Record<string, any> }>(
+    const rows = await cachedQuery<{ value: Record<string, any> }>(
+      "public-contact-info",
       `SELECT value FROM store_settings WHERE key = 'contact_info' LIMIT 1`
     )
     if (rows.length > 0 && rows[0].value) {
@@ -111,21 +105,16 @@ export async function getContactInfo(): Promise<ContactInfo> {
             ? [dbData.street_address, dbData.district, dbData.city, dbData.country].filter(Boolean).join(", ")
             : ""),
       }
-      _cachedContactInfo = merged
-      _cacheTime = now
       return merged
     }
   } catch {
     // DB hatası → defaults ile devam et
   }
 
-  _cachedContactInfo = defaults
-  _cacheTime = now
   return defaults
 }
 
 /** Cache'i temizle (ayar kaydedildikten sonra çağrılır) */
 export function invalidateContactInfoCache() {
-  _cachedContactInfo = null
-  _cacheTime = 0
+  invalidateTables(["store_settings"])
 }

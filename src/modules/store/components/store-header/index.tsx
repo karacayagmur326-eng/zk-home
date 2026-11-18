@@ -1,6 +1,7 @@
 "use client"
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
+import { useCatalogQuery } from "../catalog-query"
 import { useCallback, useState } from "react"
 import { SortOptions } from "../refinement-list/sort-products"
 import { LayoutGrid, List, ChevronDown } from "@lib/icons"
@@ -26,8 +27,7 @@ export default function StoreHeader({
   headingLevel?: 1 | 2
 }) {
   const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
+  const { pathname, searchParams } = useCatalogQuery()
 
   const [open, setOpen] = useState(false)
   const viewMode = searchParams.get("viewMode") || "grid"

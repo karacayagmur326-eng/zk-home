@@ -1,14 +1,18 @@
+import { ensureDatabaseFeature } from "@lib/admin/schema-check"
 import { getAdminSession } from "@lib/admin/auth"
 import { query } from "@lib/admin/db"
 import { defaultHomeEditorialContent } from "@lib/content/home-editorial"
 import { NextRequest, NextResponse } from "next/server"
 
 async function ensureTable() {
+  return ensureDatabaseFeature("home-editorial-schema-v1", ["SELECT id,content,updated_at FROM homepage_editorial LIMIT 0"], async () => {
   await query(`CREATE TABLE IF NOT EXISTS homepage_editorial (
     id TEXT PRIMARY KEY,
     content JSONB NOT NULL,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
   )`)
+
+  })
 }
 
 export async function GET() {

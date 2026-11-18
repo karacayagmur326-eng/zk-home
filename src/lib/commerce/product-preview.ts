@@ -9,13 +9,13 @@ import { listStoreProducts } from "@lib/commerce/repository"
 export const getProductForStorefront = cache(async (handle: string, allowPreview = false) => {
   // Published pages do not depend on a session and can use the Full Route Cache.
   // Only a missing public product needs the authenticated draft lookup.
-  const published = await listStoreProducts({ handles: [handle], status: "published", limit: 1 })
+  const published = await listStoreProducts({ handles: [handle], status: "published", limit: 1, includeCounts: false })
   if (published.products[0]) return { product: published.products[0] as unknown as HttpTypes.StoreProduct, isPreview: false }
   if (!allowPreview) return { product: null, isPreview: false }
   const session = await getAdminSession()
   if (!session) return { product: null, isPreview: false }
   const { products } = await listStoreProducts({
-    handles: [handle], status: session ? "all" : "published", limit: 1,
+    handles: [handle], status: session ? "all" : "published", limit: 1, includeCounts: false,
   })
   const product = products[0] || null
   return {

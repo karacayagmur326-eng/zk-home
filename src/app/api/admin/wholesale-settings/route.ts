@@ -1,3 +1,4 @@
+import { ensureStoreSettingsSchema } from "@lib/admin/schema-check"
 import { getAdminSession } from "@lib/admin/auth"
 import { query } from "@lib/admin/db"
 import { NextResponse } from "next/server"
@@ -60,13 +61,7 @@ export async function GET() {
   if (!session) return NextResponse.json({ error: "Yetkisiz işlem." }, { status: 401 })
 
   try {
-    await query(`
-      CREATE TABLE IF NOT EXISTS store_settings (
-        key TEXT PRIMARY KEY,
-        value JSONB NOT NULL,
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      )
-    `)
+    await ensureStoreSettingsSchema()
 
     const rows = await query<{ key: string; value: any }>(
       `SELECT key, value FROM store_settings WHERE key = 'wholesale_info' LIMIT 1`
@@ -87,13 +82,7 @@ export async function POST(request: Request) {
     const body = await request.json()
     const { wholesale_info } = body
 
-    await query(`
-      CREATE TABLE IF NOT EXISTS store_settings (
-        key TEXT PRIMARY KEY,
-        value JSONB NOT NULL,
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      )
-    `)
+    await ensureStoreSettingsSchema()
 
     if (wholesale_info) {
       await query(

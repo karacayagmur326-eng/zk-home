@@ -1,3 +1,4 @@
+import { ensureStoreSettingsSchema } from "@lib/admin/schema-check"
 import { cleanContactValue } from "@lib/content/contact-info"
 import { getAdminSession } from "@lib/admin/auth"
 import { query } from "@lib/admin/db"
@@ -10,13 +11,7 @@ export async function GET() {
   if (!session) return NextResponse.json({ error: "Yetkisiz işlem." }, { status: 401 })
 
   try {
-    await query(`
-      CREATE TABLE IF NOT EXISTS store_settings (
-        key TEXT PRIMARY KEY,
-        value JSONB NOT NULL,
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      )
-    `)
+    await ensureStoreSettingsSchema()
 
     const rows = await query<{ key: string; value: any }>(
       `SELECT key, value FROM store_settings WHERE key IN ('contact_info', 'smtp_settings')`
@@ -94,13 +89,7 @@ export async function POST(request: Request) {
     const body = await request.json()
     const { contact_info, smtp_settings } = body
 
-    await query(`
-      CREATE TABLE IF NOT EXISTS store_settings (
-        key TEXT PRIMARY KEY,
-        value JSONB NOT NULL,
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      )
-    `)
+    await ensureStoreSettingsSchema()
 
     if (contact_info) {
       const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/

@@ -1,12 +1,12 @@
 "use server"
 
 import { HttpTypes } from "@medusajs/types"
-import { query } from "@lib/admin/db"
+import { cachedQuery } from "@lib/admin/db"
 import { ensureCommerceSchema } from "@lib/commerce/schema"
 
 export const retrieveCollection = async (id: string) => {
   await ensureCommerceSchema()
-  const rows = await query<any>(
+  const rows = await cachedQuery<any>(`collection-id:${id}`,
     `SELECT * FROM store_collection WHERE id=$1 LIMIT 1`,
     [id]
   )
@@ -19,11 +19,11 @@ export const listCollections = async (
   await ensureCommerceSchema()
   const limit = Math.min(Number(queryParams.limit || 100), 500)
   const offset = Number(queryParams.offset || 0)
-  const rows = await query<any>(
+  const rows = await cachedQuery<any>(`collection-list:${limit}:${offset}`,
     `SELECT * FROM store_collection ORDER BY created_at DESC LIMIT $1 OFFSET $2`,
     [limit, offset]
   )
-  const count = await query<{ count: number }>(
+  const count = await cachedQuery<{ count: number }>("collection-count",
     `SELECT COUNT(*)::int AS count FROM store_collection`
   )
   return {
@@ -34,7 +34,7 @@ export const listCollections = async (
 
 export const getCollectionByHandle = async (handle: string) => {
   await ensureCommerceSchema()
-  const rows = await query<any>(
+  const rows = await cachedQuery<any>(`collection-handle:${handle}`,
     `SELECT c.*,
        COALESCE((
          SELECT jsonb_agg(jsonb_build_object('id',p.id,'title',p.title,'handle',p.handle))

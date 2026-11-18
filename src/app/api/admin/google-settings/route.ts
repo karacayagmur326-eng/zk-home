@@ -1,3 +1,4 @@
+import { ensureDatabaseFeature } from "@lib/admin/schema-check"
 import { NextRequest, NextResponse } from "next/server"
 import { getAdminSession } from "@lib/admin/auth"
 import { query } from "@lib/admin/db"
@@ -9,6 +10,7 @@ import {
 } from "@lib/seo/google-settings"
 
 async function ensureColumns() {
+  return ensureDatabaseFeature("google-settings-schema-v1", ["SELECT seo_google_verification,seo_ga4_id,seo_gtm_id,seo_sitemap_settings,custom_head_scripts,custom_body_scripts FROM theme_settings LIMIT 0"], async () => {
   await query(`ALTER TABLE theme_settings
     ADD COLUMN IF NOT EXISTS seo_google_verification TEXT,
     ADD COLUMN IF NOT EXISTS seo_ga4_id TEXT,
@@ -16,6 +18,8 @@ async function ensureColumns() {
     ADD COLUMN IF NOT EXISTS seo_sitemap_settings JSONB,
     ADD COLUMN IF NOT EXISTS custom_head_scripts TEXT,
     ADD COLUMN IF NOT EXISTS custom_body_scripts TEXT`)
+
+  })
 }
 
 export async function GET() {

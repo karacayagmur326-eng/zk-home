@@ -1,8 +1,10 @@
+import { ensureDatabaseFeature } from "@lib/admin/schema-check"
 import { query } from "@lib/admin/db"
 import { NextResponse } from "next/server"
 import { getAdminSession } from "@lib/admin/auth"
 
 const ensureTable = async () => {
+  return ensureDatabaseFeature("featured-section-schema-v1", ["SELECT title,subtitle FROM featured_section LIMIT 0","SELECT id,label,tag_id,position,is_active FROM featured_tabs LIMIT 0"], async () => {
   await query(`
     CREATE TABLE IF NOT EXISTS featured_section (
       id TEXT PRIMARY KEY DEFAULT 'main',
@@ -29,6 +31,8 @@ const ensureTable = async () => {
     ON CONFLICT (id) DO NOTHING
   `)
 
+
+  })
 }
 
 export async function GET() {

@@ -1,3 +1,4 @@
+import { ensureSliderSchema } from "@lib/content/slider-schema"
 import { NextRequest, NextResponse } from "next/server"
 import { getAdminSession } from "@lib/admin/auth"
 import { query } from "@lib/admin/db"
@@ -12,13 +13,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
   const { id } = await params
   try {
-    await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS image_reveal_end INTEGER DEFAULT 65")
-    await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS image_reveal_enabled BOOLEAN DEFAULT TRUE")
-    await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS image_reveal_settings JSONB")
-    await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS product_title TEXT")
-    await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS product_detail TEXT")
-    await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS product_url TEXT")
-    await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS theme TEXT DEFAULT 'warm'")
+    await ensureSliderSchema()
     const body = await req.json()
     const {
       title,
@@ -122,9 +117,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
 
   const { id } = await params
   try {
-    await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS image_reveal_end INTEGER DEFAULT 65")
-    await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS image_reveal_enabled BOOLEAN DEFAULT TRUE")
-    await query("ALTER TABLE slider ADD COLUMN IF NOT EXISTS image_reveal_settings JSONB")
+    await ensureSliderSchema()
     await query(`UPDATE slider SET deleted_at=NOW() WHERE id=$1`, [id])
     revalidatePath("/", "layout")
     return NextResponse.json({ success: true })

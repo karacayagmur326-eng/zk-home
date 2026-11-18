@@ -1,3 +1,4 @@
+import { ensureDatabaseFeature } from "@lib/admin/schema-check"
 import { NextRequest, NextResponse } from "next/server"
 import { revalidatePath } from "next/cache"
 import { getAdminSession } from "@lib/admin/auth"
@@ -6,6 +7,7 @@ import { isSafePublicImageUrl } from "@lib/security/public-assets"
 import { persistInlineImageUrl } from "@lib/storage/persist-inline-image"
 
 async function ensureSeoColumns() {
+  return ensureDatabaseFeature("theme-settings-schema-v1", ["SELECT maintenance_mode,maintenance_message,seo_meta_title,seo_meta_description,seo_meta_keywords,seo_google_verification,seo_ga4_id,seo_gtm_id,custom_head_scripts,custom_body_scripts,seo_og_image_url,seo_canonical_url,seo_indexing_enabled,seo_title_separator,seo_product_title_template,seo_product_desc_template,seo_category_title_template,seo_category_desc_template,seo_brand_title_template,seo_brand_desc_template,seo_blog_title_template,seo_blog_desc_template,seo_page_title_template,footer_features_active,header_menu_align,header_menu_font_size,header_menu_gap,header_menu_letter_spacing,header_menu_font_weight,header_menu_text_transform,footer_description,contact_phone,contact_email,contact_address,footer_col2_title,footer_col3_title,footer_col4_title,footer_col5_title,footer_col5_desc,social_instagram,social_facebook,social_youtube,social_linkedin,footer_copyright_text,footer_brand_subtext,footer_mersis_no,footer_kep_address,footer_show_payment_badges,payment_logo_iyzico,payment_logo_mastercard,payment_logo_visa,payment_logo_amex,payment_logo_troy,footer_features FROM theme_settings LIMIT 0"], async () => {
   try {
     await query(`
       ALTER TABLE theme_settings 
@@ -67,6 +69,8 @@ async function ensureSeoColumns() {
   } catch (e) {
     // Columns might already exist
   }
+
+  })
 }
 
 export async function GET(req: NextRequest) {

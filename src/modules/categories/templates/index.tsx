@@ -1,3 +1,5 @@
+import CatalogQueryProvider from "@modules/store/components/catalog-query"
+import { catalogQueryString } from "@lib/util/catalog-query"
 import { sanitizePublicHtml } from "@lib/security/html"
 import { notFound } from "next/navigation"
 import Image from "@components/common/SmartImage"
@@ -8,7 +10,7 @@ import { SafeImage } from "@lib/SafeImage"
 import { getMenu } from "@lib/data/menus"
 import { listCategories } from "@lib/data/categories"
 import { serializeJsonLd } from "@lib/security/html"
-import { query } from "@lib/admin/db"
+import { cachedQuery } from "@lib/admin/db"
 import { OptionValueIds } from "@lib/util/product-option-filters"
 import { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -136,7 +138,7 @@ function itemList(
   return items.length ? items : fallback
 }
 
-export default async function CategoryTemplate({
+async function CategoryContent({
   category,
   sortBy,
   page,
@@ -162,7 +164,8 @@ export default async function CategoryTemplate({
   const [sidebarMenu, navigationCategories, navigationCollections] = await Promise.all([
     getMenu("category-sidebar").catch(() => null).then(async (m) => m || await getMenu("ikincil-menu").catch(() => null)),
     listCategories().catch(() => []),
-    query<{ id: string; title: string; handle: string }>(
+    cachedQuery<{ id: string; title: string; handle: string }>(
+      "store-navigation-collections",
       `SELECT id,title,handle FROM store_collection ORDER BY title`,
     ).catch(() => []),
   ])
@@ -592,4 +595,8 @@ export default async function CategoryTemplate({
       </div>
     </div>
   )
+}
+
+export default function CategoryTemplate(props: Parameters<typeof CategoryContent>[0]) {
+  return <CatalogQueryProvider pathname={categoryPath(props.category)} query={catalogQueryString(props)}><CategoryContent {...props} /></CatalogQueryProvider>
 }

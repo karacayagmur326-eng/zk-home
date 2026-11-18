@@ -184,7 +184,7 @@ export async function listStoreProducts(filters: ProductFilters = {}) {
   }
 
   if (filters.q) {
-    const p = add(`%${filters.q}%`)
+    const p = add(`%${filters.q.replace(/[\\%_]/g, "\\$&")}%`)
     const tagQuery = slugify(filters.q)
     // Tags are stored as slugs. Normalize Turkish letters and require every
     // search word to match this product's tags, regardless of word order.
@@ -288,6 +288,10 @@ export async function listStoreProducts(filters: ProductFilters = {}) {
 
   const limit = Math.min(Math.max(filters.limit || 100, 1), 500)
   const offset = Math.max(filters.offset || 0, 0)
+  if (offset >= (countRows[0]?.count || 0)) return {
+    products: [], count: countRows[0]?.count || 0,
+    counts: counts || { total: 0, published_count: 0, draft_count: 0, low_stock_count: 0, deleted_count: 0 },
+  }
   const priceOrder = "(SELECT MIN(sv.price) FROM store_variant sv WHERE sv.product_id=p.id)"
   const order = filters.sort === "price_asc" ? priceOrder + " ASC NULLS LAST, p.created_at DESC, p.id" : filters.sort === "price_desc" ? priceOrder + " DESC NULLS LAST, p.created_at DESC, p.id" : "p.created_at DESC, p.id"
   const productSelect = filters.status === "published"
@@ -309,7 +313,7 @@ export async function listStoreProducts(filters: ProductFilters = {}) {
       count: countRows[0]?.count || 0,
       counts: counts || { total: 0, published_count: 0, draft_count: 0, low_stock_count: 0, deleted_count: 0 },
     }
-  }, 120)
+  }, 300, ["store_product", "store_variant", "store_product_image", "store_product_category", "store_category", "store_collection", "store_product_tag", "store_tag"])
 }
 
 export async function getStoreProduct(idOrHandle: string) {
@@ -637,6 +641,7 @@ export async function listStoreCategories(activeOnly = false) {
     `store-categories:${activeOnly ? "active" : "all"}`,
     () => query<any>(sql),
     300,
+    ["store_category", "store_product_category", "store_product"],
   )
   const shaped = rows.map((row) => ({
     id: row.id,

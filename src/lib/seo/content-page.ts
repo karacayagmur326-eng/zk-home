@@ -1,12 +1,13 @@
 import { cache } from "react"
-import { query } from "@lib/admin/db"
+import { cachedQuery } from "@lib/admin/db"
 import { getThemeSettings } from "@lib/content/theme-settings"
 import { renderSeoTemplate } from "./templates"
 import { entityMetadata, descriptionExcerpt } from "./entity"
 import { indexingEnabled } from "./indexing"
 
 export const contentPageSeo = cache(async (handle: string) => {
-  const rows = await query<{ content: Record<string, any> }>(
+  const rows = await cachedQuery<{ content: Record<string, any> }>(
+    `content-page-seo:${handle}`,
     "SELECT content FROM content_pages WHERE handle=$1 LIMIT 1",
     [handle]
   )

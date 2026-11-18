@@ -1,10 +1,11 @@
 "use server"
 
-import { isDatabaseReachable, query } from "@lib/admin/db"
+import { isDatabaseReachable, cachedQuery } from "@lib/admin/db"
 import { normalizePublicImageUrl } from "@lib/security/public-assets"
 
 export async function listActiveSliders(): Promise<any[]> {
-  const rows = await query<any>(
+  const rows = await cachedQuery<any>(
+    "public-active-sliders",
     `SELECT * FROM slider
      WHERE deleted_at IS NULL AND is_active=TRUE
      ORDER BY order_index ASC, created_at DESC`,

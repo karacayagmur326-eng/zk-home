@@ -4,6 +4,7 @@ export const PRIVATE_PATHS = [
   "/son-gezdiklerim", "/koleksiyonlarim", "/sifremi-unuttum",
   "/sifremi-yenile", "/verify-account", "/siparis", "/siparis-takibi",
   "/product-preview",
+  "/catalog-view",
 ] as const
 
 export function isPrivatePath(pathname: string): boolean {

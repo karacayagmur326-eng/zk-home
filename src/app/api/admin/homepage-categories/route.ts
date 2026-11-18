@@ -1,8 +1,10 @@
+import { ensureDatabaseFeature } from "@lib/admin/schema-check"
 import { query } from "@lib/admin/db"
 import { getAdminSession } from "@lib/admin/auth"
 import { NextResponse } from "next/server"
 
 const ensureTable = async () => {
+  return ensureDatabaseFeature("homepage-categories-schema-v1", ["SELECT * FROM homepage_categories LIMIT 0"], async () => {
   await query(`
     CREATE TABLE IF NOT EXISTS homepage_categories (
       category_id TEXT PRIMARY KEY,
@@ -10,6 +12,8 @@ const ensureTable = async () => {
       created_at TIMESTAMPTZ DEFAULT NOW()
     )
   `)
+
+  })
 }
 
 export async function GET() {

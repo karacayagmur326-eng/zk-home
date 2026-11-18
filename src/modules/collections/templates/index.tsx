@@ -16,5 +16,5 @@ export default function CollectionTemplate({ collection, ...filters }: {
   viewMode?: string
 }) {
   const heading = typeof collection.metadata?.h1_title === "string" && collection.metadata.h1_title.trim() ? collection.metadata.h1_title : collection.title
-  return <StoreTemplate {...filters} title={heading} collectionId={collection.id} fixedCollectionId={collection.id} />
+  return <StoreTemplate {...filters} publicPath={`/markalar/${collection.handle}`} title={heading} collectionId={collection.id} fixedCollectionId={collection.id} />
 }

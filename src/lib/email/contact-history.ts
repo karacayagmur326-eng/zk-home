@@ -1,9 +1,14 @@
 import "server-only"
 import { query } from "@lib/admin/db"
+import { ensureDatabaseFeature } from "@lib/admin/schema-check"
 
 let schemaReady: Promise<void> | null = null
 export async function ensureContactHistory() {
-  if (!schemaReady) schemaReady = initializeContactHistory().catch((error) => { schemaReady = null; throw error })
+  if (!schemaReady) schemaReady = ensureDatabaseFeature("contact-history-v1", [
+    "SELECT customer_id,admin_reply,replied_at,initiated_by_admin,admin_message_key,product_question_id,product_review_id,source_kind FROM contact_messages LIMIT 0",
+    "SELECT id,contact_id,sender,message,created_at,imported_at FROM contact_incoming_replies LIMIT 0",
+  ], initializeContactHistory, ["contact_messages_admin_key_idx", "contact_messages_review_idx", "contact_messages_question_idx", "contact_messages_customer_idx", "contact_messages_email_idx", "contact_incoming_replies_contact_idx"])
+    .catch((error) => { schemaReady = null; throw error })
   return schemaReady
 }
 

@@ -1,7 +1,8 @@
 "use client"
 
 import PaginationControl from "@modules/common/components/pagination"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
+import { useCatalogQuery } from "../catalog-query"
 
 export function Pagination({
   page,
@@ -13,8 +14,7 @@ export function Pagination({
   "data-testid"?: string
 }) {
   const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
+  const { pathname, searchParams } = useCatalogQuery()
 
   const handlePageChange = (newPage: number) => {
     const params = new URLSearchParams(searchParams.toString())

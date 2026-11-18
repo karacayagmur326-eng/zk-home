@@ -1,3 +1,4 @@
+import { ensureDatabaseFeature } from "@lib/admin/schema-check"
 import { NextResponse } from "next/server"
 import { getAdminSession } from "@lib/admin/auth"
 import { query } from "@lib/admin/db"
@@ -7,6 +8,7 @@ const categories = ["orders", "returns", "customers"] as const
 type Category = (typeof categories)[number]
 
 async function ensureSeenTable() {
+  return ensureDatabaseFeature("notification-seen-schema-v1", ["SELECT name,email,message,status,created_at FROM contact_messages LIMIT 0","SELECT admin_email,category,seen_at FROM admin_notification_seen LIMIT 0"], async () => {
   await query(`
     CREATE TABLE IF NOT EXISTS contact_messages (
       id BIGSERIAL PRIMARY KEY,
@@ -23,6 +25,8 @@ async function ensureSeenTable() {
       PRIMARY KEY (admin_email, category)
     )
   `)
+
+  })
 }
 
 export async function GET() {

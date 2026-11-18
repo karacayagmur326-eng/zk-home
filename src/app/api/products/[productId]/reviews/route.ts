@@ -16,6 +16,9 @@ export async function GET(
 ) {
   try {
     const { productId } = await context.params
+    if (!/^prod_[a-zA-Z0-9_-]{1,128}$/.test(productId)) {
+      return NextResponse.json({ error: "Geçersiz ürün." }, { status: 400, headers: { "Cache-Control": "no-store" } })
+    }
     await ensureTable()
 
     const reviewsRequest = cachedQuery<{
@@ -58,7 +61,7 @@ export async function GET(
       questions,
       questions_count: questions.length,
       reviews_count: reviews.length,
-    })
+    }, { headers: { "Cache-Control": "public, max-age=60, s-maxage=300, stale-while-revalidate=60" } })
   } catch (err) {
     console.error("[reviews:GET] Error:", err)
     return NextResponse.json({ error: "Değerlendirmeler yüklenemedi." }, { status: 500 })
