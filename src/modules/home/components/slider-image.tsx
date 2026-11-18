@@ -9,10 +9,6 @@ export default function SliderImage({ src, onLoad, imageRevealEnd, imageRevealSe
   const [loadedSource, setLoadedSource] = useState<string | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const transitions = sliderTransitions(imageRevealSettings, imageRevealEnd)
-  // These versioned WebP panoramas are already compressed for the hero. Serve
-  // their original once instead of creating extra width/format variants.
-  const preparedPanorama = /^\/hero\/(?:vase-room-complete-v1|gold-table-panorama-v1|butterfly-room-panorama-v1)\.webp$/.test(src)
-  const unoptimized = props.unoptimized || preparedPanorama
   useEffect(() => {
     const image = containerRef.current?.querySelector("img")
     if (image?.complete && image.naturalWidth > 0) setLoadedSource(src)
@@ -23,7 +19,6 @@ export default function SliderImage({ src, onLoad, imageRevealEnd, imageRevealSe
       <Image
         {...props}
         src={src}
-        unoptimized={unoptimized}
         style={{ ...props.style, "--slider-reveal-mask": imageRevealEnabled ? sliderTransitionMask(imageRevealSettings, imageRevealEnd) : "none", maskComposite: "intersect", WebkitMaskComposite: "source-in" } as CSSProperties}
         onLoad={(event) => {
           setLoadedSource(src)
@@ -35,7 +30,6 @@ export default function SliderImage({ src, onLoad, imageRevealEnd, imageRevealSe
           {...props}
           key={side}
           src={src}
-          unoptimized={unoptimized}
           alt=""
           aria-hidden="true"
           className={`${props.className || ""} hidden md:block`}
