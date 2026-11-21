@@ -8,6 +8,7 @@ import { ensureCommerceSchema } from "@lib/commerce/schema"
 import { getBaseURL } from "@lib/util/env"
 import { NextRequest, NextResponse } from "next/server"
 import { escapeXml, lastModifiedXml } from "@lib/seo/indexing"
+import { preparedImageSource } from "@lib/media/prepared-images"
 
 export const dynamic = "force-dynamic"
 
@@ -33,7 +34,7 @@ async function generateResponse(request: NextRequest) {
     (product) => `  <url>
     <loc>${escapeXml(`${baseUrl}/urunler/${product.handle}`)}</loc>
     ${lastModifiedXml(product.updated_at)}
-    ${(sitemapConfig.images ? product.images || [] : []).map(url => `<image:image><image:loc>${escapeXml(new URL(url, baseUrl).href)}</image:loc></image:image>`).join("")}
+    ${[...new Set((sitemapConfig.images ? product.images || [] : []).map(preparedImageSource))].map(url => `<image:image><image:loc>${escapeXml(new URL(url, baseUrl).href)}</image:loc></image:image>`).join("")}
     ${sitemapEntryOptions(settings, "products")}
   </url>`
   )
@@ -58,5 +59,5 @@ ${xmlRows.join("\n")}
 
 export async function GET(request: NextRequest) {
   const part = Math.max(0, Math.min(10000, Math.floor(Number(request.nextUrl.searchParams.get("part")) || 0)))
-  return cachedPublicResponse(`sitemap-products:${part}`, () => generateResponse(request))
+  return cachedPublicResponse(`sitemap-products:prepared-v1:${part}`, () => generateResponse(request))
 }

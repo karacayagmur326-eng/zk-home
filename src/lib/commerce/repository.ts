@@ -1,4 +1,5 @@
 import { validateProduct } from "./product-validation"
+import { preparedImageSource } from "@lib/media/prepared-images"
 import { randomUUID } from "crypto"
 import { query, withTransaction } from "@lib/admin/db"
 import { getCached, clearMemoryCache } from "@lib/cache"
@@ -26,10 +27,10 @@ export function categoryHandle(value: string) {
 
 function publicUrl(value: unknown) {
   if (!value) return null
-  return String(value)
+  return preparedImageSource(String(value)
     .replace(/^https?:\/\/(?:localhost|127\.0\.0\.1):9000\/static\//, "/uploads/")
     .replace(/^\/static\//, "/uploads/")
-    .replace(/^\/media\//, "/uploads/")
+    .replace(/^\/media\//, "/uploads/"))
 }
 
 function number(value: unknown, fallback = 0) {
@@ -91,7 +92,8 @@ export function shapeProduct(row: any) {
     images: (row.images || []).map((image: any) => ({
       ...image,
       url: publicUrl(image.url),
-    })),
+    })).filter((image: { url: string }, index: number, images: { url: string }[]) =>
+      images.findIndex(candidate => candidate.url === image.url) === index),
     variants: (row.variants || []).map(shapeVariant),
     categories: row.categories || [],
     tags: row.tags || [],

@@ -96,5 +96,5 @@ export function middleware(request: NextRequest) {
 export const config = {
   // Exclude actual static directories, rather than all dotted paths: API and
   // payment/source validation must still run even if a URL has an extension.
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|brand/|hero/|category-images/|category-icons/|editorial/).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|brand/|hero/|catalog-media/|category-images/|category-icons/|editorial/).*)"],
 }

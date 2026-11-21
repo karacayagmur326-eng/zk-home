@@ -160,5 +160,5 @@ async function generateResponse() {
 }
 
 export async function GET() {
-  return cachedPublicResponse("merchant-feed.xml", generateResponse)
+  return cachedPublicResponse("merchant-feed.xml:prepared-v1", generateResponse)
 }

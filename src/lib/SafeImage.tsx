@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
+import { preparedImageSource } from "@lib/media/prepared-images"
 
 export interface SafeImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src: string
@@ -29,7 +30,7 @@ export function SafeImage({ src, alt = "", className, style, fallbackSrc, ...pro
   return (
     <img
       {...props}
-      src={failed && fallbackSrc ? fallbackSrc : src}
+      src={preparedImageSource(failed && fallbackSrc ? fallbackSrc : src)}
       alt={alt}
       className={className}
       style={style}
@@ -37,8 +38,9 @@ export function SafeImage({ src, alt = "", className, style, fallbackSrc, ...pro
         const target = e.currentTarget
         if (!target.dataset.retried) {
           target.dataset.retried = "true"
-          const delimiter = src.includes("?") ? "&" : "?"
-          target.src = `${src}${delimiter}retry=${Date.now()}`
+          const resolved = preparedImageSource(src)
+          const delimiter = resolved.includes("?") ? "&" : "?"
+          target.src = `${resolved}${delimiter}retry=${Date.now()}`
         } else {
           setFailed(true)
         }

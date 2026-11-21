@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { getBaseURL } from "@lib/util/env"
 import { renderSeoTemplate } from "./templates"
+import { preparedImageSource } from "@lib/media/prepared-images"
 
 export function plainText(value: unknown): string {
   return String(value || "")
@@ -20,7 +21,7 @@ export function plainText(value: unknown): string {
 export function absoluteUrl(value: unknown, fallback = ""): string {
   if (!value && !fallback) return ""
   try {
-    const url = new URL(String(value || fallback), getBaseURL())
+    const url = new URL(preparedImageSource(String(value || fallback)), getBaseURL())
     return /^https?:$/.test(url.protocol) ? url.href : ""
   } catch {
     return ""

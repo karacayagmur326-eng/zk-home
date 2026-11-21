@@ -1,3 +1,5 @@
+import { preparedImageSource } from "@lib/media/prepared-images"
+
 const blockedInlineImagePattern = /^(?:data|blob|javascript):/i
 
 export function isSafePublicImageUrl(value: unknown): value is string {
@@ -13,5 +15,5 @@ export function normalizePublicImageUrl(
   value: unknown,
   fallback = ""
 ): string {
-  return isSafePublicImageUrl(value) ? value.trim() : fallback
+  return isSafePublicImageUrl(value) ? preparedImageSource(value.trim()) : fallback
 }
