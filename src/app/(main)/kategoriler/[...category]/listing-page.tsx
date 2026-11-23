@@ -30,6 +30,7 @@ import { getBaseURL } from "@lib/util/env"
 import { paginatedPath } from "@lib/seo/indexing"
 import { categoryIndexable, categoryPath, categorySeoText } from "@lib/seo/category"
 import { isStoreReady } from "@lib/security/store-readiness"
+import { serializeJsonLd } from "@lib/security/html"
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params
@@ -96,18 +97,88 @@ export default async function CategoryPage(props: Props) {
     permanentRedirect(categoryPath(productCategory))
   }
 
+  const baseUrl = getBaseURL()
+  const path = categoryPath(productCategory)
+  const canonicalUrl = `${baseUrl}${path}`
+
+  const breadcrumbElements: Array<{ position: number; name: string; item: string }> = [
+    {
+      position: 1,
+      name: "Ana Sayfa",
+      item: baseUrl,
+    },
+    {
+      position: 2,
+      name: "Mağaza",
+      item: `${baseUrl}/magaza`,
+    },
+  ]
+
+  let currentCategory: any = productCategory
+  const catChain: any[] = []
+  while (currentCategory) {
+    catChain.unshift(currentCategory)
+    currentCategory = currentCategory.parent_category
+  }
+
+  catChain.forEach((cat, idx) => {
+    breadcrumbElements.push({
+      position: idx + 3,
+      name: cat.name,
+      item: `${baseUrl}${categoryPath(cat)}`,
+    })
+  })
+
+  const categoryJsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "@id": `${canonicalUrl}#breadcrumb`,
+        itemListElement: breadcrumbElements.map((el) => ({
+          "@type": "ListItem",
+          position: el.position,
+          name: el.name,
+          item: el.item,
+        })),
+      },
+      {
+        "@type": "CollectionPage",
+        "@id": `${canonicalUrl}#webpage`,
+        url: canonicalUrl,
+        name: productCategory.name,
+        description: plainText(
+          productCategory.description || `${productCategory.name} koleksiyonu ve ürün modelleri ZK Home'da.`
+        ),
+        isPartOf: {
+          "@type": "WebSite",
+          "@id": `${baseUrl}/#website`,
+        },
+        breadcrumb: {
+          "@id": `${canonicalUrl}#breadcrumb`,
+        },
+      },
+    ],
+  }
+
   return (
-    <CategoryTemplate
-      category={productCategory}
-      sortBy={sortBy}
-      page={page}
-      countryCode="tr"
-      optionValueIds={optionValueIds}
-      collectionId={collection_id}
-      hideOutOfStock={hide_out_of_stock}
-      priceMin={price_min}
-      priceMax={price_max}
-      viewMode={typeof viewMode === "string" ? viewMode : undefined}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(categoryJsonLd) }}
+      />
+      <CategoryTemplate
+        category={productCategory}
+        sortBy={sortBy}
+        page={page}
+        countryCode="tr"
+        optionValueIds={optionValueIds}
+        collectionId={collection_id}
+        hideOutOfStock={hide_out_of_stock}
+        priceMin={price_min}
+        priceMax={price_max}
+        viewMode={typeof viewMode === "string" ? viewMode : undefined}
+      />
+    </>
   )
 }

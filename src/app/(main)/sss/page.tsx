@@ -7,6 +7,8 @@ import PageHero from "../../../components/common/PageHero"
 import FaqContent from "./FaqContent"
 import { serializeJsonLd } from "@lib/security/html"
 
+export const dynamic = "force-dynamic"
+
 export async function generateMetadata() { return contentPageMetadata("sss", "Sıkça Sorulan Sorular (SSS)", "Yemek takımı, kahve fincanı, dekorasyon, nevresim, havlu, kargo ve iade hakkında 100 sık sorulan sorunun yanıtını keşfedin.") }
 
 const removedQuestions = new Set([

@@ -13,6 +13,7 @@ import { Metadata } from "next"
 import { getBaseURL } from "@lib/util/env"
 import { socialImageUrl } from "@lib/seo/entity"
 import { getThemeSettings } from "@lib/content/theme-settings"
+import { getContactInfo } from "@lib/content/contact-info"
 import { serializeJsonLd } from "@lib/security/html"
 import { cachedQuery } from "@lib/admin/db"
 import { defaultHomeEditorialContent, type HomeEditorialContent } from "@lib/content/home-editorial"
@@ -79,20 +80,68 @@ export default async function Home() {
   const publicSliders = isStoreReady()
     ? sliders
     : sliders.map(({ top_bar_features: _topBar, ...slider }) => slider)
-  const { siteName, title, description } = getSiteSeoMetadata(await getThemeSettings())
+  const [themeSettings, contactInfo] = await Promise.all([
+    getThemeSettings(),
+    getContactInfo(),
+  ])
+  const { siteName, title, description } = getSiteSeoMetadata(themeSettings)
   const homeUrl = `${getBaseURL()}/`
+  const configuredLogo = String(themeSettings?.header_logo_url || "")
+  const logoUrl = configuredLogo
+    ? (/^https?:\/\//.test(configuredLogo) ? configuredLogo : `${getBaseURL()}${configuredLogo}`)
+    : `${homeUrl}brand/placeholder.svg`
+
+  const socialLinks = [
+    themeSettings?.social_instagram,
+    themeSettings?.social_facebook,
+    themeSettings?.social_youtube,
+    themeSettings?.social_linkedin,
+  ].filter(Boolean)
+
   const homeSchema = {
     "@context": "https://schema.org",
     "@graph": [
       {
-        "@type": "WebSite", "@id": `${homeUrl}#website`,
-        name: siteName, alternateName: ["ZK Home", "ZK HOME", "zk-home.com"],
-        url: homeUrl, inLanguage: "tr-TR",
+        "@type": "Organization",
+        "@id": `${homeUrl}#organization`,
+        name: siteName || "ZK Home",
+        alternateName: ["ZK Home", "ZK HOME", "zk-home.com"],
+        url: homeUrl,
+        logo: {
+          "@type": "ImageObject",
+          url: logoUrl,
+        },
+        ...(contactInfo?.email ? { email: contactInfo.email } : {}),
+        ...(contactInfo?.phone ? { telephone: contactInfo.phone } : {}),
+        ...(contactInfo?.full_address
+          ? {
+              address: {
+                "@type": "PostalAddress",
+                streetAddress: contactInfo.street_address || contactInfo.full_address,
+                addressLocality: contactInfo.district || contactInfo.city || "İstanbul",
+                addressRegion: contactInfo.city || "İstanbul",
+                addressCountry: "TR",
+              },
+            }
+          : {}),
+        ...(socialLinks.length > 0 ? { sameAs: socialLinks } : {}),
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${homeUrl}#website`,
+        name: siteName,
+        alternateName: ["ZK Home", "ZK HOME", "zk-home.com"],
+        url: homeUrl,
+        inLanguage: "tr-TR",
         publisher: { "@id": `${homeUrl}#organization` },
       },
       {
-        "@type": "WebPage", "@id": `${homeUrl}#webpage`,
-        url: homeUrl, name: title, description, inLanguage: "tr-TR",
+        "@type": "WebPage",
+        "@id": `${homeUrl}#webpage`,
+        url: homeUrl,
+        name: title,
+        description,
+        inLanguage: "tr-TR",
         isPartOf: { "@id": `${homeUrl}#website` },
         about: { "@id": `${homeUrl}#organization` },
       },

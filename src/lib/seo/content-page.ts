@@ -6,12 +6,16 @@ import { entityMetadata, descriptionExcerpt } from "./entity"
 import { indexingEnabled } from "./indexing"
 
 export const contentPageSeo = cache(async (handle: string) => {
-  const rows = await cachedQuery<{ content: Record<string, any> }>(
-    `content-page-seo:${handle}`,
-    "SELECT content FROM content_pages WHERE handle=$1 LIMIT 1",
-    [handle]
-  )
-  return rows[0]?.content || {}
+  try {
+    const rows = await cachedQuery<{ content: Record<string, any> }>(
+      `content-page-seo:${handle}`,
+      "SELECT content FROM content_pages WHERE handle=$1 LIMIT 1",
+      [handle]
+    )
+    return rows[0]?.content || {}
+  } catch {
+    return {}
+  }
 })
 export async function contentPageMetadata(
   handle: string,

@@ -111,6 +111,32 @@ export default async function ArticlePage({ params }: Props) {
   // Dynamic Content Formatter: Guarantees exact SSS Accordion layout across all 64 articles
   let formattedContent = article.content || ""
   
+  // Extract FAQs for Schema.org FAQPage
+  const faqItems: Array<{ question: string; answer: string }> = []
+  const rawContent = article.content || ""
+  const faqRegex = /<div class="(?:faq-box|my-4 p-4 rounded-xl bg-slate-50[^"]*|[^"]*bg-slate-50[^"]*)">\s*<h3[^>]*>(?:<span[^>]*>[^<]*<\/span>\s*)?([^<]+)<\/h3>\s*<p[^>]*>([\s\S]*?)<\/p>\s*<\/div>/gi
+  let m
+  while ((m = faqRegex.exec(rawContent)) !== null) {
+    const q = m[1].replace(/^[?❓\s]+/, "").trim()
+    const a = m[2].replace(/<[^>]+>/g, " ").trim()
+    if (q && a) {
+      faqItems.push({ question: q, answer: a })
+    }
+  }
+
+  // Also check if content already has <details class="faq-accordion"><summary>
+  if (faqItems.length === 0) {
+    const detailsRegex = /<summary[^>]*>([\s\S]*?)<\/summary>[\s\S]*?<div class="faq-body">\s*<p>([\s\S]*?)<\/p>/gi
+    let dm
+    while ((dm = detailsRegex.exec(rawContent)) !== null) {
+      const q = dm[1].replace(/<[^>]+>/g, "").replace(/^[?❓\s]+/, "").trim()
+      const a = dm[2].replace(/<[^>]+>/g, " ").trim()
+      if (q && a) {
+        faqItems.push({ question: q, answer: a })
+      }
+    }
+  }
+
   // Convert any remaining raw FAQ boxes to <details open class="faq-accordion">
   formattedContent = formattedContent.replace(
     /<div class="(?:faq-box|my-4 p-4 rounded-xl bg-slate-50[^"]*|[^"]*bg-slate-50[^"]*)">\s*<h3[^>]*>(?:<span[^>]*>[^<]*<\/span>\s*)?([^<]+)<\/h3>\s*<p[^>]*>([\s\S]*?)<\/p>\s*<\/div>/gi,
@@ -132,31 +158,56 @@ export default async function ArticlePage({ params }: Props) {
   )
   formattedContent = sanitizePublicHtml(formattedContent)
 
-  // JSON-LD Schema.org Article
+  // JSON-LD Schema.org Article & FAQPage
+  const articleUrl = `${getBaseURL()}/blog/${article.slug}`
+  const graph: any[] = [
+    {
+      "@type": "BlogPosting",
+      "@id": `${articleUrl}#article`,
+      "headline": article.title,
+      "description": article.excerpt,
+      "image": article.image || `${getBaseURL()}/brand/placeholder.svg`,
+      "author": {
+        "@type": "Person",
+        "name": article.author || "Editör"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": theme?.logo_text || "ZK Home",
+        ...(publisherLogo ? {
+          "logo": {
+            "@type": "ImageObject",
+            "url": publisherLogo
+          }
+        } : {})
+      },
+      "datePublished": article.published_at,
+      "dateModified": article.updated_at || article.published_at,
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": articleUrl
+      }
+    }
+  ]
+
+  if (faqItems.length > 0) {
+    graph.push({
+      "@type": "FAQPage",
+      "@id": `${articleUrl}#faq`,
+      "mainEntity": faqItems.map((item) => ({
+        "@type": "Question",
+        "name": item.question,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": item.answer
+        }
+      }))
+    })
+  }
+
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    "headline": article.title,
-    "description": article.excerpt,
-    "image": article.image || `${getBaseURL()}/brand/placeholder.svg`,
-    "author": {
-      "@type": "Person",
-      "name": article.author || "Editör"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": theme?.logo_text || "Mağaza",
-      "logo": {
-        "@type": "ImageObject",
-        "url": publisherLogo
-      }
-    },
-    "datePublished": article.published_at,
-    "dateModified": article.updated_at || article.published_at,
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": `${getBaseURL()}/blog/${article.slug}`
-    }
+    "@graph": graph
   }
 
   return (
