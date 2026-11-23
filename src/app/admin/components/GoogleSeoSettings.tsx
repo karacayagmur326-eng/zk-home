@@ -15,6 +15,7 @@ export default function GoogleSeoSettings({
 }) {
   const [values, setValues] = useState({
     verification: "",
+    bingVerification: "",
     ga4: "",
     gtm: "",
     headScripts: "",
@@ -100,7 +101,7 @@ export default function GoogleSeoSettings({
         <p>Ayarlar yükleniyor…</p>
       ) : (
         <>
-          <div className="grid gap-4 lg:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {(
               [
                 [
@@ -108,6 +109,12 @@ export default function GoogleSeoSettings({
                   "Google Search Console doğrulama kodu",
                   "Doğrulama kodu / google-site-verification=…",
                   "Kodun tamamını veya HTML meta etiketini yapıştırabilirsiniz.",
+                ],
+                [
+                  "bingVerification",
+                  "Bing Webmaster Tools doğrulama kodu",
+                  "Doğrulama kodu / msvalidate.01=…",
+                  "Bing doğrulama kodunu veya HTML meta etiketini yapıştırabilirsiniz.",
                 ],
                 [
                   "ga4",

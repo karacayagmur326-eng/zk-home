@@ -8,6 +8,16 @@ export function normalizeGoogleVerification(value: string): string {
   return input.replace(/^google-site-verification\s*=\s*/i, "").trim()
 }
 
+export function normalizeBingVerification(value: string): string {
+  const input = value.trim()
+  if (/<meta\b/i.test(input)) {
+    if (!/name\s*=\s*["']msvalidate\.01["']/i.test(input))
+      return input
+    return input.match(/content\s*=\s*["']([^"']+)["']/i)?.[1]?.trim() || input
+  }
+  return input.replace(/^msvalidate\.01\s*=\s*/i, "").trim()
+}
+
 export const sitemapKinds = [
   "products",
   "categories",

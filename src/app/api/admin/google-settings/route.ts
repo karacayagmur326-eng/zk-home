@@ -6,13 +6,15 @@ import { flushAllSiteCache } from "@lib/cache"
 import { getBaseURL } from "@lib/util/env"
 import {
   normalizeGoogleVerification,
+  normalizeBingVerification,
   normalizeSitemapSettings,
 } from "@lib/seo/google-settings"
 
 async function ensureColumns() {
-  return ensureDatabaseFeature("google-settings-schema-v1", ["SELECT seo_google_verification,seo_ga4_id,seo_gtm_id,seo_sitemap_settings,custom_head_scripts,custom_body_scripts FROM theme_settings LIMIT 0"], async () => {
+  return ensureDatabaseFeature("google-settings-schema-v1", ["SELECT seo_google_verification,seo_bing_verification,seo_ga4_id,seo_gtm_id,seo_sitemap_settings,custom_head_scripts,custom_body_scripts FROM theme_settings LIMIT 0"], async () => {
   await query(`ALTER TABLE theme_settings
     ADD COLUMN IF NOT EXISTS seo_google_verification TEXT,
+    ADD COLUMN IF NOT EXISTS seo_bing_verification TEXT,
     ADD COLUMN IF NOT EXISTS seo_ga4_id TEXT,
     ADD COLUMN IF NOT EXISTS seo_gtm_id TEXT,
     ADD COLUMN IF NOT EXISTS seo_sitemap_settings JSONB,
@@ -28,11 +30,12 @@ export async function GET() {
   try {
     await ensureColumns()
     const [settings] = await query<any>(
-      "SELECT seo_google_verification, seo_ga4_id, seo_gtm_id, seo_sitemap_settings, custom_head_scripts, custom_body_scripts FROM theme_settings WHERE id=1"
+      "SELECT seo_google_verification, seo_bing_verification, seo_ga4_id, seo_gtm_id, seo_sitemap_settings, custom_head_scripts, custom_body_scripts FROM theme_settings WHERE id=1"
     )
     return NextResponse.json(
       {
         verification: settings?.seo_google_verification || "",
+        bingVerification: settings?.seo_bing_verification || "",
         ga4: settings?.seo_ga4_id || "",
         gtm: settings?.seo_gtm_id || "",
         headScripts: settings?.custom_head_scripts || "",
@@ -58,6 +61,9 @@ export async function POST(request: NextRequest) {
     const verification = normalizeGoogleVerification(
       String(body.verification || "")
     )
+    const bingVerification = normalizeBingVerification(
+      String(body.bingVerification || "")
+    )
     const ga4 = String(body.ga4 || "")
       .trim()
       .toUpperCase()
@@ -68,6 +74,9 @@ export async function POST(request: NextRequest) {
     if (verification && !/^[A-Za-z0-9_-]{10,256}$/.test(verification))
       errors.verification =
         "Doğrulama kodunu, google-site-verification= kaydını veya HTML meta etiketini girin."
+    if (bingVerification && !/^[A-Za-z0-9_-]{10,256}$/.test(bingVerification))
+      errors.bingVerification =
+        "Bing doğrulama kodunu veya HTML meta etiketini girin."
     if (ga4 && !/^G-[A-Z0-9]+$/.test(ga4))
       errors.ga4 = "G- ile başlayan GA4 ölçüm kimliğini girin."
     if (gtm && !/^GTM-[A-Z0-9]+$/.test(gtm))
@@ -83,14 +92,17 @@ export async function POST(request: NextRequest) {
       )
     await ensureColumns()
     await query(
-      `INSERT INTO theme_settings (id, seo_google_verification, seo_ga4_id, seo_gtm_id, seo_sitemap_settings, custom_head_scripts, custom_body_scripts)
-      VALUES (1,$1,$2,$3,$4::jsonb,$5,$6) ON CONFLICT (id) DO UPDATE SET
-      seo_google_verification=EXCLUDED.seo_google_verification, seo_ga4_id=EXCLUDED.seo_ga4_id,
+      `INSERT INTO theme_settings (id, seo_google_verification, seo_bing_verification, seo_ga4_id, seo_gtm_id, seo_sitemap_settings, custom_head_scripts, custom_body_scripts)
+      VALUES (1,$1,$2,$3,$4,$5::jsonb,$6,$7) ON CONFLICT (id) DO UPDATE SET
+      seo_google_verification=EXCLUDED.seo_google_verification,
+      seo_bing_verification=EXCLUDED.seo_bing_verification,
+      seo_ga4_id=EXCLUDED.seo_ga4_id,
       seo_gtm_id=EXCLUDED.seo_gtm_id, seo_sitemap_settings=EXCLUDED.seo_sitemap_settings,
-      custom_head_scripts=CASE WHEN $7 THEN EXCLUDED.custom_head_scripts ELSE theme_settings.custom_head_scripts END,
-      custom_body_scripts=CASE WHEN $8 THEN EXCLUDED.custom_body_scripts ELSE theme_settings.custom_body_scripts END`,
+      custom_head_scripts=CASE WHEN $8 THEN EXCLUDED.custom_head_scripts ELSE theme_settings.custom_head_scripts END,
+      custom_body_scripts=CASE WHEN $9 THEN EXCLUDED.custom_body_scripts ELSE theme_settings.custom_body_scripts END`,
       [
         verification || null,
+        bingVerification || null,
         ga4 || null,
         gtm || null,
         JSON.stringify(normalizeSitemapSettings(body.sitemap)),

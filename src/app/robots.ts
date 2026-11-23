@@ -25,8 +25,7 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
       {
         userAgent: "*",
         allow: "/",
-        // Private routes send noindex and require authentication where needed.
-        // Blocking them here would prevent Google from reading that noindex.
+        disallow: ["/admin/", "/api/"],
       },
     ],
     sitemap: sitemapEnabled(settings) ? `${baseUrl}/sitemap.xml` : undefined,

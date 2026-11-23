@@ -17,7 +17,7 @@ import ChatbotWidget from "@components/common/ChatbotWidget"
 import { getChatbotSettings } from "@lib/chatbot/settings"
 import { serializeJsonLd } from "@lib/security/html"
 import { omitStandardGa4Snippet } from "@lib/util/analytics-snippet"
-import { normalizeGoogleVerification } from "@lib/seo/google-settings"
+import { normalizeGoogleVerification, normalizeBingVerification } from "@lib/seo/google-settings"
 import { indexingEnabled } from "@lib/seo/indexing"
 import AnalyticsRuntime from "@modules/layout/components/analytics-runtime"
 
@@ -130,6 +130,11 @@ export async function generateMetadata(): Promise<Metadata> {
     twitter: { card: "summary_large_image", title, description, images: [ogImage] },
     verification: {
       google: normalizeGoogleVerification(settings?.seo_google_verification || "") || undefined,
+      other: {
+        ...(settings?.seo_bing_verification
+          ? { "msvalidate.01": [normalizeBingVerification(settings.seo_bing_verification)] }
+          : {}),
+      },
     },
   }
 }
