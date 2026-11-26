@@ -23,10 +23,17 @@ export async function GET(req: NextRequest) {
 
     const data = await getIyzicoInstallments(price)
 
-    return NextResponse.json({
-      ok: true,
-      ...data,
-    })
+    return NextResponse.json(
+      {
+        ok: true,
+        ...data,
+      },
+      {
+        headers: {
+          "Cache-Control": "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400",
+        },
+      }
+    )
   } catch (error: any) {
     console.error("Installment API error:", error)
     return NextResponse.json(

@@ -39,13 +39,20 @@ export async function GET(request: Request) {
 
     const totalPages = Math.ceil(count / 12)
 
-    return NextResponse.json({
-      products: products || [],
-      count: count || 0,
-      totalPages,
-      page,
-      hasMore: page < totalPages,
-    })
+    return NextResponse.json(
+      {
+        products: products || [],
+        count: count || 0,
+        totalPages,
+        page,
+        hasMore: page < totalPages,
+      },
+      {
+        headers: {
+          "Cache-Control": "public, max-age=60, s-maxage=300, stale-while-revalidate=600",
+        },
+      }
+    )
   } catch (err: any) {
     console.error("Paginated products API error:", err)
     return NextResponse.json({ error: "Ürünler şu anda yüklenemedi." }, { status: 500 })

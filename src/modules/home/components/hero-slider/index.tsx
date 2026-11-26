@@ -17,7 +17,7 @@ function sliderForeground(background: string) {
   return brightness > 160 ? "#16181B" : "#FFFFFF"
 }
 
-const EDITORIAL_HERO_IMAGE = "/hero/zkhome-panorama-v4.png"
+const EDITORIAL_HERO_IMAGE = "/hero/zkhome-panorama-v4.webp"
 
 const SLIDER_FONT_STACKS: Record<string, string> = {
   "Plus Jakarta Sans":
